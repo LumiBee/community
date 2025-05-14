@@ -50,8 +50,11 @@ NAVBAR
 			<li class="nav-item">
 			<a class="nav-link" href="./docs.html">Template <span class="badge badge-secondary">docs</span></a>
 			</li>
-			<li class="nav-item">
-			<a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登陆</a>
+			<li th:if="${session.user == null}" class="nav-item">
+			<a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登 录</a>
+			</li>
+			<li th:if="${session.user != null}" class="nav-item">
+				<a href="#" role="button" th:text="${session.user.getName()}"/>
 			</li>
 		</ul>
 		<ul class="navbar-nav ml-auto d-flex align-items-center">
