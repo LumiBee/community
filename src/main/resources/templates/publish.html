@@ -16,11 +16,71 @@
     <link href="/css/main.css" rel="stylesheet"/>
     <link href="/css/publish.css" rel="stylesheet"/>
 
-</head>
+    <style>
+        /* Basic body reset if main.css doesn't handle fixed navbar padding for this specific page well */
+        /* body { padding-top: 0 !important; } */
 
+        .top-action-bar.fixed-top {
+            background-color: #f8f9fa; /* Or your desired background */
+            /* z-index will be set by JS if needed, or manage here if main navbar has higher z-index */
+        }
+
+        .publish-page-wrapper {
+            box-sizing: border-box;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #fff;
+
+            /* Main content background */
+            /* padding-top and padding-bottom will be set by JavaScript */
+        }
+
+        .editor-content-container.container-fluid {
+            padding-top: 1rem; /* Space between top-action-bar content and editor */
+            padding-bottom: 1rem; /* Space between editor and bottom-status-bar content */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #publishForm {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #toastUiEditor { /* The div where editor is mounted */
+            flex-grow: 1; /* Allow the editor's container div to grow */
+        }
+        .toastui-editor-defaultUI { /* Toast UI's main wrapper */
+            border: 1px solid #ced4da;
+            flex-grow: 1; /* Allow the editor UI to grow */
+            display: flex;
+            flex-direction: column;
+        }
+        .toastui-editor-defaultUI .toastui-editor-main { /* Actual editing area */
+            flex-grow: 1 !important; /* Force the editing area to take available space */
+        }
+
+        /* Style for custom file upload area in modal */
+        .custom-file-upload {
+            border: 2px dashed #ced4da;
+            padding: 2rem;
+            border-radius: .25rem;
+            background-color: #f8f9fa;
+            transition: background-color .15s ease-in-out;
+        }
+        .custom-file-upload:hover {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
 <body>
 
-<div th:replace="~{fragments/header :: navbar}"></div> <div class="top-action-bar fixed-top" style="z-index: 1029;"> <div class="container-fluid d-flex justify-content-between align-items-center py-2 border-bottom bg-light">
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<div class="top-action-bar fixed-top" style="z-index: 1029;"> <div class="container-fluid d-flex justify-content-between align-items-center py-2 border-bottom">
     <div class="title-input-container flex-grow-1 mr-3">
         <input id="articleTitleInput" type="text" class="form-control form-control-lg article-title-input" placeholder="输入文章标题..." th:value="${article?.title}">
     </div>
@@ -32,14 +92,15 @@
 </div>
 </div>
 
-<div class="editor-content-container container-fluid">
-    <form id="publishForm" method="post" th:action="@{/}">
-        <input type="hidden" id="formArticleContent" name="content">
-        <script id="initial-content-data" type="text/template" th:text="${article?.content}"></script>
-        <div id="toastUiEditor"></div>
-    </form>
+<div class="publish-page-wrapper">
+    <div class="editor-content-container container-fluid">
+        <form id="publishForm" method="post" th:action="@{/your-actual-publish-url}">
+            <input type="hidden" id="formArticleContent" name="content">
+            <script id="initial-content-data" type="text/template" th:text="${article?.content}"></script>
+            <div id="toastUiEditor"></div>
+        </form>
+    </div>
 </div>
-
 
 <div class="bottom-status-bar fixed-bottom bg-light border-top">
     <div class="container-fluid d-flex justify-content-between align-items-center py-1">
@@ -55,67 +116,64 @@
     </div>
 </div>
 
-<div class="modal fade" id="publishSettingsModal" tabindex="-1" role="dialog" aria-labelledby="publishSettingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document"> <div class="modal-content">
-        <div class="modal-header">
-            <h5 class="modal-title" id="publishSettingsModalLabel">发布文章</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="modal-body">
-            <form id="articleSettingsForm">
-                <div class="form-group">
-                    <label for="articleTags"><span class="text-danger">*</span> 添加标签:</label>
-                    <input type="text" class="form-control" id="articleTags" name="tags" placeholder="请搜索或输入标签，用逗号分隔">
-                    <small class="form-text text-muted">最多添加5个标签。</small>
-                </div>
 
-                <div class="form-group">
-                    <label>文章封面:</label>
-                    <div class="custom-file-upload text-center border p-5" style="cursor:pointer;">
-                        <i class="fas fa-plus fa-3x text-muted"></i>
-                        <p class="text-muted mt-2">上传封面</p>
-                        <input type="file" class="d-none" id="articleCoverUpload" name="coverImage" accept="image/*">
-                        <img id="coverPreview" src="#" alt="封面预览" class="img-fluid mt-2" style="display:none; max-height: 150px;"/>
+<div class="modal fade" id="publishSettingsModal" tabindex="-1" aria-labelledby="publishSettingsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="publishSettingsModalLabel">发布文章</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="articleSettingsForm">
+
+                    <div class="form-group">
+                        <label for="articleTags"><span class="text-danger">*</span> 添加标签:</label>
+                        <input type="text" class="form-control" id="articleTags" name="tags" placeholder="请搜索或输入标签，用逗号分隔">
+                        <small class="form-text text-muted">最多添加5个标签。</small>
                     </div>
-                    <small class="form-text text-muted">建议尺寸：192*128px (封面图仅展示在首页信息流中)</small>
-                </div>
 
-                <div class="form-group">
-                    <label for="articleCollection">收录至作品集:</label>
-                    <select class="form-control" id="articleCollection" name="collection">
-                        <option value="">请搜索添加专栏，同一篇文章最多添加三个专栏</option>
-                        <option value="tech_notes">技术笔记</option>
-                        <option value="life_hacks">生活技巧</option>
-                    </select>
-                </div>
+                    <div class="form-group">
+                        <label>文章封面:</label>
+                        <div class="custom-file-upload text-center" style="cursor:pointer;">
+                            <i class="fas fa-plus fa-3x text-muted"></i>
+                            <p class="text-muted mt-2">上传封面</p>
+                            <input type="file" class="d-none" id="articleCoverUpload" name="coverImageInput" accept="image/*"> <img id="coverPreview" src="#" alt="封面预览" class="img-fluid mt-2" style="display:none; max-height: 150px;"/>
+                        </div>
+                        <small class="form-text text-muted">建议尺寸：192*128px (封面图仅展示在首页信息流中)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="articlePortfolio">收录至作品集:</label>
+                        <input type="text" class="form-control" id="articlePortfolio" name="portfolio" placeholder="请输入作品集名称 (可以不添加)">
+                        <small class="form-text text-muted">如果您的作品属于某个系列或合集，可以在此输入名称。</small>
+                    </div>
 
 
-                <div class="form-group">
-                    <label for="articleSummary"><span class="text-danger">*</span> 编辑摘要:</label>
-                    <textarea class="form-control" id="articleSummary" name="summary" rows="3" maxlength="100" placeholder="请输入文章摘要..."></textarea>
-                    <small class="form-text text-muted text-right"><span id="summaryCharCount">0</span>/100</small>
-                </div>
-            </form>
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="articleSummary" class="mb-0"><span class="text-danger">*</span> 编辑摘要:</label>
+                        </div>
+                        <textarea class="form-control mt-1" id="articleSummary" name="summary" rows="3" maxlength="200" placeholder="请输入文章摘要..."></textarea>
+                        <small class="form-text text-muted text-right"><span id="summaryCharCount">0</span>/200</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取 消</button>
+                <button type="button" class="btn btn-primary" id="confirmPublishBtn">确定并发布</button>
+            </div>
         </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">取 消</button>
-            <button type="button" class="btn btn-primary" id="confirmPublishBtn">确 定并发 布</button>
-        </div>
-    </div>
     </div>
 </div>
-
 <script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/functions.js}" type="text/javascript"></script>
-<script th:src="@{/js/publish-editor.js}" type="text/javascript"></script>
-
-<script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script> <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/functions.js}" type="text/javascript"></script> <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/highlight.min.js"></script>
 
+<script th:src="@{/js/publish-editor.js}" type="text/javascript"></script>
 
 </body>
 </html>

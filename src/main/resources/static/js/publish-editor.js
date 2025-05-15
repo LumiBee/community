@@ -1,12 +1,12 @@
 document.addEventListener("DOMContentLoaded", function() {
     // --- DOM Element References ---
     const editorElement = document.getElementById('toastUiEditor');
-    const mainNavbar = document.querySelector('nav.fixed-top'); // Main navigation bar
-    const topActionBar = document.querySelector('.top-action-bar.fixed-top'); // Bar with title input
-    const publishPageWrapper = document.querySelector('.publish-page-wrapper'); // Main content wrapper
-    const bottomStatusBar = document.querySelector('.bottom-status-bar.fixed-bottom'); // Bottom status bar
-    const articleTitleInput = document.getElementById('articleTitleInput'); // Title input in top action bar
-    const formArticleContent = document.getElementById('formArticleContent'); // Hidden input for editor's markdown
+    const mainNavbar = document.querySelector('nav.fixed-top');
+    const topActionBar = document.querySelector('.top-action-bar.fixed-top');
+    const publishPageWrapper = document.querySelector('.publish-page-wrapper');
+    const bottomStatusBar = document.querySelector('.bottom-status-bar.fixed-bottom');
+    const articleTitleInput = document.getElementById('articleTitleInput');
+    const formArticleContent = document.getElementById('formArticleContent');
     const wordCountEl = document.getElementById('wordCount');
     const charCountEl = document.getElementById('charCount');
 
@@ -21,10 +21,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const articleSummaryTextarea = document.getElementById('articleSummary');
     const summaryCharCount = document.getElementById('summaryCharCount');
     const initialContentDataElement = document.getElementById('initial-content-data');
-
+    const generateAISummaryBtn = document.getElementById('generateAISummaryBtn');
 
     let editorInstance = null;
-    let bsModalInstance = null;
+    let bsModalInstance = null; // For Bootstrap 5 Native JS Modal Instance
 
     // --- Helper Functions ---
     function getElementHeight(element) {
@@ -32,36 +32,38 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function getElementPadding(element, side) {
-        return element ? (parseFloat(getComputedStyle(element)[side]) || 0) : 0;
+        if (!element) return 0;
+        const style = getComputedStyle(element);
+        return parseFloat(style[side]) || 0;
     }
 
     // --- Dynamic Layout Adjustments ---
     function adjustLayout() {
-        const mainNavbarHeight = getElementHeight(mainNavbar);
-        let topActionBarHeight = 0;
+        const currentMainNavbarHeight = getElementHeight(mainNavbar);
+        let currentTopActionBarHeight = 0;
 
         if (topActionBar) {
-            topActionBar.style.top = mainNavbarHeight + 'px';
-            topActionBarHeight = getElementHeight(topActionBar);
+            topActionBar.style.top = currentMainNavbarHeight + 'px';
+            currentTopActionBarHeight = getElementHeight(topActionBar);
         } else {
             console.warn("Top action bar not found for layout adjustment.");
         }
 
         if (publishPageWrapper) {
-            const totalTopOffset = mainNavbarHeight + topActionBarHeight;
+            const totalTopOffset = currentMainNavbarHeight + currentTopActionBarHeight;
             publishPageWrapper.style.paddingTop = totalTopOffset + 'px';
 
             const bottomStatusBarHeight = getElementHeight(bottomStatusBar);
             publishPageWrapper.style.paddingBottom = bottomStatusBarHeight + 'px';
-            console.log(`Layout Adjusted: NavbarH=${mainNavbarHeight}, ActionBarH=${topActionBarHeight}, TopOffset=${totalTopOffset}, BottomBarH=${bottomStatusBarHeight}`);
+            // console.log(`Layout Adjusted: NavbarH=${currentMainNavbarHeight}, ActionBarH=${currentTopActionBarHeight}, TopOffset=${totalTopOffset}, BottomBarH=${bottomStatusBarHeight}`);
         } else {
             console.warn("Publish page wrapper not found for layout adjustment.");
         }
-        return { mainNavbarHeight, topActionBarHeight }; // Return heights for editor calculation
+        return { mainNavbarHeight: currentMainNavbarHeight, topActionBarHeight: currentTopActionBarHeight };
     }
 
-    const { mainNavbarHeight, topActionBarHeight } = adjustLayout(); // Adjust layout on load
-    window.addEventListener('resize', adjustLayout); // Optional: Adjust on resize if heights can change
+    const { mainNavbarHeight, topActionBarHeight } = adjustLayout();
+    window.addEventListener('resize', adjustLayout);
 
 
     // --- Initialize Toast UI Editor ---
@@ -69,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.error("CRITICAL: Toast UI Editor mount point (#toastUiEditor) not found!");
     } else {
         try {
-            let editorHeight = '82vh'; // Default height
+            let editorHeight = '70vh'; // Default height
             if (publishPageWrapper && mainNavbarHeight > 0 && topActionBarHeight > 0) {
                 const bottomBarH = getElementHeight(bottomStatusBar);
                 const editorContentContainer = document.querySelector('.editor-content-container');
@@ -78,20 +80,16 @@ document.addEventListener("DOMContentLoaded", function() {
                 editorHeight = Math.max(300, availableHeight) + 'px'; // Min height 300px
                 console.log(`Calculated editor height: ${editorHeight}`);
             } else {
-                console.warn("Could not calculate dynamic editor height accurately, using default.", editorHeight);
+                console.warn("Could not calculate dynamic editor height accurately, using default '70vh'. Used values - mainNavbarH:", mainNavbarHeight, "topActionBarH:", topActionBarHeight);
             }
 
-            console.log("Available plugins in toastui.Editor.plugin:", toastui.Editor.plugin);
+            // console.log("Available plugins in toastui.Editor.plugin:", toastui.Editor.plugin);
             let editorPlugins = [];
-            if (toastui.Editor.plugin && toastui.Editor.plugin['code-syntax-highlight']) {
-                editorPlugins.push(toastui.Editor.plugin['code-syntax-highlight']);
-            } else if (toastui.Editor.plugin && toastui.Editor.plugin.codeSyntaxHighlight) {
-                editorPlugins.push(toastui.Editor.plugin.codeSyntaxHighlight);
+            if (toastui.Editor.plugin && (toastui.Editor.plugin['code-syntax-highlight'] || toastui.Editor.plugin.codeSyntaxHighlight) && typeof hljs !== 'undefined') {
+                editorPlugins.push(toastui.Editor.plugin['code-syntax-highlight'] || toastui.Editor.plugin.codeSyntaxHighlight);
+                console.log("Code syntax highlight plugin added.");
             } else {
-                console.warn("Code syntax highlight plugin not found.");
-            }
-            if (editorPlugins.length > 0 && typeof hljs !== 'undefined') {
-                console.log("hljs is available globally for code syntax highlight plugin.");
+                console.warn("Code syntax highlight plugin or hljs not available.");
             }
 
             let resolvedInitialContent = '';
@@ -104,17 +102,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 height: editorHeight,
                 initialEditType: 'markdown',
                 previewStyle: 'vertical',
-                placeholder: '请输入内容...',
+                initialValue: resolvedInitialContent || '',
+                placeholder: '请输入文章内容...',
                 usageStatistics: false,
                 plugins: editorPlugins,
                 hooks: {
                     addImageBlobHook: async (blob, callback) => {
+                        console.log("addImageBlobHook triggered, blob:", blob);
+                        // Placeholder for actual upload; using base64 for now.
+                        // Replace with your actual upload logic to your server.
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                            callback(event.target.result, blob.name); // Temporary base64 solution
+                            console.log("File read as base64, calling callback.");
+                            callback(event.target.result, blob.name);
+                        };
+                        reader.onerror = (error) => {
+                            console.error("Error reading file for base64 preview:", error);
+                            callback(null, "Error reading file"); // Or handle error appropriately
                         };
                         reader.readAsDataURL(blob);
-                        return false;
+                        return false; // Important to return false if you handle the upload
                     }
                 }
             });
@@ -124,31 +131,37 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // --- Initialize Bootstrap Modal (if using Bootstrap 5 native JS) ---
-    if (publishSettingsModalElement && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-        bsModalInstance = new bootstrap.Modal(publishSettingsModalElement);
-        console.log("Bootstrap Modal instance created.");
-    } else if (typeof $ !== 'undefined' && publishSettingsModalElement) {
-        console.log("jQuery found, will use jQuery for modal if Bootstrap JS modal not available.");
-    } else {
-        console.warn("Bootstrap Modal JS or jQuery not found, or modal element missing.");
+    // --- Initialize Bootstrap Modal ---
+    if (publishSettingsModalElement) {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bsModalInstance = new bootstrap.Modal(publishSettingsModalElement);
+            console.log("Bootstrap 5 Modal instance created.");
+        } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
+            console.log("jQuery and Bootstrap 4 Modal JS found. Will use jQuery for modal.");
+        } else {
+            console.warn("Bootstrap Modal JS (neither v5 nor v4 via jQuery) not found, or modal element #publishSettingsModal missing.");
+        }
     }
 
 
     // --- Stats Update Function ---
     function updateStats() {
         if (!wordCountEl || !charCountEl || !editorInstance) return;
-        const markdownText = editorInstance.getMarkdown();
-        const plainText = markdownText.replace(/<[^>]*>?/gm, '').trim();
-        charCountEl.textContent = plainText.length;
-        wordCountEl.textContent = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
+        try {
+            const markdownText = editorInstance.getMarkdown();
+            const plainText = markdownText.replace(/<[^>]*>?/gm, '').trim();
+            charCountEl.textContent = plainText.length;
+            wordCountEl.textContent = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
+        } catch (e) {
+            console.error("Error updating stats:", e);
+        }
     }
 
     if (editorInstance) {
         editorInstance.on('change', updateStats);
         updateStats(); // Initial stats
     } else {
-        console.error("Cannot setup stats update: Editor instance is not available.");
+        console.error("Cannot setup stats update: Editor instance is not available at initial setup.");
     }
 
     // --- Modal Interactions ---
@@ -171,35 +184,77 @@ document.addEventListener("DOMContentLoaded", function() {
                 if (file) alert("请选择图片文件！");
             }
         });
+    } else {
+        console.warn("Elements for cover image preview not fully found.");
     }
 
     // Summary character count
-    if (articleSummaryTextarea && summaryCharCount) {
-        articleSummaryTextarea.addEventListener('input', function() {
-            const currentLength = this.value.length;
+    function updateSummaryCharCount() {
+        if (articleSummaryTextarea && summaryCharCount) {
+            const currentLength = articleSummaryTextarea.value.length;
             summaryCharCount.textContent = currentLength;
-            summaryCharCount.style.color = currentLength > 100 ? 'red' : '';
-        });
-        // Initial count for summary
-        summaryCharCount.textContent = articleSummaryTextarea.value.length;
+            const maxLength = parseInt(articleSummaryTextarea.getAttribute('maxlength')) || 200;
+            articleSummaryTextarea.classList.toggle('is-invalid', currentLength > maxLength);
+            summaryCharCount.style.color = currentLength > maxLength ? 'red' : '';
+        }
+    }
+    if (articleSummaryTextarea) {
+        articleSummaryTextarea.addEventListener('input', updateSummaryCharCount);
+        updateSummaryCharCount(); // Initial call to set count if textarea has initial value
+    } else {
+        console.warn("Article summary textarea or char count element not found.");
+    }
+
+    // --- AI Summary Generation Function ---
+    async function fetchAISummary(textContent, maxLength = 200) {
+        if (!textContent.trim()) {
+            console.warn("文章内容为空，无法生成摘要。");
+            return null;
+        }
+        const originalPlaceholder = articleSummaryTextarea ? articleSummaryTextarea.placeholder : "";
+        if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "AI 正在生成摘要，请稍候...";
+
+        try {
+            const response = await fetch('/api/ai/generate-summary-deepseek', { // Ensure this URL is correct
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' /* Add CSRF token if needed */ },
+                body: JSON.stringify({ textContent: textContent, maxLength: maxLength })
+            });
+            if (!response.ok) {
+                let errorMsg = `HTTP error! Status: ${response.status}`;
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.summary || errorData.message || errorMsg;
+                } catch (e) { /* Ignore if response is not JSON */ }
+                throw new Error(errorMsg);
+            }
+            const data = await response.json();
+            return data.summary;
+        } catch (error) {
+            console.error("Error fetching AI summary:", error);
+            return null;
+        } finally {
+            if (articleSummaryTextarea) articleSummaryTextarea.placeholder = originalPlaceholder || "请输入文章摘要...";
+        }
     }
 
 
     // --- Top Publish Button (Trigger for Modal) ---
-    if (topPublishBtnModalTrigger) {
-        topPublishBtnModalTrigger.addEventListener('click', function() {
-            console.log("Top publish button (modal trigger) clicked!");
+    if (topPublishBtnModalTrigger && articleTitleInput) {
+        topPublishBtnModalTrigger.addEventListener('click', function () {
+            console.log("Top publish button (modal trigger) CLICKED!");
             if (!editorInstance) {
                 alert('编辑器尚未准备好，请稍候。');
                 console.error("Editor instance not available for modal trigger.");
                 return;
             }
-            const title = articleTitleInput ? articleTitleInput.value : '';
+
+            const title = articleTitleInput.value;
             const contentMarkdown = editorInstance.getMarkdown();
 
             if (!title.trim()) {
                 alert('请输入文章标题！');
-                if (articleTitleInput) articleTitleInput.focus();
+                articleTitleInput.focus();
                 return;
             }
             if (!contentMarkdown.trim()) {
@@ -208,69 +263,105 @@ document.addEventListener("DOMContentLoaded", function() {
                 return;
             }
 
-            // Show Modal
-            if (bsModalInstance) { // Prefer Bootstrap JS instance
+            if (articleSummaryTextarea) {
+                articleSummaryTextarea.value = ''; // 清空现有摘要，或根据需求保留
+                articleSummaryTextarea.placeholder = "AI 正在准备摘要..."; // 初始提示
+                updateSummaryCharCount();
+            }
+
+            // 1. 显示 Modal
+            console.log("Attempting to show modal...");
+            let modalShown = false;
+            if (bsModalInstance) {
                 bsModalInstance.show();
-                console.log("Bootstrap JS: Modal 'show' command sent.");
-            } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') { // Fallback to jQuery
+                modalShown = true;
+                console.log("Bootstrap JS Modal 'show' command sent.");
+            } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function' && $(publishSettingsModalElement).length) {
                 $(publishSettingsModalElement).modal('show');
-                console.log("jQuery: Modal 'show' command sent.");
+                modalShown = true;
+                console.log("jQuery Modal 'show' command sent.");
             } else {
-                console.error("Cannot show modal: No Bootstrap JS or jQuery modal instance available.");
-                alert("无法打开文章设置，请检查页面。");
+                console.error("Cannot show modal: No valid Bootstrap JS or jQuery modal instance/element available for #publishSettingsModal.");
+                alert("无法打开文章设置，Modal 组件似乎未正确初始化或页面元素缺失。");
+            }
+
+            // 2. 如果 Modal 成功（或尝试）显示，则异步获取 AI 摘要
+            if (modalShown && articleSummaryTextarea && editorInstance) {
+                const plainTextForAI = contentMarkdown
+                    .replace(/<\/?[^>]+(>|$)/g, "")
+                    .replace(/(\r\n|\n|\r)/gm, " ")
+                    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+                    .replace(/[`*#~_>+\-|=]/g, "")
+                    .replace(/\s\s+/g, ' ').trim();
+
+                if (plainTextForAI) {
+                    const summaryMaxLength = parseInt(articleSummaryTextarea.getAttribute('maxlength')) || 100;
+                    console.log("Fetching AI summary after modal is shown...");
+
+                    // 使用 .then() 处理异步，避免阻塞 Modal 显示
+                    fetchAISummary(plainTextForAI, summaryMaxLength)
+                        .then(aiSummary => {
+                            if (aiSummary !== null && articleSummaryTextarea) { // 检查 articleSummaryTextarea 仍然存在
+                                articleSummaryTextarea.value = aiSummary;
+                                console.log("AI summary auto-populated after modal shown:", aiSummary);
+                            } else if (articleSummaryTextarea) {
+                                articleSummaryTextarea.placeholder = "AI摘要生成失败或内容为空，请手动输入。";
+                                console.warn("AI summary generation failed or content was empty for AI (after modal shown).");
+                            }
+                            if (articleSummaryTextarea) updateSummaryCharCount(); // 再次更新字数
+                        })
+                        .catch(error => {
+                            // fetchAISummary 内部已经处理了 alert 和 console.error
+                            if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "AI摘要生成出错，请手动输入。";
+                            if (articleSummaryTextarea) updateSummaryCharCount();
+                        });
+                } else {
+                    if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "文章内容为空，无法自动生成摘要。";
+                    if (articleSummaryTextarea) updateSummaryCharCount();
+                }
             }
         });
-        console.log("Event listener for modal trigger attached to topPublishBtnModalTrigger.");
+        console.log("Event listener for modal trigger attached to .top-action-bar .publish-btn.");
     } else {
-        console.error("Top publish button (modal trigger) not found.");
+        console.error("Top publish button ('.top-action-bar .publish-btn') or articleTitleInput NOT FOUND for modal trigger setup.");
     }
 
-
     // --- Confirm Publish Button (Inside Modal) ---
-    if (confirmPublishBtn) {
+    if (confirmPublishBtn && articleTitleInput && articleSettingsForm && formArticleContent) {
         confirmPublishBtn.addEventListener('click', function() {
             console.log("Confirm publish button in modal clicked.");
-            if (!editorInstance || !articleTitleInput || !articleSettingsForm) {
-                alert("页面组件未完全加载，无法发布。");
+            if (!editorInstance) {
+                alert("编辑器实例丢失，无法发布。");
                 return;
             }
 
             const title = articleTitleInput.value;
             const contentMarkdown = editorInstance.getMarkdown();
             const settingsData = {};
-            if (articleSettingsForm) {
-                const formData = new FormData(articleSettingsForm);
-                formData.forEach((value, key) => { settingsData[key] = value; });
-            }
+            const formData = new FormData(articleSettingsForm);
+            formData.forEach((value, key) => { settingsData[key] = value; });
 
             const coverFile = articleCoverUpload ? articleCoverUpload.files[0] : null;
-            if (coverFile) settingsData.coverImageFileName = coverFile.name;
-
+            if (coverFile) settingsData.coverImageFileName = coverFile.name; // Or handle file upload separately
 
             // Validation for modal fields
+            if (!settingsData.tags || !settingsData.tags.trim()) { alert('请输入至少一个标签！'); document.getElementById('articleTags')?.focus(); return; }
+            if (!settingsData.summary || !settingsData.summary.trim()) { alert('请输入文章摘要！'); document.getElementById('articleSummary')?.focus(); return; }
 
-            if (!settingsData.tags || !settingsData.tags.trim()) {
-                alert('请输入至少一个标签！');
-                document.getElementById('articleTags')?.focus();
-                return;
-            }
-            if (!settingsData.summary || !settingsData.summary.trim()) {
-                alert('请输入文章摘要！');
-                document.getElementById('articleSummary')?.focus();
-                return;
-            }
+            formArticleContent.value = contentMarkdown; // Set editor content to hidden input for form submission
 
             const finalArticleData = {
                 title: title,
                 content: contentMarkdown,
-                tags: settingsData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+                tags: settingsData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
                 coverImageFileName: settingsData.coverImageFileName || null,
-                collection: settingsData.collection,
+                portfolio: settingsData.portfolio || "", // Ensure portfolio exists
                 summary: settingsData.summary
             };
             console.log("Final data to publish:", finalArticleData);
 
-            alert('（模拟）文章及设置已收集，准备发送到后端！查看控制台。');
+            alert('（模拟）文章及设置已收集，准备发送到后端！查看控制台。\n您可以在这里取消注释 document.getElementById(\'publishForm\').submit(); 或发起 AJAX 请求。');
+            // document.getElementById('publishForm').submit(); // Uncomment to submit the form
 
             // Close Modal
             if (bsModalInstance) {
@@ -279,8 +370,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 $(publishSettingsModalElement).modal('hide');
             }
         });
-        console.log("Event listener attached to confirmPublishBtn.");
+        console.log("Event listener attached to #confirmPublishBtn.");
     } else {
-        console.error("Confirm publish button (#confirmPublishBtn) in modal not found.");
+        console.error("Confirm publish button or other critical elements for final publish (articleTitleInput, articleSettingsForm, formArticleContent) NOT FOUND.");
     }
 });

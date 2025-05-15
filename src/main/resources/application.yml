@@ -1,13 +1,11 @@
 server:
   port: 8090
 
-github:
-    client:
-        id: Ov23libFQvARjqG8BM54
-        secret: 6ccadf84025a5c52820bbea47cb67953d4d9193d
-        redirect-uri: http://localhost:8090/callback
-
 spring:
+  config:
+    import:
+        - "optional:application-secret.yml"
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
@@ -19,3 +17,4 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1.0.0
+
