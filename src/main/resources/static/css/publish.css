@@ -1,0 +1,119 @@
+/* publish.css */
+body {
+    height: 100px;
+    padding-top: 148px; /* 为固定的顶部操作栏和主导航栏留出空间 */
+    padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
+    background-color: #f8f9fa; /* 浅灰色背景，类似图片 */
+}
+
+/* 编辑器区域的容器，使用 .container 使其居中 */
+.editor-content-container {
+    /* 如果需要，可以在这里为编辑器区域本身添加额外的上下间距 */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+
+/* Toast UI 编辑器样式调整 */
+.toastui-editor-defaultUI {
+    border: 1px solid #ced4da;
+}
+
+/* 确保主导航栏在顶部操作栏之下，如果主导航栏也是 fixed-top */
+/* 如果你的 th:fragment="navbar" 已经有 fixed-top，需要调整 body 的 padding-top */
+/* 例如，如果主导航高 60px，操作栏高 60px，则 padding-top: 120px; */
+.topnav.fixed-top { /* 这是你主导航栏的类名 */
+    z-index: 1030; /* 确保在标准 fixed-top 之上 */
+}
+
+.editor-area {
+    padding-top: 100px; /* 根据您的 top-action-bar 高度调整 */
+    padding-bottom: 80px; /* 根据您的 bottom-status-bar 高度调整 */
+}
+/* Toast UI 编辑器高度 */
+.toastui-editor-defaultUI {
+    border: 1px solid #ced4da; /* 与您之前的样式匹配 */
+}
+
+.publish-container {
+    padding-top: 200px;
+}
+
+
+.top-action-bar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 10px 0; /* 根据图片调整内边距 */
+    width: 100%;
+    z-index: 1031; /* 比主导航栏高，但低于可能的模态框等 */
+    top: 67px; /* 假设你的主导航栏高度约为 60px，如果主导航栏也 fixed-top */
+    /* 如果主导航栏不固定，或者你想让这个操作栏在最顶端，设为 top: 0; 并调整 body padding-top */
+}
+
+body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
+    /* padding-top: 130px; /* 示例: 假设主导航栏70px + 操作栏60px */
+}
+.top-action-bar.with-fixed-topnav { /* 如果主导航栏是fixed */
+    /* top: 70px;  示例: 假设主导航栏70px高 */
+}
+
+.article-title-input {
+    width: 100%;
+    border: none;
+    font-size: 1.5rem; /* 调整标题输入框字体大小 */
+    font-weight: bold;
+    box-shadow: none !important; /* 移除默认的聚焦阴影 */
+}
+.article-title-input:focus {
+    border: none;
+    box-shadow: none;
+}
+
+.action-buttons .btn-icon {
+    color: #6c757d;
+    background-color: transparent;
+    border: none;
+}
+.action-buttons .btn-icon:hover {
+    color: #343a40;
+}
+
+.editor-area {
+    background-color: #ffffff;
+    padding: 20px;
+    /* border-radius: .25rem; */ /* 可以根据喜好添加圆角 */
+    /* box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075); */ /* 可以添加轻微阴影 */
+    margin-bottom: 60px; /* 为底部状态栏留出空间 */
+}
+
+.editor-toolbar {
+    /* 可以添加更多样式来美化工具栏外观 */
+}
+.editor-toolbar .btn-icon {
+    color: #495057;
+    margin-right: 2px;
+}
+.editor-toolbar .btn-icon:hover {
+    background-color: #e9ecef;
+}
+
+
+.article-content-input {
+    /* 确保富文本编辑器的高度和样式符合预期 */
+    /* min-height 已在内联样式中设置，可移到这里 */
+    outline: none; /* 移除可能的默认轮廓 */
+}
+
+.bottom-status-bar {
+    padding: 0 15px; /* 左右内边距 */
+    font-size: 0.85em;
+    z-index: 1029; /* 确保在内容之上 */
+    color: #495057;
+}
+.bottom-status-bar .controls .btn-link {
+    color: #495057;
+    text-decoration: none;
+}
+.bottom-status-bar .controls .btn-link:hover {
+    color: #007bff;
+}

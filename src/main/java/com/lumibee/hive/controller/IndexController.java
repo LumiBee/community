@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class HomeController {
+public class IndexController {
 
     @Autowired
     private UserMapper userMapper;
@@ -36,6 +36,11 @@ public class HomeController {
     @GetMapping("/about")
     public String about() {
         return "about";
+    }
+
+    @GetMapping("/article")
+    public String article() {
+        return "article";
     }
 
 }

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="navbar" class="topnav navbar navbar-expand-lg navbar-light bg-white fixed-top border-bottom" style="padding-bottom: 0; padding-top: 0;">
+  <div class="container-fluid">
+    <div style="padding-left: 20px;">
+      <a class="navbar-brand" th:href="@{/}"> <img alt="logo" src="/img/logo.png" style="margin: 5px; height: 55px; width: 250px"/>
+      </a>
+    </div>
+    <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse collapse" id="navbarColor02" style="">
+      <ul class="navbar-nav mr-auto d-flex align-items-center">
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">Intro</a> </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/article}">Culture</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/article}">Tech</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/article}">Politics</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/article}">Health</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/article}">Collections</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/about}">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/templates/docs.html}">Template <span class="badge badge-secondary">docs</span></a>
+        </li>
+
+      </ul>
+      <ul class="navbar-nav ml-auto d-flex align-items-center">
+        <li th:if="${session.user == null}" class="nav-item">
+          <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登 录</a>
+        </li>
+        <li th:if="${session.user != null}" class="nav-item" style="padding-right: 20px; font-size: 1.2em;">
+          <a href="#" role="button" th:text="${session.user.getName()}"/>
+        </li>
+        <li class="nav-item highlight">
+          <a class="nav-link" th:href="@{/publish}">发 布 文 章</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+</body>
+</html>

@@ -747,6 +747,7 @@ pre {
       max-width: 1140px; } }
 
 .container-fluid {
+
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;
@@ -3499,12 +3500,20 @@ input[type="button"].btn-block {
   list-style: none; }
 
 .nav-link {
-  display: block;
-  padding: 0.8rem 1rem; }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 0;
+  height: 66px;
+  font-size: 20px;}
   .nav-link:hover, .nav-link:focus {
-    text-decoration: none; }
+    text-decoration: none;}
   .nav-link.disabled {
     color: #6c757d; }
+
+.nav-link.active {
+    border-bottom: 2px solid #c4ec0f;
+}
 
 .nav-tabs {
   border-bottom: 1px solid #dee2e6; }
@@ -3512,8 +3521,8 @@ input[type="button"].btn-block {
     margin-bottom: -1px; }
   .nav-tabs .nav-link {
     border: 1px solid transparent;
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0.25rem; }
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem; }
     .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
       border-color: #e9ecef #e9ecef #dee2e6; }
     .nav-tabs .nav-link.disabled {
@@ -3531,7 +3540,7 @@ input[type="button"].btn-block {
     border-top-right-radius: 0; }
 
 .nav-pills .nav-link {
-  border-radius: 0.25rem; }
+  border-radius: 5px; }
 
 .nav-pills .nav-link.active,
 .nav-pills .show > .nav-link {
@@ -3569,8 +3578,8 @@ input[type="button"].btn-block {
 
 .navbar-brand {
   display: inline-block;
-  padding-top: 0.68rem;
-  padding-bottom: 0.68rem;
+  padding-top: 0;
+  padding-bottom: 0;
   margin-right: 1rem;
   font-size: 1.15rem;
   line-height: inherit;
@@ -3621,6 +3630,7 @@ input[type="button"].btn-block {
   content: "";
   background: no-repeat center center;
   background-size: 100% 100%; }
+
 
 @media (max-width: 575.98px) {
   .navbar-expand-sm > .container,
@@ -8726,6 +8736,7 @@ html {
 /* Base Styles -------------------- */
 body {
   overflow-x: hidden;
+
   padding-top: 69.75px; }
 
 .sticky-top {
@@ -8910,7 +8921,8 @@ a.text-dark:hover {
     border: 1px solid #03a87c;
     padding: 0.3rem 1rem;
     border-radius: 3px;
-    font-size: .93rem; }
+    font-size: .93rem;
+    height: auto; }
   .navbar .highlight .nav-link:hover {
     background: #03a87c;
     color: #fff !important; }
