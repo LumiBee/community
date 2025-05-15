@@ -12,3 +12,4 @@
 [Thymeleaf](https://www.thymeleaf.org/doc/tutorials/3.0/usingthymeleaf.html#using-texts)
 [MyBatis-Plus](https://baomidou.com/getting-started/)
 [flyway](https://documentation.red-gate.com/fd/quickstart-maven-184127578.html)
+[toast](https://nhn.github.io/tui.editor/latest/)

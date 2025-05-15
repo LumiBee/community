@@ -39,15 +39,23 @@
 
       </ul>
       <ul class="navbar-nav ml-auto d-flex align-items-center">
-        <li th:if="${session.user == null}" class="nav-item">
-          <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登 录</a>
-        </li>
-        <li th:if="${session.user != null}" class="nav-item" style="padding-right: 20px; font-size: 1.2em;">
-          <a href="#" role="button" th:text="${session.user.getName()}"/>
-        </li>
-        <li class="nav-item highlight">
-          <a class="nav-link" th:href="@{/publish}">发 布 文 章</a>
-        </li>
+        <th:block th:if="${session.user == null}">
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登 录</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">注 册</a>
+          </li>
+        </th:block>
+
+        <th:block th:if="${session.user != null}">
+          <li class="nav-item highlight">
+            <a class="nav-link" th:href="@{/publish}">发 布 文 章</a>
+          </li>
+          <li class="nav-item" style="padding-right: 15px;">
+            <a class="nav-link" href="#" th:text="${session.user.getName()}" style="font-size: 1.2em; color: #10de88">用户名</a>
+          </li>
+        </th:block>
       </ul>
     </div>
   </div>

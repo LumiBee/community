@@ -3515,6 +3515,13 @@ input[type="button"].btn-block {
     border-bottom: 2px solid #c4ec0f;
 }
 
+.nav-link.disabled-look {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+
+
 .nav-tabs {
   border-bottom: 1px solid #dee2e6; }
   .nav-tabs .nav-item {
