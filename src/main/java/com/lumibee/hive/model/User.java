@@ -12,6 +12,7 @@ public class User {
     private String accountId;
     private String name;
     private String token;
-    private long GmtCreate;
-    private long GmtModified;
+    private long gmtCreate;
+    private long gmtModified;
+    private String avatarUrl;
 }
