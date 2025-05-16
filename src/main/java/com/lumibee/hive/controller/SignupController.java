@@ -1,13 +1,95 @@
 package com.lumibee.hive.controller;
 
+import com.lumibee.hive.dto.SignupDTO;
+import com.lumibee.hive.mapper.UserMapper;
+import com.lumibee.hive.model.User;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.UUID;
 
 @Controller
 public class SignupController {
 
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // 显示注册页面
     @GetMapping("/signup")
-    public String signup() {
+    public String signupPage(Model model) {
+        if (!model.containsAttribute("signupDTO")) {
+            model.addAttribute("signupDTO", new SignupDTO());
+        }
         return "signup";
     }
+
+    @PostMapping("/signup")
+    public String processSignup(@Valid @ModelAttribute("signupDTO") SignupDTO signupDTO,
+                                BindingResult bindingResult,
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
+
+        // 1. 基本表单校验结果 (来自 SignupDTO 的注解)
+        if (bindingResult.hasErrors()) {
+            // 如果有校验错误，将 signupDTO（已包含错误信息）和 bindingResult 返回给注册页面
+            return "signup"; // 返回注册页面，显示错误
+        }
+
+        // 2. 检查密码和确认密码是否一致
+        if (!signupDTO.getPassword().equals(signupDTO.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "error.confirmPassword", "密码和确认密码不一致");
+        }
+
+        // 3. 检查用户名是否已存在
+        User existingUserByName = userMapper.selectByName(signupDTO.getUsername());
+        if (existingUserByName != null) {
+            bindingResult.rejectValue("username", "error.username", "该用户名已被注册");
+        }
+
+        // 4. 检查邮箱是否已存在
+        User existingUserByEmail = userMapper.selectByEmail(signupDTO.getEmail());
+        if (existingUserByEmail != null) {
+            bindingResult.rejectValue("email", "error.email", "该邮箱已被注册");
+        }
+
+        // 如果存在任何自定义的校验错误（用户名或邮箱重复）
+        if (bindingResult.hasErrors()) {
+            return "signup"; // 返回注册页面，显示错误
+        }
+
+        // 4. 如果校验通过，创建新用户
+        User newUser = new User();
+        newUser.setName(signupDTO.getUsername());
+        newUser.setEmail(signupDTO.getEmail());
+        newUser.setPassword(passwordEncoder.encode(signupDTO.getPassword())); // 加密密码
+        newUser.setToken(UUID.randomUUID().toString());
+        newUser.setGmtCreate(System.currentTimeMillis());
+        newUser.setGmtModified(newUser.getGmtCreate());
+        newUser.setAccountId(null);
+         newUser.setAvatarUrl(null);
+
+        try {
+            userMapper.insert(newUser);
+        } catch (Exception e) {
+            e.printStackTrace(); // 记录错误
+            bindingResult.reject("error.global", "注册失败，请稍后再试或联系管理员。");
+            return "signup";
+        }
+
+        // 5. 注册成功
+        redirectAttributes.addFlashAttribute("signupSuccess", "注册成功！现在您可以使用新账户登录了。");
+        return "redirect:/login";
+    }
+
 }

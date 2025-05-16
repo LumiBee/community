@@ -4,6 +4,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -18,7 +20,6 @@ public class HiveApplication {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) { // 注入 RestTemplateBuilder
-
 
         return builder
                 .build();

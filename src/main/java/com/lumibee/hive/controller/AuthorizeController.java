@@ -26,6 +26,9 @@ public class AuthorizeController {
     @Autowired
     private GithubProvider githubProvider;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Value("${github.client.id}")
     private String clientId;
 
@@ -34,9 +37,6 @@ public class AuthorizeController {
 
     @Value("${github.client.redirect-uri}")
     private String redirectUri;
-
-    @Autowired
-    private UserMapper userMapper;
 
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
@@ -50,7 +50,6 @@ public class AuthorizeController {
         accessTokenDTO.setState(state);
         String accessToken = githubProvider.getAccessToken(accessTokenDTO);
         GithubUser githubUser = githubProvider.getUser(accessToken);
-        System.out.println(">>>>>> In AuthorizeController, githubUser.getAvatar_url(): " + (githubUser != null ? githubUser.getAvatar_url() : "githubUser is null"));
         if (githubUser != null) {
             // 登录成功
             // 将用户信息存储到数据库

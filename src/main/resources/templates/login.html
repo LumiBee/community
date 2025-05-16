@@ -18,45 +18,77 @@
         body {
             min-height: 100%;
             flex-direction: column;
-            background-color: #ffffff; /* 整体页面背景色 */
+            background-color: #ffffff;
         }
         .login-page-wrapper { /* 用于垂直居中和页面最小高度 */
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 900px; /* 假设 header 60px, footer 50px */
-            padding-top: 68px; /* 为 fixed-top header 留出空间, 这个值应等于header高度 */
-            padding-bottom: 20px; /* 给底部一些空间 */
+            min-height: 900px;
+            padding-top: 68px;
+            padding-bottom: 20px;
             box-sizing: border-box;
         }
         .login-container { /* 包含左右两栏的白色背景容器 */
             display: flex;
             max-width: 1000px;
-            width: calc(100% - 40px); /* 考虑小屏幕两侧边距 */
-            margin: 20px auto; /* 左右自动边距使其居中 */
+            width: calc(100% - 40px);
+            margin: 20px auto;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         .login-form-section { /* 左侧表单区域 */
-            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            flex: 1;
             padding: 40px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
         .login-info-section { /* 右侧信息区域 */
-            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            flex: 1;
             background-color: #f8f9fa;
             padding: 40px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             color: #495057;
-            /* border-left: 1px solid #e9ecef; /* 可选：添加一个分隔线 */
         }
+
+        .btn-outline-secondary {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
+        }
+
+        .btn-outline-secondary::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            /* https://grabient.com/HQDgbA7ANMCcDMYYQKwCZkEYAMz7xhABYDg1MiY0JMqwNc1htZKjhMRYg/?categories=%5B%22Random%22%5D&style=linearGradient */
+            /* https://grabient.com/HQDgrAbANKAs2gIyJoitUHYBMqAMAnDLAWMSAMwxiZV5TbB61SzDaJ5A/?categories=%5B%22Random%22%5D&style=linearGradient */
+
+            background: linear-gradient(45deg, rgba(255, 255, 214, 1.000) 0.000%, rgba(255, 241, 197, 1.000) 16.667%, rgba(240, 220, 184, 1.000) 33.333%, rgba(219, 198, 179, 1.000) 50.000%, rgba(198, 181, 184, 1.000) 66.667%, rgba(183, 172, 196, 1.000) 83.333%, rgba(176, 175, 213, 1.000) 100.000%);
+            opacity: 0;
+            transition: opacity 0.1ms ease-in-out;
+            z-index: -1;
+            border-radius: inherit;
+        }
+
+        .btn-outline-secondary:hover {
+            color: #0a0909 !important;
+        }
+
+        .btn-outline-secondary:hover::before {
+            opacity: 1 !important;
+        }
+
         .login-form-section .logo { text-align: center; margin-bottom: 30px; }
         .login-form-section .logo img { max-height: 50px; }
         .login-form-section .form-group label { font-weight: 600; color: #555; }
@@ -93,31 +125,26 @@
             <div class="logo">
                 <img src="/img/logo.png" alt="Hive Logo"> </div>
 
-            <form th:action="@{/login}" method="post">
-                <div class="form-group mb-3">
-                    <label for="username">账号</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="请输入您的邮箱/用户名" required>
-                </div>
+            <form th:action="@{/login-process}" method="post"> <div class="form-group mb-3">
+                <label for="accountInput">账号 (邮箱或用户名)</label>
+                <input type="text" class="form-control" id="accountInput" name="account" placeholder="请输入您的邮箱或用户名" required
+                       th:classappend="${param.error} ? 'is-invalid' : ''">
+            </div>
 
                 <div class="form-group mb-3">
                     <label for="password">密码</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入您的密码" required>
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="请输入您的密码" required
+                           th:classappend="${param.error} ? 'is-invalid' : ''">
+                    <div th:if="${param.error}" class="invalid-feedback"> 邮箱/用户名或密码不正确。
+                    </div>
                 </div>
 
-                <div class="form-group mb-3 d-flex justify-content-end">
-                    <a href="#" class="forgot-password text-muted">忘记密码?</a>
-                </div>
-
-                <div th:if="${param.error}" class="alert alert-danger mb-3" role="alert">
-                    邮箱或密码不正确！
-                </div>
-                <div th:if="${param.logout}" class="alert alert-success mb-3" role="alert">
-                    您已成功注销。
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block w-100 mb-3">立即登录</button>
-            </form> <button type="button" class="btn btn-outline-secondary btn-block w-100" onclick="window.location.href='/signup'">
-            注册
+                <button type="submit" class="btn btn-warning btn-block w-100 mb-3">立即登录</button>
+            </form>
+            <p class="text-center mt-3">
+                还没有账户？ <a th:href="@{/signup}">立即注册</a>
+            </p>
         </button>
 
             <div class="text-center mt-3">

@@ -18,44 +18,43 @@
         body {
             min-height: 100%;
             flex-direction: column;
-            background-color: #ffffff; /* 整体页面背景色 */
+            background-color: #ffffff;
         }
         .signup-page-wrapper { /* 用于垂直居中和页面最小高度 */
             flex-grow: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 900px; /* 假设 header 60px, footer 50px */
-            padding-top: 68px; /* 为 fixed-top header 留出空间, 这个值应等于header高度 */
-            padding-bottom: 20px; /* 给底部一些空间 */
+            min-height: 900px;
+            padding-top: 68px;
+            padding-bottom: 20px;
             box-sizing: border-box;
         }
         .signup-container { /* 包含左右两栏的白色背景容器 */
             display: flex;
             max-width: 1000px;
-            width: calc(100% - 40px); /* 考虑小屏幕两侧边距 */
-            margin: 20px auto; /* 左右自动边距使其居中 */
+            width: calc(100% - 40px);
+            margin: 20px auto;
             background-color: #fff;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             overflow: hidden;
         }
         .signup-form-section { /* 左侧表单区域 */
-            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            flex: 1;
             padding: 40px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
         .signup-info-section { /* 右侧信息区域 */
-            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            flex: 1;
             background-color: #f8f9fa;
             padding: 40px 50px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             color: #495057;
-            /* border-left: 1px solid #e9ecef; /* 可选：添加一个分隔线 */
         }
         .signup-form-section .logo { text-align: center; margin-bottom: 30px; }
         .signup-form-section .logo img { max-height: 50px; }
@@ -68,17 +67,17 @@
         .signup-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
         .signup-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
 
-        @media (max-width: 768px) { /* 小屏幕下单列 */
+        @media (max-width: 768px) {
             .signup-container {
                 flex-direction: column;
             }
             .signup-info-section {
-                border-left: none; /* 移除竖线 */
-                border-top: 1px solid #e9ecef; /* 改为顶部横线 */
+                border-left: none;
+                border-top: 1px solid #e9ecef;
             }
             .signup-page-wrapper {
-                min-height: auto; /* 小屏幕时内容自适应高度 */
-                padding-top: 80px; /* 确保header不遮挡 */
+                min-height: auto;
+                padding-top: 80px;
             }
         }
     </style>
@@ -92,30 +91,46 @@
         <div class="signup-form-section">
             <div class="logo">
                 <img src="/img/logo.png" alt="Hive Logo"> </div>
+            <form th:action="@{/signup}" th:object="${signupDTO}" method="post">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger mb-3" role="alert">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global error message</p>
+                </div>
 
-            <form th:action="@{/sianup}" method="post">
-                <div class="form-group mb-3">
-                    <label for="username">用户名</label>
-                    <input type="text" class="form-control" id="username" name="username" placeholder="请输入您的用户名" required>
+                <div class="form-group mb-3"> <label for="username">用户名</label>
+                    <input type="text" class="form-control" id="username" th:field="*{username}" placeholder="3-20个字符" required
+                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}">
+                    </div>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="email">账号</label>
-                    <input type="text" class="form-control" id="email" name="email" placeholder="请输入您的邮箱" required>
+                    <label for="email">邮箱</label> <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="例如：user@example.com" required
+                                                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}">
+                    </div>
                 </div>
 
                 <div class="form-group mb-3">
                     <label for="password">密码</label>
-                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入您的密码" required>
+                    <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="6-30个字符" required
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                    <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback" th:errors="*{password}">
+                    </div>
                 </div>
 
                 <div class="form-group mb-3">
-                    <label for="ConfirmedPassword">确认密码</label>
-                    <input type="password" class="form-control" id="ConfirmedPassword" name="ConfirmedPassword" placeholder="请再次输入您的密码" required>
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" placeholder="请再次输入您的密码" required
+                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback" th:errors="*{confirmPassword}">
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-block w-100 mb-3">注册</button>
+                <button type="submit" class="btn btn-warning btn-block w-100">立即注册</button>
             </form>
+            <p class="text-center mt-3">
+                已经有账户了？ <a th:href="@{/login}">立即登录</a>
+            </p>
 
         </div>
         <div class="signup-info-section">

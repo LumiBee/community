@@ -17,5 +17,5 @@ public class User {
     private String bio;
     private String avatarUrl;
     private String email;
-
+    private String password;
 }
