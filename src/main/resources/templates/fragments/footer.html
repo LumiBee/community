@@ -2,16 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="page-footer" class="container mt-5">
-    <footer class="bg-white border-top p-3 text-muted small">
+<footer th:fragment="page-footer" class="bg-white border-top p-3 text-muted small site-footer">
+    <div class="container-fluid">
         <div class="row align-items-center justify-content-between">
-            <div>
-                <span class="navbar-brand mr-2"><strong>LumiBee Hive</strong></span> Copyright &copy;
-                <script>document.write(new Date().getFullYear())</script>
-                . All rights reserved.
-            </div>
+        <div class="col-md-12 text-center text-md-left" style="padding-left: 50px;">
+            <span class="navbar-brand mr-2" style="font-size: 1.5em;">
+                <strong>LumiBee Hive</strong>
+            </span> Copyright &copy;
+            <script>document.write(new Date().getFullYear())</script>
+            . All rights reserved.
         </div>
-    </footer>
-</div>
+    </div>
+    </div>
+</footer>
+
 </body>
 </html>

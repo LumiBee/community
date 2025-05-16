@@ -24,6 +24,7 @@ public class GithubProvider {
 
         try(Response response = client.newCall(request).execute()) {
             String str = response.body().string();
+            System.out.println(">>>>>>> In GithubProvider, getAccessToken(), str: " + str);
             return str.split("&")[0].split("=")[1];
         } catch (IOException e) {
             throw new RuntimeException(e);

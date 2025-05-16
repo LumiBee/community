@@ -1,6 +1,8 @@
 /* publish.css */
-body {
-    height: 100px;
+html, body {
+    height: 100%;
+    overflow: hidden !important;
+    margin: 0;
     padding-top: 148px; /* 为固定的顶部操作栏和主导航栏留出空间 */
     padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
     background-color: #f8f9fa; /* 浅灰色背景，类似图片 */
@@ -9,7 +11,6 @@ body {
 /* 编辑器区域的容器，使用 .container 使其居中 */
 .editor-content-container {
     /* 如果需要，可以在这里为编辑器区域本身添加额外的上下间距 */
-    padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
@@ -116,4 +117,67 @@ body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
 }
 .bottom-status-bar .controls .btn-link:hover {
     color: #007bff;
+}
+
+.top-action-bar.fixed-top {
+    background-color: #f8f9fa; /* Or your desired background */
+    /* z-index will be set by JS if needed, or manage here if main navbar has higher z-index */
+}
+
+.editor-content-container.container-fluid {
+    padding-bottom: 1rem; /* Space between editor and bottom-status-bar content */
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+/* 目标：WYSIWYG 模式下的主要内容区 */
+.toastui-editor-contents {
+    font-size: 20px;
+}
+
+/* 目标：Markdown 模式下的编辑区 */
+.toastui-editor-md-container .ProseMirror {
+    font-size: 20px !important;
+}
+
+.toastui-editor-md-container .CodeMirror-code,
+.toastui-editor-md-container .CodeMirror-line,
+.toastui-editor-md-container .CodeMirror pre.CodeMirror-line {
+    font-size: inherit !important; /* 从父级 .CodeMirror 继承字号 */
+}
+
+#publishForm {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+#toastUiEditor { /* The div where editor is mounted */
+    flex-grow: 1; /* Allow the editor's container div to grow */
+    min-height: 0;
+}
+.toastui-editor-defaultUI { /* Toast UI's main wrapper */
+    border: 1px solid #ced4da;
+    flex-grow: 1; /* Allow the editor UI to grow */
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.toastui-editor-defaultUI .toastui-editor-main { /* Actual editing area */
+    flex-grow: 1 !important; /* Force the editing area to take available space */
+    overflow-y: auto !important;
+    min-height: 0;
+}
+
+/* Style for custom file upload area in modal */
+.custom-file-upload {
+    border: 2px dashed #ced4da;
+    padding: 2rem;
+    border-radius: .25rem;
+    background-color: #f8f9fa;
+    transition: background-color .15s ease-in-out;
+}
+.custom-file-upload:hover {
+    background-color: #e9ecef;
 }

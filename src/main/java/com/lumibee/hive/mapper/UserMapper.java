@@ -8,6 +8,6 @@ import org.apache.ibatis.annotations.Select;
 @org.apache.ibatis.annotations.Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("SELECT id, account_id, name, token, GMT_CREATE, GMT_MODIFIED, avatar_url FROM user WHERE token = #{token}")
+    @Select("SELECT id, account_id, name, token, GMT_CREATE, GMT_MODIFIED, avatar_url, bio, email FROM user WHERE token = #{token}")
     User selectByToken(@Param("token") String token);
 }

@@ -17,63 +17,24 @@
     <link href="/css/publish.css" rel="stylesheet"/>
 
     <style>
-        /* Basic body reset if main.css doesn't handle fixed navbar padding for this specific page well */
-        /* body { padding-top: 0 !important; } */
-
-        .top-action-bar.fixed-top {
-            background-color: #f8f9fa; /* Or your desired background */
-            /* z-index will be set by JS if needed, or manage here if main navbar has higher z-index */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding-top: 80px; /* 为固定的顶部操作栏和主导航栏留出空间 */
+            padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
+            background-color: #f8f9fa; /* 浅灰色背景，类似图片 */
         }
 
         .publish-page-wrapper {
             box-sizing: border-box;
-            min-height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             background-color: #fff;
-
-            /* Main content background */
-            /* padding-top and padding-bottom will be set by JavaScript */
+            padding-top: 0 !important;
         }
 
-        .editor-content-container.container-fluid {
-            padding-top: 1rem; /* Space between top-action-bar content and editor */
-            padding-bottom: 1rem; /* Space between editor and bottom-status-bar content */
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #publishForm {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #toastUiEditor { /* The div where editor is mounted */
-            flex-grow: 1; /* Allow the editor's container div to grow */
-        }
-        .toastui-editor-defaultUI { /* Toast UI's main wrapper */
-            border: 1px solid #ced4da;
-            flex-grow: 1; /* Allow the editor UI to grow */
-            display: flex;
-            flex-direction: column;
-        }
-        .toastui-editor-defaultUI .toastui-editor-main { /* Actual editing area */
-            flex-grow: 1 !important; /* Force the editing area to take available space */
-        }
-
-        /* Style for custom file upload area in modal */
-        .custom-file-upload {
-            border: 2px dashed #ced4da;
-            padding: 2rem;
-            border-radius: .25rem;
-            background-color: #f8f9fa;
-            transition: background-color .15s ease-in-out;
-        }
-        .custom-file-upload:hover {
-            background-color: #e9ecef;
-        }
     </style>
 </head>
 <body>

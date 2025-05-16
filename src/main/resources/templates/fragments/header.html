@@ -41,10 +41,10 @@
       <ul class="navbar-nav ml-auto d-flex align-items-center">
         <th:block th:if="${session.user == null}">
           <li class="nav-item">
-            <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">登 录</a>
+            <a class="nav-link" th:href="@{/login}">登 录</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">注 册</a>
+            <a class="nav-link" th:href="@{/signup}">注 册</a>
           </li>
         </th:block>
 

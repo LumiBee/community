@@ -37,29 +37,16 @@ document.addEventListener("DOMContentLoaded", function() {
         return parseFloat(style[side]) || 0;
     }
 
-    // --- Dynamic Layout Adjustments ---
+    //--- Dynamic Layout Adjustments ---
     function adjustLayout() {
         const currentMainNavbarHeight = getElementHeight(mainNavbar);
-        let currentTopActionBarHeight = 0;
 
         if (topActionBar) {
             topActionBar.style.top = currentMainNavbarHeight + 'px';
-            currentTopActionBarHeight = getElementHeight(topActionBar);
         } else {
             console.warn("Top action bar not found for layout adjustment.");
         }
-
-        if (publishPageWrapper) {
-            const totalTopOffset = currentMainNavbarHeight + currentTopActionBarHeight;
-            publishPageWrapper.style.paddingTop = totalTopOffset + 'px';
-
-            const bottomStatusBarHeight = getElementHeight(bottomStatusBar);
-            publishPageWrapper.style.paddingBottom = bottomStatusBarHeight + 'px';
-            // console.log(`Layout Adjusted: NavbarH=${currentMainNavbarHeight}, ActionBarH=${currentTopActionBarHeight}, TopOffset=${totalTopOffset}, BottomBarH=${bottomStatusBarHeight}`);
-        } else {
-            console.warn("Publish page wrapper not found for layout adjustment.");
-        }
-        return { mainNavbarHeight: currentMainNavbarHeight, topActionBarHeight: currentTopActionBarHeight };
+        return { mainNavbarHeight: currentMainNavbarHeight};
     }
 
     const { mainNavbarHeight, topActionBarHeight } = adjustLayout();
@@ -71,14 +58,15 @@ document.addEventListener("DOMContentLoaded", function() {
         console.error("CRITICAL: Toast UI Editor mount point (#toastUiEditor) not found!");
     } else {
         try {
-            let editorHeight = '70vh'; // Default height
-            if (publishPageWrapper && mainNavbarHeight > 0 && topActionBarHeight > 0) {
-                const bottomBarH = getElementHeight(bottomStatusBar);
+            let editorHeight = '82vh'; // Default height
+            if (mainNavbarHeight > 0 && topActionBarHeight > 0) {
+                const bottomBarH = 35;
                 const editorContentContainer = document.querySelector('.editor-content-container');
                 const containerPaddingY = getElementPadding(editorContentContainer, 'paddingTop') + getElementPadding(editorContentContainer, 'paddingBottom');
                 const availableHeight = window.innerHeight - (mainNavbarHeight + topActionBarHeight + bottomBarH + containerPaddingY);
-                editorHeight = Math.max(300, availableHeight) + 'px'; // Min height 300px
+                editorHeight = Math.max(250, availableHeight) + 'px'; // Min height 300px
                 console.log(`Calculated editor height: ${editorHeight}`);
+                console.log(`Calculated TUI_Editor height: ${editorHeight}, WindowH: ${window.innerHeight}, NavH: ${mainNavbarHeight}, ActionBarH: ${topActionBarHeight}, BottomBarH: ${bottomBarH}, ContainerPaddingY: ${containerPaddingY}`);
             } else {
                 console.warn("Could not calculate dynamic editor height accurately, using default '70vh'. Used values - mainNavbarH:", mainNavbarHeight, "topActionBarH:", topActionBarHeight);
             }

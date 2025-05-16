@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="icon" type="image/png" href="/img/favicon.ico">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>登录 - LumiHive</title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
+
+    <link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,700|Source+Sans+Pro:400,600,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+    <link href="/css/main.css" rel="stylesheet"/>
+
+    <style>
+        html {
+            height: 100%;
+        }
+        body {
+            min-height: 100%;
+            flex-direction: column;
+            background-color: #ffffff; /* 整体页面背景色 */
+        }
+        .login-page-wrapper { /* 用于垂直居中和页面最小高度 */
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 900px; /* 假设 header 60px, footer 50px */
+            padding-top: 68px; /* 为 fixed-top header 留出空间, 这个值应等于header高度 */
+            padding-bottom: 20px; /* 给底部一些空间 */
+            box-sizing: border-box;
+        }
+        .login-container { /* 包含左右两栏的白色背景容器 */
+            display: flex;
+            max-width: 1000px;
+            width: calc(100% - 40px); /* 考虑小屏幕两侧边距 */
+            margin: 20px auto; /* 左右自动边距使其居中 */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .login-form-section { /* 左侧表单区域 */
+            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .login-info-section { /* 右侧信息区域 */
+            flex: 1; /* <<< 关键：使其占据可用空间的一半 */
+            background-color: #f8f9fa;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            color: #495057;
+            /* border-left: 1px solid #e9ecef; /* 可选：添加一个分隔线 */
+        }
+        .login-form-section .logo { text-align: center; margin-bottom: 30px; }
+        .login-form-section .logo img { max-height: 50px; }
+        .login-form-section .form-group label { font-weight: 600; color: #555; }
+        .login-form-section .form-control { border-radius: 4px; padding: 12px 15px; border: 1px solid #ced4da; }
+        .login-form-section .btn { padding: 10px; border-radius: 4px; font-size: 1rem; }
+        .login-form-section .btn-primary { background-color: #007bff; border-color: #007bff; }
+        .login-form-section .btn-outline-secondary { color: #6c757d; border-color: #6c757d; }
+        .login-form-section .forgot-password { text-align: right; font-size: 0.9em; }
+        .login-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
+        .login-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
+
+        @media (max-width: 768px) { /* 小屏幕下单列 */
+            .login-container {
+                flex-direction: column;
+            }
+            .login-info-section {
+                border-left: none; /* 移除竖线 */
+                border-top: 1px solid #e9ecef; /* 改为顶部横线 */
+            }
+            .login-page-wrapper {
+                min-height: auto; /* 小屏幕时内容自适应高度 */
+                padding-top: 80px; /* 确保header不遮挡 */
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<div class="login-page-wrapper">
+    <div class="login-container">
+        <div class="login-form-section">
+            <div class="logo">
+                <img src="/img/logo.png" alt="Hive Logo"> </div>
+
+            <form th:action="@{/login}" method="post">
+                <div class="form-group mb-3">
+                    <label for="username">账号</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="请输入您的邮箱/用户名" required>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label for="password">密码</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="请输入您的密码" required>
+                </div>
+
+                <div class="form-group mb-3 d-flex justify-content-end">
+                    <a href="#" class="forgot-password text-muted">忘记密码?</a>
+                </div>
+
+                <div th:if="${param.error}" class="alert alert-danger mb-3" role="alert">
+                    邮箱或密码不正确！
+                </div>
+                <div th:if="${param.logout}" class="alert alert-success mb-3" role="alert">
+                    您已成功注销。
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block w-100 mb-3">立即登录</button>
+            </form> <button type="button" class="btn btn-outline-secondary btn-block w-100" onclick="window.location.href='/signup'">
+            注册
+        </button>
+
+            <div class="text-center mt-3">
+                <p class="text-muted">或通过以下方式登录</p>
+                <a href="https://github.com/login/oauth/authorize?client_id=Ov23libFQvARjqG8BM54&redirect_uri=http://localhost:8090/callback&state=1">
+                    <button type="button" class="btn btn-outline-dark">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+                        </svg>
+                        Github
+                    </button>
+                </a>
+                <button type="button" class="btn btn-outline-danger">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tencent-qq" viewBox="0 0 16 16">
+                        <path d="M6.048 3.323c.022.277-.13.523-.338.55-.21.026-.397-.176-.419-.453-.022-.277.13-.523.338-.55.21-.026.397.176.42.453Zm2.265-.24c-.603-.146-.894.256-.936.333-.027.048-.008.117.037.15.045.035.092.025.119-.003.361-.39.751-.172.829-.129l.011.007c.053.024.147.028.193-.098.023-.063.017-.11-.006-.142-.016-.023-.089-.08-.247-.118Z"></path>
+                        <path fill-rule="evenodd" d="M11.727 6.719c0-.022.01-.375.01-.557 0-3.07-1.45-6.156-5.015-6.156-3.564 0-5.014 3.086-5.014 6.156 0 .182.01.535.01.557l-.72 1.795a25.85 25.85 0 0 0-.534 1.508c-.68 2.187-.46 3.093-.292 3.113.36.044 1.401-1.647 1.401-1.647 0 .979.504 2.256 1.594 3.179-.408.126-.907.319-1.228.556-.29.213-.253.43-.201.518.228.386 3.92.246 4.985.126 1.065.12 4.756.26 4.984-.126.052-.088.088-.305-.2-.518-.322-.237-.822-.43-1.23-.557 1.09-.922 1.594-2.2 1.594-3.178 0 0 1.041 1.69 1.401 1.647.168-.02.388-.926-.292-3.113a25.78 25.78 0 0 0-.534-1.508l-.72-1.795ZM9.773 5.53c-.13-.286-1.431-.605-3.042-.605h-.017c-1.611 0-2.913.319-3.042.605a.096.096 0 0 0-.01.04c0 .022.008.04.018.056.11.159 1.554.943 3.034.943h.017c1.48 0 2.924-.784 3.033-.943a.095.095 0 0 0 .008-.096Zm-4.32-.989c-.483.022-.896-.529-.922-1.229-.026-.7.344-1.286.828-1.308.483-.022.896.529.922 1.23.027.7-.344 1.286-.827 1.307Zm2.538 0c.483.022.896-.529.922-1.229.026-.7-.344-1.286-.827-1.308-.484-.022-.896.529-.923 1.23-.026.7.344 1.285.828 1.307ZM2.928 8.99a10.674 10.674 0 0 0-.097 2.284c.146 2.45 1.6 3.99 3.846 4.012h.091c2.246-.023 3.7-1.562 3.846-4.011.054-.9 0-1.663-.097-2.285-1.312.26-2.669.41-3.786.396h-.017c-.297.003-.611-.005-.937-.023v2.148c-1.106.154-2.21-.068-2.21-.068V9.107a22.93 22.93 0 0 1-.639-.117Z"></path>
+                    </svg>
+                    QQ
+                </button>
+            </div>
+        </div> <div class="login-info-section">
+        <h2>欢迎来到 LumiHive!</h2>
+        <p>
+            LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
+        </p>
+        <p>
+            我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
+        </p>
+        <p>
+            最后请大家共同爱护这个交流环境，相信这里一定是您注册过的所有社区中用户体验最好的。😊
+        </p>
+    </div>
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/functions.js}" type="text/javascript"></script>
+
+</body>
+</html>
