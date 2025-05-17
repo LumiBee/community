@@ -211,6 +211,26 @@ FOOTER
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 <!-- End Footer -->
 
+<th:block th:if="${session.showPasswordSetupPrompt == true}">
+	<div class="modal fade" id="passwordSetupModal" tabindex="-1" aria-labelledby="passwordSetupModalLabel" aria-hidden="true"
+		 data-bs-backdrop="static" data-bs-keyboard="false"> <div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="passwordSetupModalLabel">重要提示</h5>
+			</div>
+			<div class="modal-body">
+				<p>欢迎您，<strong th:text="${session.user?.name}">用户</strong>！</p>
+				<p>为了您的账户安全并启用邮箱/密码登录方式，我们建议您为通过第三方授权（如GitHub,QQ）登录的账户设置一个邮箱和本地密码。</p>
+				<p><strong>请前往“账号设置”页面设置您的密码。</strong></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" id="laterPasswordSetupBtn">稍后提醒</button>
+				<a th:href="@{/settings}" class="btn btn-primary">前往设置密码</a> </div>
+		</div>
+	</div>
+	</div>
+</th:block>
+
 <!--------------------------------------
 JAVASCRIPTS
 --------------------------------------->

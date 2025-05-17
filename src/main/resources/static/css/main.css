@@ -2099,7 +2099,7 @@ fieldset:disabled a.btn {
 
 .btn-warning {
   color: #212529;
-  background-color: #e8ca0f;
+  background-color: #ffde03;
   border-color: #ffde03; }
   .btn-warning:hover {
     color: #212529;
@@ -2952,7 +2952,7 @@ input[type="button"].btn-block {
     text-decoration: none;
     background-color: #f8f9fa; }
   .dropdown-item.active, .dropdown-item:active {
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
     background-color: #03a87c; }
   .dropdown-item.disabled, .dropdown-item:disabled {
@@ -8948,9 +8948,9 @@ a.text-dark:hover {
   @media (min-width: 768px) {
     .dropdown-menu:before {
       content: '';
-      top: -8px;
+      top: -6px;
       position: absolute;
-      left: 50px;
+      left: 164px;
       border-top: 16px solid #fff;
       border-left: 16px solid #fff;
       -webkit-transform: rotate(45deg);
@@ -9413,6 +9413,8 @@ footer.bg-black {
 
 #docsarea h1 + h2 {
   padding-top: 0; }
+
+
 
 /* JUST SOME STYLES FOR PRE CODES */
 code {

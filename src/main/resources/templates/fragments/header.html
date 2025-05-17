@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <body>
 
 <nav th:fragment="navbar" class="topnav navbar navbar-expand-lg navbar-light bg-white fixed-top border-bottom" style="padding-bottom: 0; padding-top: 0;">
@@ -14,24 +15,18 @@
     <div class="navbar-collapse collapse" id="navbarColor02" style="">
       <ul class="navbar-nav mr-auto d-flex align-items-center">
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/}">Intro</a> </li>
+          <a class="nav-link" th:href="@{/}">首页</a> </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">Culture</a>
+          <a class="nav-link" th:href="@{/article}">分类</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">Tech</a>
+          <a class="nav-link" th:href="@{/article}">作品集</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">Politics</a>
+          <a class="nav-link" th:href="@{/article}">个人作品</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">Health</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">Collections</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/about}">About</a>
+          <a class="nav-link" th:href="@{/about}">关于本站</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" th:href="@{/templates/docs.html}">Template <span class="badge badge-secondary">docs</span></a>
@@ -52,18 +47,42 @@
           <li class="nav-item highlight">
             <a class="nav-link" th:href="@{/publish}">发 布 文 章</a>
           </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#" th:text="${session.user.getName()}" style="font-size: 1.2em; color: #10de88;">用户名</a>
-          </li>
-          <li class="nav-item" style="padding-right: 10px; display: flex; align-items: center;">
-            <a href="./publish" class="nav-link p-0">
-            <img th:if="${session.user.getAvatarUrl() != null && !session.user.getAvatarUrl().isEmpty()}"
-                 th:src="${session.user.getAvatarUrl()}" alt="用户头像" class="rounded-circle"
-                 style="width: 52px; height: 52px; object-fit: cover; border: 1px solid #ddd;">
-              <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
-              <i class="fas fa-user-circle" style="font-size: 32px; color: #ccc;"></i>
-              </th:block>
-          </a>
+          <li class="nav-item dropdown user-avatar-dropdown" style="padding-left: 10px; padding-right: 15px; display: flex; align-items: center;">
+            <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdownUserMenu" role="button"
+               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+               style="line-height: 1;"> <img th:if="${session.user.getAvatarUrl() != null && !session.user.getAvatarUrl().isEmpty()}"
+                                             th:src="${session.user.getAvatarUrl()}"
+                                             alt="用户头像"
+                                             class="rounded-circle"
+                                             style="width: 32px; height: 32px; object-fit: cover;"> <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
+              <i class="fas fa-user-circle" style="font-size: 32px; color: #6c757d;"></i> </th:block>
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUserMenu" style="min-width: 220px; padding-top: 0;">
+              <div class="px-3 py-2" style="border-bottom: 1px solid #e9ecef;">
+              <div class="d-flex align-items-center">
+                <img th:if="${session.user.getAvatarUrl() != null && !session.user.getAvatarUrl().isEmpty()}"
+                     th:src="${session.user.getAvatarUrl()}"
+                     alt="用户头像" class="rounded-circle mr-2"
+                     style="width: 40px; height: 40px; object-fit: cover;">
+                <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
+                  <i class="fas fa-user-circle fa-2x mr-2" style="color: #6c757d;"></i>
+                </th:block>
+                <div style="line-height: 1.2;">
+                  <strong th:text="${session.user.getName()}">用户名</strong>
+                </div>
+              </div>
+            </div>
+
+              <a class="dropdown-item" th:href="@{/profile}">个人中心</a>
+              <a class="dropdown-item" th:href="@{/drafts}">我的草稿</a>
+              <div class="dropdown-divider"></div>
+              <a class="dropdown-item" th:href="@{/settings}">设置</a>
+              <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="dropdown-item">
+                  退出登录
+                </button>
+              </form>
+            </div>
           </li>
         </th:block>
       </ul>

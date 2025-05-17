@@ -201,20 +201,55 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         const originalPlaceholder = articleSummaryTextarea ? articleSummaryTextarea.placeholder : "";
         if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "AI 正在生成摘要，请稍候...";
+        // --- BEGIN CSRF Token Logic ---
+        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
+        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
+        const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : null;
+
+        const requestHeaders = {
+            'Content-Type': 'application/json'
+            // CSRF token会在这里添加 (如果存在)
+        };
+
+        if (csrfToken && csrfHeaderName) {
+            requestHeaders[csrfHeaderName] = csrfToken;
+            console.log("CSRF Header added:", csrfHeaderName, csrfToken); // 用于调试
+        } else {
+            console.warn("CSRF token or header name not found in meta tags OR their content is null. POST request might be blocked by CSRF protection.");
+            // 更详细的调试信息
+            if (!csrfTokenMeta) console.warn("Meta tag with name '_csrf' NOT found.");
+            if (!csrfHeaderMeta) console.warn("Meta tag with name '_csrf_header' NOT found.");
+            if (csrfTokenMeta && !csrfToken) console.warn("Meta tag '_csrf' found, but its 'content' attribute is null or empty.");
+            if (csrfHeaderMeta && !csrfHeaderName) console.warn("Meta tag '_csrf_header' found, but its 'content' attribute is null or empty.");
+        }
+        // --- END CSRF Token Logic ---
         try {
             const response = await fetch('/api/ai/generate-summary-deepseek', { // Ensure this URL is correct
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' /* Add CSRF token if needed */ },
+                headers: requestHeaders,
                 body: JSON.stringify({ textContent: textContent, maxLength: maxLength })
             });
             if (!response.ok) {
-                let errorMsg = `HTTP error! Status: ${response.status}`;
+                let errorMsg = `AI服务暂时不可用 (HTTP ${response.status})。请稍后重试或手动输入。`;
                 try {
                     const errorData = await response.json();
-                    errorMsg = errorData.summary || errorData.message || errorMsg;
-                } catch (e) { /* Ignore if response is not JSON */ }
-                throw new Error(errorMsg);
+                    if (errorData && errorData.summary) {
+                        errorMsg = errorData.summary;
+                    } else if (errorData && errorData.message) {
+                        errorMsg = errorData.message;
+                    } else if (response.status === 403) { // 更具体地处理403
+                        errorMsg = "请求被拒绝 (403 Forbidden)。这可能是由于安全限制（如CSRF Token问题）。请确保页面已正确加载或尝试刷新。";
+                    }
+                    console.error(`AI Summary HTTP Error ${response.status}:`, errorData || "未能从响应中解析出错误JSON");
+                } catch (e) {
+                    console.error(`AI Summary HTTP Error ${response.status} (无法解析错误响应JSON):`, e);
+                    if (response.status === 403) {
+                        errorMsg = "请求被拒绝 (403 Forbidden)。安全策略可能阻止了此操作。";
+                    }
+                }
+                return { summary: null, error: errorMsg };
             }
             const data = await response.json();
             return data.summary;
@@ -293,7 +328,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 articleSummaryTextarea.value = aiSummary;
                                 console.log("AI summary auto-populated after modal shown:", aiSummary);
                             } else if (articleSummaryTextarea) {
-                                articleSummaryTextarea.placeholder = "AI摘要生成失败或内容为空，请手动输入。";
+                                articleSummaryTextarea.placeholder = "AI摘要生成失败，请手动输入。";
                                 console.warn("AI summary generation failed or content was empty for AI (after modal shown).");
                             }
                             if (articleSummaryTextarea) updateSummaryCharCount(); // 再次更新字数
