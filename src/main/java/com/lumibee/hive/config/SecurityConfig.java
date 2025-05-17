@@ -1,7 +1,7 @@
 package com.lumibee.hive.config;
 
-import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +30,7 @@ import java.util.UUID;
 public class SecurityConfig {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -57,7 +57,7 @@ public class SecurityConfig {
                                                 "/favicon.ico",   // 网站图标
                                                 "/api/user/dismiss-password-prompt"
                                         ).permitAll() // 以上路径允许所有用户访问
-                                        .requestMatchers("/publish", "/api/ai/**").authenticated()
+                                        .requestMatchers("/publish", "/api/ai/**","/settings").authenticated()
                                         .anyRequest().permitAll() // 其他所有未明确指定的请求也允许
                 )
                 .formLogin(formLogin ->
@@ -105,16 +105,17 @@ public class SecurityConfig {
             if (!userIdentifier.isEmpty()) {
                 User user = null;
                 if (userIdentifier.contains("@")) {
-                    user = userMapper.selectByEmail(userIdentifier);
+                    user = userService.selectByEmail(userIdentifier);
                 } else {
-                    user = userMapper.selectByName(userIdentifier);
+                    user = userService.selectByName(userIdentifier);
                 }
 
                 if (user != null) {
                     User sessionUser = new User();
                     sessionUser.setId(user.getId());
                     sessionUser.setName(user.getName());
-                    sessionUser.setAccountId(user.getAccountId());
+                    sessionUser.setGithubId(user.getGithubId());
+                    sessionUser.setQqOpenId(user.getQqOpenId());
                     sessionUser.setAvatarUrl(user.getAvatarUrl());
                     sessionUser.setEmail(user.getEmail());
                     sessionUser.setToken(user.getToken());
@@ -138,11 +139,11 @@ public class SecurityConfig {
     @Component
     class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
-        private final UserMapper userMapper;
+        private final UserService userService;
 
         @Autowired
-        public CustomOAuth2AuthenticationSuccessHandler(UserMapper userMapper) {
-            this.userMapper = userMapper;
+        public CustomOAuth2AuthenticationSuccessHandler(UserService userService) {
+            this.userService = userService;
         }
 
         @Override
@@ -150,18 +151,19 @@ public class SecurityConfig {
             HttpSession session = request.getSession();
             OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
 
-            String accountId = oauth2User.getName();
+
+            String githubId = oauth2User.getName();
             String name = oauth2User.getAttribute("name");
             String email = oauth2User.getAttribute("email");
             String avatarUrl = oauth2User.getAttribute("avatar_url");
             String bio = oauth2User.getAttribute("bio");
 
-            User user = userMapper.selectByAccountId(accountId);
+            User user = userService.selectByGithubId(githubId);
             boolean needsPasswordPrompt = false;
 
             if (user == null) {
                 user = new User();
-                user.setAccountId(accountId);
+                user.setGithubId(githubId);
                 user.setName(name);
                 user.setEmail(email);
                 user.setAvatarUrl(avatarUrl);
@@ -170,16 +172,16 @@ public class SecurityConfig {
                 user.setGmtModified(user.getGmtCreate());
                 user.setPassword(null); // 新 OAuth 用户，本地密码为 null
                 user.setToken(UUID.randomUUID().toString());
-                userMapper.insert(user);
+                userService.insert(user);
                 needsPasswordPrompt = true;
                 System.out.println("New user created via Spring Security OAuth2: " + user.getName());
             }  else {
-                if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+                if (user.getPassword() == null || user.getPassword().isBlank()) {
                     needsPasswordPrompt = true;
                 }
 
                 user.setGmtModified(System.currentTimeMillis());
-                userMapper.updateById(user);
+                userService.updateById(user);
                 System.out.println("Updated existing user info via Spring Security OAuth2: " + user.getName());
             }
 

@@ -1,7 +1,7 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class IndexController {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @GetMapping("/")
     public String home(HttpServletRequest request) {
@@ -21,7 +21,7 @@ public class IndexController {
             for (Cookie cookie : cookies) {
                 if (cookie.getName().equals("token")) {
                     String token = cookie.getValue();
-                    User user = userMapper.selectByToken(token);
+                    User user = userService.selectByToken(token);
                     if (user != null) {
                         request.getSession().setAttribute("user", user);
                     }
@@ -42,5 +42,6 @@ public class IndexController {
     public String article() {
         return "article";
     }
+
 
 }

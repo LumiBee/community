@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人设置 - Lumi Hive</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="/css/main.css" rel="stylesheet"/>
+
+  <meta name="_csrf" th:content="${_csrf?.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
+
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      margin: 0;
+      background-color: #f8f9fa;
+    }
+    .main-content {
+      flex: 1 0 auto;
+    }
+    .settings-container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    .avatar-preview-container { /* 用于头像和按钮的垂直居中对齐 */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* margin-bottom: 1.5rem; */ /* BS4 使用 form-group 来管理间距 */
+    }
+    .avatar-image {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #eee;
+      margin-bottom: 0.75rem; /* 图片和按钮间距 */
+      cursor: pointer;
+    }
+    /* Bootstrap 4 .nav-pills .nav-link 样式调整 */
+    .nav-pills .nav-link {
+      font-size: 1rem; /* 或 18px */
+      /* display: flex; align-items: center; justify-content: center; */ /* BS4 a 标签默认就是块状的，可以不用flex来居中文本 */
+      text-align: center; /* 对于 a 标签，可以用 text-align */
+      padding: 0.5rem 1rem; /* BS4 .nav-link 默认 padding */
+      color: #495057; /* BS4 默认链接颜色 */
+    }
+    .nav-pills .nav-link.active {
+      font-size: 1rem; /* 或 18px */
+      background-color: #007bff; /* BS4 primary color */
+      color: white;
+    }
+    .site-footer { /* 页脚粘性布局 */
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<div class="main-content">
+  <div class="container settings-container">
+    <h3 class="mb-4 text-center">个人设置</h3>
+
+    <div class="row">
+      <div class="col-md-3">
+        <ul class="nav nav-pills flex-column" id="settingsTabs" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="profile-tab-btn" data-toggle="pill" href="#profile" role="tab" aria-controls="profile" aria-selected="true">
+              <i class="fas fa-user-edit mr-2"></i>基本资料 </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="account-tab-btn" data-toggle="pill" href="#account" role="tab" aria-controls="account" aria-selected="false">
+              <i class="fas fa-shield-alt mr-2"></i>账户安全
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="preferences-tab-btn" data-toggle="pill" href="#preferences" role="tab" aria-controls="preferences" aria-selected="false">
+              <i class="fas fa-sliders-h mr-2"></i>偏好设置
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="col-md-9">
+        <div class="tab-content" id="settingsTabContent">
+          <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab-btn">
+            <h4 class="mb-3">编辑基本资料</h4>
+            <form id="profileSettingsForm" th:action="@{/user/settings/profile}" method="post" enctype="multipart/form-data">
+              <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+
+              <div class="form-group avatar-preview-container"> <img th:if="${session.user?.avatarUrl != null && !session.user.avatarUrl.isEmpty()}"
+                                                                     th:src="${session.user.avatarUrl}"
+                                                                     alt="用户头像" class="avatar-image">
+                <img th:unless="${session.user?.avatarUrl != null && !session.user.avatarUrl.isEmpty()}"
+                     th:src="@{/img/default.jpg}" alt="默认用户头像" class="avatar-image">
+
+                <input type="file" class="form-control-file d-none" id="avatarUploadInput" name="avatarFile" accept="image/*"> <label for="avatarUploadInput" class="btn btn-sm btn-outline-primary mt-2">
+                  <i class="fas fa-camera mr-1"></i> 上传新头像 </label>
+                <small class="form-text text-muted d-block mt-1">支持 JPG, PNG 格式，大小不超过2MB。</small>
+              </div>
+
+              <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" name="username" th:value="${user?.name}" required>
+                <small class="form-text text-muted">这将是您在网站上公开显示的名称。</small>
+              </div>
+
+              <div class="form-group">
+                <label for="bio">个人简介</label>
+                <textarea class="form-control" id="bio" name="bio" rows="3" placeholder="简单介绍一下自己..." th:text="${user?.bio}"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label for="email_profile">电子邮箱</label>
+                <input type="email" class="form-control" id="email_profile" name="email" th:value="${user?.email}" required>
+                <small class="form-text text-muted">用于登录和接收通知。如需更改，可能需要验证新邮箱。</small>
+              </div>
+
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i> 保存更改
+              </button>
+            </form>
+          </div>
+
+          <div class="tab-pane fade" id="account" role="tabpanel" aria-labelledby="account-tab-btn">
+            <h4 class="mb-3">账户安全</h4>
+            <div th:if="${passwordSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+              <span th:text="${passwordSuccess}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close"> <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div th:if="${passwordError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <span th:text="${passwordError}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div th:if="${passwordInfo}" class="alert alert-info alert-dismissible fade show" role="alert">
+              <span th:text="${passwordInfo}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <hr>
+            <form id="accountSettingsForm" th:action="@{/user/settings/account}" method="post">
+              <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+              <h5>修改密码</h5>
+              <div class="form-group">
+                <label for="newPassword">新密码</label>
+                <input type="password" class="form-control" id="newPassword" name="newPassword">
+              </div>
+              <div class="form-group">
+                <label for="confirmNewPassword">确认新密码</label>
+                <input type="password" class="form-control" id="confirmNewPassword" name="confirmNewPassword">
+              </div>
+              <button type="submit" class="btn btn-primary mb-4">
+                <i class="fas fa-key mr-1"></i> 更新密码
+              </button>
+            </form>
+            <hr>
+            <h5>社交账户关联</h5>
+            <div th:if="${user?.isGithubOAuthUser()}">
+              <p class="text-muted">您已通过Github账户关联登录。</p>
+            </div>
+            <div th:if="${user?.isQQOpenAuthUser()}">
+              <p class="text-muted">您已通过QQ账户关联登录。</p>
+            </div>
+            <div th:unless="${user?.isQQOpenAuthUser() && user?.isGithubOAuthUser()}">
+              <p class="text-muted">您可以关联以下社交账户以便快速登录：</p>
+              <a href="/oauth2/authorization/github" class="btn btn-outline-dark mr-2"><i class="fab fa-github mr-1"></i> 关联 GitHub</a>
+              <a href="/oauth2/authorization/qq" class="btn btn-outline-danger"><i class="fab fa-qq mr-1"></i> 关联 QQ</a>
+            </div>
+          </div>
+
+          <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab-btn">
+            <h4 class="mb-3">偏好设置</h4>
+            <form id="preferencesSettingsForm" th:action="@{/user/settings/preferences}" method="post">
+              <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
+              <div class="custom-control custom-switch mb-3">
+                <input type="checkbox" class="custom-control-input" id="emailNotifications" name="emailNotifications" th:checked="${userPreferences?.emailNotifications}">
+                <label class="custom-control-label" for="emailNotifications">接收邮件通知</label>
+                <small class="form-text text-muted d-block">例如：新评论、系统更新等。</small>
+              </div>
+
+              <div class="form-group">
+                <label for="interfaceTheme">界面主题</label>
+                <select class="custom-select" id="interfaceTheme" name="interfaceTheme">
+                  <option value="light" th:selected="${userPreferences?.theme == 'light'}">浅色模式</option>
+                  <option value="dark" th:selected="${userPreferences?.theme == 'dark'}">深色模式</option>
+                  <option value="system" th:selected="${userPreferences?.theme == 'system'}">跟随系统</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save mr-1"></i> 保存偏好
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const avatarUploadInput = document.getElementById('avatarUploadInput');
+    const avatarPreviewDisplay = document.getElementById('avatarPreviewDisplay');
+    const defaultAvatarSrc = '/img/default.jpg';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabToActivate = urlParams.get('tab');
+
+    if (tabToActivate) {
+      const tabButtonId = tabToActivate + '-tab-btn';
+      const tabElement = document.getElementById(tabButtonId);
+      if (tabElement) {
+          $(tabElement).tab('show');
+      } else {
+          console.error(`Tab with ID ${tabButtonId} not found.`);
+      }
+    }
+
+    if (avatarUploadInput && avatarPreviewDisplay) {
+      let initialAvatarSrc = avatarPreviewDisplay.src;
+      if (!initialAvatarSrc || initialAvatarSrc.endsWith(window.location.pathname)) {
+        initialAvatarSrc = defaultAvatarSrc;
+        avatarPreviewDisplay.src = defaultAvatarSrc;
+      }
+      avatarPreviewDisplay.dataset.defaultSrc = initialAvatarSrc;
+
+      avatarPreviewDisplay.addEventListener('click', function() {
+        avatarUploadInput.click();
+      });
+
+      avatarUploadInput.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            avatarPreviewDisplay.src = e.target.result;
+          }
+          reader.readAsDataURL(file);
+        } else {
+          avatarPreviewDisplay.src = avatarPreviewDisplay.dataset.defaultSrc;
+          if (file) {
+            alert("请选择有效的图片文件 (JPG, PNG等)。");
+          }
+        }
+      });
+    } else {
+      if (!avatarUploadInput) console.error("Avatar upload input (avatarUploadInput) not found!");
+      if (!avatarPreviewDisplay) console.error("Avatar preview display (avatarPreviewDisplay) not found!");
+    }
+  });
+</script>
+</body>
+</html>

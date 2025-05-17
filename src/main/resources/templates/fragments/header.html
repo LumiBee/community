@@ -54,8 +54,9 @@
                                              th:src="${session.user.getAvatarUrl()}"
                                              alt="用户头像"
                                              class="rounded-circle"
-                                             style="width: 32px; height: 32px; object-fit: cover;"> <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
-              <i class="fas fa-user-circle" style="font-size: 32px; color: #6c757d;"></i> </th:block>
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+              <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
+              <img class="rounded-circle" alt="默认头像" th:src="@{/img/default.jpg}" style="width: 40px; height: 40px; object-fit: cover"> </th:block>
             </a>
             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUserMenu" style="min-width: 220px; padding-top: 0;">
               <div class="px-3 py-2" style="border-bottom: 1px solid #e9ecef;">
@@ -65,7 +66,7 @@
                      alt="用户头像" class="rounded-circle mr-2"
                      style="width: 40px; height: 40px; object-fit: cover;">
                 <th:block th:if="${session.user.getAvatarUrl() == null || session.user.getAvatarUrl().isEmpty()}">
-                  <i class="fas fa-user-circle fa-2x mr-2" style="color: #6c757d;"></i>
+                  <img alt="默认头像" class="rounded-circle mr-2" th:src="@{/img/default.jpg}" style="width: 40px; height: 40px; object-fit: cover;">
                 </th:block>
                 <div style="line-height: 1.2;">
                   <strong th:text="${session.user.getName()}">用户名</strong>
@@ -76,7 +77,7 @@
               <a class="dropdown-item" th:href="@{/profile}">个人中心</a>
               <a class="dropdown-item" th:href="@{/drafts}">我的草稿</a>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" th:href="@{/settings}">设置</a>
+              <a class="dropdown-item" th:href="@{/user/settings}">设置</a>
               <form th:action="@{/logout}" method="post" style="display: inline;">
                 <button type="submit" class="dropdown-item">
                   退出登录

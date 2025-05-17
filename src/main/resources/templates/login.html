@@ -16,7 +16,8 @@
             height: 100%;
         }
         body {
-            min-height: 100%;
+            min-height: 100vh;
+            display: flex;
             flex-direction: column;
             background-color: #ffffff;
         }
@@ -25,10 +26,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 900px;
+            min-height: 800px;
             padding-top: 68px;
             padding-bottom: 20px;
             box-sizing: border-box;
+            overflow: hidden;
         }
         .login-container { /* 包含左右两栏的白色背景容器 */
             display: flex;
@@ -57,46 +59,12 @@
             color: #495057;
         }
 
-        .btn-outline-secondary {
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            transition: color 0.3s ease-in-out, border-color 0.3s ease-in-out;
-        }
-
-        .btn-outline-secondary::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            /* https://grabient.com/HQDgbA7ANMCcDMYYQKwCZkEYAMz7xhABYDg1MiY0JMqwNc1htZKjhMRYg/?categories=%5B%22Random%22%5D&style=linearGradient */
-            /* https://grabient.com/HQDgrAbANKAs2gIyJoitUHYBMqAMAnDLAWMSAMwxiZV5TbB61SzDaJ5A/?categories=%5B%22Random%22%5D&style=linearGradient */
-
-            background: linear-gradient(45deg, rgba(255, 255, 214, 1.000) 0.000%, rgba(255, 241, 197, 1.000) 16.667%, rgba(240, 220, 184, 1.000) 33.333%, rgba(219, 198, 179, 1.000) 50.000%, rgba(198, 181, 184, 1.000) 66.667%, rgba(183, 172, 196, 1.000) 83.333%, rgba(176, 175, 213, 1.000) 100.000%);
-            opacity: 0;
-            transition: opacity 0.1ms ease-in-out;
-            z-index: -1;
-            border-radius: inherit;
-        }
-
-        .btn-outline-secondary:hover {
-            color: #0a0909 !important;
-        }
-
-        .btn-outline-secondary:hover::before {
-            opacity: 1 !important;
-        }
 
         .login-form-section .logo { text-align: center; margin-bottom: 30px; }
         .login-form-section .logo img { max-height: 50px; }
         .login-form-section .form-group label { font-weight: 600; color: #555; }
         .login-form-section .form-control { border-radius: 4px; padding: 12px 15px; border: 1px solid #ced4da; }
         .login-form-section .btn { padding: 10px; border-radius: 4px; font-size: 1rem; }
-        .login-form-section .btn-primary { background-color: #007bff; border-color: #007bff; }
-        .login-form-section .btn-outline-secondary { color: #6c757d; border-color: #6c757d; }
-        .login-form-section .forgot-password { text-align: right; font-size: 0.9em; }
         .login-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
         .login-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
 
@@ -113,6 +81,7 @@
                 padding-top: 80px; /* 确保header不遮挡 */
             }
         }
+
     </style>
 </head>
 <body>
@@ -174,7 +143,7 @@
             我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
         </p>
         <p>
-            最后请大家共同爱护这个交流环境，相信这里一定是您注册过的所有社区中用户体验最好的。😊
+            最后请大家共同爱护这个交流环境，一个好的交流环境离不开大家的努力😊
         </p>
     </div>
     </div>

@@ -1,8 +1,8 @@
 package com.lumibee.hive.controller;
 
 import com.lumibee.hive.dto.SignupDTO;
-import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +20,7 @@ import java.util.UUID;
 public class SignupController {
 
     @Autowired
-    private UserMapper userMapper;
+    private UserService userService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -52,13 +52,13 @@ public class SignupController {
         }
 
         // 3. 检查用户名是否已存在
-        User existingUserByName = userMapper.selectByName(signupDTO.getUsername());
+        User existingUserByName = userService.selectByName(signupDTO.getUsername());
         if (existingUserByName != null) {
             bindingResult.rejectValue("username", "error.username", "该用户名已被注册");
         }
 
         // 4. 检查邮箱是否已存在
-        User existingUserByEmail = userMapper.selectByEmail(signupDTO.getEmail());
+        User existingUserByEmail = userService.selectByEmail(signupDTO.getEmail());
         if (existingUserByEmail != null) {
             bindingResult.rejectValue("email", "error.email", "该邮箱已被注册");
         }
@@ -76,11 +76,10 @@ public class SignupController {
         newUser.setToken(UUID.randomUUID().toString());
         newUser.setGmtCreate(System.currentTimeMillis());
         newUser.setGmtModified(newUser.getGmtCreate());
-        newUser.setAccountId(null);
-         newUser.setAvatarUrl(null);
+        newUser.setAvatarUrl(null);
 
         try {
-            userMapper.insert(newUser);
+            userService.insert(newUser);
         } catch (Exception e) {
             e.printStackTrace(); // 记录错误
             bindingResult.reject("error.global", "注册失败，请稍后再试或联系管理员。");
