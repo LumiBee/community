@@ -172,16 +172,36 @@
             </form>
             <hr>
             <h5>社交账户关联</h5>
-            <div th:if="${user?.isGithubOAuthUser()}">
-              <p class="text-muted">您已通过Github账户关联登录。</p>
+            <div th:if="${user != null}">
+              <div class="form-group row align-items-center mb-3">
+              <label class="col-sm-3 col-form-label"><i class="fab fa-github fa-fw mr-2"></i>GitHub</label>
+              <div class="col-sm-9">
+                <th:block th:if="${user.isGithubOAuthUser()}">
+                  <span class="text-success">已关联</span>
+                  (<span th:text="${user.githubId}">GitHub ID</span>)
+                </th:block>
+                <th:block th:unless="${user.isGithubOAuthUser()}">
+                  <a href="/oauth2/authorization/github?connect=true" class="btn btn-outline-dark">
+                    <i class="fab fa-github mr-1"></i> 点击关联 GitHub 账户
+                  </a>
+                </th:block>
+              </div>
             </div>
-            <div th:if="${user?.isQQOpenAuthUser()}">
-              <p class="text-muted">您已通过QQ账户关联登录。</p>
-            </div>
-            <div th:unless="${user?.isQQOpenAuthUser() && user?.isGithubOAuthUser()}">
-              <p class="text-muted">您可以关联以下社交账户以便快速登录：</p>
-              <a href="/oauth2/authorization/github" class="btn btn-outline-dark mr-2"><i class="fab fa-github mr-1"></i> 关联 GitHub</a>
-              <a href="/oauth2/authorization/qq" class="btn btn-outline-danger"><i class="fab fa-qq mr-1"></i> 关联 QQ</a>
+
+              <div class="form-group row align-items-center mb-3">
+                <label class="col-sm-3 col-form-label" style="color:red"><i class="fab fa-qq fa-fw mr-2"></i>QQ</label>
+                <div class="col-sm-9">
+                  <th:block th:if="${user.isQQOpenAuthUser()}">
+                    <span class="text-success">已关联</span>
+                    (<span th:text="${user.qqOpenId}">QQ OpenID</span>)
+                  </th:block>
+                  <th:block th:unless="${user.isQQOpenAuthUser()}">
+                    <a href="/oauth2/authorization/qq?connect=true" class="btn btn-outline-danger">
+                      <i class="fab fa-qq mr-1"></i> 点击关联 QQ 账户
+                    </a>
+                  </th:block>
+                </div>
+              </div>
             </div>
           </div>
 
