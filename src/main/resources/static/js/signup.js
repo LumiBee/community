@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
             feedbackElement.textContent = ''; // 清空前端错误信息
             inputElement.classList.remove('is-invalid');
             // 只有在字段非空且通过所有验证时才添加is-valid
-            // 为了避免在用户清空字段后仍然显示is-valid，这里先不加
         }
     }
 
@@ -113,30 +112,9 @@ document.addEventListener('DOMContentLoaded', function () {
             if (confirmPasswordInput.value.length > 0) {
                 validateConfirmPassword(); // 当主密码变动时，如果确认密码有值，实时校验确认密码
             }
-            // 也可以在这里做一些非常轻量级的实时提示，比如密码长度，但主要验证放在blur
         });
     }
 
-
-    // --- 密码可见性切换 (保持不变) ---
-    function togglePasswordVisibility(inputElement, buttonElement) {
-        const type = inputElement.getAttribute('type') === 'password' ? 'text' : 'password';
-        inputElement.setAttribute('type', type);
-        const icon = buttonElement.querySelector('i');
-        if (type === 'password') {
-            icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
-        } else {
-            icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
-        }
-    }
-    if (togglePasswordButton && passwordInput) {
-        togglePasswordButton.addEventListener('click', function () { togglePasswordVisibility(passwordInput, this); });
-    }
-    if (toggleConfirmPasswordButton && confirmPasswordInput) {
-        toggleConfirmPasswordButton.addEventListener('click', function () { togglePasswordVisibility(confirmPasswordInput, this); });
-    }
-
-    // --- 表单提交时的整体验证 (保持不变) ---
     if (signupForm) {
         signupForm.addEventListener('submit', function (event) {
             // 在提交时，确保所有字段都执行一次blur事件的验证逻辑
@@ -148,13 +126,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!usernameValid || !emailValid || !passwordValid || !confirmPasswordValid) {
                 event.preventDefault();
                 event.stopPropagation();
-                // 尝试聚焦到第一个无效字段
                 const firstInvalid = signupForm.querySelector('.form-control.is-invalid');
                 if (firstInvalid) {
                     firstInvalid.focus();
                 }
-                // 可以选择不显示全局alert，因为每个字段已有提示
-                // alert('请修正表单中的错误后再提交。');
             }
         });
     }

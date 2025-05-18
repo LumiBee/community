@@ -18,3 +18,6 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1.0.0
 
+mybatis:
+  configuration:
+    map-underscore-to-camel-case: true

@@ -1,6 +1,7 @@
 package com.lumibee.hive.config;
 
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -20,8 +21,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -32,10 +36,26 @@ public class SecurityConfig {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private DataSource dataSource;
+
+    @Autowired
+    private CustomUserServiceImpl customUserService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public PersistentTokenRepository persistentTokenRepository() {
+        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
+        tokenRepository.setDataSource(dataSource);
+        //第一次运行需要设为true,之后注释掉即可
+        //tokenRepository.setCreateTableOnStartup(true);
+        return tokenRepository;
+    }
+
 
 
     @Bean
@@ -83,6 +103,13 @@ public class SecurityConfig {
                                 .deleteCookies("JSESSIONID", "token")
                                 .clearAuthentication(true)
                                 .permitAll()
+                )
+                .rememberMe(rememberMe ->
+                        rememberMe
+                                .tokenRepository(persistentTokenRepository())
+                                .tokenValiditySeconds(604800)
+                                .userDetailsService(customUserService)
+                                .rememberMeParameter("remember-me")
                 );
 
 
@@ -118,14 +145,9 @@ public class SecurityConfig {
                     sessionUser.setQqOpenId(user.getQqOpenId());
                     sessionUser.setAvatarUrl(user.getAvatarUrl());
                     sessionUser.setEmail(user.getEmail());
-                    sessionUser.setToken(user.getToken());
 
                     session.setAttribute("user", sessionUser); //将 User 对象以键名 "user" 存入 session
                     System.out.println("Form Login Success: User '" + sessionUser.getName() + "' set in session.");
-
-                    if (sessionUser.getToken() != null) {
-                        response.addCookie(new Cookie("token", sessionUser.getToken()));
-                    }
                 } else {
                     System.err.println("Form Login Success, but could not reload user from DB with identifier: " + userIdentifier);
                 }
@@ -171,7 +193,6 @@ public class SecurityConfig {
                 user.setGmtCreate(System.currentTimeMillis());
                 user.setGmtModified(user.getGmtCreate());
                 user.setPassword(null); // 新 OAuth 用户，本地密码为 null
-                user.setToken(UUID.randomUUID().toString());
                 userService.insert(user);
                 needsPasswordPrompt = true;
                 System.out.println("New user created via Spring Security OAuth2: " + user.getName());
@@ -192,11 +213,6 @@ public class SecurityConfig {
             } else {
                 session.removeAttribute("showPasswordSetupPrompt");
             }
-
-            if (user.getToken() != null) {
-                response.addCookie(new Cookie("token", user.getToken()));
-            }
-
             response.sendRedirect(request.getContextPath() + "/");
         }
     }
