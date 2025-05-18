@@ -87,7 +87,8 @@ public class SignupController {
         }
 
         // 5. 注册成功
-        redirectAttributes.addFlashAttribute("signupSuccess", "注册成功！现在您可以使用新账户登录了。");
+        redirectAttributes.addFlashAttribute("signupSuccess", true);
+        redirectAttributes.addFlashAttribute("signupMessage", "现在您可以使用新账户登录了。");
         return "redirect:/login";
     }
 

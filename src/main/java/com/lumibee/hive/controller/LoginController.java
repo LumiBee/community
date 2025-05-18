@@ -4,16 +4,20 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 public class LoginController {
 
     @GetMapping("/login")
-    public String login() {
+    public String login(@ModelAttribute("signupSuccess")String signupSuccess,
+                        @ModelAttribute("signupMessage")String signupMessage,
+                        Model model) {
+        if ("true".equals(signupSuccess) && signupMessage != null) {
+            model.addAttribute("showSignupSuccessPopup", true);
+            model.addAttribute("popupMessage", signupMessage);
+        }
+
         return "login";
     }
 

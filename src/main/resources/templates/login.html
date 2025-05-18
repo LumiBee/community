@@ -67,6 +67,35 @@
         .login-form-section .btn { padding: 10px; border-radius: 4px; font-size: 1rem; }
         .login-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
         .login-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
+        .toast-container-wrapper {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1090;
+            width: auto;
+            min-width: 300px;
+        }
+
+        #signupSuccessToast.toast {
+            border-radius: 0.5rem;
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
+            border: none;
+            background-clip: padding-box;
+        }
+
+        #signupSuccessToast .toast-header {
+            border-bottom: 1px solid rgba(0,0,0,.075);
+            border-top-left-radius: calc(0.5rem - 1px);
+            border-top-right-radius: calc(0.5rem - 1px);
+            padding: .75rem 1.25rem;
+        }
+
+        #signupSuccessToast .toast-body {
+            padding: 1rem; /* 调整身体部分内边距 */
+            font-size: 0.95rem; /* 调整消息文本大小 */
+            color: #212529; /* 主体文字颜色 */
+        }
 
         @media (max-width: 768px) { /* 小屏幕下单列 */
             .login-container {
@@ -80,6 +109,14 @@
                 min-height: auto; /* 小屏幕时内容自适应高度 */
                 padding-top: 80px; /* 确保header不遮挡 */
             }
+            .toast-container-wrapper {
+                top: 60px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                transform: translateX(-50%);
+                max-width: none;
+            }
         }
 
     </style>
@@ -87,6 +124,13 @@
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
+
+<div aria-live="polite" aria-atomic="true" class="toast-container-wrapper">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" id="signupSuccessToast">
+        <div class="toast-header bg-warning text-white" style="margin-top:5px"> <strong class="mr-auto">注册成功！</strong></div>
+        <div class="toast-body" id="signupSuccessToastBody"></div>
+    </div>
+</div>
 
 <div class="login-page-wrapper">
     <div class="login-container">
@@ -114,7 +158,7 @@
             <p class="text-center mt-3">
                 还没有账户？ <a th:href="@{/signup}">立即注册</a>
             </p>
-        </button>
+
 
             <div class="text-center mt-3">
                 <p class="text-muted">或通过以下方式登录</p>
@@ -154,6 +198,52 @@
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+        var showToastFlag = /*[[${showSignupSuccessPopup}]]*/ false;
+        var toastMsg = /*[[${popupMessage}]]*/ null;
+
+        console.log("Flag from model (showSignupSuccessPopup):", showToastFlag);
+        console.log("Message from model (popupMessage):", toastMsg);
+
+        if (showToastFlag === true && toastMsg) {
+            const toastBodyElement = document.getElementById('signupSuccessToastBody');
+            const toastTitleElement = document.getElementById('signupSuccessToastTitle');
+
+            if (toastBodyElement) {
+                toastBodyElement.textContent = toastMsg;
+            } else {
+                console.error("Toast body element 'signupSuccessToastBody' not found!");
+            }
+
+            const toastElement = $('#signupSuccessToast');
+            if (toastElement.length) {
+                toastElement.toast({
+                    animation: true,
+                    autohide: true,
+                    delay: 7000
+                });
+                toastElement.css('display', '');
+                toastElement.removeClass('d-none');
+
+                toastElement.toast('show');
+                console.log("Signup success toast display initiated.");
+            } else {
+                console.error("Toast element '#signupSuccessToast' not found!");
+            }
+        } else {
+            const toastElement = $('#signupSuccessToast');
+            if (toastElement.length && toastElement.css('display') !== 'none') {
+                toastElement.hide();
+                console.log("Toast not shown as flags are not set. Ensuring toast is hidden.");
+            }
+            if (showToastFlag === true && !toastMsg) {
+                console.warn("showToastFlag is true, but toastMsg is null or empty.");
+            }
+        }
+    });
+</script>
 
 </body>
 </html>
