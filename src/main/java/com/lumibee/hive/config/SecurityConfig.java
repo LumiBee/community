@@ -77,8 +77,8 @@ public class SecurityConfig {
                                                 "/favicon.ico",   // 网站图标
                                                 "/api/user/dismiss-password-prompt"
                                         ).permitAll() // 以上路径允许所有用户访问
-                                        .requestMatchers("/publish", "/api/ai/**","/settings").authenticated()
-                                        .anyRequest().permitAll() // 其他所有未明确指定的请求也允许
+                                        .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
+                                        .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
                 .formLogin(formLogin ->
                         formLogin

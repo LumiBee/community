@@ -82,14 +82,12 @@ body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
 .editor-area {
     background-color: #ffffff;
     padding: 20px;
-    /* border-radius: .25rem; */ /* 可以根据喜好添加圆角 */
+    border-radius: .25rem;
     /* box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075); */ /* 可以添加轻微阴影 */
     margin-bottom: 60px; /* 为底部状态栏留出空间 */
 }
 
-.editor-toolbar {
-    /* 可以添加更多样式来美化工具栏外观 */
-}
+
 .editor-toolbar .btn-icon {
     color: #495057;
     margin-right: 2px;
@@ -100,8 +98,6 @@ body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
 
 
 .article-content-input {
-    /* 确保富文本编辑器的高度和样式符合预期 */
-    /* min-height 已在内联样式中设置，可移到这里 */
     outline: none; /* 移除可能的默认轮廓 */
 }
 

@@ -23,29 +23,66 @@
     <style>
         html, body {
             height: 100%;
-            overflow: hidden;
             margin: 0;
-            padding-top: 80px; /* 为固定的顶部操作栏和主导航栏留出空间 */
-            padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
-            background-color: #f8f9fa; /* 浅灰色背景，类似图片 */
+            overflow: hidden;
+            background-color: #f8f9fa;
+            padding-top: 80px;
+            padding-bottom: 10px;
+            box-sizing: border-box;
         }
 
         .publish-page-wrapper {
-            box-sizing: border-box;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            min-height: 0;
             background-color: #fff;
-            padding-top: 0 !important;
+            box-sizing: border-box;
         }
 
+        .editor-content-container.container-fluid {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        #publishForm {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        #toastUiEditor {
+            flex-grow: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+        .toastui-editor-defaultUI .toastui-editor-main {
+            flex-grow: 1 !important;
+            overflow-y: auto !important;
+            min-height: 0;
+        }
+
+        .bottom-status-bar.fixed-bottom {
+            z-index: 1030;
+        }
     </style>
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="top-action-bar fixed-top" style="z-index: 1029;"> <div class="container-fluid d-flex justify-content-between align-items-center py-2 border-bottom">
+<div class="top-action-bar fixed-top" style="z-index: 1029;">
+    <div class="container-fluid d-flex justify-content-between align-items-center py-2 border-bottom">
     <div class="title-input-container flex-grow-1 mr-3">
         <input id="articleTitleInput" type="text" class="form-control form-control-lg article-title-input" placeholder="输入文章标题..." th:value="${article?.title}">
     </div>

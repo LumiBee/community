@@ -1,0 +1,73 @@
+/* 确保最外层轮播容器的高度设置生效，并隐藏任何可能溢出的内容 */
+#carouselExampleCaptions {
+    /* 您已经在HTML中通过 style="height: 300px" 设置了高度 */
+    /* overflow: hidden; /* 确保任何超出部分被隐藏，避免出现滚动条 */
+}
+
+/* 设置轮播图内部容器占据其父容器（#carouselExampleCaptions）的全部高度 */
+.carousel-inner {
+    height: 100%;
+    overflow: hidden; /* 再次确认隐藏溢出内容，这对于 object-fit: cover 很重要 */
+}
+
+/* 设置每个轮播项目（图片的直接父容器）也占据其父容器（.carousel-inner）的全部高度 */
+.carousel-item {
+    height: 100%;
+}
+
+/* 针对轮播图片的样式 */
+.carousel-item img {
+    /* Bootstrap 的 w-100 class 已经应用了 width: 100% !important; */
+    /* display: block; Bootstrap 的 d-block class 已经应用了 */
+    height: 100%;             /* 使图片高度填满 .carousel-item 的高度 */
+    object-fit: cover;        /* 核心属性：保持图片原始宽高比，缩放图片以完全覆盖容器。如果图片宽高比与容器不同，则会裁剪图片多余的部分。 */
+    object-position: center;  /* 可选：当 object-fit: cover 裁剪图片时，决定图片如何定位。'center' 会使图片居中显示，您也可以使用 'top', 'bottom', 'left', 'right' 或具体的百分比/像素值。 */
+}
+
+/* --- 轮播图控制按钮通用样式 --- */
+#carouselExampleCaptions .carousel-control-prev,
+#carouselExampleCaptions .carousel-control-next {
+    /* 1. 外观和尺寸调整 */
+    width: 48px;  /* 设置按钮的宽度，例如48像素 */
+    height: 48px; /* 设置按钮的高度，例如48像素 */
+    background-color: rgba(0, 0, 0, 0.3); /* 给按钮一个半透明的背景色，使其看起来像一个实体按钮 */
+    border-radius: 50%; /* 将按钮设置为圆形；如果想要圆角方形，可以使用例如 '4px' 或 '8px' */
+    border: none; /* 移除浏览器或Bootstrap可能添加的默认边框 */
+
+    /* 2. 定位调整 */
+    top: 50%; /* 使按钮的顶部与轮播区域的垂直中心对齐 */
+    transform: translateY(-50%); /* 精确地将按钮垂直居中 */
+    bottom: auto; /* 如果Bootstrap默认有 bottom:0，覆盖它以确保固定高度生效 */
+    /* Bootstrap的 z-index 通常是合理的，这里我们依赖它，确保按钮在图片之上 */
+
+    /* 3. 初始状态：隐藏按钮，并设置过渡动画 */
+    opacity: 0; /* 完全透明，即隐藏 */
+    visibility: hidden; /* 彻底隐藏，不占据空间，对辅助功能友好 */
+    transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out, background-color 0.2s ease-in-out; /* 为显隐和背景色变化添加平滑过渡效果 */
+}
+
+/* --- “上一个”按钮的具体定位 --- */
+#carouselExampleCaptions .carousel-control-prev {
+    left: 20px; /* 按钮距离轮播区域左边缘的距离，可根据喜好调整 */
+}
+
+/* --- “下一个”按钮的具体定位 --- */
+#carouselExampleCaptions .carousel-control-next {
+    right: 20px; /* 按钮距离轮播区域右边缘的距离，可根据喜好调整 */
+}
+
+/* --- 悬停效果 --- */
+
+/* 1. 当鼠标悬停在整个轮播区域 (#carouselExampleCaptions) 时，显示控制按钮 */
+#carouselExampleCaptions:hover .carousel-control-prev,
+#carouselExampleCaptions:hover .carousel-control-next {
+    opacity: 0.7; /* 设置按钮为半透明可见 */
+    visibility: visible; /* 使按钮可见 */
+}
+
+/* 2. 当鼠标直接悬停在已经显示的控制按钮上时，进一步改变按钮样式（例如变得更不透明） */
+#carouselExampleCaptions .carousel-control-prev:hover,
+#carouselExampleCaptions .carousel-control-next:hover {
+    background-color: rgba(0, 0, 0, 0.6); /* 鼠标悬停时按钮背景色加深 */
+    opacity: 1; /* 鼠标悬停时按钮完全不透明 */
+}
