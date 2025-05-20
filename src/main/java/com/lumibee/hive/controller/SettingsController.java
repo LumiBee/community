@@ -1,6 +1,6 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.model.User;
+import com.lumibee.hive.entity.User;
 import com.lumibee.hive.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +112,7 @@ public class SettingsController {
             currentUser.setPassword(encryptedPassword);
             session.setAttribute("user", currentUser);
             redirectAttributes.addFlashAttribute("passwordSuccess", "密码更新成功");
+            session.removeAttribute("showPasswordSetupPrompt");
         } else {
             redirectAttributes.addFlashAttribute("passwordError", "密码更新失败，请稍后再试");
         }

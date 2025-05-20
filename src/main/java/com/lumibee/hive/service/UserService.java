@@ -1,6 +1,6 @@
 package com.lumibee.hive.service;
 
-import com.lumibee.hive.model.User;
+import com.lumibee.hive.entity.User;
 
 public interface UserService {
     User selectByToken(String token);

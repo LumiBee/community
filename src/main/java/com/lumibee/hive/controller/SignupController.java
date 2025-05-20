@@ -1,7 +1,7 @@
 package com.lumibee.hive.controller;
 
 import com.lumibee.hive.dto.SignupDTO;
-import com.lumibee.hive.model.User;
+import com.lumibee.hive.entity.User;
 import com.lumibee.hive.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +42,6 @@ public class SignupController {
 
         // 1. 基本表单校验结果 (来自 SignupDTO 的注解)
         if (bindingResult.hasErrors()) {
-            // 如果有校验错误，将 signupDTO（已包含错误信息）和 bindingResult 返回给注册页面
             return "signup"; // 返回注册页面，显示错误
         }
 

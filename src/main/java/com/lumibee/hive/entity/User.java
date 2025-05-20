@@ -1,29 +1,35 @@
-package com.lumibee.hive.model;
+package com.lumibee.hive.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import lombok.AllArgsConstructor;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class User {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
     private String name;
     private String token;
-    private long gmtCreate;
-    private long gmtModified;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDate gmtCreate;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDate gmtModified;
+
     private String bio;
     private String avatarUrl;
     private String email;
     private String password;
-
     private String githubId;
     private String qqOpenId;
+
+    @TableLogic
+    private Integer deleted;
+
+    @Version
+    private Integer version;
 
     public boolean isGithubOAuthUser() {
         return this.githubId != null;

@@ -1,13 +1,9 @@
 package com.lumibee.hive.config;
 
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.CustomUserServiceImpl;
-import com.lumibee.hive.service.UserService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+
+import javax.sql.DataSource;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -25,9 +21,14 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.util.UUID;
+import com.lumibee.hive.entity.User;
+import com.lumibee.hive.service.CustomUserServiceImpl;
+import com.lumibee.hive.service.UserService;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @Configuration
 @EnableWebSecurity

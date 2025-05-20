@@ -1,7 +1,7 @@
 package com.lumibee.hive.service;
 
 import com.lumibee.hive.mapper.UserMapper;
-import com.lumibee.hive.model.User;
+import com.lumibee.hive.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

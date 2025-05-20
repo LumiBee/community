@@ -1,18 +1,17 @@
-package com.lumibee.hive.model;
+package com.lumibee.hive.entity;
 
-import lombok.AllArgsConstructor;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Article implements Serializable {
-    private int articleId;
-    private int userId;
+    @TableId(type = IdType.AUTO)
+    private Integer articleId;
+
+    private Long userId;
     private String title;
     private String slug;
     private String filePath;
@@ -20,11 +19,20 @@ public class Article implements Serializable {
     private String coverImageUrl;
     private ArticleStatus status;
     private ArticleVisibility visibility;
-    private Date gmtCreate;
-    private Date gmtModified;
-    private Date gmtPublished;
-    private int viewCount;
-    private int allowComments;
+
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDate gmtCreate;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDate gmtModified;
+
+    private Integer viewCount;
+    private Integer allowComments;
+
+    @TableLogic
+    private Integer deleted;
+
+    @Version
+    private Integer version;
 
     public enum ArticleStatus {
         DRAFT,
