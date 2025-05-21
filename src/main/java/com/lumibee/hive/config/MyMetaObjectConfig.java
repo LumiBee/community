@@ -13,6 +13,7 @@ public class MyMetaObjectConfig implements MetaObjectHandler {
     public void insertFill(MetaObject metaObject) {
         this.strictInsertFill(metaObject, "gmtCreate", LocalDateTime::now, LocalDateTime.class);
         this.strictInsertFill(metaObject, "gmtModified", LocalDateTime::now, LocalDateTime.class);
+        this.strictInsertFill(metaObject, "version", () -> 0, Integer.class);
     }
 
     @Override

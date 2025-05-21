@@ -1,4 +1,4 @@
-package com.lumibee.hive.entity;
+package com.lumibee.hive.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -29,6 +29,7 @@ public class User {
     private Integer deleted;
 
     @Version
+    @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
     public boolean isGithubOAuthUser() {

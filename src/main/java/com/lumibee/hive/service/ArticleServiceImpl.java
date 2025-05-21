@@ -3,7 +3,7 @@ package com.lumibee.hive.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.mapper.ArticleMapper;
-import com.lumibee.hive.entity.Article;
+import com.lumibee.hive.model.Article;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

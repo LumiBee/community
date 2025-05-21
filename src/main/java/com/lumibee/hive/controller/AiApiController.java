@@ -74,7 +74,7 @@ public class AiApiController {
                     request.getTextContent());
 
             Map<String, Object> body = new HashMap<>();
-            body.put("model", "deepseek-chat"); // 替换为 DeepSeek 提供的具体模型名称
+            body.put("entity", "deepseek-chat"); // 替换为 DeepSeek 提供的具体模型名称
             body.put("messages", Collections.singletonList(message));
             body.put("max_tokens", request.getMaxLength() + 100); // 允许一些余量给 token 计算
             body.put("temperature", 0.7); // 控制生成文本的随机性/创造性

@@ -1,6 +1,6 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.entity.User;
+import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;

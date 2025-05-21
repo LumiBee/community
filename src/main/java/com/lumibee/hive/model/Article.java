@@ -1,4 +1,4 @@
-package com.lumibee.hive.entity;
+package com.lumibee.hive.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
@@ -32,6 +32,7 @@ public class Article implements Serializable {
     private Integer deleted;
 
     @Version
+    @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
     public enum ArticleStatus {

@@ -1,7 +1,7 @@
 package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lumibee.hive.entity.User;
+import com.lumibee.hive.model.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

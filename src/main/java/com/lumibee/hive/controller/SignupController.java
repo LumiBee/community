@@ -1,7 +1,7 @@
 package com.lumibee.hive.controller;
 
 import com.lumibee.hive.dto.SignupDTO;
-import com.lumibee.hive.entity.User;
+import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Controller
@@ -73,7 +74,7 @@ public class SignupController {
         newUser.setEmail(signupDTO.getEmail());
         newUser.setPassword(passwordEncoder.encode(signupDTO.getPassword())); // 加密密码
         newUser.setToken(UUID.randomUUID().toString());
-        newUser.setGmtCreate(System.currentTimeMillis());
+        newUser.setGmtCreate(LocalDate.now());
         newUser.setGmtModified(newUser.getGmtCreate());
         newUser.setAvatarUrl(null);
 

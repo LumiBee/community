@@ -1,10 +1,12 @@
 package com.lumibee.hive.service;
 
 import com.lumibee.hive.mapper.UserMapper;
-import com.lumibee.hive.entity.User;
+import com.lumibee.hive.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -33,7 +35,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setId(id);
         user.setPassword(newPassword);
-        user.setGmtModified(System.currentTimeMillis());
+        user.setGmtModified(LocalDate.now());
 
         int updatedRows = userMapper.updateById(user);
 

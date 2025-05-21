@@ -1,6 +1,7 @@
 package com.lumibee.hive.config;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 import javax.sql.DataSource;
 
@@ -21,7 +22,7 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.stereotype.Component;
 
-import com.lumibee.hive.entity.User;
+import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 
@@ -160,7 +161,7 @@ public class SecurityConfig {
     }
 
     @Component
-    class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+    public static class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
         private final UserService userService;
 
@@ -191,7 +192,7 @@ public class SecurityConfig {
                 user.setEmail(email);
                 user.setAvatarUrl(avatarUrl);
                 user.setBio(bio);
-                user.setGmtCreate(System.currentTimeMillis());
+                user.setGmtCreate(LocalDate.now());
                 user.setGmtModified(user.getGmtCreate());
                 user.setPassword(null); // 新 OAuth 用户，本地密码为 null
                 userService.insert(user);
@@ -202,7 +203,7 @@ public class SecurityConfig {
                     needsPasswordPrompt = true;
                 }
 
-                user.setGmtModified(System.currentTimeMillis());
+                user.setGmtModified(LocalDate.now());
                 userService.updateById(user);
                 System.out.println("Updated existing user info via Spring Security OAuth2: " + user.getName());
             }
