@@ -23,7 +23,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import org.springframework.stereotype.Component;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.CustomUserServiceImpl;
+import com.lumibee.hive.service.UserServiceImpl;
 import com.lumibee.hive.service.UserService;
 
 import jakarta.servlet.ServletException;
@@ -42,7 +42,7 @@ public class SecurityConfig {
     private DataSource dataSource;
 
     @Autowired
-    private CustomUserServiceImpl customUserService;
+    private UserServiceImpl customUserService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {

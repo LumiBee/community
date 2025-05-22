@@ -34,10 +34,11 @@ public class ArticleServiceImpl implements ArticleService {
                 Article articleDTO = new Article();
                 articleDTO.setArticleId(article.getArticleId());
                 articleDTO.setUserId(article.getUserId());
+                articleDTO.setUserName(userServiceImpl.selectById(article.getUserId()).getName());
                 articleDTO.setTitle(article.getTitle());
                 articleDTO.setGmtCreate(article.getGmtCreate());
                 articleDTO.setGmtModified(article.getGmtModified());
-                articleDTO.setCoverImageUrl(userServiceImpl.selectById(article.getUserId()).getAvatarUrl());
+                articleDTO.setAvatarUrl(userServiceImpl.selectById(article.getUserId()).getAvatarUrl());
                 articleList.add(articleDTO);
             }
         }

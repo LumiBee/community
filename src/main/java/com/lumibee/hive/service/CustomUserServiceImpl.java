@@ -38,15 +38,7 @@ public class CustomUserServiceImpl implements UserDetailsService {
         System.out.println(">>>> User's email to be used for UserDetails: [" + user.getEmail() + "]");
         System.out.println(">>>> User's password from DB for UserDetails: [" + user.getPassword() + "]");
 
-        // 创建 Spring Security 的 UserDetails 对象
-        // 第一个参数是 principal 的唯一标识，通常是用户名或邮箱，用于后续获取 Principal 对象。
-        // 我们可以选择使用数据库中的 name 或 email 作为 Spring Security 的 "username"。
-        // 这里使用 user.getEmail() 作为 UserDetails 的 username
-        // 重要的是 user.getPassword() 必须是数据库中存储的加密密码。
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                new ArrayList<>()
-        );
+
+        return user;
     }
 }

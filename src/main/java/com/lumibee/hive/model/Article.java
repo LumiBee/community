@@ -7,18 +7,19 @@ import java.io.Serializable;
 import java.time.LocalDate;
 
 @Data
+@TableName("articles")
 public class Article implements Serializable {
     @TableId(type = IdType.AUTO)
     private Integer articleId;
 
     private Long userId;
+    private String userName;
     private String title;
     private String slug;
     private String filePath;
     private String excerpt;
-    private String coverImageUrl;
+    private String avatarUrl;
     private ArticleStatus status;
-    private ArticleVisibility visibility;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDate gmtCreate;
@@ -29,22 +30,17 @@ public class Article implements Serializable {
     private Integer allowComments;
 
     @TableLogic
+    @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
 
     @Version
-    @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
     public enum ArticleStatus {
         DRAFT,
-        PUBLISHED,
+        published,
         ARCHIVED,
         PENDING_REVIEW
     }
 
-    public enum ArticleVisibility {
-        PUBLIC,
-        PRIVATE,
-        UNLISTED
-    }
 }

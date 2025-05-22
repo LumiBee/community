@@ -2,11 +2,17 @@ package com.lumibee.hive.model;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Data
-public class User {
+public class User implements UserDetails {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 
@@ -26,10 +32,10 @@ public class User {
     private String qqOpenId;
 
     @TableLogic
+    @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
 
     @Version
-    @TableField(fill = FieldFill.INSERT)
     private Integer version;
 
     public boolean isGithubOAuthUser() {
@@ -38,4 +44,15 @@ public class User {
     public boolean isQQOpenAuthUser() {
         return this.qqOpenId != null;
     }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.name;
+    }
+
 }
