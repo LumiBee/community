@@ -12,9 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @MapperScan(basePackages = "com.lumibee.hive.mapper")
 public class MybatisPlusConfig {
 
-    /**
-     * 添加分页插件
-     */
+
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();

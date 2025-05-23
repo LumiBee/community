@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @TableName("articles")
@@ -16,17 +16,20 @@ public class Article implements Serializable {
     private String userName;
     private String title;
     private String slug;
-    private String filePath;
+    private String tags;
+    private String portfolioName;
+    private String content;
     private String excerpt;
     private String avatarUrl;
     private ArticleStatus status;
 
     @TableField(fill = FieldFill.INSERT)
-    private LocalDate gmtCreate;
+    private LocalDateTime gmtCreate;
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDate gmtModified;
+    private LocalDateTime gmtModified;
 
     private Integer viewCount;
+    private Integer likes;
     private Integer allowComments;
 
     @TableLogic
@@ -37,10 +40,9 @@ public class Article implements Serializable {
     private Integer version;
 
     public enum ArticleStatus {
-        DRAFT,
+        draft,
         published,
-        ARCHIVED,
-        PENDING_REVIEW
+        archived
     }
 
 }

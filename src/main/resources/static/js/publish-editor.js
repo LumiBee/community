@@ -371,20 +371,39 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!settingsData.tags || !settingsData.tags.trim()) { alert('请输入至少一个标签！'); document.getElementById('articleTags')?.focus(); return; }
             if (!settingsData.summary || !settingsData.summary.trim()) { alert('请输入文章摘要！'); document.getElementById('articleSummary')?.focus(); return; }
 
-            formArticleContent.value = contentMarkdown; // Set editor content to hidden input for form submission
+            formArticleContent.value = contentMarkdown;
+
+            const publishForm = document.getElementById('publishForm');
+
+            function addHiddenInput(form, name, value) {
+                let input = form.querySelector(`input[type="hidden"][name="${name}"]`);
+                if (!input) {
+                    input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = name;
+                    form.appendChild(input);
+                }
+                input.value = value;
+            }
+
+            // 将 title, tags, summary, portfolio 添加到 publishForm 中
+            addHiddenInput(publishForm, 'title', title);
+            addHiddenInput(publishForm, 'tags', settingsData.tags); // 后端期望参数名为 "tags"
+            addHiddenInput(publishForm, 'summary', settingsData.summary); // 后端期望参数名为 "summary" (对应你的 excerpt)
+            if (settingsData.portfolio) { // portfolio 是可选的
+                addHiddenInput(publishForm, 'portfolio', settingsData.portfolio);
+            }
 
             const finalArticleData = {
                 title: title,
                 content: contentMarkdown,
                 tags: settingsData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-                coverImageFileName: settingsData.coverImageFileName || null,
                 portfolio: settingsData.portfolio || "", // Ensure portfolio exists
                 summary: settingsData.summary
             };
             console.log("Final data to publish:", finalArticleData);
 
-            alert('（模拟）文章及设置已收集，准备发送到后端！查看控制台。\n您可以在这里取消注释 document.getElementById(\'publishForm\').submit(); 或发起 AJAX 请求。');
-            // document.getElementById('publishForm').submit(); // Uncomment to submit the form
+            document.getElementById('publishForm').submit();
 
             // Close Modal
             if (bsModalInstance) {

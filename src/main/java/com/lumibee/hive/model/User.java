@@ -5,11 +5,9 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.io.Serializable;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 @Data
 public class User implements UserDetails {
@@ -20,9 +18,9 @@ public class User implements UserDetails {
     private String token;
 
     @TableField(fill = FieldFill.INSERT)
-    private LocalDate gmtCreate;
+    private LocalDateTime gmtCreate;
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDate gmtModified;
+    private LocalDateTime gmtModified;
 
     private String bio;
     private String avatarUrl;

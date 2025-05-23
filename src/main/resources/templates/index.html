@@ -11,136 +11,7 @@
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 	<link href="/css/main.css" rel="stylesheet"/>
 	<link href="/css/index.css" rel="stylesheet"/>
-	<style>
-		html {
-			height: 100%;
-		}
-		body {
-			min-height: 100vh; /* Ensures body takes at least full viewport height */
-			display: flex;
-			flex-direction: column; /* Stacks children vertically (header, main content, footer) */
-			font-family: 'Source Sans Pro', sans-serif;
-			background-color: #f8f9fa; /* Softer background color */
-			color: #333;
-			margin: 0; /* Reset default margin */
-		}
 
-		.main-content-wrapper {
-			flex-grow: 1; /* Allows this wrapper to grow and push the footer down */
-		}
-
-		h1, h2, h3, h4, h5, h6,
-		.font-weight-bold.spanborder span, /* For section titles */
-		.card-body h2.h4 a.text-dark, /* For article titles in cards */
-		.list-unstyled h6 a.text-dark /* For popular article titles */
-		{
-			font-family: 'Playfair Display', serif;
-		}
-
-		/* Enhanced card shadow for 3D effect */
-		.card.box-shadow {
-			box-shadow: 0 6px 6px rgba(0,0,0,0.15), 0 3px 4px rgba(0,0,0,0.10);
-			transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-			border: none; /* Remove default border if any for a cleaner shadow effect */
-		}
-
-		.card.box-shadow:hover {
-			box-shadow: 0 10px 10px rgba(0, 0, 0, 0.11), 0 5px 5px rgba(0, 0, 0, 0.1);
-			transform: translateY(-2px); /* Slight lift on hover */
-		}
-
-		/* Carousel enhancements */
-		#carouselExampleCaptions {
-			height: 350px; /* Slightly increased height */
-			margin-bottom: 30px;
-		}
-		#carouselExampleCaptions .carousel-inner,
-		#carouselExampleCaptions .carousel-item {
-			height: 100%;
-		}
-		#carouselExampleCaptions .carousel-item img {
-			object-fit: cover;
-			height: 100%;
-			filter: brightness(0.8); /* Slightly darken images for better text contrast */
-		}
-		.carousel-caption {
-			background-color: rgba(0, 0, 0, 0.37);
-			border-radius: .25rem;
-			padding: 15px;
-			bottom: 20px; /* Adjust position */
-		}
-		.carousel-caption h5 {
-			font-family: 'Playfair Display', serif; /* Ensure font */
-			color: #fff;
-		}
-		.carousel-caption p {
-			font-family: 'Source Sans Pro', sans-serif; /* Ensure font */
-			color: #f0f0f0;
-		}
-
-		.spanborder span { /* This rule might need review if it conflicts with h5.font-weight-bold.spanborder span */
-			border-bottom: 0;
-			display: inline-block;
-			padding-bottom: 20px; /* This padding seems large for an inline-block span if it's just text */
-			margin-bottom: -1px; /* This might be for alignment with its parent's border */
-		}
-		/* Section title beautification */
-		h5.font-weight-bold.spanborder {
-			border-bottom: 2px solid #ffda58; /* Or your theme's primary color */
-			padding-bottom: 10px;
-			margin-bottom: 25px;
-			position: relative; /* For potential pseudo-elements if needed */
-		}
-		h5.font-weight-bold.spanborder span {
-			background-color: #ffda58; /* Or your theme's primary color */
-			color: white; /* Text color for the span, ensure contrast */
-			padding: 6px 12px;
-			border-radius: 4px;
-			font-size: 1.2rem; /* Slightly larger for emphasis */
-			/* Resetting inherited properties from generic .spanborder span if they conflict */
-			display: inline-block; /* Ensure it behaves as expected */
-			margin-bottom: 0;
-			padding-bottom: 6px; /* Match top padding or adjust as needed */
-
-		}
-
-		.card-body h2.h4 a.text-dark {
-			color: #2c3e50 !important; /* Darker, more sophisticated color */
-			transition: color 0.2s ease-in-out;
-		}
-		.card-body h2.h4 a.text-dark:hover {
-			color: #ffda58 !important; /* Theme color on hover */
-		}
-
-		/* Popular articles list item styling */
-		.col-md-4.pl-4 ol.list-unstyled li.mb-3 {
-			padding-bottom: 1rem;
-			margin-bottom: 1rem;
-		}
-		.col-md-4.pl-4 ol.list-unstyled li.mb-3:last-child {
-			border-bottom: none;
-			margin-bottom: 0;
-		}
-
-		/* Pagination styling - subtle improvements */
-		.pagination .page-item.active .page-link {
-			background-color: #ffda58;
-			border-color: #ffda58;
-			color: white; /* Text color for active page, ensure contrast */
-		}
-		.pagination .page-link {
-			color: #ffda58;
-			transition: background-color 0.2s ease, color 0.2s ease;
-		}
-		.pagination .page-link:hover {
-			background-color: #e9ecef;
-			color: #ffda58; /* Keep color or change to a darker shade for better feedback */
-		}
-		.pagination .page-item.disabled .page-link {
-			color: #6c757d;
-		}
-
-	</style>
 </head>
 <body>
 <div th:replace="~{fragments/header :: navbar}"></div>
@@ -188,25 +59,50 @@
 	<div class="container" style="margin-top:20px">
 		<div class="row justify-content-between">
 			<div class="col-md-8"> <h5 class="font-weight-bold spanborder"><span>所有文章</span></h5>
-
 				<div th:if="${articles != null}">
-					<div th:each="article : ${articles.records}" class="card mb-4 box-shadow"> <div class="card-body d-flex flex-column"> <div>
-						<h2 class="mb-1 h4 font-weight-bold">
-							<a class="text-dark" th:href="@{'/article/' + ${article.slug}}" th:text="${article.title}">文章标题</a>
-						</h2>
-						<p class="card-text mb-auto" th:text="${article.excerpt}">文章摘要...</p>
-					</div>
-						<div class="mt-3 d-flex justify-content-between align-items-center w-100"> <div class="d-flex align-items-center">
-							<img th:if="${article.AvatarUrl != null and !article.AvatarUrl.isEmpty()}"
-								 th:src="${article.AvatarUrl}"
-								 alt="作者头像"
-								 style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
-							<small class="text-muted" th:text="${article.userName ?: '佚名'}">作者</small>
+					<a th:each="article : ${articles.records}"
+					   th:href="@{'/article/' + ${article.slug}}"
+					   style="display: block; text-decoration: none; color: inherit;">
+						<div class="card mb-4 box-shadow">
+							<div class="card-body d-flex flex-column">
+								<div>
+									<h2 class="mb-1 h4 font-weight-bold">
+										<span class="text-dark" th:text="${article.title}">文章标题</span>
+									</h2>
+									<p class="card-text mb-auto" th:text="${article.excerpt}">文章摘要...</p>
+								</div>
+								<div class="mt-3 d-flex justify-content-between align-items-center w-100">
+									<div class="d-flex align-items-center"> <img th:if="${article.AvatarUrl != null and !article.AvatarUrl.isEmpty()}"
+																				 th:src="${article.AvatarUrl}"
+																				 alt="作者头像"
+																				 style="width: 24px; height: 24px; border-radius: 50%; margin-right: 8px;">
+										<small class="text-muted" th:text="${article.userName ?: '佚名'}">作者</small>
+										<small class="text-muted" style="margin-left:6px">
+											<th:block th:if="${article.gmtCreate}" th:with="
+											 now = ${T(java.time.LocalDateTime).now()},
+											 duration = ${T(java.time.Duration).between(article.gmtCreate, now)},
+											 days = ${duration.toDays()},
+											 totalHours = ${duration.toHours()},
+											 totalMinutes = ${duration.toMinutes()}">
+											<span th:if="${days > 0}" th:text="${days + ' 天前'}"></span>
+											<span th:if="${days == 0 and totalHours > 0}" th:text="${totalHours + ' 小时前'}"></span>
+											<span th:if="${days == 0 and totalHours == 0 and totalMinutes > 0}" th:text="${totalMinutes + ' 分钟前'}"></span>
+											<span th:if="${days == 0 and totalHours == 0 and totalMinutes == 0}" th:text="'刚刚'"></span>
+										</th:block>
+											<span th:unless="${article.gmtCreate}">日期未知</span>
+										</small>
+									</div>
+									<span style="display: inline-flex; align-items: center;"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;"> <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+									  </svg>
+									  <small th:text="${article.viewCount != null ? article.viewCount : '0'}" style="margin-right: 6px;">0</small>
+									  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16" style="margin-right: 2px;"> <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+									  </svg>
+									  <small th:text="${article.likes != null ? article.likes : '0'}">0</small>
+                					</span>
+								</div>
+							</div>
 						</div>
-							<small class="text-muted" th:if="${article.gmtCreate}" th:text="${#temporals.format(article.gmtCreate, 'yyyy年MM月dd日')}">发布日期</small>
-						</div>
-					</div>
-					</div>
+					</a>
 				</div>
 
 				<div th:if="${articles == null or articles.records.isEmpty()}">
@@ -238,7 +134,8 @@
 				</nav>
 			</div>
 
-			<div class="col-md-4 pl-4"> <h5 class="font-weight-bold spanborder"><span>热门阅读 (Popular)</span></h5>
+			<div class="col-md-4 pl-4">
+				<h5 class="font-weight-bold spanborder"><span>热门阅读</span></h5>
 				<ol class="list-unstyled" th:if="${popularArticles != null and not popularArticles.isEmpty()}">
 					<li th:each="popArticle, iterStat : ${popularArticles}" class="mb-3 pb-3 border-bottom"> <div class="d-flex align-items-center">
 						<div>
@@ -259,6 +156,7 @@
 				<div th:if="${popularArticles == null or popularArticles.isEmpty()}">
 					<p>暂无热门文章。</p>
 				</div>
+				<h5 class="font-weight-bold spanborder"><span>分类</span></h5>
 			</div>
 		</div>
 	</div>

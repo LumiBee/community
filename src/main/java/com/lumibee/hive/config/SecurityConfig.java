@@ -1,10 +1,11 @@
 package com.lumibee.hive.config;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.sql.DataSource;
 
+import com.lumibee.hive.service.CustomUserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -36,13 +37,13 @@ import jakarta.servlet.http.HttpSession;
 public class SecurityConfig {
 
     @Autowired
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
     private DataSource dataSource;
 
     @Autowired
-    private UserServiceImpl customUserService;
+    private CustomUserServiceImpl customUserServiceImpl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -110,7 +111,7 @@ public class SecurityConfig {
                         rememberMe
                                 .tokenRepository(persistentTokenRepository())
                                 .tokenValiditySeconds(604800)
-                                .userDetailsService(customUserService)
+                                .userDetailsService(customUserServiceImpl)
                                 .rememberMeParameter("remember-me")
                 );
 
@@ -134,9 +135,9 @@ public class SecurityConfig {
             if (!userIdentifier.isEmpty()) {
                 User user = null;
                 if (userIdentifier.contains("@")) {
-                    user = userService.selectByEmail(userIdentifier);
+                    user = userServiceImpl.selectByEmail(userIdentifier);
                 } else {
-                    user = userService.selectByName(userIdentifier);
+                    user = userServiceImpl.selectByName(userIdentifier);
                 }
 
                 if (user != null) {
@@ -192,7 +193,7 @@ public class SecurityConfig {
                 user.setEmail(email);
                 user.setAvatarUrl(avatarUrl);
                 user.setBio(bio);
-                user.setGmtCreate(LocalDate.now());
+                user.setGmtCreate(LocalDateTime.now());
                 user.setGmtModified(user.getGmtCreate());
                 user.setPassword(null); // 新 OAuth 用户，本地密码为 null
                 userService.insert(user);
@@ -203,7 +204,7 @@ public class SecurityConfig {
                     needsPasswordPrompt = true;
                 }
 
-                user.setGmtModified(LocalDate.now());
+                user.setGmtModified(LocalDateTime.now());
                 userService.updateById(user);
                 System.out.println("Updated existing user info via Spring Security OAuth2: " + user.getName());
             }

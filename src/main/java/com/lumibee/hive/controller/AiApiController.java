@@ -74,11 +74,10 @@ public class AiApiController {
                     request.getTextContent());
 
             Map<String, Object> body = new HashMap<>();
-            body.put("entity", "deepseek-chat"); // 替换为 DeepSeek 提供的具体模型名称
+            body.put("model", "deepseek-chat"); // DeepSeek 提供的具体模型名称
             body.put("messages", Collections.singletonList(message));
             body.put("max_tokens", request.getMaxLength() + 100); // 允许一些余量给 token 计算
             body.put("temperature", 0.7); // 控制生成文本的随机性/创造性
-            // body.put("stream", false); // 通常 для摘要，非流式响应更简单
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
@@ -90,8 +89,7 @@ public class AiApiController {
             );
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                // 解析 DeepSeek API 的响应 (根据其文档调整)
-                // 假设 DeepSeek 返回的 JSON 结构与 OpenAI 类似，有一个 choices 数组
+
                 Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
 
                 // 具体的路径需要看 DeepSeek API 的实际返回格式

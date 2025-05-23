@@ -31,6 +31,6 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志
     map-underscore-to-camel-case: true # 开启驼峰命名转换
 
-logging.level.org.springframework.security : DEBUG
-logging.level.org.springframework.security.web.authentication.rememberme : TRACE
-logging.level.com.lumibee.hive.service.UserServiceImpl: DEBUG
+#logging.level.org.springframework.security : DEBUG
+#logging.level.org.springframework.security.web.authentication.rememberme : TRACE
+#logging.level.com.lumibee.hive.service.UserServiceImpl: DEBUG

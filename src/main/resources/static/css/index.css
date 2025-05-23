@@ -1,3 +1,130 @@
+html {
+    height: 100%;
+}
+body {
+    min-height: 100vh; /* Ensures body takes at least full viewport height */
+    display: flex;
+    flex-direction: column; /* Stacks children vertically (header, main content, footer) */
+    font-family: 'Source Sans Pro', sans-serif;
+    background-color: #f8f9fa; /* Softer background color */
+    color: #333;
+    margin: 0; /* Reset default margin */
+}
+
+.main-content-wrapper {
+    flex-grow: 1; /* Allows this wrapper to grow and push the footer down */
+}
+
+h1, h2, h3, h4, h5, h6,
+.font-weight-bold.spanborder span, /* For section titles */
+.card-body h2.h4 a.text-dark, /* For article titles in cards */
+.list-unstyled h6 a.text-dark /* For popular article titles */
+{
+    font-family: 'Playfair Display', serif;
+}
+
+/* Enhanced card shadow for 3D effect */
+.card.box-shadow {
+    box-shadow: 0 6px 6px rgba(0,0,0,0.15), 0 3px 4px rgba(0,0,0,0.10);
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    border: none; /* Remove default border if any for a cleaner shadow effect */
+}
+
+.card.box-shadow:hover {
+    box-shadow: 0 10px 10px rgba(0, 0, 0, 0.11), 0 5px 5px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px); /* Slight lift on hover */
+}
+
+/* Carousel enhancements */
+#carouselExampleCaptions {
+    height: 350px; /* Slightly increased height */
+    margin-bottom: 30px;
+}
+#carouselExampleCaptions .carousel-inner,
+#carouselExampleCaptions .carousel-item {
+    height: 100%;
+}
+#carouselExampleCaptions .carousel-item img {
+    object-fit: cover;
+    height: 100%;
+    filter: brightness(0.8); /* Slightly darken images for better text contrast */
+}
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.37);
+    border-radius: .25rem;
+    padding: 15px;
+    bottom: 20px; /* Adjust position */
+}
+.carousel-caption h5 {
+    font-family: 'Playfair Display', serif; /* Ensure font */
+    color: #fff;
+}
+.carousel-caption p {
+    font-family: 'Source Sans Pro', sans-serif; /* Ensure font */
+    color: #f0f0f0;
+}
+
+.spanborder span { /* This rule might need review if it conflicts with h5.font-weight-bold.spanborder span */
+    border-bottom: 0;
+    display: inline-block;
+    padding-bottom: 20px; /* This padding seems large for an inline-block span if it's just text */
+    margin-bottom: -1px; /* This might be for alignment with its parent's border */
+}
+/* Section title beautification */
+h5.font-weight-bold.spanborder {
+    border-bottom: 2px solid #ffda58; /* Or your theme's primary color */
+    padding-bottom: 10px;
+    margin-bottom: 25px;
+    position: relative; /* For potential pseudo-elements if needed */
+}
+h5.font-weight-bold.spanborder span {
+    background-color: #ffda58; /* Or your theme's primary color */
+    color: white; /* Text color for the span, ensure contrast */
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 1.2rem; /* Slightly larger for emphasis */
+    /* Resetting inherited properties from generic .spanborder span if they conflict */
+    display: inline-block; /* Ensure it behaves as expected */
+    margin-bottom: 0;
+    padding-bottom: 6px; /* Match top padding or adjust as needed */
+
+}
+
+.card-body h2.h4 a.text-dark {
+    color: #2c3e50 !important; /* Darker, more sophisticated color */
+    transition: color 0.2s ease-in-out;
+}
+.card-body h2.h4 a.text-dark:hover {
+    color: #ffda58 !important; /* Theme color on hover */
+}
+
+/* Popular articles list item styling */
+.col-md-4.pl-4 ol.list-unstyled li.mb-3 {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+.col-md-4.pl-4 ol.list-unstyled li.mb-3:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+/* Pagination styling - subtle improvements */
+.pagination .page-item.active .page-link {
+    background-color: #ffda58;
+    border-color: #ffda58;
+    color: white; /* Text color for active page, ensure contrast */
+}
+.pagination .page-link {
+    color: #ffda58;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+.pagination .page-link:hover {
+    background-color: #e9ecef;
+    color: #ffda58; /* Keep color or change to a darker shade for better feedback */
+}
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+}
 /* 确保最外层轮播容器的高度设置生效，并隐藏任何可能溢出的内容 */
 #carouselExampleCaptions {
     /* 您已经在HTML中通过 style="height: 300px" 设置了高度 */

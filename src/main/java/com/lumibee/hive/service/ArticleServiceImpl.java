@@ -2,14 +2,17 @@ package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lumibee.hive.config.SlugGenerator;
 import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.model.Article;
+import com.lumibee.hive.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -18,7 +21,10 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleMapper articleMapper;
 
     @Autowired
-    private UserServiceImpl userServiceImpl;
+    private UserService userService;
+
+    @Autowired
+    private TagService tagService;
 
     @Override
     @Transactional(readOnly = true)
@@ -34,11 +40,17 @@ public class ArticleServiceImpl implements ArticleService {
                 Article articleDTO = new Article();
                 articleDTO.setArticleId(article.getArticleId());
                 articleDTO.setUserId(article.getUserId());
-                articleDTO.setUserName(userServiceImpl.selectById(article.getUserId()).getName());
+                articleDTO.setUserName(userService.selectById(article.getUserId()).getName());
                 articleDTO.setTitle(article.getTitle());
                 articleDTO.setGmtCreate(article.getGmtCreate());
                 articleDTO.setGmtModified(article.getGmtModified());
-                articleDTO.setAvatarUrl(userServiceImpl.selectById(article.getUserId()).getAvatarUrl());
+                articleDTO.setAvatarUrl(userService.selectById(article.getUserId()).getAvatarUrl());
+                articleDTO.setExcerpt(article.getExcerpt());
+                articleDTO.setLikes(article.getLikes());
+                articleDTO.setViewCount(article.getViewCount());
+                articleDTO.setTags(article.getTags());
+                articleDTO.setSlug(article.getSlug());
+                articleDTO.setPortfolioName(article.getPortfolioName());
                 articleList.add(articleDTO);
             }
         }
@@ -50,5 +62,38 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOPage;
     }
 
+    public String createUniqueSlug(String title) {
+        String baseSlug = SlugGenerator.generateSlug(title);
+        if (baseSlug.isEmpty()) {
+            baseSlug = "article-" + System.currentTimeMillis();
+        }
+
+        String potentialSlug = baseSlug;
+        int count = 0;
+        while (articleMapper.selectBySlug(potentialSlug)) {
+            potentialSlug = potentialSlug + "-" + count++;
+        }
+
+        return potentialSlug;
+    }
+
+    @Override
+    public Article publishArticle(Article article, List<String> tagsName) {
+
+        articleMapper.insert(article);
+        if (tagsName != null && !tagsName.isEmpty()) {
+            Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
+            for (Tag tag : tags) {
+                articleMapper.insertArticleTag(article.getArticleId(), tag.getTagId());
+            }
+        }
+
+        return article;
+    }
+
+    @Override
+    public Article getArticleBySlug(String slug) {
+        return articleMapper.findBySlug(slug);
+    }
 
 }

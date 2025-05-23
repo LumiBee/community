@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
         User user = new User();
         user.setId(id);
         user.setPassword(newPassword);
-        user.setGmtModified(LocalDate.now());
+        user.setGmtModified(LocalDateTime.now());
 
         int updatedRows = userMapper.updateById(user);
 
