@@ -744,7 +744,7 @@ pre {
       max-width: 960px; } }
   @media (min-width: 1200px) {
     .container {
-      max-width: 1140px; } }
+      max-width: 1180px; } }
 
 .container-fluid {
 
@@ -7658,7 +7658,7 @@ html {
       max-width: 960px; } }
   @media (min-width: 1200px) {
     .container {
-      max-width: 1140px; } }
+      max-width: 1180px; } }
 
 .container-fluid {
   width: 100%;
@@ -8060,8 +8060,8 @@ html {
     flex: 0 0 58.33333%;
     max-width: 58.33333%; }
   .col-lg-8 {
-    flex: 0 0 66.66667%;
-    max-width: 66.66667%; }
+    flex: 1 0 66.66667%;
+    /*max-width: 66.66667%; }*/}
   .col-lg-9 {
     flex: 0 0 75%;
     max-width: 75%; }

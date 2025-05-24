@@ -10,6 +10,56 @@
 	<link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,700|Source+Sans+Pro:400,600,700" rel="stylesheet">
 	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css" integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
 	<link href="/css/main.css" rel="stylesheet"/>
+	<style>
+		.tag-link {
+			text-decoration: none;
+			transition: all 0.3s ease;
+		}
+		.tag-link:hover {
+			transform: translateY(-1px);
+			box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+		}
+		.badge-tag {
+			background-color: #f8f9fa;
+			color: #495057;
+			border: 1px solid #dee2e6;
+			font-size: 0.875rem;
+			padding: 0.5rem 0.75rem;
+			border-radius: 20px;
+		}
+		.badge-tag:hover {
+			background-color: #007bff;
+			color: white;
+			border-color: #007bff;
+		}
+		.article-content pre {
+			background-color: #f6f8fa;
+			border-radius: 3px;
+			font-size: 85%;
+			line-height: 1.45;
+			overflow: auto;
+			padding: 16px;
+		}
+		.copy-btn {
+			 position: absolute;
+			 right: 10px;
+			 background-color: #6c757d; /* 改为柔和的灰色 */
+			 color: white;
+			 border: none;
+			 padding: 3px 8px; /* 调小一点 */
+			 font-size: 12px; /* 调小一点 */
+			 border-radius: 5px;
+			 cursor: pointer;
+			 opacity: 0; /* 默认隐藏 */
+			 transition: all 0.2s ease;
+			 margin-right: 8px; /* 右侧间距 */
+			 z-index: 10; /* 保持层级，防止被覆盖 */
+		 }
+
+		.article-content pre:hover .copy-btn {
+			opacity: 1;
+		}
+	</style>
 </head>
 <body>
 <!-- 导航栏 -->
@@ -20,11 +70,24 @@
 	<div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
 		<div class="h-100 tofront">
 			<div class="row justify-content-between">
-				<div class="col-md-8 pt-6 pb-6 pr-6 align-self-center">
+				<div class="col-md-8 pt-6 align-self-center">
 					<h1 class="display-4 secondfont mb-3 font-weight-bold" th:text="${article.title}">文章标题</h1>
 					<p class="mb-3 lead" th:text="${article.excerpt}" th:if="${article.excerpt}">
 						文章摘要内容...
 					</p>
+
+					<!-- 文章标签 -->
+					<div class="mb-4" th:if="${article.tags}">
+						<div th:each="tag : ${#strings.listSplit(article.tags, ',')}" class="d-inline-block">
+							<a th:href="@{'/articles/tag/' + ${#strings.trim(tag)}}"
+							   class="badge badge-tag mr-2 mb-2 tag-link"
+							   th:text="${#strings.trim(tag)}"
+							   th:title="'查看更多 ' + ${#strings.trim(tag)} + ' 相关文章'">
+								标签
+							</a>
+						</div>
+					</div>
+
 					<div class="d-flex align-items-center">
 						<img th:if="${article.avatarUrl != null and !article.avatarUrl.isEmpty()}"
 							 th:src="${article.avatarUrl}"
@@ -52,6 +115,7 @@
 								</th:block>
 								<span th:unless="${article.gmtCreate}">发布时间未知</span>
 								&middot;
+
 								<span style="display: inline-flex; align-items: center;">
 									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;">
 										<path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
@@ -66,7 +130,6 @@
 						</div>
 					</div>
 				</div>
-
 			</div>
 		</div>
 	</div>
@@ -76,7 +139,7 @@
 <div class="container pt-4 pb-4">
 	<div class="row justify-content-center">
 		<!-- 分享按钮侧边栏 -->
-		<div class="col-lg-2 pr-4 mb-4 col-md-12">
+		<div class="col-lg-2 pr-4 mb-4 col-md-12" >
 			<div class="sticky-top text-center">
 				<div class="text-muted mb-2">
 					分享文章
@@ -103,16 +166,12 @@
 				<!-- 文章内容 -->
 				<div th:utext="${renderedHtmlContent}" class="article-content">
 					<p>文章正文内容将在这里显示...</p>
-				</div>
-
-				<!-- 文章标签 -->
-				<div class="mt-4" th:if="${article.tags}">
-					<div class="mb-2">
-						<small class="text-muted">标签:</small>
-					</div>
-					<div th:each="tag : ${#strings.listSplit(article.tags, ',')}" class="d-inline-block">
-						<span class="badge badge-light mr-1 mb-1" th:text="${#strings.trim(tag)}">标签</span>
-					</div>
+						<pre><code class="language-java">public class HelloWorld {
+						public static void main(String[] args) {
+							System.out.println("Hello, World!");
+						}
+					}
+						</code></pre>
 				</div>
 
 				<!-- 点赞和收藏功能 -->
@@ -273,6 +332,41 @@
 		$('#backToTop').click(function() {
 			$('html, body').animate({scrollTop: 0}, 800);
 			return false;
+		});
+		// 为所有pre标签添加复制按钮
+		const allPres = document.querySelectorAll('article.article-post pre'); // 使用修正后的选择器
+
+		allPres.forEach(pre => {
+			if (pre.innerText.trim().length === 0) {
+				return; // 跳过内容为空的代码块
+			}
+
+			const button = document.createElement('button');
+			button.className = 'copy-btn';
+			button.textContent = '复制';
+
+			pre.appendChild(button);
+
+			button.addEventListener('click', (e) => {
+				e.stopPropagation(); // 防止点击事件冒泡
+				const codeElement = pre.querySelector('code');
+				const textToCopy = codeElement ? codeElement.innerText : pre.innerText;
+
+				// 复制前临时去掉按钮自身的文字，避免复制进去
+				const originalButtonText = button.textContent;
+				button.textContent = '';
+				const cleanText = pre.innerText;
+				button.textContent = originalButtonText;
+
+				navigator.clipboard.writeText(cleanText).then(() => {
+					button.textContent = '已复制!';
+					setTimeout(() => {
+						button.textContent = '复制';
+					}, 2000);
+				}).catch(err => {
+					console.error('复制失败', err);
+				});
+			});
 		});
 	});
 </script>

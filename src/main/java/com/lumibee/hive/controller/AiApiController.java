@@ -70,7 +70,7 @@ public class AiApiController {
             // 这是一个通用的 Chat Completion 格式示例，具体字段名和结构需参照 DeepSeek 文档
             Map<String, Object> message = new HashMap<>();
             message.put("role", "user");
-            message.put("content", "请为以下文本生成一个不多于150字的摘要，直接返回摘要内容，不要包含其他任何引导性文字或标签,摘要的目的是让读者能够快速了解文章的主要内容,摘要不能多于150字。如果内容过短，请直接返回原文。文本如下：\n\n" +
+            message.put("content", "请为以下文本生成一个不多于120字的摘要，直接返回摘要内容，不要包含其他任何引导性文字或标签,摘要的目的是让读者能够快速了解文章的主要内容,摘要不能多于120字。如果内容过短，请直接返回原文。文本如下：\n\n" +
                     request.getTextContent());
 
             Map<String, Object> body = new HashMap<>();

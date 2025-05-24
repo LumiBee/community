@@ -78,7 +78,8 @@ public class SecurityConfig {
                                                 "/img/**",        // 图片文件
                                                 "/error",         // Spring Boot 默认错误页
                                                 "/favicon.ico",   // 网站图标
-                                                "/api/user/dismiss-password-prompt"
+                                                "/api/user/dismiss-password-prompt",
+                                                "/article/**"    // 文章浏览
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
                                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问

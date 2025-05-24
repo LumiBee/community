@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="">
-<body>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="zh"> <body>
 
 <nav th:fragment="navbar" class="topnav navbar navbar-expand-lg navbar-light bg-white fixed-top border-bottom" style="padding-bottom: 0; padding-top: 0;">
   <div class="container-fluid">
     <div style="padding-left: 20px;">
       <a class="navbar-brand" th:href="@{/}">
-        <img alt="logo" src="/img/logo.png" style="margin: 5px; height: 55px; width: 250px"/>
-      </a>
+        <img alt="logo" th:src="@{/img/logo.png}" style="margin: 5px; height: 55px; width: 250px"/> </a>
     </div>
 
     <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarColor02" aria-controls="navbarColor02" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,14 +18,9 @@
           <a class="nav-link" th:href="@{/}">首页</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">分类</a>
-        </li>
+          <a class="nav-link" th:href="@{/category}">分类</a> </li>
         <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">作品集</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" th:href="@{/article}">个人作品</a>
-        </li>
+          <a class="nav-link" th:href="@{/portfolio}">作品集</a> </li>
         <li class="nav-item">
           <a class="nav-link" th:href="@{/about}">关于本站</a>
         </li>
@@ -53,8 +46,7 @@
             <a class="nav-link" th:href="@{/login}">登 录</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" th:href="@{/signup}">注 册</a>
-          </li>
+            <a class="nav-link" th:href="@{/signup}">注 册</a> </li>
         </th:block>
 
         <th:block sec:authorize="isAuthenticated()">
@@ -62,48 +54,59 @@
             <a class="nav-link" th:href="@{/publish}">发 布 文 章</a>
           </li>
           <li class="nav-item dropdown user-avatar-dropdown" style="padding-left: 10px; padding-right: 15px; display: flex; align-items: center;">
-            <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdownUserMenu" role="button"
-               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-               style="line-height: 1;">
-              <img th:if="${#authentication.principal.getAvatarUrl() != null && !#strings.isEmpty(#authentication.principal.getAvatarUrl())}"
-                   th:src="${#authentication.principal.getAvatarUrl()}"
-                   alt="用户头像"
-                   class="rounded-circle"
-                   style="width: 40px; height: 40px; object-fit: cover;">
-              <th:block th:if="${#authentication.principal.getAvatarUrl() == null || #strings.isEmpty(#authentication.principal.getAvatarUrl())}">
-                <img class="rounded-circle" alt="默认头像" th:src="@{/img/default01.jpg}" style="width: 40px; height: 40px; object-fit: cover;">
-              </th:block>
-            </a>
-            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUserMenu" style="min-width: 220px; padding-top: 0;">
-              <div class="px-3 py-2" style="border-bottom: 1px solid #e9ecef;">
-                <div class="d-flex align-items-center">
-                  <img th:if="${#authentication.principal.getAvatarUrl() != null && !#strings.isEmpty(#authentication.principal.getAvatarUrl())}"
-                       th:src="${#authentication.principal.getAvatarUrl()}"
-                       alt="用户头像" class="rounded-circle mr-2"
+            <th:block th:with="principal = ${#authentication.principal}">
+              <th:block th:with="
+                    userAvatar = (${principal instanceof T(com.lumibee.hive.model.User)} ? ${principal.avatarUrl} :
+                                   (${principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)} ? ${principal.attributes['avatar_url']} : null)),
+                    userNameToDisplay = (${principal instanceof T(com.lumibee.hive.model.User)} ? ${principal.name} :
+                                     (${principal instanceof T(org.springframework.security.oauth2.core.user.OAuth2User)} ?
+                                        (${principal.attributes['name'] ?: principal.attributes['login'] ?: principal.name}) :
+                                        '用户'))
+                ">
+                <a class="nav-link dropdown-toggle p-0" href="#" id="navbarDropdownUserMenu" role="button"
+                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                   style="line-height: 1;">
+                  <img th:if="${userAvatar != null && !#strings.isEmpty(userAvatar)}"
+                       th:src="${userAvatar}"
+                       alt="用户头像"
+                       class="rounded-circle"
                        style="width: 40px; height: 40px; object-fit: cover;">
-                  <th:block th:if="${#authentication.principal.getAvatarUrl() == null || #strings.isEmpty(#authentication.principal.getAvatarUrl())}">
-                    <img alt="默认头像" class="rounded-circle mr-2" th:src="@{/img/default01.jpg}" style="width: 40px; height: 40px; object-fit: cover;">
-                  </th:block>
-                  <div style="line-height: 1.2;">
-                    <strong th:text="${#authentication.principal.getName()}">用户名</strong>
+                  <img th:if="${userAvatar == null || #strings.isEmpty(userAvatar)}"
+                       class="rounded-circle" alt="默认头像" th:src="@{/img/default01.jpg}" style="width: 40px; height: 40px; object-fit: cover;">
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownUserMenu" style="min-width: 220px; padding-top: 0;">
+                  <div class="px-3 py-2" style="border-bottom: 1px solid #e9ecef;">
+                    <div class="d-flex align-items-center">
+                      <img th:if="${userAvatar != null && !#strings.isEmpty(userAvatar)}"
+                           th:src="${userAvatar}"
+                           alt="用户头像" class="rounded-circle mr-2"
+                           style="width: 40px; height: 40px; object-fit: cover;">
+                      <img th:if="${userAvatar == null || #strings.isEmpty(userAvatar)}"
+                           alt="默认头像" class="rounded-circle mr-2" th:src="@{/img/default01.jpg}"
+                           style="width: 40px; height: 40px; object-fit: cover;">
+                      <div style="line-height: 1.2;">
+                        <strong th:text="${userNameToDisplay}">用户名</strong>
+                      </div>
+                    </div>
                   </div>
+                  <a class="dropdown-item" th:href="@{/profile}">个人中心</a>
+                  <a class="dropdown-item" th:href="@{/drafts}">我的草稿</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" th:href="@{/user/settings}">设置</a>
+                  <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="dropdown-item">
+                      退出登录
+                    </button>
+                  </form>
                 </div>
-              </div>
-              <a class="dropdown-item" th:href="@{/profile}">个人中心</a>
-              <a class="dropdown-item" th:href="@{/drafts}">我的草稿</a>
-              <div class="dropdown-divider"></div>
-              <a class="dropdown-item" th:href="@{/user/settings}">设置</a>
-              <form th:action="@{/logout}" method="post" style="display: inline;">
-                <button type="submit" class="dropdown-item">
-                  退出登录
-                </button>
-              </form>
-            </div>
+              </th:block>
+            </th:block>
           </li>
         </th:block>
       </ul>
     </div>
   </div>
 </nav>
+
 </body>
 </html>

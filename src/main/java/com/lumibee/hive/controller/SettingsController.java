@@ -76,8 +76,8 @@ public class SettingsController {
         User currentUser = null;
 
         if (principal instanceof UserDetails) {
-            String email = ((UserDetails) principal).getUsername();
-            currentUser = userService.selectByEmail(email);
+            String username = ((UserDetails) principal).getUsername();
+            currentUser = userService.selectByName(username);
         }else {
             OAuth2User oauth2User = (OAuth2User) principal;
             String name = oauth2User.getAttribute("login");
@@ -86,6 +86,8 @@ public class SettingsController {
             }
         }
 
+        System.out.println("当前用户: " + currentUser);
+        System.out.println(currentUser.toString());
 
         //1.验证新密码和确认密码是否一致
         if (newPassword == null || newPassword.isBlank()) {
