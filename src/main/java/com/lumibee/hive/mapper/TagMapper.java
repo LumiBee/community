@@ -15,4 +15,6 @@ public interface TagMapper extends BaseMapper<Tag> {
     Tag selectByName(String name);
     @Select("SELECT * FROM tags INNER JOIN article_tags at ON tags.tag_id = at.tag_id WHERE at.article_id = #{articleId}")
     List<Tag> selectByArticleId(Integer articleId);
+    @Select("SELECT * from tags ORDER BY article_count DESC LIMIT 20")
+    List<Tag> selectAllTags();
 }

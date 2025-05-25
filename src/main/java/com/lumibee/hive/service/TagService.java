@@ -10,5 +10,5 @@ public interface TagService {
     Tag selectOrCreateTag(String tagName);
     Set<Tag> selectOrCreateTags(List<String> tagNames);
     List<Tag> selectTagsByArticleId(int articleId);
-
+    List<Tag> selectAllTags();
 }

@@ -33,6 +33,7 @@ public class ArticleController {
     public String viewArticle(@PathVariable("slug") String slug,
                               @AuthenticationPrincipal Principal principal,
                               Model model) {
+        // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
         Article article = articleService.getArticleBySlug(slug);
 
@@ -48,12 +49,15 @@ public class ArticleController {
 
         String markdownContent = article.getContent();
         String renderedHtmlContent = "";
+        // 解析 Markdown 内容
         if (markdownContent != null) {
             Parser parser = Parser.builder().build();
             Node document = parser.parse(markdownContent);
             HtmlRenderer renderer = HtmlRenderer.builder().build();
             renderedHtmlContent = renderer.render(document);
         }
+
+        // 增加文章浏览量
         articleService.incrementViewCount(article.getArticleId());
 
         model.addAttribute("article", article);
@@ -66,11 +70,13 @@ public class ArticleController {
     public ResponseEntity<LikeResponse> toggleLike(@PathVariable("articleId") int articleId,
                                                    @AuthenticationPrincipal Principal principal) {
 
+        // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // 调用服务层方法切换点赞状态
         LikeResponse response = articleService.toggleLike(user.getId(), articleId);
 
         return ResponseEntity.ok(response);

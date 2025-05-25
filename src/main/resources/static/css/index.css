@@ -198,3 +198,24 @@ h5.font-weight-bold.spanborder span {
     background-color: rgba(0, 0, 0, 0.6); /* 鼠标悬停时按钮背景色加深 */
     opacity: 1; /* 鼠标悬停时按钮完全不透明 */
 }
+
+.tag-cloud-container {
+    overflow: hidden; /* 防止泡泡跑到容器外面 */
+}
+
+.tag-bubble {
+    /* 圆形和基本外观已在HTML的style中部分定义，这里可以补充或覆盖 */
+    color: white; /* 假设多数泡泡用深色背景 */
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    /* 确保文本不会超出泡泡太多 */
+    white-space: normal; /* 允许换行 */
+    word-break: break-word; /* 单词内换行 */
+}
+
+.tag-bubble:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 100; /* 确保悬停的在最上面 */
+}

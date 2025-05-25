@@ -32,6 +32,8 @@ public class TagServiceImpl implements TagService {
             tag.setGmtCreate(LocalDateTime.now());
             tagMapper.insert(tag);
         }
+        tag.setArticleCount(tag.getArticleCount() + 1);
+
         return tag;
     }
 
@@ -52,5 +54,10 @@ public class TagServiceImpl implements TagService {
     @Override
     public List<Tag> selectTagsByArticleId(int articleId) {
         return tagMapper.selectByArticleId(articleId);
+    }
+
+    @Override
+    public List<Tag> selectAllTags() {
+        return tagMapper.selectAllTags();
     }
 }
