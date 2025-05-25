@@ -79,7 +79,8 @@ public class SecurityConfig {
                                                 "/error",         // Spring Boot 默认错误页
                                                 "/favicon.ico",   // 网站图标
                                                 "/api/user/dismiss-password-prompt",
-                                                "/article/**"    // 文章浏览
+                                                "/article/**",    // 文章浏览
+                                                "/.well-known/**" // WebFinger 协议
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
                                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
@@ -90,7 +91,7 @@ public class SecurityConfig {
                                 .loginProcessingUrl("/login-process") // 登录表单 POST 提交到此路径
                                 .usernameParameter("account") // 前端表单中用于输入邮箱或用户名的字段的 name 属性
                                 .passwordParameter("password") // 前端表单中密码字段的 name 属性
-                                .successHandler(formLoginAuthenticationSuccessHandler())
+                                .successHandler(formLoginSuccessHandler)
                                 .failureUrl("/login?error=true")
                                 .permitAll()
                 )

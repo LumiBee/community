@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -36,13 +37,10 @@ public class PublishController {
                                  @RequestParam("tags")String tags,
                                  @RequestParam("summary")String excerpt,
                                  @RequestParam(value = "portfolio", required = false)String portfolioName,
-                                 @AuthenticationPrincipal User user,
+                                 @AuthenticationPrincipal Principal principal,
                                  RedirectAttributes redirectAttributes) {
         // 1. 参数校验
-        if (user == null) {
-            redirectAttributes.addFlashAttribute("error", "请先登录");
-            return "redirect:/login";
-        }
+        User user = userService.getCurrentUserFromPrincipal(principal);
 
         if (title == null || title.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "标题不能为空");

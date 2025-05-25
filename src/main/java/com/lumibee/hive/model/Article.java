@@ -36,6 +36,9 @@ public class Article implements Serializable {
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
 
+    @TableField(exist = false)
+    private boolean isLiked;
+
     @Version
     private Integer version;
 

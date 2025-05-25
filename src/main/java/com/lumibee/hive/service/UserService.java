@@ -2,6 +2,9 @@ package com.lumibee.hive.service;
 
 import com.lumibee.hive.model.User;
 
+import java.security.Principal;
+import java.util.List;
+
 public interface UserService {
     User selectByToken(String token);
     User selectByName(String name);
@@ -11,5 +14,5 @@ public interface UserService {
     int insert(User user);
     int updateById(User user);
     User selectById(Long id);
-
+    User getCurrentUserFromPrincipal(Principal principal);
 }

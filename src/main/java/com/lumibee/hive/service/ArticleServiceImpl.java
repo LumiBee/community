@@ -3,6 +3,8 @@ package com.lumibee.hive.service;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.mapper.ArticleLikesMapper;
 import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Tag;
@@ -25,6 +27,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private ArticleLikesMapper articleLikesMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -94,6 +99,47 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Article getArticleBySlug(String slug) {
         return articleMapper.findBySlug(slug);
+    }
+
+    @Override
+    @Transactional
+    public LikeResponse toggleLike(long userId, int articleId) {
+        //获取当前文章的点赞状态
+        boolean isCurrentlyLiked = articleLikesMapper.toggleLike(userId, articleId) == null;
+        //用来储存用户的点赞状态
+        boolean newLikedStatus;
+
+        if (isCurrentlyLiked) {
+            //如果当前用户没有点赞，则插入点赞记录并更新文章的点赞状态
+            articleLikesMapper.insertLike(userId, articleId);
+            articleMapper.updateArticleLikes(articleId, 1);
+            newLikedStatus = true;
+        }else {
+            //如果当前用户已经点赞，则删除点赞记录并更新文章的点赞状态
+            articleLikesMapper.deleteLike(userId, articleId);
+            articleMapper.updateArticleLikes(articleId, -1);
+            newLikedStatus = false;
+        }
+
+        //获取当前文章的点赞数量
+        Integer likesCount = articleMapper.countLikes(articleId);
+
+        return new LikeResponse(true, newLikedStatus, likesCount);
+    }
+
+    @Override
+    public boolean isUserLiked(long userId, int articleId) {
+        return articleLikesMapper.toggleLike(userId, articleId) != null;
+    }
+
+    @Override
+    public void incrementViewCount(Integer articleId) {
+        articleMapper.incrementViewCount(articleId);
+    }
+
+    @Override
+    public List<Article> getTopArticles() {
+        return articleMapper.getTopArticles();
     }
 
 }

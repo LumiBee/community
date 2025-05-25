@@ -5,6 +5,7 @@ import com.lumibee.hive.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/user/settings")
@@ -68,26 +71,11 @@ public class SettingsController {
     @PostMapping("/account")
     public String updatePassword(@RequestParam("newPassword") String newPassword,
                                  @RequestParam("confirmNewPassword") String confirmNewPassword,
+                                 @AuthenticationPrincipal Principal principal,
                                  HttpSession session,
                                  RedirectAttributes redirectAttributes) {
-        // 获取当前用户
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = auth.getPrincipal();
-        User currentUser = null;
 
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails) principal).getUsername();
-            currentUser = userService.selectByName(username);
-        }else {
-            OAuth2User oauth2User = (OAuth2User) principal;
-            String name = oauth2User.getAttribute("login");
-            if (name != null) {
-                currentUser = userService.selectByName(name);
-            }
-        }
-
-        System.out.println("当前用户: " + currentUser);
-        System.out.println(currentUser.toString());
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
 
         //1.验证新密码和确认密码是否一致
         if (newPassword == null || newPassword.isBlank()) {

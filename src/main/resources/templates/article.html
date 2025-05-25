@@ -5,6 +5,8 @@
 	<link rel="apple-touch-icon" sizes="76x76" href="/img/favicon.ico">
 	<link rel="icon" type="image/png" href="/img/favicon.ico">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 	<title th:text="${article?.title} ?: 'Lumi Hive'">Lumi Hive</title>
 	<meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport'/>
 	<link href="https://fonts.googleapis.com/css?family=Playfair+Display:400,700|Source+Sans+Pro:400,600,700" rel="stylesheet">
@@ -69,8 +71,8 @@
 <div class="container">
 	<div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
 		<div class="h-100 tofront">
-			<div class="row justify-content-between">
-				<div class="col-md-8 pt-6 align-self-center">
+			<div class="justify-content-between">
+				<div class="pt-5 align-self-center">
 					<h1 class="display-4 secondfont mb-3 font-weight-bold" th:text="${article.title}">文章标题</h1>
 					<p class="mb-3 lead" th:text="${article.excerpt}" th:if="${article.excerpt}">
 						文章摘要内容...
@@ -178,7 +180,10 @@
 				<div class="mt-4 pt-4 border-top">
 					<div class="d-flex justify-content-between align-items-center">
 						<div>
-							<button class="btn btn-outline-danger btn-sm mr-2" onclick="toggleLike()">
+							<button th:class="${article.isLiked}
+								   ? 'btn btn-danger btn-sm mr-2'
+								   : 'btn btn-outline-danger btn-sm mr-2'"
+									onclick="toggleLike(event)">
 								<i class="fas fa-heart"></i>
 								点赞 (<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>)
 							</button>
@@ -281,18 +286,60 @@
 
 <script>
 	// 点赞功能
-	function toggleLike() {
-		// 这里需要实现AJAX调用后端API
-		const likeCount = document.getElementById('likeCount');
-		const currentCount = parseInt(likeCount.textContent);
-		likeCount.textContent = currentCount + 1;
+	async function toggleLike(event) {
+		// 1. 获取需要操作的页面元素
+		const likeButton = event.currentTarget; // 获取当前被点击的按钮
+		const likeCountSpan = document.getElementById('likeCount'); // 获取显示点赞数的元素
+		const likeIcon = likeButton.querySelector('i'); // 获取按钮上的心形图标
 
-		// TODO: 实际项目中需要调用后端API
-		// $.post('/api/article/like', {slug: '[[${article.slug}]]'}, function(data) {
-		//     if(data.success) {
-		//         likeCount.textContent = data.likeCount;
-		//     }
-		// });
+		// 2. 从HTML中获取文章ID（假设Thymeleaf的article对象中包含id属性）
+		const articleId = '[[${article.articleId}]]';
+
+		// 3. 从meta标签中获取CSRF安全令牌
+		const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+		const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+		// 4. 在发送请求前，先禁用按钮，防止用户重复点击，提升用户体验
+		likeButton.disabled = true;
+
+		try {
+			// 5. 使用 fetch API 发送POST请求到后端接口
+			const response = await fetch(`/article/${articleId}/like`, {
+				method: 'POST',
+				headers: {
+					[header]: token
+				}
+			});
+
+			// 6. 检查后端的响应是否成功（HTTP状态码是否为2xx）
+			if (!response.ok) {
+				throw new Error(`服务器响应失败，状态码: ${response.status}`);
+			}
+
+			// 7. 解析后端返回的JSON格式数据
+			const data = await response.json();
+
+			// 8. 根据后端返回的真实数据来更新前端UI
+			if (data.success) {
+				likeCountSpan.textContent = data.likeCount; // 使用服务器返回的最新点赞数更新页面
+
+				// 根据服务器返回的最新点赞状态，更新按钮的视觉样式
+				if (data.liked) {
+					likeButton.classList.add('btn-danger'); // 按钮变为实心红色
+					likeButton.classList.remove('btn-outline-danger'); // 移除线框样式
+				} else {
+					likeButton.classList.add('btn-outline-danger'); // 按钮变为线框样式
+					likeButton.classList.remove('btn-danger'); // 移除实心红色样式
+				}
+			}
+
+		} catch (error) {
+			// 9. 如果在上述任何步骤中发生错误（网络问题或程序异常），在控制台打印
+			console.error('点赞操作失败:', error);
+		} finally {
+			// 10. 无论请求成功还是失败，最后都必须重新启用按钮
+			likeButton.disabled = false;
+		}
 	}
 
 	// 收藏功能
@@ -333,6 +380,7 @@
 			$('html, body').animate({scrollTop: 0}, 800);
 			return false;
 		});
+
 		// 为所有pre标签添加复制按钮
 		const allPres = document.querySelectorAll('article.article-post pre'); // 使用修正后的选择器
 
