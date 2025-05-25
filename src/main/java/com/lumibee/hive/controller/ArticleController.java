@@ -62,6 +62,7 @@ public class ArticleController {
 
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);
+        model.addAttribute("isFollowedByCurrentUser", true);
 
         return "article";
     }
@@ -69,6 +70,7 @@ public class ArticleController {
     @PostMapping("/article/{articleId}/like")
     public ResponseEntity<LikeResponse> toggleLike(@PathVariable("articleId") int articleId,
                                                    @AuthenticationPrincipal Principal principal) {
+        System.out.println(principal);
 
         // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);

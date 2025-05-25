@@ -5,12 +5,13 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 
 @Data
-public class User implements UserDetails {
+public class User implements UserDetails, Principal {
     @TableId(type = IdType.ASSIGN_ID)
     private Long id;
 

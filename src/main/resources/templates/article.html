@@ -77,7 +77,6 @@
 					<p class="mb-3 lead" th:text="${article.excerpt}" th:if="${article.excerpt}">
 						文章摘要内容...
 					</p>
-
 					<!-- 文章标签 -->
 					<div class="mb-4" th:if="${article.tags}">
 						<div th:each="tag : ${#strings.listSplit(article.tags, ',')}" class="d-inline-block">
@@ -101,15 +100,26 @@
 							 alt="默认头像"
 							 class="rounded-circle"
 							 style="width: 40px; height: 40px;">
-						<div class="ml-3">
-							<small class="font-weight-bold" th:text="${article.userName ?: '佚名'}">作者姓名</small>
+						<div class="ml-3 w-100">
+							<div style="display: flex; justify-content: space-between; align-items: end; width: 100%;">
+								<small class="font-weight-bold" style="flex-grow: 1; font-size: 16px" th:text="${article.userName ?: '佚名'}">作者姓名</small>
+								<div>
+									<button type="button"
+											th:id="${'followButton-' + article.userId}"
+											th:class="${article.isFollowedByCurrentUser} ? 'btn btn-secondary btn-sm' : 'btn btn-outline-primary btn-sm'"
+											th:onclick="'toggleFollow(\'' + ${article.userId} + '\', this)'">
+										<span th:if="${article.isFollowedByCurrentUser}"><i class="fas fa-user-check"></i> 已关注</span>
+										<span th:unless="${article.isFollowedByCurrentUser}"><i class="fas fa-user-plus"></i> 关注</span>
+									</button>
+								</div>
+							</div>
 							<small class="text-muted d-block">
 								<th:block th:if="${article.gmtCreate}" th:with="
-								 now = ${T(java.time.LocalDateTime).now()},
-								 duration = ${T(java.time.Duration).between(article.gmtCreate, now)},
-								 days = ${duration.toDays()},
-								 totalHours = ${duration.toHours()},
-								 totalMinutes = ${duration.toMinutes()}">
+									now = ${T(java.time.LocalDateTime).now()},
+									duration = ${T(java.time.Duration).between(article.gmtCreate, now)},
+									days = ${duration.toDays()},
+									totalHours = ${duration.toHours()},
+									totalMinutes = ${duration.toMinutes()}">
 									<span th:if="${days > 0}" th:text="${days + ' 天前'}"></span>
 									<span th:if="${days == 0 and totalHours > 0}" th:text="${totalHours + ' 小时前'}"></span>
 									<span th:if="${days == 0 and totalHours == 0 and totalMinutes > 0}" th:text="${totalMinutes + ' 分钟前'}"></span>
@@ -117,17 +127,16 @@
 								</th:block>
 								<span th:unless="${article.gmtCreate}">发布时间未知</span>
 								&middot;
-
 								<span style="display: inline-flex; align-items: center;">
-									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;">
-										<path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
-									</svg>
-									<span th:text="${article.viewCount != null ? article.viewCount : '0'}" style="margin-right: 8px;">0</span>
-									<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16" style="margin-right: 2px;">
-										<path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
-									</svg>
-									<span th:text="${article.likes != null ? article.likes : '0'}">0</span>
-								</span>
+								  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;">
+									 <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>
+								  </svg>
+								  <span th:text="${article.viewCount != null ? article.viewCount : '0'}" style="margin-right: 8px;">0</span>
+								  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-suit-heart" viewBox="0 0 16 16" style="margin-right: 2px;">
+									 <path d="m8 6.236-.894-1.789c-.222-.443-.607-1.08-1.152-1.595C5.418 2.345 4.776 2 4 2 2.324 2 1 3.326 1 4.92c0 1.211.554 2.066 1.868 3.37.337.334.721.695 1.146 1.093C5.122 10.423 6.5 11.717 8 13.447c1.5-1.73 2.878-3.024 3.986-4.064.425-.398.81-.76 1.146-1.093C14.446 6.986 15 6.131 15 4.92 15 3.326 13.676 2 12 2c-.777 0-1.418.345-1.954.852-.545.515-.93 1.152-1.152 1.595L8 6.236zm.392 8.292a.513.513 0 0 1-.784 0c-1.601-1.902-3.05-3.262-4.243-4.381C1.3 8.208 0 6.989 0 4.92 0 2.755 1.79 1 4 1c1.6 0 2.719 1.05 3.404 2.008.26.365.458.716.596.992a7.55 7.55 0 0 1 .596-.992C9.281 2.049 10.4 1 12 1c2.21 0 4 1.755 4 3.92 0 2.069-1.3 3.288-3.365 5.227-1.193 1.12-2.642 2.48-4.243 4.38z"/>
+								  </svg>
+								  <span th:text="${article.likes != null ? article.likes : '0'}">0</span>
+							   </span>
 							</small>
 						</div>
 					</div>
@@ -148,15 +157,30 @@
 				</div>
 				<div class="share d-inline-block">
 					<div class="d-flex flex-column">
-						<a href="#" class="btn btn-outline-primary btn-sm mb-2" onclick="shareToWechat()">
-							<i class="fab fa-weixin"></i>
+						<a href="#" class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="shareToWechat()">
+							<i class="fab fa-weixin"></i> 微信
 						</a>
-						<a href="#" class="btn btn-outline-info btn-sm mb-2" onclick="shareToWeibo()">
-							<i class="fab fa-weibo"></i>
+						<a href="#" class="btn btn-outline-info btn-sm mb-2 w-100" onclick="shareToWeibo()">
+							<i class="fab fa-weibo"></i> 微博
 						</a>
-						<a href="#" class="btn btn-outline-success btn-sm mb-2" onclick="copyLink()">
-							<i class="fas fa-link"></i>
+						<a href="#" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="copyLink()">
+							<i class="fas fa-link"></i> 复制链接
 						</a>
+
+						<div class="text-muted my-2 pt-2 border-top"></div>
+						<button th:class="${article.isLiked} ? 'btn btn-danger btn-sm mb-2 w-100' : 'btn btn-outline-danger btn-sm mb-2 w-100'"
+								onclick="toggleLike(event)">
+							<i class="fas fa-heart"></i>
+							点赞 (<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>)
+						</button>
+						<button class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="toggleFavorite()">
+							<i class="fas fa-bookmark"></i>
+							收藏
+						</button>
+						<button class="btn btn-outline-info btn-sm mb-2 w-100" onclick="scrollToComments()">
+							<i class="fas fa-comments"></i>
+							评论
+						</button>
 					</div>
 				</div>
 			</div>
@@ -168,35 +192,14 @@
 				<!-- 文章内容 -->
 				<div th:utext="${renderedHtmlContent}" class="article-content">
 					<p>文章正文内容将在这里显示...</p>
-						<pre><code class="language-java">public class HelloWorld {
-						public static void main(String[] args) {
-							System.out.println("Hello, World!");
-						}
-					}
-						</code></pre>
 				</div>
 
-				<!-- 点赞和收藏功能 -->
+				<!-- 显示阅读量 -->
 				<div class="mt-4 pt-4 border-top">
-					<div class="d-flex justify-content-between align-items-center">
-						<div>
-							<button th:class="${article.isLiked}
-								   ? 'btn btn-danger btn-sm mr-2'
-								   : 'btn btn-outline-danger btn-sm mr-2'"
-									onclick="toggleLike(event)">
-								<i class="fas fa-heart"></i>
-								点赞 (<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>)
-							</button>
-							<button class="btn btn-outline-primary btn-sm" onclick="toggleFavorite()">
-								<i class="fas fa-bookmark"></i>
-								收藏
-							</button>
-						</div>
-						<div>
+					<div class="d-flex justify-content-end align-items-center">
 							<small class="text-muted">
 								阅读量: <span th:text="${article.viewCount ?: '0'}">0</span>
 							</small>
-						</div>
 					</div>
 				</div>
 			</article>
@@ -339,6 +342,62 @@
 		} finally {
 			// 10. 无论请求成功还是失败，最后都必须重新启用按钮
 			likeButton.disabled = false;
+		}
+	}
+
+	async function toggleFollow(authorId, buttonElement) {
+		console.log("Toggling follow for author ID:", authorId);
+
+		// 1. 从meta标签中获取CSRF安全令牌 (与toggleLike中相同)
+		const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+		const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+		// 2. 发送请求前，禁用按钮 (可选，但推荐)
+		buttonElement.disabled = true;
+
+		try {
+			// 3. 构建API的URL，例如 /api/user/{authorId}/follow
+			const response = await fetch(`/api/user/${authorId}/follow`, { // <--- 请替换为您的实际关注API路径
+				method: 'POST', // 通常关注/取消关注是POST请求
+				headers: {
+					[header]: token
+					// 如果需要，可以添加 'Content-Type': 'application/json' 等
+				}
+			});
+
+			if (!response.ok) {
+				throw new Error(`服务器响应失败，状态码: ${response.status}`);
+			}
+
+			const data = await response.json(); // 假设后端返回 { success: true, isFollowing: true/false }
+
+			// 4. 根据后端返回的真实数据更新UI
+			if (data.success) {
+				const icon = buttonElement.querySelector('i');
+				const textSpan = buttonElement.querySelector('span:last-child'); // 获取按钮内的文本span
+
+				if (data.isFollowing) { // 假设后端返回 isFollowing 字段
+					buttonElement.classList.remove('btn-outline-primary');
+					buttonElement.classList.add('btn-secondary');
+					if (icon) icon.className = 'fas fa-user-check'; // 更新图标
+					textSpan.textContent = ' 已关注'; // 更新文本
+				} else {
+					buttonElement.classList.remove('btn-secondary');
+					buttonElement.classList.add('btn-outline-primary');
+					if (icon) icon.className = 'fas fa-user-plus'; // 更新图标
+					textSpan.textContent = ' 关注'; // 更新文本
+				}
+			} else {
+				// 处理后端返回操作失败的情况
+				alert(data.message || '操作失败，请稍后再试。');
+			}
+
+		} catch (error) {
+			console.error('关注操作失败:', error);
+			alert('操作失败，请稍后重试。');
+		} finally {
+			// 5. 无论成功还是失败，最后都必须重新启用按钮
+			buttonElement.disabled = false;
 		}
 	}
 

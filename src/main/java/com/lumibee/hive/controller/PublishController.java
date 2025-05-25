@@ -39,6 +39,8 @@ public class PublishController {
                                  @RequestParam(value = "portfolio", required = false)String portfolioName,
                                  @AuthenticationPrincipal Principal principal,
                                  RedirectAttributes redirectAttributes) {
+
+        System.out.println(principal);
         // 1. 参数校验
         User user = userService.getCurrentUserFromPrincipal(principal);
 

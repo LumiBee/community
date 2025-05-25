@@ -28,6 +28,7 @@ public class Article implements Serializable {
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime gmtModified;
 
+    @TableField(fill = FieldFill.INSERT)
     private Integer viewCount;
     private Integer likes;
     private Integer allowComments;
@@ -38,6 +39,9 @@ public class Article implements Serializable {
 
     @TableField(exist = false)
     private boolean isLiked;
+
+    @TableField(exist = false)
+    private boolean isFollowedByCurrentUser;
 
     @Version
     private Integer version;
