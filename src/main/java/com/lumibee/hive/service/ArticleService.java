@@ -9,7 +9,7 @@ import java.util.List;
 public interface ArticleService {
     Page<Article> getHomepageArticle(long pageNum, long pageSize);
     String createUniqueSlug(String title);
-    Article publishArticle(Article article, List<String> tagsName);
+    Article publishArticle(Article article, List<String> tagsName, String portfolioName);
     Article getArticleBySlug(String slug);
     LikeResponse toggleLike(long userId, int articleId);
     boolean isUserLiked(long userId, int articleId);

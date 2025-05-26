@@ -2,6 +2,7 @@ package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.lumibee.hive.model.Tag;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -22,4 +23,6 @@ public interface TagMapper extends BaseMapper<Tag> {
     List<Tag> selectAllTags();
     @Update("UPDATE tags SET article_count =#{currentCount} WHERE tag_id = #{tagId}")
     void updateArticleCount(Integer tagId, int currentCount);
+    @Insert("INSERT IGNORE into article_tags (article_id, tag_id) VALUES (#{articleId}, #{tagId})")
+    void insertTagArticleRelation(Integer articleId, Integer tagId);
 }

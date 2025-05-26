@@ -20,7 +20,7 @@ public class User implements UserDetails, Principal {
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtModified;
 
     private String bio;
@@ -33,7 +33,6 @@ public class User implements UserDetails, Principal {
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
-
     @Version
     private Integer version;
 

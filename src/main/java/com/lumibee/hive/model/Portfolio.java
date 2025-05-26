@@ -6,15 +6,16 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-@TableName("tags")
-public class Tag {
+public class Portfolio {
     @TableId(type = IdType.AUTO)
-    private Integer tagId;
+    private Integer id;
     private String name;
     private String slug;
+    private String description;
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;
-    private Integer articleCount;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime gmtModified;
 
     @TableLogic
     @TableField(fill = FieldFill.INSERT)

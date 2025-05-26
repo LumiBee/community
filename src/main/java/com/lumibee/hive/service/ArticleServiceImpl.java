@@ -30,6 +30,9 @@ public class ArticleServiceImpl implements ArticleService {
     private TagService tagService;
 
     @Autowired
+    private PortfolioService portfolioService;
+
+    @Autowired
     private ArticleLikesMapper articleLikesMapper;
 
     @Override
@@ -37,7 +40,7 @@ public class ArticleServiceImpl implements ArticleService {
     public Page<Article> getHomepageArticle(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Article::getGmtCreate);
+        queryWrapper.orderByDesc(Article::getGmtModified);
 
         Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
         List<Article> articleList = new ArrayList<>();
@@ -54,9 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDTO.setExcerpt(article.getExcerpt());
                 articleDTO.setLikes(article.getLikes());
                 articleDTO.setViewCount(article.getViewCount());
-                articleDTO.setTags(article.getTags());
                 articleDTO.setSlug(article.getSlug());
-                articleDTO.setPortfolioName(article.getPortfolioName());
                 articleList.add(articleDTO);
             }
         }
@@ -84,17 +85,29 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Article publishArticle(Article article, List<String> tagsName) {
+    public Article publishArticle(Article article, List<String> tagsName, String portfolioName) {
 
+        // 1. 设置文章的基本状态
         article.setGmtCreate(LocalDateTime.now());
         article.setGmtModified(LocalDateTime.now());
         article.setStatus(Article.ArticleStatus.published);
+
+        // 2. 设置文章的portfolioId
+        if (portfolioName != null && !portfolioName.isEmpty()) {
+            Integer portfolioId = portfolioService.selectOrCreatePortfolio(portfolioName).getId();
+            article.setPortfolioId(portfolioId);
+        }
+
+        // 3. 将数据插入数据库
         articleMapper.insert(article);
+
+        // 4. 更新tag表和tag——article关系表
+        Integer articleId = article.getArticleId();
         if (tagsName != null && !tagsName.isEmpty()) {
             Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
-            tags.forEach(tag -> {
-                System.out.println(tag.getName());
-            });
+            for (Tag tag : tags) {
+                tagService.insertTagArticleRelation(articleId, tag.getTagId());
+            }
         }
 
         return article;
@@ -102,9 +115,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Article getArticleBySlug(String slug) {
-        Article article = articleMapper.findBySlug(slug);
-        article.setTags(tagService.selectTagsByArticleId(article.getArticleId()));
-        return article;
+        return articleMapper.findDetailsBySlug(slug);
     }
 
     @Override

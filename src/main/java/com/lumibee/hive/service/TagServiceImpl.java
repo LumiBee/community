@@ -62,4 +62,9 @@ public class TagServiceImpl implements TagService {
     public List<Tag> selectAllTags() {
         return tagMapper.selectAllTags();
     }
+
+    @Override
+    public void insertTagArticleRelation(Integer articleId, Integer tagId) {
+        tagMapper.insertTagArticleRelation(articleId, tagId);
+    }
 }

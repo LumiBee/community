@@ -35,6 +35,7 @@ public class ArticleController {
                               Model model) {
         // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
+        // 根据 slug 获取文章
         Article article = articleService.getArticleBySlug(slug);
 
         if (article == null) {
@@ -60,10 +61,12 @@ public class ArticleController {
         // 增加文章浏览量
         articleService.incrementViewCount(article.getArticleId());
 
-        System.out.println(article.getTags());
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);
         model.addAttribute("isFollowedByCurrentUser", true);
+        System.out.println(article.getTags());
+        System.out.println(article.getPortfolio());
+        System.out.println(article.getPortfolioId());
 
         return "article";
     }

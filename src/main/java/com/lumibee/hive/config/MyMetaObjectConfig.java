@@ -15,10 +15,12 @@ public class MyMetaObjectConfig implements MetaObjectHandler {
         this.strictInsertFill(metaObject, "gmtModified", LocalDateTime::now, LocalDateTime.class);
         this.strictInsertFill(metaObject, "deleted", () -> 0, Integer.class);
         this.strictInsertFill(metaObject, "viewCount", () -> 0, Integer.class);
+
     }
 
     @Override
     public void updateFill(MetaObject metaObject) {
-        this.strictUpdateFill(metaObject, "gmtModified", LocalDateTime::now, LocalDateTime.class);
+
     }
+
 }

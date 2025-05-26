@@ -14,18 +14,17 @@ public class Article implements Serializable {
     private Integer articleId;
 
     private Long userId;
-    private String userName;
+
     private String title;
     private String slug;
-    private String portfolioName;
     private String content;
     private String excerpt;
-    private String avatarUrl;
     private ArticleStatus status;
+    private Integer portfolioId;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;
-    @TableField(fill = FieldFill.INSERT_UPDATE)
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtModified;
 
     @TableField(fill = FieldFill.INSERT)
@@ -33,19 +32,22 @@ public class Article implements Serializable {
     private Integer likes;
     private Integer allowComments;
 
+    @TableField(exist = false)
+    private String userName;
+    @TableField(exist = false)
+    private String avatarUrl;
+    @TableField(exist = false)
+    private boolean isLiked;
+    @TableField(exist = false)
+    private boolean isFollowedByCurrentUser;
+    @TableField(exist = false)
+    private List<Tag> tags;
+    @TableField(exist = false)
+    private Portfolio portfolio;
+
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;
-
-    @TableField(exist = false)
-    private boolean isLiked;
-
-    @TableField(exist = false)
-    private boolean isFollowedByCurrentUser;
-
-    @TableField(exist = false)
-    private List<Tag> tags;
-
     @Version
     private Integer version;
 

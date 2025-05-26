@@ -78,14 +78,16 @@
 						文章摘要内容...
 					</p>
 					<!-- 文章标签 -->
-					<div class="mb-4" th:if="${article.tags != null and not #lists.isEmpty(article.tags)}">
-						<div th:each="tag : ${article.tags}" class="d-inline-block">
-							<a th:href="@{'/articles/tag/' + ${tag.slug}}"
-							   class="badge badge-tag mr-2 mb-2 tag-link"
-							   th:text="${tag.name}"
-							   th:title="'查看更多 ' + ${tag.name} + ' 相关文章'">
-								标签
-							</a>
+					<div class="mb-4 w-100" th:if="${article.tags != null and not #lists.isEmpty(article.tags)}">
+						<div style="display: flex; align-items: end; width: 100%;">
+							<div th:each="tag : ${article.tags}" class="d-inline-block">
+								<a th:href="@{'/articles/tag/' + ${tag.slug}}"
+								   class="badge badge-tag mr-2 mb-2 tag-link"
+								   th:text="${tag.name}"
+								   th:title="'查看更多 ' + ${tag.name} + ' 相关文章'">
+									标签
+								</a>
+							</div>
 						</div>
 					</div>
 
@@ -148,9 +150,9 @@
 
 <!-- 主要内容区域 -->
 <div class="container pt-4 pb-4">
-	<div class="row justify-content-center">
+	<div class="row">
 		<!-- 分享按钮侧边栏 -->
-		<div class="col-lg-2 pr-4 mb-4 col-md-12" >
+		<div class="col-lg-2 col-md-3 pr-4 mb-4" >
 			<div class="sticky-top text-center">
 				<div class="text-muted mb-2">
 					分享文章
@@ -187,7 +189,7 @@
 		</div>
 
 		<!-- 文章正文 -->
-		<div class="col-md-12 col-lg-8">
+		<div class="col-lg-8 col-md-9">
 			<article class="article-post">
 				<!-- 文章内容 -->
 				<div th:utext="${renderedHtmlContent}" class="article-content">
