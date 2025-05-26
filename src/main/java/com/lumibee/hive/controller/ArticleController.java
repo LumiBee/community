@@ -60,6 +60,7 @@ public class ArticleController {
         // 增加文章浏览量
         articleService.incrementViewCount(article.getArticleId());
 
+        System.out.println(article.getTags());
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);
         model.addAttribute("isFollowedByCurrentUser", true);

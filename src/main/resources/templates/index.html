@@ -140,16 +140,16 @@
 					<li th:each="popularArticle, iterStat : ${popularArticles}" class="pb-3 pt-3 border-bottom">
 						<div class="d-flex align-items-center">
 						<div style="width: 100%">
-							<h6 class="font-weight-bold mb-0">
+							<h6 class="font-weight-bold mb-0" style="margin-bottom: 2px">
 								<a th:href="@{'/article/' + ${popularArticle.slug}}" class="text-dark" th:text="${popularArticle.title}">热门文章标题</a>
 							</h6>
-							<small class="text-muted d-flex align-items-center w-100" style="justify-content: space-between; width: 100%;">
+							<small class="text-muted d-flex align-items-center w-100 pt-2" style="justify-content: space-between; width: 100%;">
 								<span class="d-flex align-items-center" style="display: inline-flex; align-items: center;">
 								<img th:if="${popularArticle.AvatarUrl != null and !popularArticle.AvatarUrl.isEmpty()}"
 									 th:src="${popularArticle.AvatarUrl}"
 									 alt="作者头像"
-									 style="width: 16px; height: 16px; border-radius: 50%; margin-right: 4px;">
-								<small class="text-muted" th:text="${popularArticle.userName ?: '佚名'}">作者</small>
+									 style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px;">
+								<small class="text-muted" style="font-size: 13px" th:text="${popularArticle.userName ?: '佚名'}">作者</small>
 								</span>
 								<span style="display: inline-flex; align-items: center;" class="ml-auto">
 									  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;"> <path d="M4 11H2v3h2v-3zm5-4H7v7h2V7zm5-5v12h-2V2h2zm-2-1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1h-2zM6 7a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7zm-5 4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1v-3z"/>

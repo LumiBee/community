@@ -30,9 +30,11 @@ public class TagServiceImpl implements TagService {
             tag.setName(trimmedTagName);
             tag.setSlug(SlugGenerator.generateSlug(trimmedTagName));
             tag.setGmtCreate(LocalDateTime.now());
+            tag.setArticleCount(1);
             tagMapper.insert(tag);
+        }else {
+            tagMapper.updateArticleCount(tag.getTagId(), tag.getArticleCount() + 1);
         }
-        tag.setArticleCount(tag.getArticleCount() + 1);
 
         return tag;
     }

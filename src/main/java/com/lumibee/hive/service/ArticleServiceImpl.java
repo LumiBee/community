@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Set;
@@ -85,12 +86,15 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Article publishArticle(Article article, List<String> tagsName) {
 
+        article.setGmtCreate(LocalDateTime.now());
+        article.setGmtModified(LocalDateTime.now());
+        article.setStatus(Article.ArticleStatus.published);
         articleMapper.insert(article);
         if (tagsName != null && !tagsName.isEmpty()) {
             Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
-            for (Tag tag : tags) {
-                articleMapper.insertArticleTag(article.getArticleId(), tag.getTagId());
-            }
+            tags.forEach(tag -> {
+                System.out.println(tag.getName());
+            });
         }
 
         return article;
@@ -98,7 +102,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Article getArticleBySlug(String slug) {
-        return articleMapper.findBySlug(slug);
+        Article article = articleMapper.findBySlug(slug);
+        article.setTags(tagService.selectTagsByArticleId(article.getArticleId()));
+        return article;
     }
 
     @Override

@@ -40,7 +40,6 @@ public class PublishController {
                                  @AuthenticationPrincipal Principal principal,
                                  RedirectAttributes redirectAttributes) {
 
-        System.out.println(principal);
         // 1. 参数校验
         User user = userService.getCurrentUserFromPrincipal(principal);
 
@@ -69,9 +68,6 @@ public class PublishController {
         article.setContent(content);
         article.setExcerpt(excerpt);
         article.setPortfolioName(portfolioName);
-        article.setGmtCreate(LocalDateTime.now());
-        article.setGmtModified(LocalDateTime.now());
-        article.setStatus(Article.ArticleStatus.published);
         article.setSlug(articleService.createUniqueSlug(title));
         article.setUserId(userId);
         article.setUserName(userName);

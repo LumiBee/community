@@ -78,12 +78,12 @@
 						文章摘要内容...
 					</p>
 					<!-- 文章标签 -->
-					<div class="mb-4" th:if="${article.tags}">
-						<div th:each="tag : ${#strings.listSplit(article.tags, ',')}" class="d-inline-block">
-							<a th:href="@{'/articles/tag/' + ${#strings.trim(tag)}}"
+					<div class="mb-4" th:if="${article.tags != null and not #lists.isEmpty(article.tags)}">
+						<div th:each="tag : ${article.tags}" class="d-inline-block">
+							<a th:href="@{'/articles/tag/' + ${tag.slug}}"
 							   class="badge badge-tag mr-2 mb-2 tag-link"
-							   th:text="${#strings.trim(tag)}"
-							   th:title="'查看更多 ' + ${#strings.trim(tag)} + ' 相关文章'">
+							   th:text="${tag.name}"
+							   th:title="'查看更多 ' + ${tag.name} + ' 相关文章'">
 								标签
 							</a>
 						</div>

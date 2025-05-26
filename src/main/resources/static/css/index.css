@@ -82,7 +82,7 @@ h5.font-weight-bold.spanborder span {
     color: white; /* Text color for the span, ensure contrast */
     padding: 6px 12px;
     border-radius: 4px;
-    font-size: 1.2rem; /* Slightly larger for emphasis */
+    font-size: 1.5rem; /* Slightly larger for emphasis */
     /* Resetting inherited properties from generic .spanborder span if they conflict */
     display: inline-block; /* Ensure it behaves as expected */
     margin-bottom: 0;

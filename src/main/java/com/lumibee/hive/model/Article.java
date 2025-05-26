@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("articles")
@@ -16,7 +17,6 @@ public class Article implements Serializable {
     private String userName;
     private String title;
     private String slug;
-    private String tags;
     private String portfolioName;
     private String content;
     private String excerpt;
@@ -42,6 +42,9 @@ public class Article implements Serializable {
 
     @TableField(exist = false)
     private boolean isFollowedByCurrentUser;
+
+    @TableField(exist = false)
+    private List<Tag> tags;
 
     @Version
     private Integer version;
