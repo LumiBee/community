@@ -22,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
 
 import com.lumibee.hive.model.User;
@@ -116,6 +117,10 @@ public class SecurityConfig {
                                 .tokenValiditySeconds(604800)
                                 .userDetailsService(customUserServiceImpl)
                                 .rememberMeParameter("remember-me")
+                )
+                .csrf(csrf ->
+                        csrf
+                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 );
 
 
@@ -160,11 +165,6 @@ public class SecurityConfig {
             } else {
                 System.err.println("Form Login Success, but could not get user identifier from principal.");
             }
-
-
-            // 再次检查SecurityContextHolder中的状态，在设置完session.setAttribute之后
-            Authentication authInContextAfterSessionSet = SecurityContextHolder.getContext().getAuthentication();
-            System.out.println("SuccessHandler: Authentication in SecurityContextHolder (after session.setAttribute): " + authInContextAfterSessionSet);
 
             response.sendRedirect("/");
         };
