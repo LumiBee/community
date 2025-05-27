@@ -1,0 +1,362 @@
+/* settings.css - 个人设置页面样式 */
+
+/* 基础样式 */
+html {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  background-color: #f8f9fa;
+  font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding-top: 67px; /* 为固定导航栏留出空间 */
+}
+
+.main-content {
+  flex: 1 0 auto;
+  padding: 2rem 0;
+}
+
+/* 设置容器 */
+.settings-container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.settings-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #ffda58;
+  border-radius: 4px 4px 0 0;
+}
+
+.settings-container h3 {
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  position: relative;
+  display: inline-block;
+}
+
+.settings-container h3::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: #ffda58;
+  border-radius: 2px;
+}
+
+/* 标签页导航 */
+.nav-pills .nav-link {
+  font-size: 1rem;
+  text-align: center;
+  padding: 0.8rem 1.2rem;
+  color: #495057;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: rgba(255, 218, 88, 0.1);
+  color: #333;
+  transform: translateX(5px);
+}
+
+.nav-pills .nav-link.active {
+  background-color: #ffda58;
+  color: #333;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(255, 218, 88, 0.3);
+}
+
+.nav-pills .nav-link i {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+/* 标签页内容 */
+.tab-pane {
+  padding: 1rem 0.5rem;
+}
+
+.tab-pane h4 {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.tab-pane h5 {
+  font-weight: 600;
+  color: #444;
+  margin: 1.5rem 0 1rem 0;
+}
+
+/* 表单样式 */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.form-control {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 0.6rem 1rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.form-control:focus {
+  border-color: #ffda58;
+  box-shadow: 0 0 0 0.2rem rgba(255, 218, 88, 0.25);
+  background-color: #fff;
+}
+
+.form-text {
+  color: #888;
+  font-size: 0.85rem;
+  margin-top: 0.3rem;
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: #ffda58;
+  border-color: #ffda58;
+  color: #333;
+  font-weight: 500;
+  padding: 0.5rem 1.5rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.btn-primary:hover {
+  background-color: #ffd333;
+  border-color: #ffd333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+}
+
+.btn-outline-primary {
+  color: #333;
+  border-color: #ffda58;
+  background-color: transparent;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #ffda58;
+  color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.btn-outline-dark, .btn-outline-danger {
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.btn-outline-dark:hover, .btn-outline-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* 头像上传区域 */
+.avatar-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+  transition: all 0.3s ease;
+}
+
+.avatar-upload-wrapper:hover {
+  border-color: #ffda58;
+  background-color: rgba(255, 218, 88, 0.05);
+}
+
+.avatar-preview-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.avatar-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.avatar-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  border-color: #ffda58;
+}
+
+.avatar-upload-controls {
+  text-align: center;
+}
+
+/* 自定义开关 */
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: #ffda58;
+  border-color: #ffda58;
+}
+
+.custom-switch .custom-control-input:focus ~ .custom-control-label::before {
+  box-shadow: 0 0 0 0.2rem rgba(255, 218, 88, 0.25);
+}
+
+.custom-select {
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  padding: 0.6rem 1rem;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+}
+
+.custom-select:focus {
+  border-color: #ffda58;
+  box-shadow: 0 0 0 0.2rem rgba(255, 218, 88, 0.25);
+}
+
+/* 提示信息 */
+.alert {
+  border-radius: 8px;
+  border: none;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.alert-success {
+  background-color: #e3fcef;
+  color: #0d6832;
+}
+
+.alert-danger {
+  background-color: #fee7e7;
+  color: #b71c1c;
+}
+
+.alert-info {
+  background-color: #e6f7ff;
+  color: #0c5460;
+}
+
+/* 社交账户关联 */
+.social-account-row {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
+  border: 1px solid #eee;
+}
+
+.social-account-row:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+}
+
+.social-account-row .text-success {
+  color: #28a745 !important;
+  font-weight: 500;
+}
+
+/* 分隔线 */
+hr {
+  margin: 2rem 0;
+  border-top: 1px solid #eee;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 1.5rem;
+    margin: 1rem;
+    border-radius: 12px;
+  }
+  
+  .nav-pills .nav-link {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .avatar-image {
+    width: 120px;
+    height: 120px;
+  }
+}
+
+/* 动画效果 */
+.tab-pane.fade.show {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* 修改默认的关闭按钮样式 */
+.close {
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+/* 自定义文件上传按钮 */
+.btn-outline-primary.upload-btn {
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+}
+
+.btn-outline-primary.upload-btn:hover {
+  background-color: #ffda58;
+  color: #333;
+} 

@@ -3,146 +3,98 @@
 <head>
     <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
     <title>注册 - LumiHive</title>
-    <style>
-        html {
-            height: 100%;
-        }
-        body {
-            min-height: 100%;
-            flex-direction: column;
-            background-color: #ffffff;
-        }
-        .signup-page-wrapper { /* 用于垂直居中和页面最小高度 */
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 900px;
-            padding-top: 68px;
-            padding-bottom: 20px;
-            box-sizing: border-box;
-        }
-        .signup-container { /* 包含左右两栏的白色背景容器 */
-            display: flex;
-            max-width: 1000px;
-            width: calc(100% - 40px);
-            margin: 20px auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .signup-form-section { /* 左侧表单区域 */
-            flex: 1;
-            padding: 40px 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .signup-info-section { /* 右侧信息区域 */
-            flex: 1;
-            background-color: #f8f9fa;
-            padding: 40px 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: #495057;
-        }
-        .signup-form-section .logo { text-align: center; margin-bottom: 30px; }
-        .signup-form-section .logo img { max-height: 50px; }
-        .signup-form-section .form-group label { font-weight: 600; color: #555; }
-        .signup-form-section .form-control { border-radius: 4px; padding: 12px 15px; border: 1px solid #ced4da; }
-        .signup-form-section .btn { padding: 10px; border-radius: 4px; font-size: 1rem; }
-        .signup-form-section .btn-primary { background-color: #007bff; border-color: #007bff; }
-        .signup-form-section .btn-outline-secondary { color: #6c757d; border-color: #6c757d; }
-        .signup-form-section .forgot-password { text-align: right; font-size: 0.9em; }
-        .signup-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
-        .signup-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
-
-        @media (max-width: 768px) {
-            .signup-container {
-                flex-direction: column;
-            }
-            .signup-info-section {
-                border-left: none;
-                border-top: 1px solid #e9ecef;
-            }
-            .signup-page-wrapper {
-                min-height: auto;
-                padding-top: 80px;
-            }
-        }
-
-        .form-group .input-group .form-control { /* 修正密码可见性按钮与输入框边框问题 */
-            border-right: none;
-        }
-        .form-group .input-group .input-group-append .btn {
-            border-left: none;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-
-<div class="signup-page-wrapper">
-    <div class="signup-container">
-        <div class="signup-form-section">
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+        <div class="auth-form-section">
             <div class="logo">
                 <img src="/img/logo.png" alt="Hive Logo">
             </div>
+            
             <form th:action="@{/signup}" th:object="${signupDTO}" method="post" id="signupForm" novalidate>
-                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger mb-3" role="alert">
+                <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
                     <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global error message</p>
                 </div>
 
-                <div class="form-group mb-3">
+                <div class="form-group">
                     <label for="username">用户名</label>
-                    <input type="text" class="form-control" id="username" th:field="*{username}" placeholder="3-20个字符" required
-                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
-                    <div class="invalid-feedback"> </div>
-                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="username" th:field="*{username}" 
+                               placeholder="3-20个字符" required
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
                     </div>
+                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}"></div>
                 </div>
 
-                <div class="form-group mb-3">
+                <div class="form-group">
                     <label for="email">邮箱</label>
-                    <input type="email" class="form-control" id="email" th:field="*{email}" placeholder="例如：user@example.com" required
-                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
-                    <div class="invalid-feedback"> </div>
-                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                        </div>
+                        <input type="email" class="form-control" id="email" th:field="*{email}" 
+                               placeholder="例如：user@example.com" required
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
                     </div>
+                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}"></div>
                 </div>
-                <div class="form-group mb-3">
+                
+                <div class="form-group">
                     <label for="password">密码</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" th:field="*{password}" placeholder="6-30个字符" required>
-                        <div class="invalid-feedback" style="width: 100%;"> </div>
-                    </div>
-                    <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback d-block" th:errors="*{password}">
-                    </div>
-                </div>
-
-                <div class="form-group mb-3">
-                    <label for="confirmPassword">确认密码</label>
-                    <div class="input-group">
-                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" placeholder="请再次输入您的密码" required>
-                        <div class="invalid-feedback" style="width: 100%;">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        </div>
+                        <input type="password" class="form-control" id="password" th:field="*{password}" 
+                               placeholder="6-30个字符" required
+                               th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                        <div class="input-group-append">
+                            <button class="btn" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
                         </div>
                     </div>
-                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback d-block" th:errors="*{confirmPassword}">
-                    </div>
+                    <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback d-block" th:errors="*{password}"></div>
                 </div>
 
-                <button type="submit" class="btn btn-warning btn-block w-100">立即注册</button>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        </div>
+                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" 
+                               placeholder="请再次输入您的密码" required
+                               th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+                        <div class="input-group-append">
+                            <button class="btn" type="button" id="toggleConfirmPassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback d-block" th:errors="*{confirmPassword}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-warning btn-block">
+                    <i class="fas fa-user-plus mr-1"></i> 立即注册
+                </button>
             </form>
-            <p class="text-center mt-3">
-                已经有账户了？ <a th:href="@{/login}">立即登录</a>
-            </p>
+            
+            <div class="auth-links">
+                <p>已经有账户了？ <a th:href="@{/login}">立即登录</a></p>
+            </div>
         </div>
 
-        <div class="signup-info-section">
+        <div class="auth-info-section">
             <h2>欢迎来到 LumiHive!</h2>
             <p>
                 LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
@@ -156,14 +108,41 @@
         </div>
     </div>
 </div>
+
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 
 <script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
-<script th:src="@{/js/signup.js}" type="text/javascript"></script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 密码可见性切换
+    const togglePassword = document.getElementById('togglePassword');
+    const password = document.getElementById('password');
+    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
+    const confirmPassword = document.getElementById('confirmPassword');
+    
+    if(togglePassword && password) {
+        togglePassword.addEventListener('click', function() {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+    
+    if(toggleConfirmPassword && confirmPassword) {
+        toggleConfirmPassword.addEventListener('click', function() {
+            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+            confirmPassword.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+    }
+});
+</script>
 
 </body>
 </html>

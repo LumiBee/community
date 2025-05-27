@@ -157,14 +157,14 @@
 						</div>
 					</li>
 				</ol>
-				<h5 class="font-weight-bold spanborder"><span>标签</span></h5>
+				<h5 class="font-weight-bold spanborder"><span>热门标签</span></h5>
 				<div id="tagBubbleContainer" class="tag-cloud-container"
 					 style="position: relative;
-					height: 500px;
-					border: 1px solid #eee;
+					height: 600px;
 					margin-bottom: 20px;">
 					<a th:each="tag, iterStat : ${tags}"
 					   class="tag-bubble"
+					   th:href="@{'/articles/tag/' + ${tag.slug}}"
 					   th:attr="data-count=${tag.articleCount}"
 					   style="position: absolute;
 					   border-radius: 50%;

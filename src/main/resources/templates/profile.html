@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
+    <title>个人空间 - LumiHive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <!-- 个人信息卡片 -->
+        <div class="profile-header" th:attr="data-user-id=${user.id}">
+            <div class="profile-cover">
+                <img class="profile-cover-img" src="https://via.placeholder.com/1200x300" alt="封面图片">
+            </div>
+            <div class="profile-avatar-wrapper">
+                <img class="profile-avatar" th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://via.placeholder.com/200x200'}" alt="用户头像">
+            </div>
+            <div class="profile-info">
+                <div class="profile-info-top">
+                    <div class="profile-name-wrapper">
+                        <h1 class="profile-name" th:text="${user.name}">用户昵称</h1>
+                        <div class="profile-username" th:text="'@' + ${user.name}">@用户名</div>
+                    </div>
+                    <div class="profile-action-buttons">
+                        <button class="profile-btn btn-follow"
+                                th:classappend="${(isFollowing ?: false) ? 'following' : ''}"
+                                th:text="${(isFollowing ?: false) ? '已关注' : '关注'}">关注</button>
+                        <button class="profile-btn btn-message" th:attr="data-user-id=${user.id}">发消息</button>
+                    </div>
+                </div>
+                <p class="profile-bio" th:text="${user.bio != null ? user.bio : '这个人很懒，还没有填写个人简介...'}">用户个人简介</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${articleCount != null ? articleCount : 0}">42</span>
+                        <span class="stat-label">文章</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${followersCount != null ? followersCount : 0}">128</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${followingCount != null ? followingCount : 0}">56</span>
+                        <span class="stat-label">关注</span>
+                    </div>
+                </div>
+                <div class="profile-social">
+                    <a href="#" th:if="${user.githubId != null}" class="social-link" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" th:if="${user.qqOpenId != null}" class="social-link" title="QQ"><i class="fab fa-qq"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容导航栏 -->
+        <div class="profile-nav">
+            <ul class="profile-nav-list">
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link active" data-content-type="articles">文章</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="favorites">收藏</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="following">关注</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="followers">粉丝</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <!-- 左侧文章列表 -->
+            <div class="col-lg-8">
+                <div class="article-list">
+                    <!-- 文章项目1 -->
+                    <div class="article-item" th:each="article : ${articles}" th:attr="data-article-id=${article.id}">
+                        <div class="article-content">
+                            <h3 class="article-title">
+                                <a th:href="@{'/article/' + ${article.id}}" th:text="${article.title}">Spring Boot 实战：构建现代化Web应用</a>
+                            </h3>
+                            <p class="article-excerpt" th:text="${article.summary != null ? article.summary : '暂无摘要'}">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
+                            <div class="article-meta">
+                                <span class="article-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span th:text="${#temporals.format(article.gmtCreate, 'yyyy-MM-dd')}">2023-06-15</span>
+                                </span>
+                                <div class="article-stats">
+                                    <span class="article-stat article-views">
+                                        <i class="far fa-eye"></i>
+                                        <span th:text="${article.viewCount != null ? article.viewCount : 0}">256</span>
+                                    </span>
+                                    <span class="article-stat article-likes" th:attr="data-article-id=${article.id}">
+                                        <i th:class="${article.isLiked != null && article.isLiked ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                        <span th:text="${article.likeCount != null ? article.likeCount : 0}">42</span>
+                                    </span>
+                                    <span class="article-stat article-comments">
+                                        <i class="far fa-comment"></i>
+                                        <span th:text="${article.commentCount != null ? article.commentCount : 0}">18</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 示例文章（实际应用中应通过Thymeleaf循环渲染） -->
+                    <div class="article-item" data-article-id="1" th:if="${articles == null || articles.isEmpty()}">
+                        <div class="article-content">
+                            <h3 class="article-title">
+                                <a href="#">Spring Boot 实战：构建现代化Web应用</a>
+                            </h3>
+                            <p class="article-excerpt">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
+                            <div class="article-meta">
+                                <span class="article-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span>2023-06-15</span>
+                                </span>
+                                <div class="article-stats">
+                                    <span class="article-stat article-views">
+                                        <i class="far fa-eye"></i>
+                                        <span>256</span>
+                                    </span>
+                                    <span class="article-stat article-likes" data-article-id="1">
+                                        <i class="far fa-heart"></i>
+                                        <span>42</span>
+                                    </span>
+                                    <span class="article-stat article-comments">
+                                        <i class="far fa-comment"></i>
+                                        <span>18</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="article-item" data-article-id="2" th:if="${articles == null || articles.isEmpty()}">
+                        <div class="article-content">
+                            <h3 class="article-title">
+                                <a href="#">Java 17新特性详解：提升开发效率的关键变化</a>
+                            </h3>
+                            <p class="article-excerpt">Java 17作为LTS版本带来了许多令人兴奋的新特性，本文将深入探讨这些变化如何提升开发效率和代码质量...</p>
+                            <div class="article-meta">
+                                <span class="article-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span>2023-05-20</span>
+                                </span>
+                                <div class="article-stats">
+                                    <span class="article-stat article-views">
+                                        <i class="far fa-eye"></i>
+                                        <span>312</span>
+                                    </span>
+                                    <span class="article-stat article-likes" data-article-id="2">
+                                        <i class="far fa-heart"></i>
+                                        <span>56</span>
+                                    </span>
+                                    <span class="article-stat article-comments">
+                                        <i class="far fa-comment"></i>
+                                        <span>24</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="article-item" data-article-id="3" th:if="${articles == null || articles.isEmpty()}">
+                        <div class="article-content">
+                            <h3 class="article-title">
+                                <a href="#">深入理解Spring Security：构建安全的Web应用</a>
+                            </h3>
+                            <p class="article-excerpt">安全性是Web应用开发中的重要考量，本文将介绍如何使用Spring Security框架实现认证、授权和防护常见安全威胁...</p>
+                            <div class="article-meta">
+                                <span class="article-date">
+                                    <i class="far fa-calendar-alt"></i>
+                                    <span>2023-04-08</span>
+                                </span>
+                                <div class="article-stats">
+                                    <span class="article-stat article-views">
+                                        <i class="far fa-eye"></i>
+                                        <span>189</span>
+                                    </span>
+                                    <span class="article-stat article-likes" data-article-id="3">
+                                        <i class="far fa-heart"></i>
+                                        <span>37</span>
+                                    </span>
+                                    <span class="article-stat article-comments">
+                                        <i class="far fa-comment"></i>
+                                        <span>15</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination-container" th:if="${totalPages != null && totalPages > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage - 1)}}" aria-label="Previous">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + i}}" th:text="${i}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage + 1)}}" aria-label="Next">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- 右侧侧边栏 -->
+            <div class="col-lg-4">
+                <!-- 关于我 -->
+                <div class="about-me">
+                    <h3 class="about-me-title">关于我</h3>
+                    <div class="about-me-content">
+                        <p th:text="${user.bio != null ? user.bio : '这里是个人介绍，可以添加一些个人经历、专业技能或兴趣爱好等信息。'}">
+                            热爱编程和技术分享的全栈开发者，专注于Java和Web开发领域，有5年以上的开发经验。喜欢探索新技术，解决复杂问题，同时也是开源社区的积极贡献者。
+                        </p>
+                        <ul class="info-list">
+                            <li class="info-item">
+                                <span class="info-label">邮箱:</span>
+                                <span class="info-value" th:text="${user.email != null ? user.email : '未设置'}">example@email.com</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">GitHub:</span>
+                                <span class="info-value" th:text="${user.githubId != null ? '已绑定' : '未绑定'}">已绑定</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">QQ:</span>
+                                <span class="info-value" th:text="${user.qqOpenId != null ? '已绑定' : '未绑定'}">已绑定</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">加入时间:</span>
+                                <span class="info-value" th:text="${user.gmtCreate != null ? #temporals.format(user.gmtCreate, 'yyyy年MM月dd日') : '未知'}">2022年3月15日</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 技能展示 -->
+                    <div class="skills">
+                        <h4 class="about-me-title">技能</h4>
+                        <div class="skill-item" th:each="skill : ${skills}" th:if="${skills != null && !skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label" th:text="${skill.name}">Java</span>
+                                <span class="skill-percent" th:text="${skill.proficiency + '%'}">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" th:style="'width:' + ${skill.proficiency + '%'}"></div>
+                            </div>
+                        </div>
+                        <!-- 示例技能（实际应用中应通过Thymeleaf循环渲染） -->
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Java</span>
+                                <span class="skill-percent">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Spring Boot</span>
+                                <span class="skill-percent">85%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">JavaScript</span>
+                                <span class="skill-percent">75%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Vue.js</span>
+                                <span class="skill-percent">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">MySQL</span>
+                                <span class="skill-percent">80%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 热门标签 -->
+                <div class="popular-tags">
+                    <h3 class="popular-tags-title">热门标签</h3>
+                    <div class="tags-cloud">
+                        <a href="#" th:href="@{'/tag/' + ${tag.id}}" class="tag" th:each="tag : ${tags}" th:text="${tag.name}" th:if="${tags != null && !tags.isEmpty()}">Java</a>
+                        <!-- 示例标签（实际应用中应通过Thymeleaf循环渲染） -->
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Java</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Spring Boot</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">微服务</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Docker</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Kubernetes</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">前端开发</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Vue.js</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">React</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">数据库</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">MySQL</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Redis</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">设计模式</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">算法</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">云计算</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">DevOps</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<!-- CSRF Token -->
+<meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+<meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+
+<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/functions.js}" type="text/javascript"></script>
+<script th:src="@{/js/profile.js}" type="text/javascript"></script>
+
+</body>
+</html> 

@@ -99,8 +99,8 @@
 				<div class="text-muted mb-2">
 					分享文章
 				</div>
-				<div class="share d-inline-block">
-					<div class="d-flex flex-column">
+				<div class="share d-flex justify-content-center">
+					<div class="d-flex flex-column align-items-center" style="width: 70%;">
 						<a href="#" class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="shareToWechat()">
 							<i class="fab fa-weixin"></i> 微信
 						</a>
@@ -108,10 +108,10 @@
 							<i class="fab fa-weibo"></i> 微博
 						</a>
 						<a href="#" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="copyLink()">
-							<i class="fas fa-link"></i> 复制链接
+							<i class="fas fa-link"></i> 复制
 						</a>
 
-						<div class="text-muted my-2 pt-2 border-top"></div>
+						<div class="text-muted my-2 pt-2 border-top w-100"></div>
 						<button th:class="${article.isLiked} ? 'btn btn-danger btn-sm mb-2 w-100' : 'btn btn-outline-danger btn-sm mb-2 w-100'"
 								onclick="toggleLike(event)">
 							<i class="fas fa-heart"></i>
@@ -145,6 +145,11 @@
 								阅读量: <span th:text="${article.viewCount ?: '0'}">0</span>
 							</small>
 					</div>
+				</div>
+
+				<!-- 评论区 -->
+				<div id="comments-section" class="mt-5">
+					<!-- 评论区内容将在这里显示 -->
 				</div>
 			</article>
 
@@ -230,6 +235,7 @@
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
+<script th:src="@{/js/article-effects.js}" type="text/javascript"></script>
 
 <script>
 	// 点赞功能

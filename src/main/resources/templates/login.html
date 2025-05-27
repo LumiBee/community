@@ -3,192 +3,107 @@
 <head>
     <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
     <title>登录 - LumiHive</title>
-    <style>
-        html {
-            height: 100%;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-color: #ffffff;
-        }
-        .login-page-wrapper { /* 用于垂直居中和页面最小高度 */
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 800px;
-            padding-top: 68px;
-            padding-bottom: 20px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-        .login-container { /* 包含左右两栏的白色背景容器 */
-            display: flex;
-            max-width: 1000px;
-            width: calc(100% - 40px);
-            margin: 20px auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-        .login-form-section { /* 左侧表单区域 */
-            flex: 1;
-            padding: 40px 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        .login-info-section { /* 右侧信息区域 */
-            flex: 1;
-            background-color: #f8f9fa;
-            padding: 40px 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            color: #495057;
-        }
-
-
-        .login-form-section .logo { text-align: center; margin-bottom: 30px; }
-        .login-form-section .logo img { max-height: 50px; }
-        .login-form-section .form-group label { font-weight: 600; color: #555; }
-        .login-form-section .form-control { border-radius: 4px; padding: 12px 15px; border: 1px solid #ced4da; }
-        .login-form-section .btn { padding: 10px; border-radius: 4px; font-size: 1rem; }
-        .login-info-section h2 { color: #333; font-family: 'Playfair Display', serif; margin-bottom: 20px; }
-        .login-info-section p { line-height: 1.7; font-size: 0.95em; margin-bottom: 15px; }
-        .toast-container-wrapper {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1090;
-            width: auto;
-            min-width: 300px;
-        }
-
-        #signupSuccessToast.toast {
-            border-radius: 0.5rem;
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,.15) !important;
-            border: none;
-            background-clip: padding-box;
-        }
-
-        #signupSuccessToast .toast-header {
-            border-bottom: 1px solid rgba(0,0,0,.075);
-            border-top-left-radius: calc(0.5rem - 1px);
-            border-top-right-radius: calc(0.5rem - 1px);
-            padding: .75rem 1.25rem;
-        }
-
-        #signupSuccessToast .toast-body {
-            padding: 1rem; /* 调整身体部分内边距 */
-            font-size: 0.95rem; /* 调整消息文本大小 */
-            color: #212529; /* 主体文字颜色 */
-        }
-
-        @media (max-width: 768px) { /* 小屏幕下单列 */
-            .login-container {
-                flex-direction: column;
-            }
-            .login-info-section {
-                border-left: none; /* 移除竖线 */
-                border-top: 1px solid #e9ecef; /* 改为顶部横线 */
-            }
-            .login-page-wrapper {
-                min-height: auto; /* 小屏幕时内容自适应高度 */
-                padding-top: 80px; /* 确保header不遮挡 */
-            }
-            .toast-container-wrapper {
-                top: 60px;
-                right: 10px;
-                left: 10px;
-                width: auto;
-                transform: translateX(-50%);
-                max-width: none;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
 <div aria-live="polite" aria-atomic="true" class="toast-container-wrapper">
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" id="signupSuccessToast">
-        <div class="toast-header bg-warning text-white" style="margin-top:5px"> <strong class="mr-auto">注册成功！</strong></div>
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" id="signupSuccessToast" style="display: none;">
+        <div class="toast-header">
+            <strong class="mr-auto">注册成功！</strong>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
         <div class="toast-body" id="signupSuccessToastBody"></div>
     </div>
 </div>
 
-<div class="login-page-wrapper">
-    <div class="login-container">
-        <div class="login-form-section">
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+        <div class="auth-form-section">
             <div class="logo">
-                <img src="/img/logo.png" alt="Hive Logo"> </div>
-
-            <form th:action="@{/login-process}" method="post"> <div class="form-group mb-3">
-                <label for="accountInput">账号 (邮箱或用户名)</label>
-                <input type="text" class="form-control" id="accountInput" name="account" placeholder="请输入您的邮箱或用户名" required
-                       th:classappend="${param.error} ? 'is-invalid' : ''">
+                <img src="/img/logo.png" alt="Hive Logo">
             </div>
 
-                <div class="form-group mb-3">
+            <form th:action="@{/login-process}" method="post">
+                <div class="form-group">
+                    <label for="accountInput">账号 (邮箱或用户名)</label>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        </div>
+                        <input type="text" class="form-control" id="accountInput" name="account" 
+                               placeholder="请输入您的邮箱或用户名" required
+                               th:classappend="${param.error} ? 'is-invalid' : ''">
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label for="password">密码</label>
-                    <input type="password" class="form-control" id="password" name="password"
-                           placeholder="请输入您的密码" required
-                           th:classappend="${param.error} ? 'is-invalid' : ''">
-                    <div th:if="${param.error}" class="invalid-feedback"> 邮箱/用户名或密码不正确。
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                        </div>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="请输入您的密码" required
+                               th:classappend="${param.error} ? 'is-invalid' : ''">
+                        <div class="input-group-append">
+                            <button class="btn" type="button" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div th:if="${param.error}" class="invalid-feedback">
+                        邮箱/用户名或密码不正确。
                     </div>
                 </div>
 
-                <div class="custom-control custom-checkbox mb-3 d-flex justify-content-end">
-                    <div class="form-check">
-                        <input type="checkbox" class="custom-control-input" id="remember-me" name="remember-me">
-                        <label class="custom-control-label" for="remember-me">记住我</label>
-                    </div>
+                <div class="custom-control custom-checkbox d-flex justify-content-end mb-3">
+                    <input type="checkbox" class="custom-control-input" id="remember-me" name="remember-me">
+                    <label class="custom-control-label" for="remember-me">记住我</label>
                 </div>
-                <button type="submit" class="btn btn-warning btn-block w-100 mb-3">立即登录</button>
-            </form>
-            <p class="text-center mt-3">
-                还没有账户？ <a th:href="@{/signup}">立即注册</a>
-            </p>
 
-
-            <div class="text-center mt-3">
-                <p class="text-muted">或通过以下方式登录</p>
-                <a th:href="@{/oauth2/authorization/github}">
-                    <button type="button" class="btn btn-outline-dark">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
-                        </svg>
-                        Github
-                    </button>
-                </a>
-                <button type="button" class="btn btn-outline-danger">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-tencent-qq" viewBox="0 0 16 16">
-                        <path d="M6.048 3.323c.022.277-.13.523-.338.55-.21.026-.397-.176-.419-.453-.022-.277.13-.523.338-.55.21-.026.397.176.42.453Zm2.265-.24c-.603-.146-.894.256-.936.333-.027.048-.008.117.037.15.045.035.092.025.119-.003.361-.39.751-.172.829-.129l.011.007c.053.024.147.028.193-.098.023-.063.017-.11-.006-.142-.016-.023-.089-.08-.247-.118Z"></path>
-                        <path fill-rule="evenodd" d="M11.727 6.719c0-.022.01-.375.01-.557 0-3.07-1.45-6.156-5.015-6.156-3.564 0-5.014 3.086-5.014 6.156 0 .182.01.535.01.557l-.72 1.795a25.85 25.85 0 0 0-.534 1.508c-.68 2.187-.46 3.093-.292 3.113.36.044 1.401-1.647 1.401-1.647 0 .979.504 2.256 1.594 3.179-.408.126-.907.319-1.228.556-.29.213-.253.43-.201.518.228.386 3.92.246 4.985.126 1.065.12 4.756.26 4.984-.126.052-.088.088-.305-.2-.518-.322-.237-.822-.43-1.23-.557 1.09-.922 1.594-2.2 1.594-3.178 0 0 1.041 1.69 1.401 1.647.168-.02.388-.926-.292-3.113a25.78 25.78 0 0 0-.534-1.508l-.72-1.795ZM9.773 5.53c-.13-.286-1.431-.605-3.042-.605h-.017c-1.611 0-2.913.319-3.042.605a.096.096 0 0 0-.01.04c0 .022.008.04.018.056.11.159 1.554.943 3.034.943h.017c1.48 0 2.924-.784 3.033-.943a.095.095 0 0 0 .008-.096Zm-4.32-.989c-.483.022-.896-.529-.922-1.229-.026-.7.344-1.286.828-1.308.483-.022.896.529.922 1.23.027.7-.344 1.286-.827 1.307Zm2.538 0c.483.022.896-.529.922-1.229.026-.7-.344-1.286-.827-1.308-.484-.022-.896.529-.923 1.23-.026.7.344 1.285.828 1.307ZM2.928 8.99a10.674 10.674 0 0 0-.097 2.284c.146 2.45 1.6 3.99 3.846 4.012h.091c2.246-.023 3.7-1.562 3.846-4.011.054-.9 0-1.663-.097-2.285-1.312.26-2.669.41-3.786.396h-.017c-.297.003-.611-.005-.937-.023v2.148c-1.106.154-2.21-.068-2.21-.068V9.107a22.93 22.93 0 0 1-.639-.117Z"></path>
-                    </svg>
-                    QQ
+                <button type="submit" class="btn btn-warning btn-block">
+                    <i class="fas fa-sign-in-alt mr-1"></i> 立即登录
                 </button>
+            </form>
+
+            <div class="auth-links">
+                <p>还没有账户？ <a th:href="@{/signup}">立即注册</a></p>
             </div>
-        </div> <div class="login-info-section">
-        <h2>欢迎来到 LumiHive!</h2>
-        <p>
-            LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
-        </p>
-        <p>
-            我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
-        </p>
-        <p>
-            最后请大家共同爱护这个交流环境，一个好的交流环境离不开大家的努力😊
-        </p>
-    </div>
+
+            <div class="social-login">
+                <p>或通过以下方式登录</p>
+                <div>
+                    <a th:href="@{/oauth2/authorization/github}" class="btn btn-outline-dark">
+                        <i class="fab fa-github mr-1"></i> Github
+                    </a>
+                    <button type="button" class="btn btn-outline-danger">
+                        <i class="fab fa-qq mr-1"></i> QQ
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="auth-info-section">
+            <h2>欢迎来到 LumiHive!</h2>
+            <p>
+                LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
+            </p>
+            <p>
+                我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
+            </p>
+            <p>
+                最后请大家共同爱护这个交流环境，一个好的交流环境离不开大家的努力😊
+            </p>
+        </div>
     </div>
 </div>
+
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 
 <script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
@@ -198,46 +113,55 @@
 
 <script th:inline="javascript">
     document.addEventListener('DOMContentLoaded', function () {
+        // 明确检查服务器传递的标志
         var showToastFlag = /*[[${showSignupSuccessPopup}]]*/ false;
         var toastMsg = /*[[${popupMessage}]]*/ null;
 
-        console.log("Flag from model (showSignupSuccessPopup):", showToastFlag);
-        console.log("Message from model (popupMessage):", toastMsg);
-
-        if (showToastFlag === true && toastMsg) {
+        // 确保只有当showToastFlag为true且有消息内容时才显示弹窗
+        if (showToastFlag === true && toastMsg && toastMsg.length > 0) {
             const toastBodyElement = document.getElementById('signupSuccessToastBody');
-            const toastTitleElement = document.getElementById('signupSuccessToastTitle');
-
             if (toastBodyElement) {
                 toastBodyElement.textContent = toastMsg;
-            } else {
-                console.error("Toast body element 'signupSuccessToastBody' not found!");
             }
 
             const toastElement = $('#signupSuccessToast');
             if (toastElement.length) {
+                // 确保弹窗可见
+                toastElement.css('display', 'block');
+                
+                // 初始化Bootstrap的toast组件
                 toastElement.toast({
                     animation: true,
                     autohide: true,
                     delay: 7000
                 });
-                toastElement.css('display', '');
-                toastElement.removeClass('d-none');
-
+                
+                // 显示弹窗
                 toastElement.toast('show');
-                console.log("Signup success toast display initiated.");
-            } else {
-                console.error("Toast element '#signupSuccessToast' not found!");
+                
+                // 确保关闭按钮正常工作
+                $('.toast .close').on('click', function() {
+                    toastElement.toast('hide');
+                });
+                
+                // 当弹窗隐藏时，确保它被完全移除
+                toastElement.on('hidden.bs.toast', function () {
+                    toastElement.css('display', 'none');
+                });
             }
-        } else {
-            const toastElement = $('#signupSuccessToast');
-            if (toastElement.length && toastElement.css('display') !== 'none') {
-                toastElement.hide();
-                console.log("Toast not shown as flags are not set. Ensuring toast is hidden.");
-            }
-            if (showToastFlag === true && !toastMsg) {
-                console.warn("showToastFlag is true, but toastMsg is null or empty.");
-            }
+        }
+        
+        // 密码可见性切换
+        const togglePassword = document.getElementById('togglePassword');
+        const password = document.getElementById('password');
+        
+        if(togglePassword && password) {
+            togglePassword.addEventListener('click', function() {
+                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                password.setAttribute('type', type);
+                this.querySelector('i').classList.toggle('fa-eye');
+                this.querySelector('i').classList.toggle('fa-eye-slash');
+            });
         }
     });
 </script>

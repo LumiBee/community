@@ -31,7 +31,9 @@ public class SettingsController {
     private PasswordEncoder passwordEncoder;
 
     @GetMapping
-    public String userSettingsPage(Model model, Authentication authentication, @RequestParam(name = "tab", required = false) String activeTab) {
+    public String userSettingsPage(Model model,
+                                   Authentication authentication,
+                                   @RequestParam(name = "tab", required = false) String activeTab) {
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
             return "redirect:/login"; // 用户未认证，重定向到登录
         }

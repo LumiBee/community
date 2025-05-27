@@ -5,142 +5,210 @@ html, body {
     margin: 0;
     padding-top: 148px; /* 为固定的顶部操作栏和主导航栏留出空间 */
     padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
-    background-color: #f8f9fa; /* 浅灰色背景，类似图片 */
+    background-color: #f8f9fa; /* 浅灰色背景 */
+    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* 编辑器区域的容器，使用 .container 使其居中 */
+/* 编辑器区域的容器 */
 .editor-content-container {
-    /* 如果需要，可以在这里为编辑器区域本身添加额外的上下间距 */
     padding-bottom: 1rem;
+    transition: all 0.3s ease;
 }
-
 
 /* Toast UI 编辑器样式调整 */
 .toastui-editor-defaultUI {
-    border: 1px solid #ced4da;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    overflow: hidden;
 }
 
-/* 确保主导航栏在顶部操作栏之下，如果主导航栏也是 fixed-top */
-/* 如果你的 th:fragment="navbar" 已经有 fixed-top，需要调整 body 的 padding-top */
-/* 例如，如果主导航高 60px，操作栏高 60px，则 padding-top: 120px; */
-.topnav.fixed-top { /* 这是你主导航栏的类名 */
-    z-index: 1030; /* 确保在标准 fixed-top 之上 */
+/* 确保主导航栏在顶部操作栏之下 */
+.topnav.fixed-top {
+    z-index: 1030;
 }
 
 .editor-area {
-    padding-top: 100px; /* 根据您的 top-action-bar 高度调整 */
-    padding-bottom: 80px; /* 根据您的 bottom-status-bar 高度调整 */
-}
-/* Toast UI 编辑器高度 */
-.toastui-editor-defaultUI {
-    border: 1px solid #ced4da; /* 与您之前的样式匹配 */
+    padding-top: 100px;
+    padding-bottom: 80px;
 }
 
 .publish-container {
     padding-top: 200px;
 }
 
-
+/* 顶部操作栏美化 */
 .top-action-bar {
     background-color: #ffffff;
-    border-bottom: 1px solid #dee2e6;
-    padding: 10px 0; /* 根据图片调整内边距 */
+    border-bottom: 1px solid #eaeaea;
+    padding: 12px 0;
     width: 100%;
-    z-index: 1031; /* 比主导航栏高，但低于可能的模态框等 */
-    top: 67px; /* 假设你的主导航栏高度约为 60px，如果主导航栏也 fixed-top */
-    /* 如果主导航栏不固定，或者你想让这个操作栏在最顶端，设为 top: 0; 并调整 body padding-top */
+    z-index: 1031;
+    top: 67px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
 }
 
-body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
-    /* padding-top: 130px; /* 示例: 假设主导航栏70px + 操作栏60px */
-}
-.top-action-bar.with-fixed-topnav { /* 如果主导航栏是fixed */
-    /* top: 70px;  示例: 假设主导航栏70px高 */
+.top-action-bar .container-fluid {
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
+body.has-fixed-topnav {
+    /* padding-top: 130px; */
+}
+
+.top-action-bar.with-fixed-topnav {
+    /* top: 70px; */
+}
+
+/* 文章标题输入框美化 */
 .article-title-input {
     width: 100%;
     border: none;
-    font-size: 1.5rem; /* 调整标题输入框字体大小 */
-    font-weight: bold;
-    box-shadow: none !important; /* 移除默认的聚焦阴影 */
+    font-size: 1.6rem;
+    font-weight: 600;
+    box-shadow: none !important;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
 }
+
 .article-title-input:focus {
     border: none;
     box-shadow: none;
+    background-color: #f0f0f0;
 }
 
+/* 操作按钮美化 */
 .action-buttons .btn-icon {
     color: #6c757d;
     background-color: transparent;
     border: none;
+    transition: all 0.2s ease;
 }
+
 .action-buttons .btn-icon:hover {
     color: #343a40;
+    transform: translateY(-1px);
+}
+
+.action-buttons .btn-outline-secondary {
+    border-radius: 20px;
+    padding: 5px 15px;
+    font-weight: 500;
+    border-color: #ddd;
+    transition: all 0.2s ease;
+}
+
+.action-buttons .btn-outline-secondary:hover {
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.action-buttons .btn-primary {
+    border-radius: 20px;
+    padding: 5px 18px;
+    font-weight: 500;
+    background-color: #ffda58;
+    border-color: #ffda58;
+    color: #333;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+
+.action-buttons .btn-primary:hover {
+    background-color: #ffd333;
+    border-color: #ffd333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
 }
 
 .editor-area {
     background-color: #ffffff;
     padding: 20px;
-    border-radius: .25rem;
-    /* box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075); */ /* 可以添加轻微阴影 */
-    margin-bottom: 60px; /* 为底部状态栏留出空间 */
+    border-radius: 8px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    margin-bottom: 60px;
 }
-
 
 .editor-toolbar .btn-icon {
     color: #495057;
     margin-right: 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
 }
+
 .editor-toolbar .btn-icon:hover {
     background-color: #e9ecef;
 }
 
-
 .article-content-input {
-    outline: none; /* 移除可能的默认轮廓 */
+    outline: none;
 }
 
+/* 底部状态栏美化 */
 .bottom-status-bar {
-    padding: 0 15px; /* 左右内边距 */
+    padding: 8px 20px;
     font-size: 0.85em;
-    z-index: 1029; /* 确保在内容之上 */
+    z-index: 1029;
     color: #495057;
+    background-color: #ffffff;
+    border-top: 1px solid #eaeaea;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
 }
+
+.bottom-status-bar .stats {
+    font-weight: 500;
+    color: #666;
+}
+
 .bottom-status-bar .controls .btn-link {
     color: #495057;
     text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 4px;
 }
+
 .bottom-status-bar .controls .btn-link:hover {
-    color: #007bff;
+    color: #ffda58;
+    background-color: #f8f9fa;
 }
 
 .top-action-bar.fixed-top {
-    background-color: #f8f9fa; /* Or your desired background */
-    /* z-index will be set by JS if needed, or manage here if main navbar has higher z-index */
+    background-color: #ffffff;
 }
 
 .editor-content-container.container-fluid {
-    padding-bottom: 1rem; /* Space between editor and bottom-status-bar content */
+    padding-bottom: 1rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
-}
-/* 目标：WYSIWYG 模式下的主要内容区 */
-.toastui-editor-contents {
-    font-size: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-/* 目标：Markdown 模式下的编辑区 */
+/* 编辑器内容区域字体大小 */
+.toastui-editor-contents {
+    font-size: 18px;
+    line-height: 1.7;
+}
+
+/* Markdown模式下的编辑区 */
 .toastui-editor-md-container .ProseMirror {
-    font-size: 20px !important;
+    font-size: 18px !important;
+    line-height: 1.7;
 }
 
 .toastui-editor-md-container .CodeMirror-code,
 .toastui-editor-md-container .CodeMirror-line,
 .toastui-editor-md-container .CodeMirror pre.CodeMirror-line {
-    font-size: inherit !important; /* 从父级 .CodeMirror 继承字号 */
+    font-size: inherit !important;
 }
 
 #publishForm {
@@ -149,31 +217,199 @@ body.has-fixed-topnav { /* 你可以给 body 添加这个类来动态调整 */
     flex-direction: column;
 }
 
-#toastUiEditor { /* The div where editor is mounted */
-    flex-grow: 1; /* Allow the editor's container div to grow */
+#toastUiEditor {
+    flex-grow: 1;
     min-height: 0;
 }
-.toastui-editor-defaultUI { /* Toast UI's main wrapper */
-    border: 1px solid #ced4da;
-    flex-grow: 1; /* Allow the editor UI to grow */
+
+.toastui-editor-defaultUI {
+    border: 1px solid #e0e0e0;
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
 }
-.toastui-editor-defaultUI .toastui-editor-main { /* Actual editing area */
-    flex-grow: 1 !important; /* Force the editing area to take available space */
+
+.toastui-editor-defaultUI .toastui-editor-main {
+    flex-grow: 1 !important;
     overflow-y: auto !important;
     min-height: 0;
 }
 
-/* Style for custom file upload area in modal */
+/* 文件上传区域美化 */
 .custom-file-upload {
-    border: 2px dashed #ced4da;
-    padding: 2rem;
-    border-radius: .25rem;
-    background-color: #f8f9fa;
-    transition: background-color .15s ease-in-out;
+    border: 2px dashed #ddd;
+    padding: 2.5rem;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
 }
+
 .custom-file-upload:hover {
-    background-color: #e9ecef;
+    background-color: #f0f0f0;
+    border-color: #ccc;
+}
+
+.custom-file-upload i {
+    font-size: 2rem;
+    color: #aaa;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+/* 模态框美化 */
+.modal-content {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.2rem 1.5rem;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    border-top: 1px solid #f0f0f0;
+    padding: 1.2rem 1.5rem;
+}
+
+/* 表单控件美化 */
+.form-control {
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #ffda58;
+    box-shadow: 0 0 0 0.2rem rgba(255, 218, 88, 0.25);
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+/* 编辑器工具栏美化 */
+.toastui-editor-defaultUI .toastui-editor-toolbar {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.toastui-editor-defaultUI .toastui-editor-toolbar button {
+    border-radius: 4px;
+    margin: 0 2px;
+    transition: all 0.2s ease;
+}
+
+.toastui-editor-defaultUI .toastui-editor-toolbar button:hover {
+    background-color: #f0f0f0;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .article-title-input {
+        font-size: 1.3rem;
+    }
+    
+    .top-action-bar {
+        padding: 8px 0;
+    }
+    
+    .action-buttons .text-muted {
+        display: none;
+    }
+    
+    .bottom-status-bar {
+        padding: 6px 15px;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.publish-page-wrapper {
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Toast UI 编辑器预览区域美化 */
+.toastui-editor-contents p {
+    margin: 1.2em 0;
+}
+
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents h4,
+.toastui-editor-contents h5,
+.toastui-editor-contents h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    color: #333;
+}
+
+.toastui-editor-contents blockquote {
+    border-left: 4px solid #ffda58;
+    padding: 0.6em 1.2em;
+    background-color: #f9f9f9;
+    margin: 1.5em 0;
+    color: #555;
+}
+
+.toastui-editor-contents code {
+    background-color: #f0f0f0;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.toastui-editor-contents pre {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    padding: 1em;
+}
+
+.toastui-editor-contents img {
+    max-width: 100%;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.toastui-editor-contents table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1.5em 0;
+}
+
+.toastui-editor-contents th,
+.toastui-editor-contents td {
+    border: 1px solid #e0e0e0;
+    padding: 8px 12px;
+}
+
+.toastui-editor-contents th {
+    background-color: #f5f5f5;
+}
+
+.toastui-editor-contents hr {
+    border: none;
+    border-top: 2px solid #f0f0f0;
+    margin: 2em 0;
 }

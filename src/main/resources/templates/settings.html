@@ -4,70 +4,7 @@
   <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
   <title>个人设置 - Lumi Hive</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    html {
-      height: 100%;
-    }
-    body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      margin: 0;
-      background-color: #f8f9fa;
-    }
-    .main-content {
-      flex: 1 0 auto;
-    }
-    .settings-container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 30px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.1);
-    }
-    .avatar-preview-container { /* 用于头像和按钮的垂直居中对齐 */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      /* margin-bottom: 1.5rem; */ /* BS4 使用 form-group 来管理间距 */
-    }
-    .avatar-image {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid #eee;
-      margin-bottom: 0.75rem; /* 图片和按钮间距 */
-      cursor: pointer;
-    }
-    /* Bootstrap 4 .nav-pills .nav-link 样式调整 */
-    .nav-pills .nav-link {
-      font-size: 1rem; /* 或 18px */
-      /* display: flex; align-items: center; justify-content: center; */ /* BS4 a 标签默认就是块状的，可以不用flex来居中文本 */
-      text-align: center; /* 对于 a 标签，可以用 text-align */
-      padding: 0.5rem 1rem; /* BS4 .nav-link 默认 padding */
-      color: #495057; /* BS4 默认链接颜色 */
-    }
-    .nav-pills .nav-link.active {
-      font-size: 1rem; /* 或 18px */
-      background-color: #007bff; /* BS4 primary color */
-      color: white;
-    }
-    /* 自定义头像上传区域布局 */
-    .avatar-upload-wrapper {
-      display: flex;          /* 1. 启用 Flexbox 布局 */
-      flex-direction: column; /* 2. 设置为垂直方向排列 */
-      align-items: center;    /* 3. 让所有子项在水平方向上居中对齐 */
-      width: 100%;            /* 确保容器占满可用宽度，以便居中生效 */
-      margin-bottom: 1rem;    /* 相当于 Bootstrap 的 mb-3 */
-    }
-
-    /* 确保上传按钮下方的提示文字也是居中的 */
-    .avatar-upload-controls {
-      text-align: center;
-    }
-  </style>
+  <link rel="stylesheet" th:href="@{/css/settings.css}">
 </head>
 <body>
 
@@ -112,18 +49,18 @@
 
                       <img th:if="${avatarUrl != null && !avatarUrl.isEmpty()}"
                            th:src="${avatarUrl}"
-                           alt="用户头像" class="avatar-image">
+                           alt="用户头像" class="avatar-image" id="avatarPreviewDisplay">
 
                       <img th:unless="${avatarUrl != null && !avatarUrl.isEmpty()}"
                            th:src="@{/img/default01.jpg}"
-                           alt="默认用户头像" class="avatar-image">
+                           alt="默认用户头像" class="avatar-image" id="avatarPreviewDisplay">
                     </th:block>
                   </th:block>
                 </div>
 
                 <div class="avatar-upload-controls">
                   <input type="file" class="form-control-file d-none" id="avatarUploadInput" name="avatarFile" accept="image/*">
-                  <label for="avatarUploadInput" class="btn btn-sm btn-outline-primary mt-2">
+                  <label for="avatarUploadInput" class="btn btn-outline-primary upload-btn">
                     <i class="fas fa-camera mr-1"></i> 上传新头像
                   </label>
                   <small class="form-text text-muted d-block mt-1">支持 JPG, PNG 格式，大小不超过2MB。</small>
@@ -197,23 +134,23 @@
             <hr>
             <h5>社交账户关联</h5>
             <div th:if="${user != null}">
-              <div class="form-group row align-items-center mb-3">
-              <label class="col-sm-3 col-form-label"><i class="fab fa-github fa-fw mr-2"></i>GitHub</label>
-              <div class="col-sm-9">
-                <th:block th:if="${user.isGithubOAuthUser()}">
-                  <span class="text-success">已关联</span>
-                  (<span th:text="${user.githubId}">GitHub ID</span>)
-                </th:block>
-                <th:block th:unless="${user.isGithubOAuthUser()}">
-                  <a href="/oauth2/authorization/github?connect=true" class="btn btn-outline-dark">
-                    <i class="fab fa-github mr-1"></i> 点击关联 GitHub 账户
-                  </a>
-                </th:block>
+              <div class="form-group row align-items-center mb-3 social-account-row">
+                <label class="col-sm-3 col-form-label"><i class="fab fa-github fa-fw mr-2"></i>GitHub</label>
+                <div class="col-sm-9">
+                  <th:block th:if="${user.isGithubOAuthUser()}">
+                    <span class="text-success">已关联</span>
+                    (<span th:text="${user.githubId}">GitHub ID</span>)
+                  </th:block>
+                  <th:block th:unless="${user.isGithubOAuthUser()}">
+                    <a href="/oauth2/authorization/github?connect=true" class="btn btn-outline-dark">
+                      <i class="fab fa-github mr-1"></i> 点击关联 GitHub 账户
+                    </a>
+                  </th:block>
+                </div>
               </div>
-            </div>
 
-              <div class="form-group row align-items-center mb-3">
-                <label class="col-sm-3 col-form-label" style="color:red"><i class="fab fa-qq fa-fw mr-2"></i>QQ</label>
+              <div class="form-group row align-items-center mb-3 social-account-row">
+                <label class="col-sm-3 col-form-label"><i class="fab fa-qq fa-fw mr-2"></i>QQ</label>
                 <div class="col-sm-9">
                   <th:block th:if="${user.isQQOpenAuthUser()}">
                     <span class="text-success">已关联</span>
@@ -260,9 +197,11 @@
 
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/functions.js}" type="text/javascript"></script>
+
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const avatarUploadInput = document.getElementById('avatarUploadInput');

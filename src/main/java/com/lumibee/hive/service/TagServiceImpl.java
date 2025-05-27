@@ -67,4 +67,5 @@ public class TagServiceImpl implements TagService {
     public void insertTagArticleRelation(Integer articleId, Integer tagId) {
         tagMapper.insertTagArticleRelation(articleId, tagId);
     }
+
 }
