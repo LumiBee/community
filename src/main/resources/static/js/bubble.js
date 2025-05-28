@@ -1,15 +1,14 @@
 document.addEventListener('DOMContentLoaded', function() {
     const container = document.getElementById('tagBubbleContainer');
+    if (!container) return;
+    
     const bubbles = Array.from(container.getElementsByClassName('tag-bubble'));
-
-    if (!container || bubbles.length === 0) {
-        return;
-    }
+    if (bubbles.length === 0) return;
 
     const containerWidth = container.offsetWidth;
     const containerHeight = container.offsetHeight;
 
-    // 简化颜色调色板，减少渐变计算
+    // 颜色调色板
     const colorPalette = [
         '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#2AB7CA',
         '#F0B67F', '#FE4A49', '#547980', '#8A9B0F', '#C3D89F',
@@ -26,6 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const maxFontSize = 18; // 最大字体大小 (px)
     const countFactorFont = 0.2; // 每篇文章数增加多少像素字体大小
 
+    // 计算最大文章数
     let maxArticleCount = 0;
     bubbles.forEach(bubble => {
         const count = parseInt(bubble.getAttribute('data-count') || '0');
@@ -34,10 +34,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // 用于简单避免重叠的数组，记录已放置泡泡的区域
+    // 用于避免重叠的数组，记录已放置泡泡的区域
     let placedBubbles = [];
 
-    bubbles.forEach((bubble, index) => {
+    // 首先根据文章数量排序泡泡，确保较大的泡泡先放置
+    const sortedBubbles = [...bubbles].sort((a, b) => {
+        const countA = parseInt(a.getAttribute('data-count') || '0');
+        const countB = parseInt(b.getAttribute('data-count') || '0');
+        return countB - countA; // 降序排列
+    });
+
+    sortedBubbles.forEach((bubble, index) => {
         const articleCount = parseInt(bubble.getAttribute('data-count') || '0');
 
         // 1. 设置颜色
@@ -62,52 +69,70 @@ document.addEventListener('DOMContentLoaded', function() {
         const paddingValue = Math.max(2, diameter * 0.05); // 根据直径设置padding
         bubble.style.padding = paddingValue + 'px';
 
-        // 3. 设置位置 (简单的随机分布，尝试避免重叠)
-        let attempts = 0;
-        let newPos;
-        do {
+        // 3. 设置位置 (尝试避免重叠)
+        let bestPos = null;
+        let minOverlap = Infinity;
+        
+        // 尝试多个位置，选择重叠最小的
+        for (let i = 0; i < 100; i++) {
             const x = Math.random() * (containerWidth - diameter);
             const y = Math.random() * (containerHeight - diameter);
-            newPos = {
+            const pos = {
                 x: x,
                 y: y,
                 radius: diameter / 2,
                 right: x + diameter,
                 bottom: y + diameter
             };
-            attempts++;
-        } while (attempts < 50 && doesOverlap(newPos, placedBubbles)); // 减少尝试次数，提高性能
-
-        bubble.style.left = newPos.x + 'px';
-        bubble.style.top = newPos.y + 'px';
-
-        placedBubbles.push(newPos);
+            
+            const overlapAmount = calculateOverlap(pos, placedBubbles);
+            if (overlapAmount < minOverlap) {
+                minOverlap = overlapAmount;
+                bestPos = pos;
+                
+                // 如果找到完全不重叠的位置，立即使用
+                if (overlapAmount === 0) break;
+            }
+        }
+        
+        // 使用找到的最佳位置
+        if (bestPos) {
+            bubble.style.left = bestPos.x + 'px';
+            bubble.style.top = bestPos.y + 'px';
+            placedBubbles.push(bestPos);
+        } else {
+            // 如果实在找不到好位置，随机放置
+            const x = Math.random() * (containerWidth - diameter);
+            const y = Math.random() * (containerHeight - diameter);
+            bubble.style.left = x + 'px';
+            bubble.style.top = y + 'px';
+        }
 
         // 添加轻微的随机旋转
         const rotation = Math.random() * 6 - 3; // -3到3度
         bubble.style.transform = `rotate(${rotation}deg)`;
     });
 
-    // 简单的重叠检测函数
-    function doesOverlap(newBubble, existingBubbles) {
-        // 只检查最近添加的10个泡泡，提高性能
-        const recentBubbles = existingBubbles.slice(-10);
-        for (let existing of recentBubbles) {
+    // 计算重叠程度
+    function calculateOverlap(newBubble, existingBubbles) {
+        let totalOverlap = 0;
+        for (let existing of existingBubbles) {
             const dx = newBubble.x + newBubble.radius - (existing.x + existing.radius);
             const dy = newBubble.y + newBubble.radius - (existing.y + existing.radius);
             const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < (newBubble.radius + existing.radius) * 0.9) { // 允许更多重叠
-                return true;
+            const minDistance = newBubble.radius + existing.radius;
+            
+            if (distance < minDistance) {
+                totalOverlap += (minDistance - distance);
             }
         }
-        return false;
+        return totalOverlap;
     }
 
-    // 仅为部分泡泡添加简单动画，减少动画数量
+    // 为部分泡泡添加动画
     const animatedBubbles = bubbles.filter((_, index) => index % 3 === 0); // 每3个泡泡中选1个添加动画
     
     animatedBubbles.forEach((bubble) => {
-        // 简化动画，减少计算量
         const floatY = Math.random() * 8 + 3; // 3-11px
         
         bubble.animate([

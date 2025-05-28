@@ -30,7 +30,7 @@
                         </div>
                         <input type="text" class="form-control" id="username" th:field="*{username}" 
                                placeholder="3-20个字符" required
-                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
                     </div>
                     <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}"></div>
                 </div>
@@ -43,7 +43,7 @@
                         </div>
                         <input type="email" class="form-control" id="email" th:field="*{email}" 
                                placeholder="例如：user@example.com" required
-                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
                     </div>
                     <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}"></div>
                 </div>
@@ -61,7 +61,7 @@
                             <button class="btn" type="button" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
-                        </div>
+                    </div>
                     </div>
                     <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback d-block" th:errors="*{password}"></div>
                 </div>

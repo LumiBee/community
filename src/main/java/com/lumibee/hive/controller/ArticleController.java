@@ -64,9 +64,7 @@ public class ArticleController {
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);
         model.addAttribute("isFollowedByCurrentUser", true);
-        System.out.println(article.getTags());
         System.out.println(article.getPortfolio());
-        System.out.println(article.getPortfolioId());
 
         return "article";
     }

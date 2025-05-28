@@ -10,7 +10,7 @@
 <div th:replace="~{fragments/header :: navbar}"></div>
 
 <!-- 文章头部区域 -->
-<div class="container">
+<div class="container-fluid" style="max-width: 1300px;">
 	<div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
 		<div class="h-100 tofront">
 			<div class="justify-content-between">
@@ -31,6 +31,15 @@
 								</a>
 							</div>
 						</div>
+					</div>
+					
+					<!-- 作品集信息 -->
+					<div class="mb-4" th:if="${article.portfolio != null}">
+						<span>作品集：</span>
+						<a th:href="@{'/portfolio/' + ${article.portfolio.getSlug()}}" class="portfolio-pill">
+							<i class="fas fa-book-open mr-1"></i>
+							<span th:text="${article.portfolio.getName()}">作品集名称</span>
+						</a>
 					</div>
 
 					<div class="d-flex align-items-center">
@@ -91,39 +100,37 @@
 </div>
 
 <!-- 主要内容区域 -->
-<div class="container pt-4 pb-4">
+<div class="container-fluid pt-4 pb-4" style="max-width: 1300px;">
 	<div class="row">
 		<!-- 分享按钮侧边栏 -->
-		<div class="col-lg-2 col-md-3 pr-4 mb-4" >
-			<div class="sticky-top text-center">
+		<div class="col-lg-1 col-md-2 pr-3 mb-4" >
+			<div class="sticky-top text-center" style="top: 80px;">
 				<div class="text-muted mb-2">
-					分享文章
+					分享
 				</div>
 				<div class="share d-flex justify-content-center">
-					<div class="d-flex flex-column align-items-center" style="width: 70%;">
+					<div class="d-flex flex-column align-items-center" style="width: 100%;">
 						<a href="#" class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="shareToWechat()">
-							<i class="fab fa-weixin"></i> 微信
+							<i class="fab fa-weixin"></i>
 						</a>
 						<a href="#" class="btn btn-outline-info btn-sm mb-2 w-100" onclick="shareToWeibo()">
-							<i class="fab fa-weibo"></i> 微博
+							<i class="fab fa-weibo"></i>
 						</a>
 						<a href="#" class="btn btn-outline-success btn-sm mb-2 w-100" onclick="copyLink()">
-							<i class="fas fa-link"></i> 复制
+							<i class="fas fa-link"></i>
 						</a>
 
 						<div class="text-muted my-2 pt-2 border-top w-100"></div>
 						<button th:class="${article.isLiked} ? 'btn btn-danger btn-sm mb-2 w-100' : 'btn btn-outline-danger btn-sm mb-2 w-100'"
-								onclick="toggleLike(event)">
+								onclick="toggleLike(event)" title="点赞">
 							<i class="fas fa-heart"></i>
-							点赞 (<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>)
+							<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>
 						</button>
-						<button class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="toggleFavorite()">
+						<button class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="toggleFavorite()" title="收藏">
 							<i class="fas fa-bookmark"></i>
-							收藏
 						</button>
-						<button class="btn btn-outline-info btn-sm mb-2 w-100" onclick="scrollToComments()">
+						<button class="btn btn-outline-info btn-sm mb-2 w-100" onclick="scrollToComments()" title="评论">
 							<i class="fas fa-comments"></i>
-							评论
 						</button>
 					</div>
 				</div>
@@ -131,7 +138,7 @@
 		</div>
 
 		<!-- 文章正文 -->
-		<div class="col-lg-8 col-md-9">
+		<div class="col-lg-9 col-md-10">
 			<article class="article-post">
 				<!-- 文章内容 -->
 				<div th:utext="${renderedHtmlContent}" class="article-content">
@@ -149,35 +156,77 @@
 
 				<!-- 评论区 -->
 				<div id="comments-section" class="mt-5">
-					<!-- 评论区内容将在这里显示 -->
-				</div>
-			</article>
-
-			<!-- 订阅区域 -->
-			<div class="border p-5 bg-lightblue mt-5">
-				<div class="row justify-content-between">
-					<div class="col-md-5 mb-2 mb-md-0">
-						<h5 class="font-weight-bold secondfont">订阅我们</h5>
-						获取最新文章推送，我们绝不发送垃圾邮件！
-					</div>
-					<div class="col-md-7">
-						<div class="row">
-							<div class="col-md-12">
-								<input type="email" class="form-control" placeholder="输入您的邮箱地址">
+					<h4 class="comments-title mb-4"><i class="fas fa-comments mr-2"></i>评论区</h4>
+					
+					<!-- 评论表单 -->
+					<div class="comment-form-container mb-4">
+						<form id="commentForm" class="comment-form">
+							<div class="form-group">
+								<textarea class="form-control" id="commentContent" rows="3" placeholder="写下你的评论..." required></textarea>
 							</div>
-							<div class="col-md-12 mt-2">
-								<button type="submit" class="btn btn-success btn-block">订阅</button>
+							<div class="text-right">
+								<button type="submit" class="btn btn-primary">发表评论</button>
+							</div>
+						</form>
+					</div>
+					
+					<!-- 评论列表 -->
+					<div class="comments-list">
+						<!-- 如果有评论 -->
+						<div th:if="${comments != null and !comments.isEmpty()}" class="comments-container">
+							<div th:each="comment : ${comments}" class="comment-item">
+								<div class="comment-header d-flex align-items-center">
+									<img th:if="${comment.userAvatarUrl}" th:src="${comment.userAvatarUrl}" alt="用户头像" class="comment-avatar">
+									<img th:unless="${comment.userAvatarUrl}" src="/img/default01.jpg" alt="默认头像" class="comment-avatar">
+									<div class="comment-meta">
+										<div class="comment-author" th:text="${comment.userName ?: '匿名用户'}">用户名</div>
+										<div class="comment-date" th:text="${#temporals.format(comment.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
+									</div>
+								</div>
+								<div class="comment-content" th:text="${comment.content}">
+									评论内容...
+								</div>
+								<div class="comment-actions">
+									<button class="btn btn-sm btn-link reply-btn" th:attr="data-comment-id=${comment.id}">
+										<i class="fas fa-reply"></i> 回复
+									</button>
+								</div>
+								
+								<!-- 回复列表 -->
+								<div th:if="${comment.replies != null and !comment.replies.isEmpty()}" class="replies-container">
+									<div th:each="reply : ${comment.replies}" class="reply-item">
+										<div class="reply-header d-flex align-items-center">
+											<img th:if="${reply.userAvatarUrl}" th:src="${reply.userAvatarUrl}" alt="用户头像" class="reply-avatar">
+											<img th:unless="${reply.userAvatarUrl}" src="/img/default01.jpg" alt="默认头像" class="reply-avatar">
+											<div class="reply-meta">
+												<div class="reply-author" th:text="${reply.userName ?: '匿名用户'}">用户名</div>
+												<div class="reply-date" th:text="${#temporals.format(reply.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
+											</div>
+										</div>
+										<div class="reply-content" th:text="${reply.content}">
+											回复内容...
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<!-- 如果没有评论 -->
+						<div th:if="${comments == null or comments.isEmpty()}" class="no-comments">
+							<div class="text-center py-4">
+								<i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+								<p class="text-muted">暂无评论，来发表第一条评论吧！</p>
 							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+			</article>
 		</div>
 	</div>
 </div>
 
 <!-- 相关文章推荐 -->
-<div class="container pt-4 pb-4">
+<div class="container-fluid pt-4 pb-4" style="max-width: 1300px;">
 	<h5 class="font-weight-bold spanborder"><span>相关阅读</span></h5>
 	<div class="row" th:if="${relatedArticles != null and !relatedArticles.isEmpty()}">
 		<div class="col-lg-6" th:each="relatedArticle : ${relatedArticles}">
@@ -426,7 +475,348 @@
 			});
 		});
 	});
+
+	// 滚动到评论区
+	function scrollToComments() {
+		const commentsSection = document.getElementById('comments-section');
+		if (commentsSection) {
+			commentsSection.scrollIntoView({ behavior: 'smooth' });
+			// 聚焦到评论输入框
+			setTimeout(() => {
+				const commentTextarea = document.getElementById('commentContent');
+				if (commentTextarea) {
+					commentTextarea.focus();
+				}
+			}, 800);
+		}
+	}
+
+	// 评论功能
+	$(document).ready(function() {
+		// 提交评论
+		$('#commentForm').on('submit', function(e) {
+			e.preventDefault();
+			
+			const commentContent = $('#commentContent').val().trim();
+			if (!commentContent) {
+				alert('评论内容不能为空');
+				return;
+			}
+			
+			const articleId = '[[${article.articleId}]]';
+			const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+			const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+			
+			$.ajax({
+				url: `/api/article/${articleId}/comment`,
+				type: 'POST',
+				headers: {
+					[header]: token,
+					'Content-Type': 'application/json'
+				},
+				data: JSON.stringify({
+					content: commentContent
+				}),
+				success: function(response) {
+					if (response.success) {
+						// 刷新页面显示新评论
+						location.reload();
+					} else {
+						alert(response.message || '评论失败，请稍后再试');
+					}
+				},
+				error: function() {
+					alert('评论失败，请检查网络连接');
+				}
+			});
+		});
+		
+		// 回复评论
+		$('.reply-btn').on('click', function() {
+			const commentId = $(this).data('comment-id');
+			const commentItem = $(this).closest('.comment-item');
+			
+			// 如果回复表单已存在，则移除
+			if (commentItem.find('.reply-form').length > 0) {
+				commentItem.find('.reply-form').remove();
+				return;
+			}
+			
+			// 创建回复表单
+			const replyForm = $(`
+				<div class="reply-form mt-2 mb-3">
+					<div class="form-group">
+						<textarea class="form-control reply-textarea" rows="2" placeholder="回复评论..."></textarea>
+					</div>
+					<div class="text-right">
+						<button type="button" class="btn btn-sm btn-secondary cancel-reply-btn mr-2">取消</button>
+						<button type="button" class="btn btn-sm btn-primary submit-reply-btn" data-comment-id="${commentId}">回复</button>
+					</div>
+				</div>
+			`);
+			
+			// 添加到评论项中
+			$(this).closest('.comment-actions').after(replyForm);
+			
+			// 聚焦到回复输入框
+			replyForm.find('.reply-textarea').focus();
+			
+			// 取消回复
+			replyForm.find('.cancel-reply-btn').on('click', function() {
+				replyForm.remove();
+			});
+			
+			// 提交回复
+			replyForm.find('.submit-reply-btn').on('click', function() {
+				const replyContent = replyForm.find('.reply-textarea').val().trim();
+				if (!replyContent) {
+					alert('回复内容不能为空');
+					return;
+				}
+				
+				const articleId = '[[${article.articleId}]]';
+				const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+				const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+				
+				$.ajax({
+					url: `/api/comment/${commentId}/reply`,
+					type: 'POST',
+					headers: {
+						[header]: token,
+						'Content-Type': 'application/json'
+					},
+					data: JSON.stringify({
+						content: replyContent
+					}),
+					success: function(response) {
+						if (response.success) {
+							// 刷新页面显示新回复
+							location.reload();
+						} else {
+							alert(response.message || '回复失败，请稍后再试');
+						}
+					},
+					error: function() {
+						alert('回复失败，请检查网络连接');
+					}
+				});
+			});
+		});
+	});
 </script>
+
+<style>
+/* 作品集样式 */
+.portfolio-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background-color: #f0f7ff;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    color: #0366d6;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid #cce4ff;
+}
+
+.portfolio-pill:hover {
+    background-color: #0366d6;
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(3, 102, 214, 0.2);
+}
+
+/* 文章内容样式优化 */
+.article-content {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #333;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}
+
+.article-content h1, .article-content h2, .article-content h3,
+.article-content h4, .article-content h5, .article-content h6 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.article-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 1.5rem 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.article-content blockquote {
+    border-left: 4px solid #007bff;
+    padding-left: 1rem;
+    margin-left: 0;
+    color: #555;
+    font-style: italic;
+}
+
+.article-content code {
+    background-color: #f5f5f5;
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.9em;
+}
+
+.article-content pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    position: relative;
+}
+
+/* 评论区样式 */
+.comments-title {
+    font-weight: 600;
+    color: #343a40;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.comment-form-container {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+}
+
+.comment-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.comment-avatar, .reply-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.reply-avatar {
+    width: 30px;
+    height: 30px;
+}
+
+.comment-meta, .reply-meta {
+    flex-grow: 1;
+}
+
+.comment-author, .reply-author {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.comment-date, .reply-date {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.comment-content, .reply-content {
+    margin: 10px 0;
+    white-space: pre-wrap;
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.reply-btn {
+    color: #6c757d;
+    padding: 0;
+}
+
+.reply-btn:hover {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.replies-container {
+    margin-left: 30px;
+    margin-top: 10px;
+    padding-left: 15px;
+    border-left: 2px solid #e9ecef;
+}
+
+.reply-item {
+    padding: 10px 0;
+}
+
+.reply-form {
+    margin-left: 30px;
+    padding-left: 15px;
+    border-left: 2px solid #e9ecef;
+}
+
+.no-comments {
+    padding: 30px 0;
+    color: #6c757d;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .article-content {
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+    
+    .container {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+
+/* 优化链接样式 */
+.article-content a {
+    color: #007bff;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.article-content a:hover {
+    border-bottom-color: #007bff;
+}
+
+/* 优化表格样式 */
+.article-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+}
+
+.article-content table th,
+.article-content table td {
+    border: 1px solid #dee2e6;
+    padding: 0.75rem;
+}
+
+.article-content table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.article-content table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+</style>
 
 </body>
 </html>

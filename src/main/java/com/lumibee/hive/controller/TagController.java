@@ -30,7 +30,7 @@ public class TagController {
         if ("all".equals(slug)) {
             articles = articleService.getArticlesLimit(100);
         } else {
-            Tag tag = tagService.selectOrCreateTag(slug);
+            Tag tag = tagService.selectTagBySlug(slug);
             if (tag == null) {
                 return ResponseEntity.notFound().build();
             }

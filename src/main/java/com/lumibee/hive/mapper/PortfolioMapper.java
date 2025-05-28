@@ -7,4 +7,6 @@ import org.apache.ibatis.annotations.Select;
 public interface PortfolioMapper extends BaseMapper<Portfolio> {
     @Select("SELECT * FROM portfolio WHERE name = #{portfolioName} LIMIT 1")
     Portfolio selectByName(String portfolioName);
+    @Select("SELECT * FROM portfolio WHERE id = #{id} LIMIT 1")
+    Portfolio findById(Integer id);
 }

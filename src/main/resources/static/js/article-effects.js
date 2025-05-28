@@ -209,14 +209,8 @@ function generateTableOfContents() {
         rightSidebar.appendChild(stickyContainer);
         
         // 6. 找到文章内容所在的行，并调整布局
-        const articleRow = document.querySelector('.container.pt-4.pb-4 .row');
+        const articleRow = document.querySelector('.container-fluid.pt-4.pb-4 .row');
         if (articleRow) {
-            // 调整文章内容区域宽度
-            const articleCol = articleRow.querySelector('.col-lg-8');
-            if (articleCol) {
-                articleCol.className = 'col-lg-7 col-md-9';
-            }
-            
             // 将目录侧边栏添加到行的末尾
             articleRow.appendChild(rightSidebar);
             

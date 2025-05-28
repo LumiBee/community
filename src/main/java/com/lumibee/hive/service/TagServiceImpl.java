@@ -18,20 +18,18 @@ public class TagServiceImpl implements TagService {
     private TagMapper tagMapper;
 
     @Override
-    public Tag selectOrCreateTag(String tagNameOrSlug) {
-        if (tagNameOrSlug == null || tagNameOrSlug.isEmpty()) {
+    public Tag selectOrCreateTag(String tagName) {
+        if (tagName == null || tagName.isEmpty()) {
             return null;
         }
 
-        String trimmedTagNameOrSlug = tagNameOrSlug.trim();
-        Tag tag = tagMapper.selectBySlug(trimmedTagNameOrSlug);
-        if (tag == null) {
-            tag = tagMapper.selectByName(trimmedTagNameOrSlug);
-        }
+        String trimmedTagName = tagName.trim();
+        Tag tag = tagMapper.selectByName(trimmedTagName);
+
         if (tag == null) {
             tag = new Tag();
-            tag.setName(trimmedTagNameOrSlug);
-            tag.setSlug(SlugGenerator.generateSlug(trimmedTagNameOrSlug));
+            tag.setName(trimmedTagName);
+            tag.setSlug(SlugGenerator.generateSlug(trimmedTagName));
             tag.setGmtCreate(LocalDateTime.now());
             tag.setArticleCount(1);
             tagMapper.insert(tag);
@@ -69,6 +67,11 @@ public class TagServiceImpl implements TagService {
     @Override
     public void insertTagArticleRelation(Integer articleId, Integer tagId) {
         tagMapper.insertTagArticleRelation(articleId, tagId);
+    }
+
+    @Override
+    public Tag selectTagBySlug(String slug) {
+        return tagMapper.selectBySlug(slug);
     }
 
 }

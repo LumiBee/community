@@ -12,4 +12,5 @@ public interface TagService {
     List<Tag> selectTagsByArticleId(int articleId);
     List<Tag> selectAllTags();
     void insertTagArticleRelation(Integer articleId, Integer tagId);
+    Tag selectTagBySlug(String slug);
 }

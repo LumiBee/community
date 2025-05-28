@@ -99,8 +99,36 @@
     // 添加搜索功能
     tagSearchInput.addEventListener('input', handleTagSearch);
 
-    // 初始加载文章
+    // 检查URL中是否有标签slug
+    const hash = window.location.hash;
+    if (hash && hash.length > 1) {
+      // 移除#号，获取标签名称并解码
+      const tagNameFromUrl = decodeURIComponent(hash.substring(1));
+      // 首先尝试通过data-slug查找
+      let tagElement = document.querySelector(`.tag-item[data-slug="${tagNameFromUrl}"]`);
+      
+      // 如果没找到，尝试通过标签名称查找
+      if (!tagElement) {
+        const allTagElements = document.querySelectorAll('.tag-item');
+        for (const element of allTagElements) {
+          if (element.textContent.trim().toLowerCase() === tagNameFromUrl.toLowerCase()) {
+            tagElement = element;
+            break;
+          }
+        }
+      }
+      
+      if (tagElement) {
+        // 如果找到对应标签，触发点击
+        handleTagClick(tagElement);
+      } else {
+        // 如果没找到，加载所有文章
+        fetchAndRenderArticles(activeSlug);
+      }
+    } else {
+      // 没有指定标签，初始加载所有文章
     fetchAndRenderArticles(activeSlug);
+    }
 
     // 添加页面加载动画
     setTimeout(() => {
@@ -122,6 +150,13 @@
     activeSlug = element.getAttribute('data-slug');
     const tagName = activeSlug === 'all' ? '所有文章' : element.textContent.trim();
     document.getElementById('articleListTitle').textContent = `(${tagName})`;
+    
+    // 更新URL，但不刷新页面
+    if (activeSlug === 'all') {
+      history.replaceState(null, null, ' ');
+    } else {
+      history.replaceState(null, null, `#${activeSlug}`);
+    }
 
     // 获取文章
     fetchAndRenderArticles(activeSlug);

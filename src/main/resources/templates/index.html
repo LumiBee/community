@@ -9,7 +9,7 @@
 <body>
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="main-content-wrapper"> <div class="container" style="width:100%">
+<div class="main-content-wrapper"> <div class="container-fluid" style="max-width: 1300px; width:100%">
 	<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="height: 300px"> <ol class="carousel-indicators">
 		<li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
 		<li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
@@ -49,7 +49,7 @@
 	</div>
 </div>
 
-	<div class="container" style="margin-top:20px">
+	<div class="container-fluid" style="max-width: 1300px; margin-top:20px">
 		<div class="row justify-content-between">
 			<div class="col-md-8"> <h5 class="font-weight-bold spanborder"><span>所有文章</span></h5>
 				<div th:if="${articles != null}">
@@ -164,8 +164,9 @@
 					margin-bottom: 20px;">
 					<a th:each="tag, iterStat : ${tags}"
 					   class="tag-bubble"
-					   th:href="@{'/articles/tag/' + ${tag.slug}}"
-					   th:attr="data-count=${tag.articleCount}"
+					   th:href="@{'/tags#' + ${tag.name}}"
+					   th:attr="data-count=${tag.articleCount}, data-tag-name=${tag.name}"
+					   onclick="navigateToTag(event, this.getAttribute('data-tag-name'))"
 					   style="position: absolute;
 					   border-radius: 50%;
 					   display: inline-flex;
@@ -201,5 +202,11 @@
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 <script th:src="@{/js/bubble.js}" type="text/javascript"></script>
+<script>
+function navigateToTag(event, tagName) {
+  event.preventDefault();
+  window.location.href = '/tags#' + encodeURIComponent(tagName);
+}
+</script>
 </body>
 </html>

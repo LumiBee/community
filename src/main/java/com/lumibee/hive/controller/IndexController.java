@@ -42,9 +42,7 @@ public class IndexController {
     @GetMapping("/tags")
     public String showAllTags(Model model) {
         List<Tag> allTags = tagService.selectAllTags();
-
         model.addAttribute("allTags", allTags);
-
         return "tags";
     }
 

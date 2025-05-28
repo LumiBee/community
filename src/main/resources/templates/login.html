@@ -48,9 +48,9 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         </div>
-                        <input type="password" class="form-control" id="password" name="password"
-                               placeholder="请输入您的密码" required
-                               th:classappend="${param.error} ? 'is-invalid' : ''">
+                    <input type="password" class="form-control" id="password" name="password"
+                           placeholder="请输入您的密码" required
+                           th:classappend="${param.error} ? 'is-invalid' : ''">
                         <div class="input-group-append">
                             <button class="btn" type="button" id="togglePassword">
                                 <i class="fas fa-eye"></i>
@@ -63,8 +63,8 @@
                 </div>
 
                 <div class="custom-control custom-checkbox d-flex justify-content-end mb-3">
-                    <input type="checkbox" class="custom-control-input" id="remember-me" name="remember-me">
-                    <label class="custom-control-label" for="remember-me">记住我</label>
+                        <input type="checkbox" class="custom-control-input" id="remember-me" name="remember-me">
+                        <label class="custom-control-label" for="remember-me">记住我</label>
                 </div>
 
                 <button type="submit" class="btn btn-warning btn-block">
@@ -90,17 +90,17 @@
         </div>
         
         <div class="auth-info-section">
-            <h2>欢迎来到 LumiHive!</h2>
-            <p>
-                LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
-            </p>
-            <p>
-                我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
-            </p>
-            <p>
-                最后请大家共同爱护这个交流环境，一个好的交流环境离不开大家的努力😊
-            </p>
-        </div>
+        <h2>欢迎来到 LumiHive!</h2>
+        <p>
+            LumiHive 是一个个人知识学习与交流平台，专注于各种技术分享与学习心得。
+        </p>
+        <p>
+            我们正在构建一个小众社区，大家在这里相互启发、以平等、自由、开放的精神进行分享交流。最终，每位大家庭成员找到与自己志同道合的伙伴，共同成长。
+        </p>
+        <p>
+            最后请大家共同爱护这个交流环境，一个好的交流环境离不开大家的努力😊
+        </p>
+    </div>
     </div>
 </div>
 
@@ -135,7 +135,7 @@
                     autohide: true,
                     delay: 7000
                 });
-                
+
                 // 显示弹窗
                 toastElement.toast('show');
                 
