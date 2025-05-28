@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
@@ -32,5 +33,15 @@ public class PortfolioServiceImpl implements PortfolioService {
         }
 
         return portfolio;
+    }
+
+    @Override
+    public List<Portfolio> selectAllPortfolios() {
+        return portfolioMapper.selectAll();
+    }
+
+    @Override
+    public Portfolio selectPortfolioBySlug(String slug) {
+        return portfolioMapper.selectBySlug(slug);
     }
 }

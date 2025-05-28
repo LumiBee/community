@@ -2,8 +2,10 @@ package com.lumibee.hive.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.model.Article;
+import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.service.ArticleService;
+import com.lumibee.hive.service.PortfolioService;
 import com.lumibee.hive.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,6 +23,9 @@ public class IndexController {
 
     @Autowired
     private TagService tagService;
+
+    @Autowired
+    private PortfolioService portfolioService;
 
     @GetMapping("/")
     public String home(@RequestParam(name = "page", defaultValue = "1") long pageNum,
@@ -44,6 +49,15 @@ public class IndexController {
         List<Tag> allTags = tagService.selectAllTags();
         model.addAttribute("allTags", allTags);
         return "tags";
+    }
+
+    @GetMapping("/portfolio")
+    public String showPortfolio(Model model) {
+        List<Portfolio> allPortfolios = portfolioService.selectAllPortfolios();
+
+        model.addAttribute("allPortfolios", allPortfolios);
+
+        return "portfolio";
     }
 
     @GetMapping("/about")

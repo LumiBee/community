@@ -2,169 +2,174 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
     <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
-    <title>作品集 - LumiHive</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" th:href="@{/css/portfolio.css}">
+    <title>作品集 - Lumi Hive</title>
+    <link rel="stylesheet" th:href="@{/css/tags.css}"/>
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="main-content">
-    <div class="container">
-        <!-- 页面标题 -->
-        <div class="page-title">
-            <h1>作品集</h1>
-            <p>展示我的创意项目和技术作品，记录成长历程</p>
+<div class="main-container">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">作品集</h1>
+            <p class="hero-subtitle">探索精选作品集，发现优质内容</p>
         </div>
+    </section>
 
-        <!-- 作品集过滤器 -->
-        <div class="portfolio-filter">
-            <button class="filter-btn active" data-filter="all">全部</button>
-            <button class="filter-btn" data-filter="web">Web开发</button>
-            <button class="filter-btn" data-filter="app">移动应用</button>
-            <button class="filter-btn" data-filter="design">UI/UX设计</button>
-            <button class="filter-btn" data-filter="other">其他项目</button>
-        </div>
-
-        <!-- 作品集网格 -->
-        <div class="portfolio-grid">
-            <!-- 作品项目1 -->
-            <div class="portfolio-item" data-category="web">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="个人博客网站" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">访问链接</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">Web开发</span>
-                    <h3 class="portfolio-title">个人博客网站</h3>
-                    <p class="portfolio-desc">基于Spring Boot和Thymeleaf开发的现代化个人博客系统，支持Markdown编辑、代码高亮和响应式设计。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2023-05-15</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 24</span>
-                    </div>
+    <!-- Content Container -->
+    <div class="content-container">
+        <div class="container">
+            <!-- Portfolio Header with Search -->
+            <div class="portfolio-header">
+                <h2 class="section-title">
+                    所有作品集
+                    <small class="section-subtitle">(6)</small>
+                </h2>
+                <div class="compact-search">
+                    <input type="search" id="portfolioSearchInput" placeholder="搜索作品集...">
+                    <i class="fas fa-search search-icon"></i>
                 </div>
             </div>
 
-            <!-- 作品项目2 -->
-            <div class="portfolio-item" data-category="app">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="健康追踪App" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">下载应用</a>
+            <!-- Portfolio Grid Section -->
+            <div id="portfolio-display-container">
+                <!-- 作品集列表 -->
+                <div id="portfolioGrid" class="article-grid stagger-children">
+                    <!-- 假数据：Java开发作品集 -->
+                    <a href="/portfolio/java-development" class="article-card portfolio-item" data-name="Java开发实践" data-description="包含Java核心技术、Spring框架和微服务架构的系列文章">
+                        <div class="portfolio-cover">
+                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" alt="Java开发实践" class="cover-img">
                         </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">移动应用</span>
-                    <h3 class="portfolio-title">健康追踪App</h3>
-                    <p class="portfolio-desc">使用Flutter开发的跨平台健康追踪应用，帮助用户记录运动数据、饮食习惯和睡眠质量。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2023-03-20</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 18</span>
-                    </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">张开发</p>
+                                    <p class="publish-date">3 天前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>12</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">Java开发实践</h3>
+                            <p class="article-excerpt">包含Java核心技术、Spring框架和微服务架构的系列文章，从基础到高级的全面指南。</p>
+                        </div>
+                    </a>
+
+                    <!-- 假数据：前端开发作品集 -->
+                    <a href="/portfolio/frontend-development" class="article-card portfolio-item" data-name="现代前端开发" data-description="涵盖HTML5、CSS3、JavaScript和主流框架的前端开发技术文章">
+                        <div class="portfolio-cover">
+                            <img src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613" alt="现代前端开发" class="cover-img">
+                        </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">李前端</p>
+                                    <p class="publish-date">1 周前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>8</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">现代前端开发</h3>
+                            <p class="article-excerpt">涵盖HTML5、CSS3、JavaScript和主流框架的前端开发技术文章，包括React、Vue等实战案例。</p>
+                        </div>
+                    </a>
+
+                    <!-- 假数据：数据科学作品集 -->
+                    <a href="/portfolio/data-science" class="article-card portfolio-item" data-name="数据科学与分析" data-description="关于数据分析、机器学习和人工智能的深度探索">
+                        <div class="portfolio-cover">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71" alt="数据科学与分析" class="cover-img">
+                        </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">王数据</p>
+                                    <p class="publish-date">2 周前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>15</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">数据科学与分析</h3>
+                            <p class="article-excerpt">关于数据分析、机器学习和人工智能的深度探索，从理论基础到实际应用的全面指导。</p>
+                        </div>
+                    </a>
+
+                    <!-- 假数据：云计算作品集 -->
+                    <a href="/portfolio/cloud-computing" class="article-card portfolio-item" data-name="云计算与DevOps" data-description="云服务、容器化和自动化部署相关的技术文章">
+                        <div class="portfolio-cover">
+                            <div class="gradient-cover" style="background: linear-gradient(135deg, #3498db, #2c3e50);">
+                                <i class="fas fa-cloud"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">赵云计算</p>
+                                    <p class="publish-date">1 个月前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>9</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">云计算与DevOps</h3>
+                            <p class="article-excerpt">云服务、容器化和自动化部署相关的技术文章，包括AWS、Docker、Kubernetes等实践经验。</p>
+                        </div>
+                    </a>
+
+                    <!-- 假数据：移动开发作品集 -->
+                    <a href="/portfolio/mobile-development" class="article-card portfolio-item" data-name="移动应用开发" data-description="Android和iOS应用开发的最佳实践和技术分享">
+                        <div class="portfolio-cover">
+                            <div class="gradient-cover" style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">陈移动</p>
+                                    <p class="publish-date">2 个月前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>7</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">移动应用开发</h3>
+                            <p class="article-excerpt">Android和iOS应用开发的最佳实践和技术分享，从UI设计到性能优化的全面指南。</p>
+                        </div>
+                    </a>
+
+                    <!-- 假数据：网络安全作品集 -->
+                    <a href="/portfolio/cyber-security" class="article-card portfolio-item" data-name="网络安全实战" data-description="网络安全、渗透测试和安全防护的专业知识">
+                        <div class="portfolio-cover">
+                            <div class="gradient-cover" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="author-section">
+                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
+                                <div class="author-info">
+                                    <p class="author-name">黄安全</p>
+                                    <p class="publish-date">3 个月前</p>
+                                </div>
+                            </div>
+                            <div class="portfolio-stats">
+                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>11</span> 文章</span>
+                            </div>
+                            <h3 class="article-title">网络安全实战</h3>
+                            <p class="article-excerpt">网络安全、渗透测试和安全防护的专业知识，包括实际案例分析和防护策略。</p>
+                        </div>
+                    </a>
                 </div>
             </div>
-
-            <!-- 作品项目3 -->
-            <div class="portfolio-item" data-category="design">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="电商平台UI设计" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">查看原型</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">UI/UX设计</span>
-                    <h3 class="portfolio-title">电商平台UI设计</h3>
-                    <p class="portfolio-desc">为移动电商平台设计的现代化UI界面，注重用户体验和转化率优化，包含完整的用户流程和交互设计。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2023-01-10</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 32</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 作品项目4 -->
-            <div class="portfolio-item" data-category="web">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="在线教育平台" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">访问链接</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">Web开发</span>
-                    <h3 class="portfolio-title">在线教育平台</h3>
-                    <p class="portfolio-desc">基于React和Node.js构建的在线教育平台，支持视频课程、在线测验和学习进度跟踪。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2022-11-05</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 27</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 作品项目5 -->
-            <div class="portfolio-item" data-category="other">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="数据可视化项目" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">查看演示</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">其他项目</span>
-                    <h3 class="portfolio-title">数据可视化项目</h3>
-                    <p class="portfolio-desc">使用D3.js开发的交互式数据可视化项目，展示全球气候变化趋势和环境数据分析。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2022-09-18</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 15</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 作品项目6 -->
-            <div class="portfolio-item" data-category="app">
-                <div class="portfolio-img-container">
-                    <img src="https://via.placeholder.com/600x400" alt="任务管理应用" class="portfolio-img">
-                    <div class="portfolio-overlay">
-                        <div class="portfolio-overlay-content">
-                            <a href="#" class="portfolio-overlay-btn">查看详情</a>
-                            <a href="#" target="_blank" class="portfolio-overlay-btn">下载应用</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="portfolio-content">
-                    <span class="portfolio-category">移动应用</span>
-                    <h3 class="portfolio-title">任务管理应用</h3>
-                    <p class="portfolio-desc">使用React Native开发的高效任务管理应用，支持任务分类、优先级设置和提醒功能。</p>
-                    <div class="portfolio-meta">
-                        <span class="portfolio-date"><i class="far fa-calendar-alt"></i> 2022-07-25</span>
-                        <span class="portfolio-likes"><i class="fas fa-heart"></i> 21</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 加载更多按钮 -->
-        <div class="load-more-container">
-            <button class="load-more-btn">加载更多作品</button>
         </div>
     </div>
 </div>
@@ -177,51 +182,206 @@
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 作品集过滤功能
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const portfolioItems = document.querySelectorAll('.portfolio-item');
-    
-    filterButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // 移除所有按钮的active类
-            filterButtons.forEach(btn => btn.classList.remove('active'));
-            // 为当前点击的按钮添加active类
-            this.classList.add('active');
-            
-            const filterValue = this.getAttribute('data-filter');
-            
-            portfolioItems.forEach(item => {
-                if (filterValue === 'all' || item.getAttribute('data-category') === filterValue) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        // 搜索功能
+        const searchInput = document.getElementById('portfolioSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchValue = this.value.toLowerCase();
+                const portfolioItems = document.querySelectorAll('.portfolio-item');
+                
+                portfolioItems.forEach(item => {
+                    const name = item.getAttribute('data-name').toLowerCase();
+                    const description = item.getAttribute('data-description') ? 
+                                        item.getAttribute('data-description').toLowerCase() : '';
+                    
+                    if (name.includes(searchValue) || description.includes(searchValue)) {
+                        item.style.display = '';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                
+                // 检查是否有可见的作品集
+                const visibleItems = document.querySelectorAll('.portfolio-item:not([style*="display: none"])');
+                const noResultsElement = document.getElementById('no-results');
+                
+                if (visibleItems.length === 0 && searchValue !== '') {
+                    // 如果没有搜索结果且有搜索词，显示无结果提示
+                    if (!noResultsElement) {
+                        const noResults = document.createElement('div');
+                        noResults.id = 'no-results';
+                        noResults.className = 'no-articles';
+                        noResults.innerHTML = `
+                            <div class="no-articles-icon"><i class="fas fa-search"></i></div>
+                            <h3>未找到匹配的作品集</h3>
+                            <p>尝试使用其他关键词搜索</p>
+                        `;
+                        document.getElementById('portfolioGrid').appendChild(noResults);
+                    }
+                } else if (noResultsElement) {
+                    // 如果有结果或没有搜索词，移除无结果提示
+                    noResultsElement.remove();
                 }
             });
-        });
+        }
+        
+        // 添加页面加载动画
+        setTimeout(() => {
+            document.querySelectorAll('.article-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('fade-in');
+                }, index * 100);
+            });
+        }, 300);
     });
-    
-    // 加载更多按钮功能（示例）
-    const loadMoreBtn = document.querySelector('.load-more-btn');
-    
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', function() {
-            // 这里可以添加AJAX请求加载更多作品的逻辑
-            // 为了演示，我们只显示一个加载中的状态，然后恢复
-            this.textContent = '加载中...';
-            this.disabled = true;
-            
-            setTimeout(() => {
-                this.textContent = '没有更多作品了';
-                this.style.backgroundColor = '#f0f0f0';
-                this.style.borderColor = '#ddd';
-                this.style.color = '#999';
-                this.style.cursor = 'not-allowed';
-            }, 1500);
-        });
-    }
-});
 </script>
+
+<style>
+    /* 作品集特定样式 */
+    .portfolio-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .section-title {
+        margin-bottom: 0;
+    }
+    
+    .compact-search {
+        position: relative;
+        width: 250px;
+    }
+    
+    .compact-search input {
+        width: 100%;
+        padding: 8px 15px 8px 35px;
+        border: 1px solid #e0e0e0;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        background-color: #f8f9fa;
+    }
+    
+    .compact-search input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        background-color: white;
+    }
+    
+    .compact-search .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    /* 作品集封面 */
+    .portfolio-cover {
+        height: 160px;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    
+    .cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .article-card:hover .cover-img {
+        transform: scale(1.05);
+    }
+    
+    .gradient-cover {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2.5rem;
+        transition: transform 0.5s ease;
+    }
+    
+    .article-card:hover .gradient-cover {
+        transform: scale(1.05);
+    }
+    
+    /* 作品集卡片 */
+    .article-card {
+        display: flex;
+        flex-direction: column;
+        border-radius: 8px;
+        overflow: hidden;
+        padding: 0;
+    }
+    
+    .card-content {
+        padding: 1.25rem;
+    }
+    
+    .portfolio-stats {
+        margin-bottom: 10px;
+    }
+    
+    .article-count {
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.85rem;
+        color: #6c757d;
+        background-color: rgba(0, 0, 0, 0.05);
+        padding: 3px 8px;
+        border-radius: 12px;
+    }
+    
+    .article-count i {
+        margin-right: 4px;
+        font-size: 0.8rem;
+    }
+    
+    /* 卡片动画 */
+    .article-card {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    }
+    
+    .article-card.fade-in {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (max-width: 768px) {
+        .portfolio-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .section-title {
+            margin-bottom: 1rem;
+        }
+        
+        .compact-search {
+            width: 100%;
+        }
+    }
+</style>
 
 </body>
 </html> 
