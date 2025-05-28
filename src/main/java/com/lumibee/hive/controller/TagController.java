@@ -1,16 +1,20 @@
 package com.lumibee.hive.controller;
 
+import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Controller
+@RestController
 public class TagController {
 
     @Autowired
@@ -19,12 +23,20 @@ public class TagController {
     @Autowired
     private ArticleService articleService;
 
-    @GetMapping("/tags")
-    public String showAllTags(Model model) {
-        List<Tag> allTags = tagService.selectAllTags();
+    @GetMapping("/api/tags/{slug}")
+    public ResponseEntity<List<Article>> getArticlesByTag(@PathVariable("slug") String slug) {
+        List<Article> articles;
 
-        model.addAttribute("allTags", allTags);
+        if ("all".equals(slug)) {
+            articles = articleService.getArticlesLimit(100);
+        } else {
+            Tag tag = tagService.selectOrCreateTag(slug);
+            if (tag == null) {
+                return ResponseEntity.notFound().build();
+            }
+            articles = articleService.getArticlesByTagId(tag.getTagId());
+        }
 
-        return "tags";
+        return ResponseEntity.ok(articles);
     }
 }

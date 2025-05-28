@@ -26,8 +26,10 @@ public class IndexController {
     public String home(@RequestParam(name = "page", defaultValue = "1") long pageNum,
                        @RequestParam(name = "size", defaultValue = "6") long pageSize,
                        Model model) {
+        int limit = 6;
+
         Page<Article> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
-        List<Article> topArticles = articleService.getTopArticles();
+        List<Article> topArticles = articleService.getArticlesLimit(limit);
         List<Tag> allTags = tagService.selectAllTags();
 
         model.addAttribute("articles", articlePage);
@@ -35,6 +37,15 @@ public class IndexController {
         model.addAttribute("tags", allTags);
 
         return "index";
+    }
+
+    @GetMapping("/tags")
+    public String showAllTags(Model model) {
+        List<Tag> allTags = tagService.selectAllTags();
+
+        model.addAttribute("allTags", allTags);
+
+        return "tags";
     }
 
     @GetMapping("/about")

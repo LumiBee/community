@@ -155,7 +155,7 @@
     articleGrid.innerHTML = '';
     articleGrid.classList.remove('stagger-children');
 
-    const apiUrl = `/api/articles?tagSlug=${slug}`;
+    const apiUrl = `/api/tags/${slug}`;
 
     try {
       const response = await fetch(apiUrl);

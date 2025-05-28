@@ -155,8 +155,13 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Article> getTopArticles() {
-        return articleMapper.getTopArticles();
+    public List<Article> getArticlesLimit(int limit) {
+        return articleMapper.getArticlesLimit(limit);
+    }
+
+    @Override
+    public List<Article> getArticlesByTagId(int tagId) {
+        return articleMapper.getArticlesByTagId(tagId);
     }
 
 }

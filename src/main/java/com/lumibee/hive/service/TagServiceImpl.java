@@ -18,17 +18,20 @@ public class TagServiceImpl implements TagService {
     private TagMapper tagMapper;
 
     @Override
-    public Tag selectOrCreateTag(String tagName) {
-        if (tagName == null || tagName.isEmpty()) {
+    public Tag selectOrCreateTag(String tagNameOrSlug) {
+        if (tagNameOrSlug == null || tagNameOrSlug.isEmpty()) {
             return null;
         }
 
-        String trimmedTagName = tagName.trim();
-        Tag tag = tagMapper.selectByName(trimmedTagName);
+        String trimmedTagNameOrSlug = tagNameOrSlug.trim();
+        Tag tag = tagMapper.selectBySlug(trimmedTagNameOrSlug);
+        if (tag == null) {
+            tag = tagMapper.selectByName(trimmedTagNameOrSlug);
+        }
         if (tag == null) {
             tag = new Tag();
-            tag.setName(trimmedTagName);
-            tag.setSlug(SlugGenerator.generateSlug(trimmedTagName));
+            tag.setName(trimmedTagNameOrSlug);
+            tag.setSlug(SlugGenerator.generateSlug(trimmedTagNameOrSlug));
             tag.setGmtCreate(LocalDateTime.now());
             tag.setArticleCount(1);
             tagMapper.insert(tag);
