@@ -16,17 +16,22 @@
             --border-color: #e9ecef;
             --success-color: #2ecc71;
             --transition-speed: 0.3s;
+            --container-padding: 30px; /* 统一容器内边距 */
+            --content-width: 80%; /* 内容宽度 */
         }
         
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden;
-            background-color: #f8f9fa;
+            background-color: #f8f9fa; /* 恢复浅灰色背景，使中央内容区域更加突出 */
             padding-top: 56px;
             padding-bottom: 0;
             box-sizing: border-box;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         /* 顶部操作栏 */
@@ -37,39 +42,43 @@
             right: 0;
             height: 70px;
             z-index: 1029;
-            background-color: #fff;
-            box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+            background-color: #f8f9fa; /* 与背景色保持一致 */
+            box-shadow: none;
             transition: all var(--transition-speed) ease;
             padding: 0;
+            display: flex;
+            justify-content: center; /* 水平居中 */
+            border-bottom: none;
         }
         
         .top-action-bar::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.03), transparent);
-            pointer-events: none;
-            opacity: 0.7;
-            transition: opacity var(--transition-speed) ease;
+            content: none; /* 移除额外的分隔线 */
         }
         
         .top-action-bar .container-fluid {
             height: 100%;
             padding: 0;
+            width: var(--content-width);
+            max-width: var(--content-width);
+            margin: 0 auto;
+            background-color: #fff; /* 白色背景 */
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            padding: 0 20px;
         }
         
         .top-action-bar .row {
             height: 100%;
             align-items: center;
+            width: 100%;
         }
         
         .article-title-input {
             border: none;
             border-radius: 0;
-            padding: 0.75rem 0 0.75rem 30px;
+            padding: 0.75rem 0;
             font-size: 1.35rem;
             font-weight: 500;
             color: var(--dark-text);
@@ -167,29 +176,23 @@
             display: flex;
             flex-direction: column;
             height: calc(100% - 126px - 50px); /* 导航栏(56px) + 操作栏(70px) + 底部状态栏(50px) */
-            width: 100%;
+            width: var(--content-width);
+            max-width: var(--content-width);
+            margin: 0 auto;
             overflow: hidden;
-            background-color: #fff;
+            background-color: transparent;
             box-sizing: border-box;
             position: fixed;
-            top: 126px; /* 导航栏(56px) + 操作栏(70px) */
-            bottom: 50px; /* 底部状态栏高度 */
+            top: 126px;
+            bottom: 50px;
             left: 0;
             right: 0;
-            padding-top: 10px; /* 添加顶部间距，使过渡更自然 */
-            transition: padding-top var(--transition-speed) ease;
+            padding: 0;
+            transition: all var(--transition-speed) ease;
         }
         
         .publish-page-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 15px;
-            background: linear-gradient(to bottom, rgba(248,249,250,0.8), transparent);
-            pointer-events: none;
-            z-index: 2;
+            content: none; /* 移除顶部渐变 */
         }
         
         .editor-content-container.container-fluid {
@@ -200,10 +203,14 @@
             width: 100%;
             max-width: 100%;
             margin: 0;
-            padding: 0;
+            padding: 0 20px;
             box-sizing: border-box;
             position: relative;
             z-index: 1;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom: none; /* 移除底部边框 */
         }
         
         #publishForm {
@@ -231,16 +238,18 @@
             border-top: none !important;
             background-color: transparent;
             transition: all var(--transition-speed) ease;
+            margin-top: 10px;
         }
         
         .toastui-editor-defaultUI .toastui-editor-toolbar {
-            background-color: rgba(255,255,255,0.95);
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            box-shadow: none;
             padding: 6px 0;
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
-            margin-top: 5px;
+            margin-top: 0;
             transition: all var(--transition-speed) ease;
             position: relative;
             z-index: 3;
@@ -256,23 +265,43 @@
             overflow-y: auto !important;
             height: calc(100% - 40px) !important;
             transition: background-color var(--transition-speed) ease;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            margin-bottom: 0; /* 确保没有底部间距 */
         }
         
         .toastui-editor-defaultUI .toastui-editor-main .toastui-editor-md-container,
         .toastui-editor-defaultUI .toastui-editor-main .toastui-editor-ww-container {
-            background: linear-gradient(to bottom, rgba(248,249,250,0.2) 0%, rgba(255,255,255,1) 20px);
+            background: #fff;
             transition: background var(--transition-speed) ease;
         }
         
         /* 底部状态栏 */
         .bottom-status-bar.fixed-bottom {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             height: 50px;
             z-index: 1030;
             background-color: #fff;
             border-top: 1px solid var(--border-color);
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            box-shadow: none;
             display: flex;
             align-items: center;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+        
+        .bottom-status-bar .container-fluid {
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0 30px;
+            height: 100%;
         }
         
         .stats {
@@ -360,7 +389,7 @@
                         <i class="fas fa-folder"></i>
                         草稿箱
                     </button>
-                    <button type="button" class="btn btn-primary publish-btn">
+                    <button type="button" class="btn btn-warning publish-btn">
                         <i class="fas fa-paper-plane"></i>
                         发布文章
                     </button>
@@ -371,7 +400,7 @@
 </div>
 
 <div class="publish-page-wrapper">
-    <div class="editor-content-container container-fluid">
+    <div class="editor-content-container container-fluid w-100">
         <form id="publishForm" method="post" th:action="@{/article/publish}">
             <input type="hidden" id="formArticleContent" name="content">
             <script id="initial-content-data" type="text/template" th:text="${article?.content}"></script>
@@ -391,11 +420,6 @@
                 <i class="fas fa-text-width"></i>
                 <span>字符: <span class="count" id="charCount">0</span></span>
             </div>
-        </div>
-        <div class="controls">
-            <button type="button" class="btn-link" onclick="window.scrollTo(0,0);">
-                <i class="fas fa-arrow-up"></i> 回到顶部
-            </button>
         </div>
     </div>
 </div>

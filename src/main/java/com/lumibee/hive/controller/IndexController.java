@@ -1,6 +1,10 @@
 package com.lumibee.hive.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.PortfolioDTO;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
+import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
@@ -33,9 +37,9 @@ public class IndexController {
                        Model model) {
         int limit = 6;
 
-        Page<Article> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
-        List<Article> topArticles = articleService.getArticlesLimit(limit);
-        List<Tag> allTags = tagService.selectAllTags();
+        Page<ArticleExcerptDTO> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
+        List<ArticleExcerptDTO> topArticles = articleService.selectArticleSummaries(limit);
+        List<TagDTO> allTags = tagService.selectAllTags();
 
         model.addAttribute("articles", articlePage);
         model.addAttribute("popularArticles", topArticles);
@@ -44,19 +48,23 @@ public class IndexController {
         return "index";
     }
 
+
+    @GetMapping("/publish")
+    public String publish() {
+        return "publish";
+    }
+
     @GetMapping("/tags")
     public String showAllTags(Model model) {
-        List<Tag> allTags = tagService.selectAllTags();
+        List<TagDTO> allTags = tagService.selectAllTags();
         model.addAttribute("allTags", allTags);
         return "tags";
     }
 
     @GetMapping("/portfolio")
     public String showPortfolio(Model model) {
-        List<Portfolio> allPortfolios = portfolioService.selectAllPortfolios();
-        System.out.println("All Portfolios: " + allPortfolios);
+        List<PortfolioDetailsDTO> allPortfolios = portfolioService.selectAllPortfolios();
         model.addAttribute("allPortfolios", allPortfolios);
-
         return "portfolio";
     }
 

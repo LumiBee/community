@@ -1,4 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
+    console.log("DOM Content Loaded - Initializing publish editor");
+    
     // --- DOM Element References ---
     const editorElement = document.getElementById('toastUiEditor');
     const mainNavbar = document.querySelector('nav.fixed-top');
@@ -22,6 +24,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const summaryCharCount = document.getElementById('summaryCharCount');
     const initialContentDataElement = document.getElementById('initial-content-data');
     const generateAISummaryBtn = document.getElementById('generateAISummaryBtn');
+    const articleTagsInput = document.getElementById('articleTags');
+    const articlePortfolioInput = document.getElementById('articlePortfolio');
+    
+    // Debug element references
+    console.log("Element references check:");
+    console.log("- topPublishBtnModalTrigger:", topPublishBtnModalTrigger);
+    console.log("- publishSettingsModalElement:", publishSettingsModalElement);
+    console.log("- confirmPublishBtn:", confirmPublishBtn);
+    console.log("- articleTagsInput:", articleTagsInput);
+    console.log("- articlePortfolioInput:", articlePortfolioInput);
+    console.log("- articleSummaryTextarea:", articleSummaryTextarea);
 
     let editorInstance = null;
     let bsModalInstance = null; // For Bootstrap 5 Native JS Modal Instance
@@ -121,13 +134,17 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- Initialize Bootstrap Modal ---
     if (publishSettingsModalElement) {
+        console.log("Attempting to initialize modal with publishSettingsModalElement");
         if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            console.log("Using Bootstrap 5 Modal API");
             bsModalInstance = new bootstrap.Modal(publishSettingsModalElement);
-            console.log("Bootstrap 5 Modal instance created.");
+            console.log("Bootstrap 5 Modal instance created:", bsModalInstance);
         } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
-            console.log("jQuery and Bootstrap 4 Modal JS found. Will use jQuery for modal.");
+            console.log("Using jQuery Bootstrap 4 Modal API");
         } else {
             console.warn("Bootstrap Modal JS (neither v5 nor v4 via jQuery) not found, or modal element #publishSettingsModal missing.");
+            console.log("bootstrap object:", typeof bootstrap, bootstrap);
+            console.log("jQuery object:", typeof $, $);
         }
     }
 
@@ -264,10 +281,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- Top Publish Button (Trigger for Modal) ---
     if (topPublishBtnModalTrigger && articleTitleInput) {
+        console.log("Setting up topPublishBtnModalTrigger click handler");
         topPublishBtnModalTrigger.addEventListener('click', function () {
             console.log("Top publish button (modal trigger) CLICKED!");
             if (!editorInstance) {
-                alert('编辑器尚未准备好，请稍候。');
+                showToast('编辑器正在加载，请稍候再试', 'error');
                 console.error("Editor instance not available for modal trigger.");
                 return;
             }
@@ -276,12 +294,12 @@ document.addEventListener("DOMContentLoaded", function() {
             const contentMarkdown = editorInstance.getMarkdown();
 
             if (!title.trim()) {
-                alert('请输入文章标题！');
+                showToast('请先输入文章标题', 'warning');
                 articleTitleInput.focus();
                 return;
             }
             if (!contentMarkdown.trim()) {
-                alert('请输入文章内容！');
+                showToast('请先输入文章内容', 'warning');
                 editorInstance.focus();
                 return;
             }
@@ -295,17 +313,40 @@ document.addEventListener("DOMContentLoaded", function() {
             // 1. 显示 Modal
             console.log("Attempting to show modal...");
             let modalShown = false;
-            if (bsModalInstance) {
-                bsModalInstance.show();
-                modalShown = true;
-                console.log("Bootstrap JS Modal 'show' command sent.");
-            } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function' && $(publishSettingsModalElement).length) {
-                $(publishSettingsModalElement).modal('show');
-                modalShown = true;
-                console.log("jQuery Modal 'show' command sent.");
+            
+            // 确保 bootstrap 对象存在
+            if (typeof bootstrap === 'undefined' && typeof $ !== 'undefined') {
+                console.log("Bootstrap object not found, trying jQuery modal");
+                // 尝试使用 jQuery 显示模态框
+                try {
+                    $(publishSettingsModalElement).modal('show');
+                    modalShown = true;
+                    console.log("jQuery Modal shown successfully");
+                } catch (e) {
+                    console.error("Error showing jQuery modal:", e);
+                }
+            } else if (bsModalInstance) {
+                try {
+                    bsModalInstance.show();
+                    modalShown = true;
+                    console.log("Bootstrap Modal shown successfully");
+                } catch (e) {
+                    console.error("Error showing Bootstrap modal:", e);
+                }
+            } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                try {
+                    // 重新创建一个模态框实例
+                    const newModal = new bootstrap.Modal(publishSettingsModalElement);
+                    newModal.show();
+                    bsModalInstance = newModal;
+                    modalShown = true;
+                    console.log("New Bootstrap Modal created and shown");
+                } catch (e) {
+                    console.error("Error creating and showing new Bootstrap modal:", e);
+                }
             } else {
                 console.error("Cannot show modal: No valid Bootstrap JS or jQuery modal instance/element available for #publishSettingsModal.");
-                alert("无法打开文章设置，Modal 组件似乎未正确初始化或页面元素缺失。");
+                showToast("无法打开发布设置，请刷新页面重试", 'error');
             }
 
             // 2. 如果 Modal 成功（或尝试）显示，则异步获取 AI 摘要
@@ -351,69 +392,245 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // --- Confirm Publish Button (Inside Modal) ---
     if (confirmPublishBtn && articleTitleInput && articleSettingsForm && formArticleContent) {
-        confirmPublishBtn.addEventListener('click', function() {
-            console.log("Confirm publish button in modal clicked.");
-            if (!editorInstance) {
-                alert("编辑器实例丢失，无法发布。");
-                return;
-            }
+        console.log("Setting up confirmPublishBtn click handler");
+        confirmPublishBtn.addEventListener('click', async function() {
+            console.log("Confirm publish button clicked (RESTful mode).");
 
-            const title = articleTitleInput.value;
-            const contentMarkdown = editorInstance.getMarkdown();
-            const settingsData = {};
-            const formData = new FormData(articleSettingsForm);
-            formData.forEach((value, key) => { settingsData[key] = value; });
-
-            const coverFile = articleCoverUpload ? articleCoverUpload.files[0] : null;
-            if (coverFile) settingsData.coverImageFileName = coverFile.name; // Or handle file upload separately
-
-            // Validation for modal fields
-            if (!settingsData.tags || !settingsData.tags.trim()) { alert('请输入至少一个标签！'); document.getElementById('articleTags')?.focus(); return; }
-            if (!settingsData.summary || !settingsData.summary.trim()) { alert('请输入文章摘要！'); document.getElementById('articleSummary')?.focus(); return; }
-
-            formArticleContent.value = contentMarkdown;
-
-            const publishForm = document.getElementById('publishForm');
-
-            function addHiddenInput(form, name, value) {
-                let input = form.querySelector(`input[type="hidden"][name="${name}"]`);
-                if (!input) {
-                    input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    form.appendChild(input);
+            try {
+                // 数据收集
+                // 从页面和模态框的各个输入框中收集最新数据
+                const title = articleTitleInput.value;
+                const content = editorInstance ? editorInstance.getMarkdown() : '';
+                
+                console.log("Checking required inputs:");
+                console.log("- articleTagsInput:", articleTagsInput);
+                console.log("- articlePortfolioInput:", articlePortfolioInput);
+                console.log("- articleSummaryTextarea:", articleSummaryTextarea);
+                
+                if (!articleTagsInput) {
+                    console.error("articleTagsInput element not found!");
+                    showToast("页面加载异常，请刷新后重试", 'error');
+                    return;
                 }
-                input.value = value;
-            }
+                
+                if (!articleSummaryTextarea) {
+                    console.error("articleSummaryTextarea element not found!");
+                    showToast("页面加载异常，请刷新后重试", 'error');
+                    return;
+                }
+                
+                const tagsValue = articleTagsInput.value;
+                const portfolioName = articlePortfolioInput ? articlePortfolioInput.value : '';
+                const excerpt = articleSummaryTextarea.value;
+                
+                console.log("Collected form data:", {
+                    title,
+                    contentLength: content.length,
+                    tagsValue,
+                    portfolioName,
+                    excerpt
+                });
 
-            // 将 title, tags, summary, portfolio 添加到 publishForm 中
-            addHiddenInput(publishForm, 'title', title);
-            addHiddenInput(publishForm, 'tags', settingsData.tags); // 后端期望参数名为 "tags"
-            addHiddenInput(publishForm, 'summary', settingsData.summary); // 后端期望参数名为 "summary" (对应你的 excerpt)
-            if (settingsData.portfolio) { // portfolio 是可选的
-                addHiddenInput(publishForm, 'portfolio', settingsData.portfolio);
-            }
+                // 客户端数据校验
+                if (!title.trim()) { showToast('请输入文章标题', 'warning'); articleTitleInput.focus(); return; }
+                if (!content.trim()) { showToast('请输入文章内容', 'warning'); editorInstance.focus(); return; }
+                if (!tagsValue.trim()) { showToast('请添加至少一个标签', 'warning'); articleTagsInput.focus(); return; }
+                if (!excerpt.trim()) { showToast('请输入文章摘要', 'warning'); articleSummaryTextarea.focus(); return; }
 
-            const finalArticleData = {
-                title: title,
-                content: contentMarkdown,
-                tags: settingsData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-                portfolio: settingsData.portfolio || "", // Ensure portfolio exists
-                summary: settingsData.summary
-            };
-            console.log("Final data to publish:", finalArticleData);
+                // 构建与后端 DTO 结构完全一致的 JSON 对象
+                // 将标签字符串处理成字符串数组
+                const tagsNameArray = tagsValue.split(',').map(tag => tag.trim()).filter(Boolean);
 
-            document.getElementById('publishForm').submit();
+                const requestData = {
+                    title: title,
+                    content: content,
+                    excerpt: excerpt,
+                    tagsName: tagsNameArray,
+                    portfolioName: portfolioName.trim() // portfolioName 是可选的
+                };
 
-            // Close Modal
-            if (bsModalInstance) {
-                bsModalInstance.hide();
-            } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
-                $(publishSettingsModalElement).modal('hide');
+                console.log("Final data to publish via AJAX:", requestData);
+
+                // 防止重复点击
+                confirmPublishBtn.disabled = true;
+                confirmPublishBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>发布中...';
+
+                // 获取CSRF令牌
+                const csrfToken = document.querySelector('meta[name="_csrf"]');
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
+                
+                if (!csrfToken || !csrfHeader) {
+                    console.warn("CSRF token or header meta tag not found");
+                }
+                
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (csrfToken && csrfHeader) {
+                    headers[csrfHeader.getAttribute('content')] = csrfToken.getAttribute('content');
+                }
+                
+                console.log("Request headers:", headers);
+
+                try {
+                    // 使用 fetch API 发起异步的 AJAX POST 请求
+                    const response = await fetch('/api/article/publish', { // 指向正确的 RESTful API 端点
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(requestData) // 将 JS 对象转换为 JSON 字符串
+                    });
+
+                    console.log("Server response status:", response.status);
+                    
+                    // 处理服务器的响应
+                    if (response.ok) { // HTTP 状态码为 2xx
+                        const newArticle = await response.json();
+                        console.log("Publish successful, article data:", newArticle);
+                        
+                        // 关闭模态框
+                        if (bsModalInstance) {
+                            bsModalInstance.hide();
+                        } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
+                            $(publishSettingsModalElement).modal('hide');
+                        }
+                        
+                        // 直接跳转到文章页面
+                        window.location.href = `/article/${newArticle.slug}`;
+                    } else {
+                        // 处理服务器返回的错误信息
+                        try {
+                            const errorData = await response.json();
+                            console.error("Server error response:", errorData);
+                            showToast(`发布失败: ${errorData.message || '服务器处理请求时出错'}`, 'error');
+                        } catch (jsonError) {
+                            console.error("Failed to parse error response:", jsonError);
+                            showToast(`发布失败，服务器返回错误码: ${response.status}`, 'error');
+                        }
+                    }
+                } catch (networkError) {
+                    console.error('发布请求时遇到网络错误:', networkError);
+                    showToast('网络连接异常，请检查网络后重试', 'error');
+                } finally {
+                    // 无论成功失败，都恢复按钮的可用状态
+                    confirmPublishBtn.disabled = false;
+                    confirmPublishBtn.innerHTML = '<i class="fas fa-check mr-1"></i>确定并发布';
+                }
+            } catch (error) {
+                console.error("Unexpected error in publish button handler:", error);
+                showToast("发布过程出现异常，请刷新页面重试", 'error');
+                confirmPublishBtn.disabled = false;
+                confirmPublishBtn.innerHTML = '<i class="fas fa-check mr-1"></i>确定并发布';
             }
         });
-        console.log("Event listener attached to #confirmPublishBtn.");
+        console.log("RESTful event listener attached to #confirmPublishBtn.");
     } else {
         console.error("Confirm publish button or other critical elements for final publish (articleTitleInput, articleSettingsForm, formArticleContent) NOT FOUND.");
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        // 检查是否已有toast容器
+        let toastContainer = document.querySelector('.toast-container');
+        
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            document.body.appendChild(toastContainer);
+        }
+        
+        // 获取图标
+        const icon = getToastIcon(type);
+        
+        // 创建toast元素
+        const toastId = 'toast-' + Date.now();
+        const toastHTML = `
+            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-${getToastBgClass(type)} text-white">
+                    <i class="${icon} me-2"></i>
+                    <strong class="me-auto">${getToastTitle(type)}</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="关闭"></button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+        
+        const toastElement = document.getElementById(toastId);
+        
+        // 添加自定义样式
+        toastElement.style.minWidth = '300px';
+        toastElement.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
+        
+        // 尝试使用Bootstrap 5的方式创建Toast
+        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
+            const toast = new bootstrap.Toast(toastElement, {
+                delay: 2000, // 缩短到2秒
+                animation: true,
+                autohide: true
+            });
+            toast.show();
+        } 
+        // 回退到Bootstrap 4 (jQuery)
+        else if (typeof $ !== 'undefined' && typeof $(toastElement).toast === 'function') {
+            $(toastElement).toast({
+                delay: 2000, // 缩短到2秒
+                animation: true,
+                autohide: true
+            });
+            $(toastElement).toast('show');
+        }
+        // 最后的回退方案：简单的计时器
+        else {
+            toastElement.style.display = 'block';
+            setTimeout(() => {
+                toastElement.style.opacity = '0';
+                setTimeout(() => toastElement.remove(), 300);
+            }, 2000); // 缩短到2秒
+        }
+        
+        // 自动移除toast元素
+        toastElement.addEventListener('hidden.bs.toast', function() {
+            this.remove();
+        });
+    }
+    
+    /**
+     * 获取Toast的背景类名
+     */
+    function getToastBgClass(type) {
+        switch (type) {
+            case 'success': return 'success';
+            case 'error': return 'danger';
+            case 'warning': return 'warning';
+            default: return 'info';
+        }
+    }
+    
+    /**
+     * 获取Toast的图标
+     */
+    function getToastIcon(type) {
+        switch (type) {
+            case 'success': return 'fas fa-check-circle';
+            case 'error': return 'fas fa-exclamation-circle';
+            case 'warning': return 'fas fa-exclamation-triangle';
+            default: return 'fas fa-info-circle';
+        }
+    }
+    
+    /**
+     * 获取Toast的标题
+     */
+    function getToastTitle(type) {
+        switch (type) {
+            case 'success': return '成功';
+            case 'error': return '错误';
+            case 'warning': return '警告';
+            default: return '提示';
+        }
     }
 });

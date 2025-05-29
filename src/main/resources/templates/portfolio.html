@@ -25,7 +25,7 @@
             <div class="portfolio-header">
                 <h2 class="section-title">
                     所有作品集
-                    <small class="section-subtitle">(6)</small>
+                    <small class="section-subtitle" th:text=" '(' + ${#lists.size(allPortfolios)} + ')' "></small>
                 </h2>
                 <div class="compact-search">
                     <input type="search" id="portfolioSearchInput" placeholder="搜索作品集...">
@@ -51,14 +51,15 @@
                         </div>
                         <div class="card-content">
                              <div class="author-section">
-                                  <img th:src="@{${portfolio.user.getAvatarUrl}}" alt="创建者头像" class="author-avatar">
+                                  <img th:src="@{${portfolio.getAvatarUrl}}" alt="创建者头像" class="author-avatar">
                                   <div class="author-info">
-                                        <p class="author-name" th:text="${portfolio.user.getName}">作者名</p>
+                                        <p class="author-name" th:text="${portfolio.getUserName}">作者名</p>
                                         <p class="publish-date" th:text="${portfolio.gmtModified}">发布日期</p>
                                   </div>
                              </div>
                              <div class="portfolio-stats">
-                                  <span class="article-count"><i class="fas fa-file-alt"></i> <span th:text="${portfolio.articleCount}">0</span> 文章</span>
+                                  <span class="article-count"><i class="fas fa-file-alt"></i>
+                                      <span th:text="${portfolio.articlesCount}">0</span> 文章</span>
                              </div>
                              <h3 class="article-title" th:text="${portfolio.name}">作品集标题</h3>
                              <p class="portfolio-description" th:text="${portfolio.description != null && !portfolio.description.isEmpty() ? portfolio.description : '暂无描述'}">作品集描述</p>
@@ -130,6 +131,29 @@
                 }, index * 100);
             });
         }, 300);
+        
+        // 作品集卡片点击跳转逻辑
+        const portfolioCards = document.querySelectorAll('.portfolio-item');
+        portfolioCards.forEach(card => {
+            card.addEventListener('click', function(e) {
+                // 如果点击的是链接内部元素，不需要额外处理，让默认的链接行为发生
+                if (e.target.tagName === 'A' || e.target.closest('a') !== this) {
+                    return;
+                }
+                
+                // 获取作品集的slug
+                const href = this.getAttribute('href');
+                if (href) {
+                    // 添加点击动画效果
+                    this.classList.add('card-clicked');
+                    
+                    // 延迟跳转，让动画有时间播放
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 150);
+                }
+            });
+        });
     });
 </script>
 
@@ -287,6 +311,33 @@
         .compact-search {
             width: 100%;
         }
+    }
+    
+    /* 添加卡片点击动画 */
+    @keyframes cardClick {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.98); }
+        100% { transform: scale(1); }
+    }
+    
+    .card-clicked {
+        animation: cardClick 0.3s ease;
+    }
+    
+    /* 确保整个卡片可点击 */
+    .portfolio-item {
+        cursor: pointer;
+        position: relative;
+    }
+    
+    /* 确保卡片内的链接不影响整体点击 */
+    .portfolio-item * {
+        pointer-events: none;
+    }
+    
+    /* 但允许链接本身可点击 */
+    .portfolio-item a {
+        pointer-events: auto;
     }
 </style>
 

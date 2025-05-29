@@ -1,34 +1,33 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Tag;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/tags")
 public class TagController {
 
-    @Autowired
-    private TagService tagService;
+    @Autowired private TagService tagService;
+    @Autowired private ArticleService articleService;
 
-    @Autowired
-    private ArticleService articleService;
-
-    @GetMapping("/api/tags/{slug}")
-    public ResponseEntity<List<Article>> getArticlesByTag(@PathVariable("slug") String slug) {
-        List<Article> articles;
+    @GetMapping("/{slug}")
+    public ResponseEntity<List<ArticleExcerptDTO>> getArticlesByTag(@PathVariable("slug") String slug) {
+        List<ArticleExcerptDTO> articles;
 
         if ("all".equals(slug)) {
-            articles = articleService.getArticlesLimit(100);
+            articles = articleService.selectArticleSummaries(100);
         } else {
-            Tag tag = tagService.selectTagBySlug(slug);
+            TagDTO tag = tagService.selectTagBySlug(slug);
             if (tag == null) {
                 return ResponseEntity.notFound().build();
             }

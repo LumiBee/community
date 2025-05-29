@@ -1,5 +1,6 @@
 package com.lumibee.hive.controller;
 
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Portfolio;
@@ -29,15 +30,15 @@ public class PortfolioController {
     private ArticleService articleService;
 
     @GetMapping("/api/portfolio/{slug}")
-    public ResponseEntity<List<Article>> getPortfolio(@PathVariable("slug") String slug) {
+    public ResponseEntity<List<ArticleExcerptDTO>> getPortfolio(@PathVariable("slug") String slug) {
         // 根据 slug 获取 Portfolio
-        List<Article> articles;
+        List<ArticleExcerptDTO> articles;
 
         if ("all".equals(slug)) {
-            articles = articleService.getArticlesLimit(100);
+            articles = articleService.selectArticleSummaries(100);
         } else {
 
-            articles = articleService.getArticlesLimit(100);
+            articles = articleService.selectArticleSummaries(100);
         }
 
         return ResponseEntity.ok(articles);

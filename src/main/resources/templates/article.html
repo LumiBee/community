@@ -67,9 +67,9 @@
 								</div>
 							</div>
 							<small class="text-muted d-block">
-								<th:block th:if="${article.gmtCreate}" th:with="
+								<th:block th:if="${article.gmtModified}" th:with="
 									now = ${T(java.time.LocalDateTime).now()},
-									duration = ${T(java.time.Duration).between(article.gmtCreate, now)},
+									duration = ${T(java.time.Duration).between(article.gmtModified, now)},
 									days = ${duration.toDays()},
 									totalHours = ${duration.toHours()},
 									totalMinutes = ${duration.toMinutes()}">
@@ -78,7 +78,7 @@
 									<span th:if="${days == 0 and totalHours == 0 and totalMinutes > 0}" th:text="${totalMinutes + ' 分钟前'}"></span>
 									<span th:if="${days == 0 and totalHours == 0 and totalMinutes == 0}" th:text="'刚刚'"></span>
 								</th:block>
-								<span th:unless="${article.gmtCreate}">发布时间未知</span>
+								<span th:unless="${article.gmtModified}">发布时间未知</span>
 								&middot;
 								<span style="display: inline-flex; align-items: center;">
 								  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-bar-chart" viewBox="0 0 16 16" style="margin-right: 2px;">

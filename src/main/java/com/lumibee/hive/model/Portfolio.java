@@ -20,11 +20,6 @@ public class Portfolio {
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtModified;
 
-    @TableField(exist = false)
-    private User user;
-    @TableField(exist = false)
-    private Integer articleCount;
-
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;

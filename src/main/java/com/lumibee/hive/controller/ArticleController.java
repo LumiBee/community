@@ -1,5 +1,6 @@
 package com.lumibee.hive.controller;
 
+import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.LikeResponse;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.User;
@@ -36,7 +37,7 @@ public class ArticleController {
         // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
         // 根据 slug 获取文章
-        Article article = articleService.getArticleBySlug(slug);
+        ArticleDetailsDTO article = articleService.getArticleBySlug(slug);
 
         if (article == null) {
             return "error/404";

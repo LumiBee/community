@@ -1,13 +1,19 @@
 package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.dto.*;
 import com.lumibee.hive.mapper.ArticleLikesMapper;
 import com.lumibee.hive.mapper.ArticleMapper;
+import com.lumibee.hive.mapper.PortfolioMapper;
+import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.Article;
+import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
+import com.lumibee.hive.model.User;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,56 +21,63 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
-    @Autowired
-    private ArticleMapper articleMapper;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private TagService tagService;
-
-    @Autowired
-    private PortfolioService portfolioService;
-
-    @Autowired
-    private ArticleLikesMapper articleLikesMapper;
+    @Autowired private ArticleMapper articleMapper;
+    @Autowired private PortfolioMapper portfolioMapper;
+    @Autowired private UserService userService;
+    @Autowired private UserMapper userMapper;
+    @Autowired private TagService tagService;
+    @Autowired private PortfolioService portfolioService;
+    @Autowired private ArticleLikesMapper articleLikesMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Article> getHomepageArticle(long pageNum, long pageSize) {
+    public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByDesc(Article::getGmtModified);
+        queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
+                    .eq(Article::getDeleted, 0)
+                    .orderByDesc(Article::getGmtModified);
 
         Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
-        List<Article> articleList = new ArrayList<>();
-        if (articlePage.getRecords() != null && !articlePage.getRecords().isEmpty()) {
-            for (Article article : articlePage.getRecords()) {
-                Article articleDTO = new Article();
-                articleDTO.setArticleId(article.getArticleId());
-                articleDTO.setUserId(article.getUserId());
-                articleDTO.setUserName(userService.selectById(article.getUserId()).getName());
-                articleDTO.setTitle(article.getTitle());
-                articleDTO.setGmtCreate(article.getGmtCreate());
-                articleDTO.setGmtModified(article.getGmtModified());
-                articleDTO.setAvatarUrl(userService.selectById(article.getUserId()).getAvatarUrl());
-                articleDTO.setExcerpt(article.getExcerpt());
-                articleDTO.setLikes(article.getLikes());
-                articleDTO.setViewCount(article.getViewCount());
-                articleDTO.setSlug(article.getSlug());
-                articleList.add(articleDTO);
-            }
+        List<Article> articleList = articlePage.getRecords();
+        if (articleList == null && articleList.isEmpty()) {
+            return new Page<>(pageNum, pageSize, 0);
         }
 
-        Page<Article> articleDTOPage = new Page<>(articlePage.getCurrent(), articlePage.getSize(), articlePage.getTotal());
-        articleDTOPage.setRecords(articleList);
-        articleDTOPage.setPages(articlePage.getPages());
+       List<Long> userIds = articleList.stream()
+                                       .map(Article::getUserId)
+                                       .distinct()
+                                       .collect(Collectors.toList());
+
+        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<ArticleExcerptDTO> articleDTOList = articleList.stream().map(article -> {
+            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
+            BeanUtils.copyProperties(article, articleDTO);
+            User user = userMap.get(article.getUserId());
+            if (user != null) {
+                articleDTO.setUserName(user.getName());
+                articleDTO.setAvatarUrl(user.getAvatarUrl());
+            }
+            return articleDTO;
+        }).collect(Collectors.toList());
+
+        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(
+                articlePage.getCurrent(),
+                articlePage.getSize(),
+                articlePage.getTotal()
+        );
+
+        articleDTOPage.setRecords(articleDTOList);
+        articleDTOPage.setTotal(articlePage.getPages());
 
         return articleDTOPage;
     }
@@ -85,37 +98,38 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public Article publishArticle(Article article, List<String> tagsName, String portfolioName) {
+    public ArticleDetailsDTO getArticleBySlug(String slug) {
+        QueryWrapper<Article> wrapper = new QueryWrapper<> ();
+        wrapper.eq("slug", slug).eq("deleted", 0);
+        Article article = articleMapper.selectOne(wrapper);
 
-        // 1. 设置文章的基本状态
-        article.setGmtCreate(LocalDateTime.now());
-        article.setGmtModified(LocalDateTime.now());
-        article.setStatus(Article.ArticleStatus.published);
-
-        // 2. 设置文章的portfolioId
-        if (portfolioName != null && !portfolioName.isEmpty()) {
-            Integer portfolioId = portfolioService.selectOrCreatePortfolio(portfolioName).getId();
-            article.setPortfolioId(portfolioId);
+        if (article == null) {
+            return null; // 如果没有找到文章，返回null
         }
 
-        // 3. 将数据插入数据库
-        articleMapper.insert(article);
+        articleMapper.incrementViewCount(article.getArticleId());
+        User user = userService.selectById(article.getUserId());
+        Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
+        List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
 
-        // 4. 更新tag表和tag——article关系表
-        Integer articleId = article.getArticleId();
-        if (tagsName != null && !tagsName.isEmpty()) {
-            Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
+        ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
+        BeanUtils.copyProperties(article, articleDetailsDTO);
+        if (user != null) {
+            articleDetailsDTO.setUserName(user.getName());
+            articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
+        }
+        if (portfolio != null) {
+            articleDetailsDTO.setPortfolio(convertToPortfolioDTO(portfolio));
+        }
+        if (tags != null && !tags.isEmpty()) {
+            List<TagDTO> tagDTOs = new ArrayList<>();
             for (Tag tag : tags) {
-                tagService.insertTagArticleRelation(articleId, tag.getTagId());
+                tagDTOs.add(convertToTagDTO(tag));
             }
+            articleDetailsDTO.setTags(tagDTOs);
         }
 
-        return article;
-    }
-
-    @Override
-    public Article getArticleBySlug(String slug) {
-        return articleMapper.findDetailsBySlug(slug);
+        return articleDetailsDTO;
     }
 
     @Override
@@ -155,13 +169,63 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Article> getArticlesLimit(int limit) {
-        return articleMapper.getArticlesLimit(limit);
+    public List<ArticleExcerptDTO> selectArticleSummaries(int limit) {
+        return articleMapper.selectArticleSummaries(limit);
     }
 
     @Override
-    public List<Article> getArticlesByTagId(int tagId) {
+    public List<ArticleExcerptDTO> getArticlesByTagId(int tagId) {
         return articleMapper.getArticlesByTagId(tagId);
+    }
+
+    @Override
+    @Transactional
+    public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId) {
+        Article article = new Article();
+        article.setTitle(requestDTO.getTitle());
+        article.setContent(requestDTO.getContent());
+        article.setExcerpt(requestDTO.getExcerpt());
+
+        article.setUserId(userId);
+        article.setGmtCreate(LocalDateTime.now());
+        article.setGmtModified(LocalDateTime.now());
+        article.setStatus(Article.ArticleStatus.published);
+        article.setSlug(createUniqueSlug(requestDTO.getTitle()));
+
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
+            Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId).getId();
+            article.setPortfolioId(portfolioId);
+        }
+
+        articleMapper.insert(article);
+
+        Integer articleId = article.getArticleId();
+        List<String> tagsName = requestDTO.getTagsName();
+        if (tagsName != null && !tagsName.isEmpty()) {
+            Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
+            for (Tag tag : tags) {
+                if (tag != null) {
+                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
+                    tagService.incrementArticleCount(tag.getTagId());
+                }
+            }
+        }
+
+        return this.getArticleBySlug(article.getSlug());
+    }
+
+    private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
+        if (portfolio == null) return null;
+        PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类
+        BeanUtils.copyProperties(portfolio, dto);
+        return dto;
+    }
+
+    private TagDTO convertToTagDTO(Tag tag) {
+        if (tag == null) return null;
+        TagDTO dto = new TagDTO(); // 假设您已创建 TagDTO 类
+        BeanUtils.copyProperties(tag, dto);
+        return dto;
     }
 
 }
