@@ -37,135 +37,31 @@
             <div id="portfolio-display-container">
                 <!-- 作品集列表 -->
                 <div id="portfolioGrid" class="article-grid stagger-children">
-                    <!-- 假数据：Java开发作品集 -->
-                    <a href="/portfolio/java-development" class="article-card portfolio-item" data-name="Java开发实践" data-description="包含Java核心技术、Spring框架和微服务架构的系列文章">
+                    <div th:if="${#lists.isEmpty(allPortfolios)}" class="no-articles">
+                        <div class="no-articles-icon"><i class="fas fa-folder-open"></i></div>
+                        <h3>暂无作品集</h3>
+                        <p>目前还没有作品集，敬请期待</p>
+                    </div>
+                    <a th:each="portfolio : ${allPortfolios}"
+                          th:href="@{/portfolio/{slug}(slug=${portfolio.slug})}"
+                          class="article-card portfolio-item"
+                          th:attr="data-name=${portfolio.name}, data-description=${portfolio.description != null ? portfolio.description : '暂无描述'}">
                         <div class="portfolio-cover">
-                            <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97" alt="Java开发实践" class="cover-img">
+                            <img th:src="${(portfolio.coverImgUrl != null and #strings.hasText(portfolio.coverImgUrl)) ? portfolio.coverImgUrl : '/img/default.jpg'}" alt="...">
                         </div>
                         <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">张开发</p>
-                                    <p class="publish-date">3 天前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>12</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">Java开发实践</h3>
-                            <p class="article-excerpt">包含Java核心技术、Spring框架和微服务架构的系列文章，从基础到高级的全面指南。</p>
-                        </div>
-                    </a>
-
-                    <!-- 假数据：前端开发作品集 -->
-                    <a href="/portfolio/frontend-development" class="article-card portfolio-item" data-name="现代前端开发" data-description="涵盖HTML5、CSS3、JavaScript和主流框架的前端开发技术文章">
-                        <div class="portfolio-cover">
-                            <img src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613" alt="现代前端开发" class="cover-img">
-                        </div>
-                        <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">李前端</p>
-                                    <p class="publish-date">1 周前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>8</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">现代前端开发</h3>
-                            <p class="article-excerpt">涵盖HTML5、CSS3、JavaScript和主流框架的前端开发技术文章，包括React、Vue等实战案例。</p>
-                        </div>
-                    </a>
-
-                    <!-- 假数据：数据科学作品集 -->
-                    <a href="/portfolio/data-science" class="article-card portfolio-item" data-name="数据科学与分析" data-description="关于数据分析、机器学习和人工智能的深度探索">
-                        <div class="portfolio-cover">
-                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71" alt="数据科学与分析" class="cover-img">
-                        </div>
-                        <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">王数据</p>
-                                    <p class="publish-date">2 周前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>15</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">数据科学与分析</h3>
-                            <p class="article-excerpt">关于数据分析、机器学习和人工智能的深度探索，从理论基础到实际应用的全面指导。</p>
-                        </div>
-                    </a>
-
-                    <!-- 假数据：云计算作品集 -->
-                    <a href="/portfolio/cloud-computing" class="article-card portfolio-item" data-name="云计算与DevOps" data-description="云服务、容器化和自动化部署相关的技术文章">
-                        <div class="portfolio-cover">
-                            <div class="gradient-cover" style="background: linear-gradient(135deg, #3498db, #2c3e50);">
-                                <i class="fas fa-cloud"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">赵云计算</p>
-                                    <p class="publish-date">1 个月前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>9</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">云计算与DevOps</h3>
-                            <p class="article-excerpt">云服务、容器化和自动化部署相关的技术文章，包括AWS、Docker、Kubernetes等实践经验。</p>
-                        </div>
-                    </a>
-
-                    <!-- 假数据：移动开发作品集 -->
-                    <a href="/portfolio/mobile-development" class="article-card portfolio-item" data-name="移动应用开发" data-description="Android和iOS应用开发的最佳实践和技术分享">
-                        <div class="portfolio-cover">
-                            <div class="gradient-cover" style="background: linear-gradient(135deg, #f2994a, #f2c94c);">
-                                <i class="fas fa-mobile-alt"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">陈移动</p>
-                                    <p class="publish-date">2 个月前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>7</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">移动应用开发</h3>
-                            <p class="article-excerpt">Android和iOS应用开发的最佳实践和技术分享，从UI设计到性能优化的全面指南。</p>
-                        </div>
-                    </a>
-
-                    <!-- 假数据：网络安全作品集 -->
-                    <a href="/portfolio/cyber-security" class="article-card portfolio-item" data-name="网络安全实战" data-description="网络安全、渗透测试和安全防护的专业知识">
-                        <div class="portfolio-cover">
-                            <div class="gradient-cover" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe);">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                        </div>
-                        <div class="card-content">
-                            <div class="author-section">
-                                <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-                                <div class="author-info">
-                                    <p class="author-name">黄安全</p>
-                                    <p class="publish-date">3 个月前</p>
-                                </div>
-                            </div>
-                            <div class="portfolio-stats">
-                                <span class="article-count"><i class="fas fa-file-alt"></i> <span>11</span> 文章</span>
-                            </div>
-                            <h3 class="article-title">网络安全实战</h3>
-                            <p class="article-excerpt">网络安全、渗透测试和安全防护的专业知识，包括实际案例分析和防护策略。</p>
+                             <div class="author-section">
+                                  <img th:src="@{${portfolio.user.getAvatarUrl}}" alt="创建者头像" class="author-avatar">
+                                  <div class="author-info">
+                                        <p class="author-name" th:text="${portfolio.user.getName}">作者名</p>
+                                        <p class="publish-date" th:text="${portfolio.gmtModified}">发布日期</p>
+                                  </div>
+                             </div>
+                             <div class="portfolio-stats">
+                                  <span class="article-count"><i class="fas fa-file-alt"></i> <span th:text="${portfolio.articleCount}">0</span> 文章</span>
+                             </div>
+                             <h3 class="article-title" th:text="${portfolio.name}">作品集标题</h3>
+                             <p class="portfolio-description" th:text="${portfolio.description != null && !portfolio.description.isEmpty() ? portfolio.description : '暂无描述'}">作品集描述</p>
                         </div>
                     </a>
                 </div>
@@ -348,6 +244,17 @@
     .article-count i {
         margin-right: 4px;
         font-size: 0.8rem;
+    }
+    
+    .portfolio-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-top: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     
     /* 卡片动画 */

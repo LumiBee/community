@@ -19,6 +19,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
     Integer countLikes(@Param("articleId") Integer articleId);
     @Update("UPDATE articles SET view_count = view_count + 1 WHERE article_id = #{articleId}")
     void incrementViewCount(@Param("articleId") Integer articleId);
+    @Select("SELECT COUNT(*) FROM articles WHERE portfolio_id = #{portfolioId}")
+    Integer countArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.allow_comments," +
             "u.name AS user_name, u.avatar_url " +
             "from articles a " +

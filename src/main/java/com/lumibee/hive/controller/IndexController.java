@@ -54,7 +54,7 @@ public class IndexController {
     @GetMapping("/portfolio")
     public String showPortfolio(Model model) {
         List<Portfolio> allPortfolios = portfolioService.selectAllPortfolios();
-
+        System.out.println("All Portfolios: " + allPortfolios);
         model.addAttribute("allPortfolios", allPortfolios);
 
         return "portfolio";

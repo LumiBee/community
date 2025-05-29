@@ -7,59 +7,336 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/github.min.css">
     <link href="/css/publish.css" rel="stylesheet"/>
     <style>
+        :root {
+            --primary-color: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary-color: #6c757d;
+            --light-bg: #f8f9fa;
+            --dark-text: #212529;
+            --border-color: #e9ecef;
+            --success-color: #2ecc71;
+            --transition-speed: 0.3s;
+        }
+        
         html, body {
             height: 100%;
             margin: 0;
             overflow: hidden;
             background-color: #f8f9fa;
-            padding-top: 80px;
-            padding-bottom: 10px;
+            padding-top: 56px;
+            padding-bottom: 0;
             box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         }
-
+        
+        /* 顶部操作栏 */
+        .top-action-bar {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            right: 0;
+            height: 70px;
+            z-index: 1029;
+            background-color: #fff;
+            box-shadow: 0 1px 0 rgba(0,0,0,0.06);
+            transition: all var(--transition-speed) ease;
+            padding: 0;
+        }
+        
+        .top-action-bar::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.03), transparent);
+            pointer-events: none;
+            opacity: 0.7;
+            transition: opacity var(--transition-speed) ease;
+        }
+        
+        .top-action-bar .container-fluid {
+            height: 100%;
+            padding: 0;
+        }
+        
+        .top-action-bar .row {
+            height: 100%;
+            align-items: center;
+        }
+        
+        .article-title-input {
+            border: none;
+            border-radius: 0;
+            padding: 0.75rem 0 0.75rem 30px;
+            font-size: 1.35rem;
+            font-weight: 500;
+            color: var(--dark-text);
+            background-color: transparent;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        .article-title-input:focus {
+            outline: none;
+            box-shadow: none;
+        }
+        
+        .article-title-input::placeholder {
+            color: #adb5bd;
+            font-weight: 400;
+            opacity: 0.7;
+        }
+        
+        /* 操作按钮 */
+        .action-buttons {
+            padding-right: 30px;
+            white-space: nowrap;
+        }
+        
+        .auto-save-indicator {
+            display: flex;
+            align-items: center;
+            margin-right: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+        }
+        
+        .auto-save-indicator .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+        
+        .action-buttons .btn {
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none;
+        }
+        
+        .action-buttons .btn i {
+            margin-right: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .action-buttons .btn-outline-secondary {
+            color: var(--secondary-color);
+            border-color: #dee2e6;
+            background-color: transparent;
+        }
+        
+        .action-buttons .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+            border-color: #c1c9d0;
+        }
+        
+        .action-buttons .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+        }
+        
+        .action-buttons .btn-primary:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        /* 编辑器容器 */
         .publish-page-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            height: calc(100% - 126px - 50px); /* 导航栏(56px) + 操作栏(70px) + 底部状态栏(50px) */
+            width: 100%;
             overflow: hidden;
-            min-height: 0;
             background-color: #fff;
             box-sizing: border-box;
+            position: fixed;
+            top: 126px; /* 导航栏(56px) + 操作栏(70px) */
+            bottom: 50px; /* 底部状态栏高度 */
+            left: 0;
+            right: 0;
+            padding-top: 10px; /* 添加顶部间距，使过渡更自然 */
+            transition: padding-top var(--transition-speed) ease;
         }
-
+        
+        .publish-page-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(to bottom, rgba(248,249,250,0.8), transparent);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
         .editor-content-container.container-fluid {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0;
-            padding-top: 1rem;
-            padding-bottom: 1rem;
+            height: 100%;
+            width: 100%;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
+            position: relative;
+            z-index: 1;
         }
-
+        
         #publishForm {
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            min-height: 0;
+            height: 100%;
+            width: 100%;
         }
-
+        
         #toastUiEditor {
             flex-grow: 1;
-            min-height: 0;
             display: flex;
             flex-direction: column;
+            height: 100%;
+            width: 100%;
+            border-radius: 0;
         }
-
-
+        
+        /* Toast UI 编辑器自定义样式 */
+        .toastui-editor-defaultUI {
+            width: 100% !important;
+            height: 100% !important;
+            border: none !important;
+            border-top: none !important;
+            background-color: transparent;
+            transition: all var(--transition-speed) ease;
+        }
+        
+        .toastui-editor-defaultUI .toastui-editor-toolbar {
+            background-color: rgba(255,255,255,0.95);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            padding: 6px 0;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+            margin-top: 5px;
+            transition: all var(--transition-speed) ease;
+            position: relative;
+            z-index: 3;
+        }
+        
+        .toastui-editor-defaultUI:focus-within .toastui-editor-toolbar {
+            background-color: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+        }
+        
         .toastui-editor-defaultUI .toastui-editor-main {
             flex-grow: 1 !important;
             overflow-y: auto !important;
-            min-height: 0;
+            height: calc(100% - 40px) !important;
+            transition: background-color var(--transition-speed) ease;
         }
-
+        
+        .toastui-editor-defaultUI .toastui-editor-main .toastui-editor-md-container,
+        .toastui-editor-defaultUI .toastui-editor-main .toastui-editor-ww-container {
+            background: linear-gradient(to bottom, rgba(248,249,250,0.2) 0%, rgba(255,255,255,1) 20px);
+            transition: background var(--transition-speed) ease;
+        }
+        
+        /* 底部状态栏 */
         .bottom-status-bar.fixed-bottom {
+            height: 50px;
             z-index: 1030;
+            background-color: #fff;
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+        }
+        
+        .stats {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            margin-right: 1.5rem;
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+        }
+        
+        .stat-item i {
+            margin-right: 6px;
+            font-size: 0.9rem;
+            color: #adb5bd;
+        }
+        
+        .stat-item .count {
+            font-weight: 500;
+            color: var(--dark-text);
+        }
+        
+        .controls .btn-link {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            text-decoration: none;
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        
+        .controls .btn-link:hover {
+            background-color: #f8f9fa;
+            color: var(--dark-text);
+        }
+        
+        /* 发布设置模态框自定义样式 */
+        .modal-content {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem 1.5rem;
         }
     </style>
 </head>
@@ -67,17 +344,30 @@
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="top-action-bar fixed-top" style="z-index: 1029;">
-    <div class="container-fluid d-flex justify-content-between align-items-center py-2 border-bottom">
-    <div class="title-input-container flex-grow-1 mr-3">
-        <input id="articleTitleInput" type="text" class="form-control form-control-lg article-title-input" placeholder="输入文章标题..." th:value="${article?.title}">
+<div class="top-action-bar">
+    <div class="container-fluid w-100 ">
+        <div class="row no-gutters w-100" style="width: 100%;">
+            <div class="col">
+                <input id="articleTitleInput" type="text" class="form-control article-title-input" placeholder="输入文章标题..." th:value="${article?.title}">
+            </div>
+            <div class="col-auto">
+                <div class="action-buttons d-flex align-items-center">
+                    <div class="auto-save-indicator">
+                        <div class="indicator"></div>
+                        <span>自动保存至草稿箱</span>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary mr-2">
+                        <i class="fas fa-folder"></i>
+                        草稿箱
+                    </button>
+                    <button type="button" class="btn btn-primary publish-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        发布文章
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="action-buttons">
-        <span class="text-muted mr-3" style="font-size: 0.9em;"><i class="fas fa-save mr-1"></i>文章将自动保存至草稿箱</span>
-        <button type="button" class="btn btn-outline-secondary btn-sm mr-2"><i class="fas fa-folder mr-1"></i>草稿箱</button>
-        <button type="button" class="btn btn-primary btn-sm publish-btn"><i class="fas fa-paper-plane mr-1"></i>发 布</button>
-    </div>
-</div>
 </div>
 
 <div class="publish-page-wrapper">
@@ -90,14 +380,20 @@
     </div>
 </div>
 
-<div class="bottom-status-bar fixed-bottom bg-light border-top">
-    <div class="container-fluid d-flex justify-content-between align-items-center py-1">
+<div class="bottom-status-bar fixed-bottom">
+    <div class="container-fluid d-flex justify-content-between align-items-center h-100">
         <div class="stats">
-            <small><i class="fas fa-font mr-1"></i>字数: <span id="wordCount">0</span></small> &nbsp;|&nbsp;
-            <small><i class="fas fa-text-width mr-1"></i>字符: <span id="charCount">0</span></small>
+            <div class="stat-item">
+                <i class="fas fa-font"></i>
+                <span>字数: <span class="count" id="wordCount">0</span></span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-text-width"></i>
+                <span>字符: <span class="count" id="charCount">0</span></span>
+            </div>
         </div>
         <div class="controls">
-            <button type="button" class="btn btn-link btn-sm p-0" onclick="window.scrollTo(0,0);">
+            <button type="button" class="btn-link" onclick="window.scrollTo(0,0);">
                 <i class="fas fa-arrow-up"></i> 回到顶部
             </button>
         </div>
