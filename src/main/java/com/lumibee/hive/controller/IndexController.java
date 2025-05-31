@@ -8,28 +8,28 @@ import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
+import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.PortfolioService;
 import com.lumibee.hive.service.TagService;
+import com.lumibee.hive.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
 public class IndexController {
 
-    @Autowired
-    private ArticleService articleService;
-
-    @Autowired
-    private TagService tagService;
-
-    @Autowired
-    private PortfolioService portfolioService;
+    @Autowired private ArticleService articleService;
+    @Autowired private TagService tagService;
+    @Autowired private PortfolioService portfolioService;
+    @Autowired private UserService userService;
 
     @GetMapping("/")
     public String home(@RequestParam(name = "page", defaultValue = "1") long pageNum,
@@ -68,10 +68,12 @@ public class IndexController {
         return "portfolio";
     }
 
-    @GetMapping("/about")
-    public String about() {
-        return "about";
+    @GetMapping("/profile")
+    public String showProfile(Model model,
+                              @AuthenticationPrincipal Principal principal) {
+        User user = userService.getCurrentUserFromPrincipal(principal);
+        model.addAttribute("user", user);
+        return "profile"; // Assuming you have a Thymeleaf template named 'profile.html'
     }
-
 
 }

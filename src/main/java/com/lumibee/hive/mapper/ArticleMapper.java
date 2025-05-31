@@ -21,11 +21,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
     Integer countLikes(@Param("articleId") Integer articleId);
     @Update("UPDATE articles SET view_count = view_count + 1 WHERE article_id = #{articleId}")
     void incrementViewCount(@Param("articleId") Integer articleId);
-    @Select("SELECT article_id, title, slug, excerpt, view_count, likes, gmt_modified, user_id " + // 按需选择字段
-            "FROM articles " +
+    @Select("SELECT article_id, title, slug, excerpt, view_count, likes, a.gmt_modified, user_id, u.name AS userName, u.avatar_url " + // 按需选择字段
+            "FROM articles a " +
+            "LEFT JOIN user u ON u.id = user_id " +
             "WHERE portfolio_id = #{portfolioId} AND status = 'published' " +
             "ORDER BY gmt_modified DESC")
-    List<Article> selectArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
+    List<ArticleExcerptDTO> selectArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT COUNT(*) FROM articles WHERE portfolio_id = #{portfolioId}")
     Integer countArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, " +

@@ -17,8 +17,7 @@ import java.util.Set;
 @Service
 public class TagServiceImpl implements TagService {
 
-    @Autowired
-    private TagMapper tagMapper;
+    @Autowired private TagMapper tagMapper;
 
     @Override
     @Transactional
@@ -54,6 +53,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public void incrementArticleCount(Integer tagId) {
         if (tagId != null) {
             tagMapper.incrementArticleCount(tagId);
@@ -61,6 +61,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional
     public Set<Tag> selectOrCreateTags(List<String> tagNames) {
         Set<Tag> tags = new HashSet<>();
         if (tagNames != null) {
@@ -75,21 +76,25 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Tag> selectTagsByArticleId(Integer articleId) {
         return tagMapper.selectTagsByArticleId(articleId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
         return tagMapper.selectAllTags();
     }
 
     @Override
+    @Transactional
     public void insertTagArticleRelation(Integer articleId, Integer tagId) {
         tagMapper.insertTagArticleRelation(articleId, tagId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public TagDTO selectTagBySlug(String slug) {
         return tagMapper.selectBySlug(slug);
     }

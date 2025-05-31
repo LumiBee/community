@@ -17,13 +17,5 @@ public class ProfileController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/profile")
-    public String showProfile(Model model,
-                              @AuthenticationPrincipal Principal principal) {
-        User user = userService.getCurrentUserFromPrincipal(principal);
 
-        model.addAttribute("user", user);
-
-        return "profile"; // Assuming you have a Thymeleaf template named 'profile.html'
-    }
 }

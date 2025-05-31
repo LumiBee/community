@@ -96,6 +96,7 @@
             padding: 2rem 0;
         }
         
+        /* 搜索和排序区域样式 */
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -103,21 +104,52 @@
             margin-bottom: 1.5rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
         }
         
         .section-title {
             font-size: 1.5rem;
             font-weight: 600;
             margin: 0;
+            margin-bottom: 0.5rem;
         }
         
         .section-actions {
             display: flex;
-            align-items: center;
+            align-items: stretch; /* 确保子元素拉伸到相同高度 */
+            gap: 10px; /* 元素之间的间距 */
         }
         
-        .sort-dropdown {
-            margin-left: 1rem;
+        .search-container {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+        }
+        
+        #articleSearchInput {
+            width: 100%;
+            height: 38px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .sort-dropdown .btn {
+            height: 38px;
+            padding: 0.375rem 0.75rem;
+            border: 1px solid #ced4da;
+            display: inline-flex;
+            align-items: center;
+            background-color: #fff;
+            color: #495057;
+        }
+        
+        .sort-dropdown .btn:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .sort-dropdown .btn i {
+            margin-right: 5px;
         }
         
         /* 文章网格 */
@@ -136,6 +168,9 @@
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
             transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         .article-card:hover {
@@ -148,6 +183,7 @@
         .article-cover {
             height: 180px;
             overflow: hidden;
+            position: relative;
         }
         
         .article-cover img {
@@ -163,6 +199,9 @@
         
         .card-content {
             padding: 1.25rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .article-title {
@@ -180,6 +219,7 @@
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            flex: 1;
         }
         
         .article-meta {
@@ -188,11 +228,33 @@
             align-items: center;
             font-size: 0.85rem;
             color: var(--secondary-color);
+            margin-top: 0.75rem;
+        }
+        
+        .article-author {
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+        }
+        
+        .article-author img {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin-right: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .article-author .author-name {
+            font-size: 0.85rem;
+            color: var(--secondary-color);
+            margin: 0;
         }
         
         .article-date {
             display: flex;
             align-items: center;
+            margin-left: auto;
         }
         
         .article-date i {
@@ -245,11 +307,16 @@
             
             .section-header {
                 flex-direction: column;
-                align-items: flex-start;
+                align-items: stretch;
             }
             
             .section-actions {
+                width: 100%;
                 margin-top: 1rem;
+            }
+            
+            .search-container {
+                max-width: none;
             }
         }
         
@@ -315,12 +382,12 @@
                 <p class="portfolio-description" th:text="${portfolio.description != null ? portfolio.description : '暂无描述'}">作品集描述...</p>
                 <div class="portfolio-meta">
                     <div class="portfolio-author">
-                        <img th:src="${portfolio.user.getAvatarUrl}" alt="作者头像" class="author-avatar">
-                        <span th:text="${portfolio.user.getName}">作者名</span>
+                        <img th:src="${portfolio.avatarUrl}" alt="作者头像" class="author-avatar">
+                        <span th:text="${portfolio.userName}">作者名</span>
                     </div>
                     <div class="portfolio-date">
                         <i class="fas fa-calendar-alt"></i>
-                        <span th:text="${#dates.format(portfolio.gmtCreate, 'yyyy-MM-dd')}">创建日期</span>
+                        <span class="publish-date" th:attr="data-date=${portfolio.gmtModified}">最后修改日期</span>
                     </div>
                 </div>
             </div>
@@ -333,15 +400,15 @@
             <div class="section-header">
                 <h2 class="section-title">
                     文章列表 
-                    <small class="text-muted" th:text="'(' + ${#lists.size(articles)} + ')'"></small>
+                    <small class="text-muted" th:text="'(' + (${portfolio.articles != null ? #lists.size(portfolio.articles) : 0}) + ')'"></small>
                 </h2>
                 <div class="section-actions">
                     <div class="search-container">
-                        <input type="search" id="articleSearchInput" placeholder="搜索文章..." class="form-control form-control-sm">
+                        <input type="search" id="articleSearchInput" placeholder="搜索文章...">
                     </div>
                     <div class="sort-dropdown dropdown">
-                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-sort"></i> 排序
+                        <button class="btn dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-sort"></i>排序
                         </button>
                         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
                             <a class="dropdown-item sort-option" href="#" data-sort="newest">
@@ -358,7 +425,7 @@
             <!-- 文章网格 -->
             <div id="articleGrid" class="article-grid stagger-children">
                 <!-- 如果没有文章，显示空状态 -->
-                <div th:if="${#lists.isEmpty(articles)}" class="empty-state">
+                <div th:if="${portfolio.articles == null || #lists.isEmpty(portfolio.articles)}" class="empty-state">
                     <div class="empty-icon">
                         <i class="fas fa-book-open"></i>
                     </div>
@@ -367,22 +434,26 @@
                 </div>
                 
                 <!-- 文章列表 -->
-                <a th:each="article, stat : ${articles}" th:href="@{/article/{slug}(slug=${article.slug})}" 
-                   class="article-card" th:attr="data-date=${article.gmtCreate}, data-title=${article.title}, style='--child-index: ' + ${stat.index}">
-                    <div class="article-cover">
-                        <img th:src="${article.coverImg != null && !article.coverImg.isEmpty() ? article.coverImg : '/img/default.jpg'}" 
-                             alt="文章封面">
-                    </div>
+                <a th:if="${portfolio.articles != null}" th:each="article, stat : ${portfolio.articles}" th:href="@{'/article/' + ${article.slug}}"
+                   class="article-card" th:attr="data-date=${article.gmtModified}, data-title=${article.title}, style='--child-index: ' + ${stat.index}">
                     <div class="card-content">
                         <h3 class="article-title" th:text="${article.title}">文章标题</h3>
                         <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要...'}">文章摘要...</p>
                         <div class="article-meta">
-                            <div class="article-tags">
-                                <span th:each="tag : ${article.tags}" class="badge badge-light" th:text="${tag.name}">标签</span>
+                            <div class="article-author">
+                                <img th:if="${article.avatarUrl != null && !article.avatarUrl.isEmpty()}" 
+                                     th:src="${article.avatarUrl}" 
+                                     alt="作者头像" 
+                                     class="author-avatar">
+                                <img th:unless="${article.avatarUrl != null && !article.avatarUrl.isEmpty()}" 
+                                     src="/img/default01.jpg"
+                                     alt="作者头像" 
+                                     class="author-avatar">
+                                <span class="author-name" th:text="${article.userName != null && !article.userName.isEmpty() ? article.userName : '佚名'}">作者名</span>
                             </div>
                             <div class="article-date">
                                 <i class="fas fa-calendar-alt"></i>
-                                <span th:text="${#dates.format(article.gmtCreate, 'yyyy-MM-dd')}">发布日期</span>
+                                <span class="publish-date" th:attr="data-date=${article.gmtModified}">发布日期</span>
                             </div>
                         </div>
                     </div>
@@ -401,6 +472,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // 格式化日期显示
+        formatDates();
+        
         // 添加淡入动画
         setTimeout(() => {
             document.querySelectorAll('.article-card').forEach((card) => {
@@ -519,6 +593,32 @@
             });
         });
     });
+    
+    // 格式化日期函数
+    function formatDates() {
+        const dateElements = document.querySelectorAll('.publish-date');
+        
+        dateElements.forEach(element => {
+            const dateValue = element.getAttribute('data-date');
+            if (dateValue) {
+                try {
+                    const date = new Date(dateValue);
+                    if (!isNaN(date.getTime())) {
+                        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                        element.textContent = formattedDate;
+                    } else {
+                        console.warn('Invalid date:', dateValue);
+                        element.textContent = '未知日期';
+                    }
+                } catch (e) {
+                    console.error('Error formatting date:', e);
+                    element.textContent = '未知日期';
+                }
+            } else {
+                element.textContent = '未知日期';
+            }
+        });
+    }
 </script>
 
 </body>

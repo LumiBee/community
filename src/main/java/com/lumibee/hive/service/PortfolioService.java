@@ -8,5 +8,5 @@ import java.util.List;
 public interface PortfolioService {
     Portfolio selectOrCreatePortfolio(String portfolioName, Long userId);
     List<PortfolioDetailsDTO> selectAllPortfolios();
-    Portfolio selectPortfolioBySlug(String slug);
+    PortfolioDetailsDTO selectPortfolioBySlug(String slug);
 }

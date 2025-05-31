@@ -98,6 +98,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
         wrapper.eq("slug", slug).eq("deleted", 0);
@@ -159,21 +160,25 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isUserLiked(long userId, int articleId) {
         return articleLikesMapper.toggleLike(userId, articleId) != null;
     }
 
     @Override
+    @Transactional
     public void incrementViewCount(Integer articleId) {
         articleMapper.incrementViewCount(articleId);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> selectArticleSummaries(int limit) {
         return articleMapper.selectArticleSummaries(limit);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getArticlesByTagId(int tagId) {
         return articleMapper.getArticlesByTagId(tagId);
     }
@@ -212,6 +217,11 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return this.getArticleBySlug(article.getSlug());
+    }
+
+    @Override
+    public List<ArticleExcerptDTO> selectArticlesByPortfolioId(Integer id) {
+        return articleMapper.selectArticlesByPortfolioId(id);
     }
 
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {

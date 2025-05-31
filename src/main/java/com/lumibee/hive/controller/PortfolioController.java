@@ -1,6 +1,7 @@
 package com.lumibee.hive.controller;
 
 import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
 import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Portfolio;
@@ -8,40 +9,39 @@ import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.PortfolioService;
 import com.lumibee.hive.service.PortfolioServiceImpl;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RestController
+@Controller
 public class PortfolioController {
 
-    @Autowired
-    private PortfolioMapper portfolioMapper;
+    @Autowired private PortfolioMapper portfolioMapper;
 
-    @Autowired
-    private PortfolioService portfolioService;
+    @Autowired private PortfolioService portfolioService;
 
-    @Autowired
-    private ArticleService articleService;
+    @Autowired private ArticleService articleService;
 
-    @GetMapping("/api/portfolio/{slug}")
-    public ResponseEntity<List<ArticleExcerptDTO>> getPortfolio(@PathVariable("slug") String slug) {
-        // 根据 slug 获取 Portfolio
-        List<ArticleExcerptDTO> articles;
+    @GetMapping("/portfolio/{slug}")
+    public String getPortfolio(@PathVariable("slug") String slug,
+                               Model model) {
 
-        if ("all".equals(slug)) {
-            articles = articleService.selectArticleSummaries(100);
-        } else {
-
-            articles = articleService.selectArticleSummaries(100);
+        if (slug == null || slug.trim().isEmpty()) {
+            return "error/404";
         }
 
-        return ResponseEntity.ok(articles);
+        PortfolioDetailsDTO portfolioDetails = portfolioService.selectPortfolioBySlug(slug);
+        model.addAttribute("portfolio", portfolioDetails);
+
+        return "portfolio-detail";
     }
 
 }

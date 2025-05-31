@@ -51,10 +51,10 @@
                         </div>
                         <div class="card-content">
                              <div class="author-section">
-                                  <img th:src="@{${portfolio.getAvatarUrl}}" alt="创建者头像" class="author-avatar">
+                                  <img th:src="@{${portfolio.avatarUrl}}" alt="创建者头像" class="author-avatar">
                                   <div class="author-info">
-                                        <p class="author-name" th:text="${portfolio.getUserName}">作者名</p>
-                                        <p class="publish-date" th:text="${portfolio.gmtModified}">发布日期</p>
+                                        <p class="author-name" th:text="${portfolio.userName}">作者名</p>
+                                        <p class="publish-date" th:attr="data-date=${portfolio.gmtModified}">发布日期</p>
                                   </div>
                              </div>
                              <div class="portfolio-stats">
@@ -80,6 +80,9 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // 格式化日期显示
+        formatDates();
+        
         // 搜索功能
         const searchInput = document.getElementById('portfolioSearchInput');
         if (searchInput) {
@@ -155,6 +158,32 @@
             });
         });
     });
+    
+    // 格式化日期函数
+    function formatDates() {
+        const dateElements = document.querySelectorAll('.publish-date');
+        
+        dateElements.forEach(element => {
+            const dateValue = element.getAttribute('data-date');
+            if (dateValue) {
+                try {
+                    const date = new Date(dateValue);
+                    if (!isNaN(date.getTime())) {
+                        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                        element.textContent = formattedDate;
+                    } else {
+                        console.warn('Invalid date:', dateValue);
+                        element.textContent = '未知日期';
+                    }
+                } catch (e) {
+                    console.error('Error formatting date:', e);
+                    element.textContent = '未知日期';
+                }
+            } else {
+                element.textContent = '未知日期';
+            }
+        });
+    }
 </script>
 
 <style>

@@ -24,11 +24,9 @@ import java.security.Principal;
 @Controller
 public class ArticleController {
 
-    @Autowired
-    private ArticleService articleService;
+    @Autowired private ArticleService articleService;
 
-    @Autowired
-    private UserService userService;
+    @Autowired private UserService userService;
 
     @GetMapping("/article/{slug}")
     public String viewArticle(@PathVariable("slug") String slug,

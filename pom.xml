@@ -115,7 +115,6 @@
             <artifactId>TinyPinyin</artifactId>
             <version>2.0.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.lucee</groupId>
             <artifactId>commonmark</artifactId>
