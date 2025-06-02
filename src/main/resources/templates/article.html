@@ -4,6 +4,8 @@
 	<th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
 	<title th:text="${article?.title} ?: 'Lumi Hive'">Lumi Hive</title>
 	<link href="/css/article.css" rel="stylesheet"/>
+	<!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
+	<meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
 </head>
 <body>
 <!-- 导航栏 -->
@@ -276,334 +278,29 @@
 	<i class="fas fa-arrow-up"></i>
 </button>
 
+<!-- 替换原来的Toast消息组件 -->
+<div id="customToast" style="display: none; position: fixed; bottom: 30px; right: 30px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 9999; min-width: 300px; max-width: 400px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #eee;">
+    <div style="display: flex; align-items: center;">
+      <i id="customToastIcon" class="fas fa-info-circle text-info mr-2"></i>
+      <strong id="customToastTitle">提示</strong>
+    </div>
+    <button onclick="hideCustomToast()" style="background: none; border: none; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+  <div id="customToastMessage" style="padding: 15px; font-size: 14px;">
+    消息内容
+  </div>
+</div>
+
 <!-- 页脚 -->
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 
 <!-- JavaScript -->
-<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
-<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 <script th:src="@{/js/article-effects.js}" type="text/javascript"></script>
-
-<script>
-	// 点赞功能
-	async function toggleLike(event) {
-		// 1. 获取需要操作的页面元素
-		const likeButton = event.currentTarget; // 获取当前被点击的按钮
-		const likeCountSpan = document.getElementById('likeCount'); // 获取显示点赞数的元素
-		const likeIcon = likeButton.querySelector('i'); // 获取按钮上的心形图标
-
-		// 2. 从HTML中获取文章ID（假设Thymeleaf的article对象中包含id属性）
-		const articleId = '[[${article.articleId}]]';
-
-		// 3. 从meta标签中获取CSRF安全令牌
-		const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-		const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-		// 4. 在发送请求前，先禁用按钮，防止用户重复点击，提升用户体验
-		likeButton.disabled = true;
-
-		try {
-			// 5. 使用 fetch API 发送POST请求到后端接口
-			const response = await fetch(`/article/${articleId}/like`, {
-				method: 'POST',
-				headers: {
-					[header]: token
-				}
-			});
-
-			// 6. 检查后端的响应是否成功（HTTP状态码是否为2xx）
-			if (!response.ok) {
-				throw new Error(`服务器响应失败，状态码: ${response.status}`);
-			}
-
-			// 7. 解析后端返回的JSON格式数据
-			const data = await response.json();
-
-			// 8. 根据后端返回的真实数据来更新前端UI
-			if (data.success) {
-				likeCountSpan.textContent = data.likeCount; // 使用服务器返回的最新点赞数更新页面
-
-				// 根据服务器返回的最新点赞状态，更新按钮的视觉样式
-				if (data.liked) {
-					likeButton.classList.add('btn-danger'); // 按钮变为实心红色
-					likeButton.classList.remove('btn-outline-danger'); // 移除线框样式
-				} else {
-					likeButton.classList.add('btn-outline-danger'); // 按钮变为线框样式
-					likeButton.classList.remove('btn-danger'); // 移除实心红色样式
-				}
-			}
-
-		} catch (error) {
-			// 9. 如果在上述任何步骤中发生错误（网络问题或程序异常），在控制台打印
-			console.error('点赞操作失败:', error);
-		} finally {
-			// 10. 无论请求成功还是失败，最后都必须重新启用按钮
-			likeButton.disabled = false;
-		}
-	}
-
-	async function toggleFollow(authorId, buttonElement) {
-		console.log("Toggling follow for author ID:", authorId);
-
-		// 1. 从meta标签中获取CSRF安全令牌 (与toggleLike中相同)
-		const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-		const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-		// 2. 发送请求前，禁用按钮 (可选，但推荐)
-		buttonElement.disabled = true;
-
-		try {
-			// 3. 构建API的URL，例如 /api/user/{authorId}/follow
-			const response = await fetch(`/api/user/${authorId}/follow`, { // <--- 请替换为您的实际关注API路径
-				method: 'POST', // 通常关注/取消关注是POST请求
-				headers: {
-					[header]: token
-					// 如果需要，可以添加 'Content-Type': 'application/json' 等
-				}
-			});
-
-			if (!response.ok) {
-				throw new Error(`服务器响应失败，状态码: ${response.status}`);
-			}
-
-			const data = await response.json(); // 假设后端返回 { success: true, isFollowing: true/false }
-
-			// 4. 根据后端返回的真实数据更新UI
-			if (data.success) {
-				const icon = buttonElement.querySelector('i');
-				const textSpan = buttonElement.querySelector('span:last-child'); // 获取按钮内的文本span
-
-				if (data.isFollowing) { // 假设后端返回 isFollowing 字段
-					buttonElement.classList.remove('btn-outline-primary');
-					buttonElement.classList.add('btn-secondary');
-					if (icon) icon.className = 'fas fa-user-check'; // 更新图标
-					textSpan.textContent = ' 已关注'; // 更新文本
-				} else {
-					buttonElement.classList.remove('btn-secondary');
-					buttonElement.classList.add('btn-outline-primary');
-					if (icon) icon.className = 'fas fa-user-plus'; // 更新图标
-					textSpan.textContent = ' 关注'; // 更新文本
-				}
-			} else {
-				// 处理后端返回操作失败的情况
-				alert(data.message || '操作失败，请稍后再试。');
-			}
-
-		} catch (error) {
-			console.error('关注操作失败:', error);
-			alert('操作失败，请稍后重试。');
-		} finally {
-			// 5. 无论成功还是失败，最后都必须重新启用按钮
-			buttonElement.disabled = false;
-		}
-	}
-
-	// 收藏功能
-	function toggleFavorite() {
-		// TODO: 实现收藏功能
-		alert('收藏功能开发中...');
-	}
-
-	// 分享功能
-	function shareToWechat() {
-		// 微信分享逻辑
-		alert('微信分享功能开发中...');
-	}
-
-	function shareToWeibo() {
-		const url = encodeURIComponent(window.location.href);
-		const title = encodeURIComponent(document.title);
-		window.open(`http://service.weibo.com/share/share.php?url=${url}&title=${title}`);
-	}
-
-	function copyLink() {
-		navigator.clipboard.writeText(window.location.href).then(function() {
-			alert('链接已复制到剪贴板');
-		});
-	}
-
-	// 返回顶部功能
-	$(document).ready(function() {
-		$(window).scroll(function() {
-			if ($(this).scrollTop() > 100) {
-				$('#backToTop').fadeIn();
-			} else {
-				$('#backToTop').fadeOut();
-			}
-		});
-
-		$('#backToTop').click(function() {
-			$('html, body').animate({scrollTop: 0}, 800);
-			return false;
-		});
-
-		// 为所有pre标签添加复制按钮
-		const allPres = document.querySelectorAll('article.article-post pre'); // 使用修正后的选择器
-
-		allPres.forEach(pre => {
-			if (pre.innerText.trim().length === 0) {
-				return; // 跳过内容为空的代码块
-			}
-
-			const button = document.createElement('button');
-			button.className = 'copy-btn';
-			button.textContent = '复制';
-
-			pre.appendChild(button);
-
-			button.addEventListener('click', (e) => {
-				e.stopPropagation(); // 防止点击事件冒泡
-				const codeElement = pre.querySelector('code');
-				const textToCopy = codeElement ? codeElement.innerText : pre.innerText;
-
-				// 复制前临时去掉按钮自身的文字，避免复制进去
-				const originalButtonText = button.textContent;
-				button.textContent = '';
-				const cleanText = pre.innerText;
-				button.textContent = originalButtonText;
-
-				navigator.clipboard.writeText(cleanText).then(() => {
-					button.textContent = '已复制!';
-					setTimeout(() => {
-						button.textContent = '复制';
-					}, 2000);
-				}).catch(err => {
-					console.error('复制失败', err);
-				});
-			});
-		});
-	});
-
-	// 滚动到评论区
-	function scrollToComments() {
-		const commentsSection = document.getElementById('comments-section');
-		if (commentsSection) {
-			commentsSection.scrollIntoView({ behavior: 'smooth' });
-			// 聚焦到评论输入框
-			setTimeout(() => {
-				const commentTextarea = document.getElementById('commentContent');
-				if (commentTextarea) {
-					commentTextarea.focus();
-				}
-			}, 800);
-		}
-	}
-
-	// 评论功能
-	$(document).ready(function() {
-		// 提交评论
-		$('#commentForm').on('submit', function(e) {
-			e.preventDefault();
-			
-			const commentContent = $('#commentContent').val().trim();
-			if (!commentContent) {
-				alert('评论内容不能为空');
-				return;
-			}
-			
-			const articleId = '[[${article.articleId}]]';
-			const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-			const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-			
-			$.ajax({
-				url: `/api/article/${articleId}/comment`,
-				type: 'POST',
-				headers: {
-					[header]: token,
-					'Content-Type': 'application/json'
-				},
-				data: JSON.stringify({
-					content: commentContent
-				}),
-				success: function(response) {
-					if (response.success) {
-						// 刷新页面显示新评论
-						location.reload();
-					} else {
-						alert(response.message || '评论失败，请稍后再试');
-					}
-				},
-				error: function() {
-					alert('评论失败，请检查网络连接');
-				}
-			});
-		});
-		
-		// 回复评论
-		$('.reply-btn').on('click', function() {
-			const commentId = $(this).data('comment-id');
-			const commentItem = $(this).closest('.comment-item');
-			
-			// 如果回复表单已存在，则移除
-			if (commentItem.find('.reply-form').length > 0) {
-				commentItem.find('.reply-form').remove();
-				return;
-			}
-			
-			// 创建回复表单
-			const replyForm = $(`
-				<div class="reply-form mt-2 mb-3">
-					<div class="form-group">
-						<textarea class="form-control reply-textarea" rows="2" placeholder="回复评论..."></textarea>
-					</div>
-					<div class="text-right">
-						<button type="button" class="btn btn-sm btn-secondary cancel-reply-btn mr-2">取消</button>
-						<button type="button" class="btn btn-sm btn-primary submit-reply-btn" data-comment-id="${commentId}">回复</button>
-					</div>
-				</div>
-			`);
-			
-			// 添加到评论项中
-			$(this).closest('.comment-actions').after(replyForm);
-			
-			// 聚焦到回复输入框
-			replyForm.find('.reply-textarea').focus();
-			
-			// 取消回复
-			replyForm.find('.cancel-reply-btn').on('click', function() {
-				replyForm.remove();
-			});
-			
-			// 提交回复
-			replyForm.find('.submit-reply-btn').on('click', function() {
-				const replyContent = replyForm.find('.reply-textarea').val().trim();
-				if (!replyContent) {
-					alert('回复内容不能为空');
-					return;
-				}
-				
-				const articleId = '[[${article.articleId}]]';
-				const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-				const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-				
-				$.ajax({
-					url: `/api/comment/${commentId}/reply`,
-					type: 'POST',
-					headers: {
-						[header]: token,
-						'Content-Type': 'application/json'
-					},
-					data: JSON.stringify({
-						content: replyContent
-					}),
-					success: function(response) {
-						if (response.success) {
-							// 刷新页面显示新回复
-							location.reload();
-						} else {
-							alert(response.message || '回复失败，请稍后再试');
-						}
-					},
-					error: function() {
-						alert('回复失败，请检查网络连接');
-					}
-				});
-			});
-		});
-	});
-</script>
 
 <style>
 /* 作品集样式 */
@@ -815,6 +512,24 @@
 
 .article-content table tr:nth-child(even) {
     background-color: #f8f9fa;
+}
+
+/* Toast样式 */
+.toast {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.toast-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.toast-body {
+    padding: 12px;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 </style>
 

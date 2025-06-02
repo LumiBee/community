@@ -1,9 +1,11 @@
 package com.lumibee.hive.controller;
 
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,52 +31,33 @@ public class SettingsController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    private CustomUserServiceImpl userDetailsService;
 
     @GetMapping
     public String userSettingsPage(Model model,
-                                   Authentication authentication,
+                                   @AuthenticationPrincipal Principal principal,
                                    @RequestParam(name = "tab", required = false) String activeTab) {
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
-            return "redirect:/login"; // 用户未认证，重定向到登录
-        }
-
-        Object principal = authentication.getPrincipal();
-        User currentUser = null;
-
-        if (principal instanceof UserDetails) {
-            String usernameOrEmail = ((UserDetails) principal).getUsername();
-            currentUser = userService.selectByEmail(usernameOrEmail);
-            if (currentUser == null) {
-                currentUser = userService.selectByName(usernameOrEmail);
-            }
-        } else {
-            OAuth2User oauth2User = (OAuth2User) principal;
-            String githubId = oauth2User.getName(); // GitHub ID 或其他 OAuth ID
-            currentUser = userService.selectByGithubId(githubId);
-
-        }
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
 
         if (currentUser == null) {
             // 无法找到用户信息，可能需要记录错误并重定向
             System.err.println("Error: Could not load user details for settings page. Principal: " + principal.toString());
-            return "redirect:/error/404"; // 或者一个更友好的错误提示页
+            return "redirect:/error/404";
         }
 
-        model.addAttribute("user", currentUser); // <--- 这是关键，将用户对象添加到模型
-        // model.addAttribute("userPreferences", ...); // 如果您有用户偏好设置
+        model.addAttribute("user", currentUser);
 
         if (activeTab != null) {
-            model.addAttribute("activeTab", activeTab); // 用于JS激活特定tab
+            model.addAttribute("activeTab", activeTab);
         }
 
-        return "settings"; // 返回 settings.html 视图名
+        return "settings";
     }
 
     @PostMapping("/account")
     public String updatePassword(@RequestParam("newPassword") String newPassword,
                                  @RequestParam("confirmNewPassword") String confirmNewPassword,
                                  @AuthenticationPrincipal Principal principal,
-                                 HttpSession session,
                                  RedirectAttributes redirectAttributes) {
 
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
@@ -101,8 +84,10 @@ public class SettingsController {
         boolean success = userService.updatePassword(currentUser.getId(), encryptedPassword);
         if (success) {
             // 更新当前用户的密码
-            currentUser.setPassword(encryptedPassword);
-            session.setAttribute("user", currentUser);
+            HttpSession session = ((org.springframework.web.context.request.ServletRequestAttributes)
+                    org.springframework.web.context.request.RequestContextHolder.currentRequestAttributes())
+                    .getRequest().getSession();
+
             redirectAttributes.addFlashAttribute("passwordSuccess", "密码更新成功");
             session.removeAttribute("showPasswordSetupPrompt");
         } else {

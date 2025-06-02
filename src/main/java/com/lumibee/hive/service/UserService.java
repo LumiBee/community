@@ -6,7 +6,6 @@ import java.security.Principal;
 import java.util.List;
 
 public interface UserService {
-    User selectByToken(String token);
     User selectByName(String name);
     User selectByEmail(String email);
     User selectByGithubId(String githubId);
@@ -15,4 +14,6 @@ public interface UserService {
     int updateById(User user);
     User selectById(Long id);
     User getCurrentUserFromPrincipal(Principal principal);
+    boolean isFollowing(Long userId, Long followerId);
+    boolean toggleFollow(Long userId, Long followerId);
 }

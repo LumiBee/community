@@ -8,7 +8,7 @@ import lombok.Data;
 
 @Data
 @TableName("article_likes")
-public class articleLikes {
+public class ArticleLikes {
     @TableId(type = IdType.AUTO)
     private long id;
     private long userId;

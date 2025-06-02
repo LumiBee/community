@@ -1,14 +1,22 @@
 package com.lumibee.hive.model;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.baomidou.mybatisplus.annotation.Version;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import lombok.Data;
 
 @Data
 public class User implements UserDetails, Principal {
@@ -26,6 +34,7 @@ public class User implements UserDetails, Principal {
     private String bio;
     private String avatarUrl;
     private String email;
+    @JsonIgnore
     private String password;
     private String githubId;
     private String qqOpenId;

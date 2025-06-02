@@ -76,4 +76,9 @@ public class IndexController {
         return "profile"; // Assuming you have a Thymeleaf template named 'profile.html'
     }
 
+    @GetMapping("/messages")
+    public String showMessages() {
+        return "messages";
+    }
+
 }
