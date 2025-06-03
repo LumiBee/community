@@ -20,4 +20,5 @@ public interface ArticleService {
     List<ArticleExcerptDTO> getArticlesByTagId(int tagId);
     ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId);
     List<ArticleExcerptDTO> selectArticlesByPortfolioId(Integer id);
+    Integer countArticlesByUserId(Long id);
 }

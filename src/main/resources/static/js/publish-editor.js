@@ -327,8 +327,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             } else if (bsModalInstance) {
                 try {
-                    bsModalInstance.show();
-                    modalShown = true;
+                bsModalInstance.show();
+                modalShown = true;
                     console.log("Bootstrap Modal shown successfully");
                 } catch (e) {
                     console.error("Error showing Bootstrap modal:", e);
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     const newModal = new bootstrap.Modal(publishSettingsModalElement);
                     newModal.show();
                     bsModalInstance = newModal;
-                    modalShown = true;
+                modalShown = true;
                     console.log("New Bootstrap Modal created and shown");
                 } catch (e) {
                     console.error("Error creating and showing new Bootstrap modal:", e);
@@ -397,9 +397,9 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("Confirm publish button clicked (RESTful mode).");
 
             try {
-                // 数据收集
-                // 从页面和模态框的各个输入框中收集最新数据
-                const title = articleTitleInput.value;
+            // 数据收集
+            // 从页面和模态框的各个输入框中收集最新数据
+            const title = articleTitleInput.value;
                 const content = editorInstance ? editorInstance.getMarkdown() : '';
                 
                 console.log("Checking required inputs:");
@@ -419,9 +419,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     return;
                 }
                 
-                const tagsValue = articleTagsInput.value;
+            const tagsValue = articleTagsInput.value;
                 const portfolioName = articlePortfolioInput ? articlePortfolioInput.value : '';
-                const excerpt = articleSummaryTextarea.value;
+            const excerpt = articleSummaryTextarea.value;
                 
                 console.log("Collected form data:", {
                     title,
@@ -431,29 +431,29 @@ document.addEventListener("DOMContentLoaded", function() {
                     excerpt
                 });
 
-                // 客户端数据校验
+            // 客户端数据校验
                 if (!title.trim()) { showToast('请输入文章标题', 'warning'); articleTitleInput.focus(); return; }
                 if (!content.trim()) { showToast('请输入文章内容', 'warning'); editorInstance.focus(); return; }
                 if (!tagsValue.trim()) { showToast('请添加至少一个标签', 'warning'); articleTagsInput.focus(); return; }
                 if (!excerpt.trim()) { showToast('请输入文章摘要', 'warning'); articleSummaryTextarea.focus(); return; }
 
-                // 构建与后端 DTO 结构完全一致的 JSON 对象
-                // 将标签字符串处理成字符串数组
-                const tagsNameArray = tagsValue.split(',').map(tag => tag.trim()).filter(Boolean);
+            // 构建与后端 DTO 结构完全一致的 JSON 对象
+            // 将标签字符串处理成字符串数组
+            const tagsNameArray = tagsValue.split(',').map(tag => tag.trim()).filter(Boolean);
 
-                const requestData = {
-                    title: title,
-                    content: content,
-                    excerpt: excerpt,
-                    tagsName: tagsNameArray,
-                    portfolioName: portfolioName.trim() // portfolioName 是可选的
-                };
+            const requestData = {
+                title: title,
+                content: content,
+                excerpt: excerpt,
+                tagsName: tagsNameArray,
+                portfolioName: portfolioName.trim() // portfolioName 是可选的
+            };
 
-                console.log("Final data to publish via AJAX:", requestData);
+            console.log("Final data to publish via AJAX:", requestData);
 
-                // 防止重复点击
-                confirmPublishBtn.disabled = true;
-                confirmPublishBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>发布中...';
+            // 防止重复点击
+            confirmPublishBtn.disabled = true;
+            confirmPublishBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>发布中...';
 
                 // 获取CSRF令牌
                 const csrfToken = document.querySelector('meta[name="_csrf"]');
@@ -473,19 +473,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 
                 console.log("Request headers:", headers);
 
-                try {
-                    // 使用 fetch API 发起异步的 AJAX POST 请求
+            try {
+                // 使用 fetch API 发起异步的 AJAX POST 请求
                     const response = await fetch('/api/article/publish', { // 指向正确的 RESTful API 端点
-                        method: 'POST',
+                    method: 'POST',
                         headers: headers,
-                        body: JSON.stringify(requestData) // 将 JS 对象转换为 JSON 字符串
-                    });
+                    body: JSON.stringify(requestData) // 将 JS 对象转换为 JSON 字符串
+                });
 
                     console.log("Server response status:", response.status);
-                    
-                    // 处理服务器的响应
-                    if (response.ok) { // HTTP 状态码为 2xx
-                        const newArticle = await response.json();
+
+                // 处理服务器的响应
+                if (response.ok) { // HTTP 状态码为 2xx
+                    const newArticle = await response.json();
                         console.log("Publish successful, article data:", newArticle);
                         
                         // 关闭模态框
@@ -496,11 +496,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         }
                         
                         // 直接跳转到文章页面
-                        window.location.href = `/article/${newArticle.slug}`;
-                    } else {
-                        // 处理服务器返回的错误信息
+                    window.location.href = `/article/${newArticle.slug}`;
+                } else {
+                    // 处理服务器返回的错误信息
                         try {
-                            const errorData = await response.json();
+                    const errorData = await response.json();
                             console.error("Server error response:", errorData);
                             showToast(`发布失败: ${errorData.message || '服务器处理请求时出错'}`, 'error');
                         } catch (jsonError) {

@@ -224,6 +224,12 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.selectArticlesByPortfolioId(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countArticlesByUserId(Long id) {
+        return articleMapper.countArticlesByUserId(id);
+    }
+
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
         if (portfolio == null) return null;
         PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类

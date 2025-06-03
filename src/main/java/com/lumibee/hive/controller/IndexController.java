@@ -72,7 +72,19 @@ public class IndexController {
     public String showProfile(Model model,
                               @AuthenticationPrincipal Principal principal) {
         User user = userService.getCurrentUserFromPrincipal(principal);
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        Integer articleCount = articleService.countArticlesByUserId(user.getId());
+        Integer fans = userService.countFansByUserId(user.getId());
+        Integer following = userService.countFollowingByUserId(user.getId());
+
         model.addAttribute("user", user);
+        model.addAttribute("articleCount", articleCount);
+        model.addAttribute("followersCount", fans);
+        model.addAttribute("followingCount", following);
+
         return "profile"; // Assuming you have a Thymeleaf template named 'profile.html'
     }
 

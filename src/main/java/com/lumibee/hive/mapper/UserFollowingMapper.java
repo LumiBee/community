@@ -11,28 +11,14 @@ import com.lumibee.hive.model.Follower;
 
 @Mapper
 public interface UserFollowingMapper extends BaseMapper<Follower> {
-    /**
-     * 检查用户是否关注了另一个用户
-     * @param userId 当前用户ID（关注者）
-     * @param followerId 被关注的用户ID（作者）
-     * @return 1 如果存在关注关系，0 如果不存在
-     */
     @Select("SELECT count(*) from following WHERE user_id = #{userId} AND follower_id = #{followerId}")
     Integer isFollowing(@Param("userId") Long userId, @Param("followerId") Long followerId);
-    
-    /**
-     * 取消关注
-     * @param userId 当前用户ID（关注者）
-     * @param followerId 被关注的用户ID（作者）
-     */
     @Delete("DELETE FROM following where user_id = #{userId} AND follower_id = #{followerId}")
     void unfollowUser(@Param("userId") Long userId, @Param("followerId") Long followerId);
-    
-    /**
-     * 添加关注
-     * @param userId 当前用户ID（关注者）
-     * @param followerId 被关注的用户ID（作者）
-     */
     @Insert("INSERT INTO following (user_id, follower_id) VALUES (#{userId}, #{followerId})")
     void followUser(@Param("userId") Long userId, @Param("followerId") Long followerId);
+    @Select("SELECT COUNT(*) FROM following WHERE follower_id = #{id}")
+    Integer countFansByUserId(@Param("id") Long id);
+    @Select("SELECT COUNT(*) FROM following WHERE user_id = #{id}")
+    Integer countFollowingByUserId(@Param("id") Long id);
 }

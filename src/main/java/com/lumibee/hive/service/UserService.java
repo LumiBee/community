@@ -16,4 +16,6 @@ public interface UserService {
     User getCurrentUserFromPrincipal(Principal principal);
     boolean isFollowing(Long userId, Long followerId);
     boolean toggleFollow(Long userId, Long followerId);
+    Integer countFansByUserId(Long id);
+    Integer countFollowingByUserId(Long id);
 }

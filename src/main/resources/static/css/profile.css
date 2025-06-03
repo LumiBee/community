@@ -107,25 +107,33 @@ body {
   border: none;
 }
 
-.btn-follow {
-  background-color: #ffda58;
-  color: #333;
+.btn-follow, .btn-follow.following, .btn-sm.rounded-pill {
+  border-radius: 50px !important; /* 强制应用圆角 */
 }
 
-.btn-follow:hover {
+.btn-warning.btn-sm.rounded-pill {
+  background-color: #ffda58;
+  color: #333;
+  border: none;
+  font-weight: 600;
+}
+
+.btn-warning.btn-sm.rounded-pill:hover {
   background-color: #ffd333;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(255, 218, 88, 0.3);
 }
 
-.btn-follow.following {
-  background-color: #f0f0f0;
-  color: #555;
+.btn-secondary.btn-sm.rounded-pill {
+  background-color: #6c757d;
+  color: white;
+  border: none;
 }
 
-.btn-follow.following:hover {
-  background-color: #ffeeee;
-  color: #ff5555;
+.btn-secondary.btn-sm.rounded-pill:hover {
+  background-color: #5a6268;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(108, 117, 125, 0.3);
 }
 
 .btn-message {

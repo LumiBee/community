@@ -5,10 +5,26 @@
     <title>个人空间 - LumiHive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
+    <meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
+
+<!-- 自定义Toast组件 -->
+<div id="customToast" style="display: none; position: fixed; bottom: 30px; right: 30px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 9999; min-width: 300px; max-width: 400px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #eee;">
+    <div style="display: flex; align-items: center;">
+      <i id="customToastIcon" class="fas fa-info-circle text-info mr-2"></i>
+      <strong id="customToastTitle">提示</strong>
+    </div>
+    <button onclick="hideCustomToast()" style="background: none; border: none; cursor: pointer; font-size: 16px;">×</button>
+  </div>
+  <div id="customToastMessage" style="padding: 15px; font-size: 14px;">
+    消息内容
+  </div>
+</div>
 
 <div class="main-content">
     <div class="container">
@@ -27,9 +43,14 @@
                         <div class="profile-username" th:text="'@' + ${user.name}">@用户名</div>
                     </div>
                     <div class="profile-action-buttons">
-                        <button class="profile-btn btn-follow"
-                                th:classappend="${(isFollowing ?: false) ? 'following' : ''}"
-                                th:text="${(isFollowing ?: false) ? '已关注' : '关注'}">关注</button>
+                        <button type="button"
+                                th:id="${'followButton-' + user.id}"
+                                th:class="${(isFollowing ?: false) ? 'btn btn-secondary btn-sm rounded-pill' : 'btn btn-warning btn-sm rounded-pill'}"
+                                style="min-width: 85px; padding: 6px 16px; border-radius: 50px !important;"
+                                onclick="toggleFollow(this)">
+                            <span th:if="${(isFollowing ?: false)}"><i class="fas fa-user-check"></i> 已关注</span>
+                            <span th:unless="${(isFollowing ?: false)}"><i class="fas fa-user-plus"></i> 关注</span>
+                        </button>
                         <button class="profile-btn btn-message" th:attr="data-user-id=${user.id}">发消息</button>
                     </div>
                 </div>

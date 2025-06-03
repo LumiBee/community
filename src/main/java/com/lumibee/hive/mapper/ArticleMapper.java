@@ -66,4 +66,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "gmtModified", column = "gmt_modified")
     })
     List<ArticleExcerptDTO> getArticlesByTagId(@Param("tagId") Integer tagId);
+    @Select("SELECT count(*) from articles where user_id = #{id} and deleted = 0")
+    Integer countArticlesByUserId(@Param("id")Long id);
 }

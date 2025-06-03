@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 
 import javax.sql.DataSource;
 
-import com.lumibee.hive.service.CustomUserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -13,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,8 +24,9 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.UserServiceImpl;
+import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
+import com.lumibee.hive.service.UserServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -82,7 +81,11 @@ public class SecurityConfig {
                                                 "/favicon.ico",   // 网站图标
                                                 "/api/user/dismiss-password-prompt",
                                                 "/article/**",    // 文章浏览
-                                                "/.well-known/**" // WebFinger 协议
+                                                "/.well-known/**", // WebFinger 协议
+                                                "/tags/**", // 标签浏览
+                                                "/api/tags/**", // 标签 API
+                                                "/portfolio/**", // 个人作品集
+                                                "/api/portfolio/**" // 个人作品集 API
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
                                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问

@@ -16,70 +16,138 @@ document.addEventListener('DOMContentLoaded', function() {
     initSkillBars();
 });
 
-/**
- * 初始化关注按钮功能
- */
-function initFollowButton() {
-    const followBtn = document.querySelector('.btn-follow');
-    if (!followBtn) return;
+// 自定义toast函数
+let toastTimeout;
+
+function showToast(title, message, icon = 'info-circle', iconClass = 'text-info') {
+    console.log('显示自定义toast消息:', title, message, icon, iconClass);
     
-    followBtn.addEventListener('click', function() {
-        const userId = this.getAttribute('data-user-id');
-        const isFollowing = this.classList.contains('following');
+    // 清除任何可能存在的超时
+    if (toastTimeout) {
+        clearTimeout(toastTimeout);
+    }
+    
+    // 获取toast元素
+    const toast = document.getElementById('customToast');
+    const toastTitle = document.getElementById('customToastTitle');
+    const toastMessage = document.getElementById('customToastMessage');
+    const toastIcon = document.getElementById('customToastIcon');
+    
+    // 设置内容
+    toastTitle.textContent = title;
+    toastMessage.textContent = message;
+    
+    // 设置图标
+    toastIcon.className = `fas fa-${icon} ${iconClass} mr-2`;
+    
+    // 显示toast
+    toast.style.display = 'block';
+    
+    // 3秒后自动隐藏
+    toastTimeout = setTimeout(hideCustomToast, 3000);
+}
+
+function hideCustomToast() {
+    const toast = document.getElementById('customToast');
+    if (toast) {
+        toast.style.display = 'none';
+    }
+}
+
+/**
+ * 处理关注按钮点击
+ * @param {HTMLElement} buttonElement - 被点击的按钮元素
+ */
+async function toggleFollow(buttonElement) {
+    if (!buttonElement) return;
+    
+    // 获取目标用户ID（从页面的profile-header元素获取）
+    const profileHeader = document.querySelector('.profile-header');
+    const targetUserId = profileHeader ? profileHeader.getAttribute('data-user-id') : null;
+    
+    if (!targetUserId) {
+        console.error('未找到目标用户ID');
+        return;
+    }
+    
+    console.log("Toggling follow for user ID:", targetUserId);
+    
+    // 检查当前登录用户ID
+    const currentUserId = document.querySelector('meta[name="current-user-id"]')?.getAttribute("content");
+    console.log("Current user ID:", currentUserId, "Target user ID:", targetUserId);
+    
+    // 如果是自己尝试关注自己
+    if (currentUserId && currentUserId === targetUserId) {
+        showToast('提示', '不能关注自己哦，试试关注其他作者吧！', 'exclamation-circle', 'text-warning');
+        return; // 直接返回，不发送请求
+    }
+    
+    // 1. 从meta标签中获取CSRF安全令牌
+    const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+    
+    // 2. 发送请求前，禁用按钮
+    buttonElement.disabled = true;
+    
+    try {
+        // 3. 构建API的URL
+        const apiUrl = `/api/user/${targetUserId}/follow`;
+        console.log("API URL:", apiUrl);
         
-        // 乐观UI更新
-        if (isFollowing) {
-            this.textContent = '关注';
-            this.classList.remove('following');
-            this.style.backgroundColor = '#ffda58';
-            this.style.color = '#333';
-            updateFollowerCount(-1);
-        } else {
-            this.textContent = '已关注';
-            this.classList.add('following');
-            this.style.backgroundColor = '#f0f0f0';
-            this.style.color = '#555';
-            updateFollowerCount(1);
-        }
-        
-        // 发送关注/取消关注请求
-        fetch(`/api/user/${userId}/${isFollowing ? 'unfollow' : 'follow'}`, {
+        const response = await fetch(apiUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').getAttribute('content')
+                [header]: token
             }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('关注操作失败');
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('关注状态更新成功', data);
-        })
-        .catch(error => {
-            console.error('关注操作出错:', error);
-            // 恢复原状态（如果请求失败）
-            if (isFollowing) {
-                followBtn.textContent = '已关注';
-                followBtn.classList.add('following');
-                followBtn.style.backgroundColor = '#f0f0f0';
-                followBtn.style.color = '#555';
+        });
+        
+        console.log("Response status:", response.status);
+        
+        if (!response.ok) {
+            throw new Error(`服务器响应失败，状态码: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("Response data:", JSON.stringify(data, null, 2));
+        
+        // 4. 根据后端返回的真实数据更新UI
+        if (data.success) {
+            const icon = buttonElement.querySelector('i');
+            const textSpan = buttonElement.querySelector('span:last-child'); // 获取按钮内的文本span
+            
+            if (data.isFollowing) { // 假设后端返回 isFollowing 字段
+                buttonElement.classList.remove('btn-warning');
+                buttonElement.classList.add('btn-secondary');
+                if (icon) icon.className = 'fas fa-user-check'; // 更新图标
+                textSpan.textContent = ' 已关注'; // 更新文本
                 updateFollowerCount(1);
             } else {
-                followBtn.textContent = '关注';
-                followBtn.classList.remove('following');
-                followBtn.style.backgroundColor = '#ffda58';
-                followBtn.style.color = '#333';
+                buttonElement.classList.remove('btn-secondary');
+                buttonElement.classList.add('btn-warning');
+                if (icon) icon.className = 'fas fa-user-plus'; // 更新图标
+                textSpan.textContent = ' 关注'; // 更新文本
                 updateFollowerCount(-1);
             }
             
-            // 显示错误提示
-            showToast('操作失败，请稍后重试', 'error');
-        });
-    });
+            // 如果后端返回了消息，显示toast提示
+            if (data.message) {
+                showToast('关注状态', data.message, data.isFollowing ? 'check-circle' : 'info-circle', data.isFollowing ? 'text-success' : 'text-info');
+            }
+        } else {
+            // 处理后端返回操作失败的情况
+            if (data.message) {
+                showToast('提示', data.message, 'exclamation-circle', 'text-warning');
+            } else {
+                showToast('提示', '操作失败，请稍后再试。', 'exclamation-triangle', 'text-danger');
+            }
+        }
+    } catch (error) {
+        console.error('关注操作失败:', error);
+        showToast('错误', '操作失败，请稍后重试。', 'exclamation-triangle', 'text-danger');
+    } finally {
+        // 5. 无论成功还是失败，最后都必须重新启用按钮
+        buttonElement.disabled = false;
+    }
 }
 
 /**
@@ -285,8 +353,12 @@ function renderUsers(data, container, type) {
                     <p class="text-muted mb-1">@${user.name}</p>
                     <p class="small mb-0">${user.bio || '这个人很懒，还没有填写个人简介...'}</p>
                 </div>
-                <button class="profile-btn btn-follow ms-3" data-user-id="${user.id}">
-                    ${user.isFollowing ? '已关注' : '关注'}
+                <button class="btn ${user.isFollowing ? 'btn-secondary' : 'btn-warning'} btn-sm rounded-pill ms-3" 
+                        style="min-width: 70px; padding: 5px 12px; border-radius: 50px !important;"
+                        data-user-id="${user.id}" 
+                        onclick="toggleFollow(this)">
+                    <i class="${user.isFollowing ? 'fas fa-user-check' : 'fas fa-user-plus'}"></i>
+                    ${user.isFollowing ? ' 已关注' : ' 关注'}
                 </button>
             </div>
         `;
@@ -450,65 +522,6 @@ function initSkillBars() {
         
         observer.observe(bar);
     });
-}
-
-/**
- * 显示提示消息
- * @param {string} message - 消息内容
- * @param {string} type - 消息类型 (success, error, info, warning)
- */
-function showToast(message, type = 'info') {
-    // 检查是否已有toast容器
-    let toastContainer = document.querySelector('.toast-container');
-    
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        document.body.appendChild(toastContainer);
-    }
-    
-    // 创建toast元素
-    const toastId = 'toast-' + Date.now();
-    const toastHTML = `
-        <div id="${toastId}" class="toast align-items-center text-white bg-${getToastBgClass(type)} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-            </div>
-        </div>
-    `;
-    
-    toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-    
-    const toastElement = document.getElementById(toastId);
-    const toast = new bootstrap.Toast(toastElement, {
-        autohide: true,
-        delay: 3000
-    });
-    
-    toast.show();
-    
-    // 自动移除toast元素
-    toastElement.addEventListener('hidden.bs.toast', function() {
-        this.remove();
-    });
-}
-
-/**
- * 获取Toast的背景类名
- * @param {string} type - 消息类型
- * @returns {string} 背景类名
- */
-function getToastBgClass(type) {
-    switch (type) {
-        case 'success': return 'success';
-        case 'error': return 'danger';
-        case 'warning': return 'warning';
-        case 'info':
-        default: return 'info';
-    }
 }
 
 /**

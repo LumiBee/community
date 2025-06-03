@@ -190,4 +190,16 @@ public class UserServiceImpl implements UserService {
             return true;
         }
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countFansByUserId(Long id) {
+        return userFollowingMapper.countFansByUserId(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer countFollowingByUserId(Long id) {
+        return userFollowingMapper.countFollowingByUserId(id);
+    }
 }
