@@ -47,7 +47,8 @@ public class ArticleServiceImpl implements ArticleService {
 
         Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
         List<Article> articleList = articlePage.getRecords();
-        if (articleList == null && articleList.isEmpty()) {
+
+        if (articleList.isEmpty()) {
             return new Page<>(pageNum, pageSize, 0);
         }
 
@@ -233,6 +234,11 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<ArticleExcerptDTO> getArticlesByUserId(Long id) {
         return articleMapper.getArticlesByUserId(id);
+    }
+
+    @Override
+    public List<ArticleExcerptDTO> selectFeaturedArticles(String title) {
+        return articleMapper.selectFeaturedArticles(title);
     }
 
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {

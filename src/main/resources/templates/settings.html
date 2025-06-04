@@ -38,6 +38,23 @@
         <div class="tab-content" id="settingsTabContent">
           <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab-btn">
             <h4 class="mb-3">编辑基本资料</h4>
+            
+            <!-- 个人资料更新成功提示 -->
+            <div th:if="${profileSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+              <span th:text="${profileSuccess}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            
+            <!-- 个人资料更新错误提示 -->
+            <div th:if="${profileError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <span th:text="${profileError}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            
             <form id="profileSettingsForm" th:action="@{/user/settings/profile}" method="post" enctype="multipart/form-data">
               <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
 
@@ -168,6 +185,23 @@
 
           <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab-btn">
             <h4 class="mb-3">偏好设置</h4>
+            
+            <!-- 偏好设置更新成功提示 -->
+            <div th:if="${preferencesSuccess}" class="alert alert-success alert-dismissible fade show" role="alert">
+              <span th:text="${preferencesSuccess}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            
+            <!-- 偏好设置更新错误提示 -->
+            <div th:if="${preferencesError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+              <span th:text="${preferencesError}"></span>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            
             <form id="preferencesSettingsForm" th:action="@{/user/settings/preferences}" method="post">
               <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
               <div class="custom-control custom-switch mb-3">
@@ -207,7 +241,8 @@
     const avatarUploadInput = document.getElementById('avatarUploadInput');
     const avatarPreviewDisplay = document.getElementById('avatarPreviewDisplay');
     const defaultAvatarSrc = '/img/default01.jpg';
-
+    
+    // 激活指定的标签页
     const urlParams = new URLSearchParams(window.location.search);
     const tabToActivate = urlParams.get('tab');
 
@@ -221,6 +256,7 @@
       }
     }
 
+    // 头像上传预览
     if (avatarUploadInput && avatarPreviewDisplay) {
       let initialAvatarSrc = avatarPreviewDisplay.src;
       if (!initialAvatarSrc || initialAvatarSrc.endsWith(window.location.pathname)) {
@@ -229,13 +265,22 @@
       }
       avatarPreviewDisplay.dataset.defaultSrc = initialAvatarSrc;
 
+      // 点击头像也可以触发文件选择
       avatarPreviewDisplay.addEventListener('click', function() {
         avatarUploadInput.click();
       });
 
+      // 预览所选头像
       avatarUploadInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file && file.type.startsWith('image/')) {
+          // 验证文件大小（最大2MB）
+          if (file.size > 2 * 1024 * 1024) {
+            alert("头像文件大小不能超过2MB");
+            this.value = ''; // 清空选择
+            return;
+          }
+          
           const reader = new FileReader();
           reader.onload = function(e) {
             avatarPreviewDisplay.src = e.target.result;
@@ -245,12 +290,36 @@
           avatarPreviewDisplay.src = avatarPreviewDisplay.dataset.defaultSrc;
           if (file) {
             alert("请选择有效的图片文件 (JPG, PNG等)。");
+            this.value = ''; // 清空选择
           }
         }
       });
     } else {
       if (!avatarUploadInput) console.error("Avatar upload input (avatarUploadInput) not found!");
       if (!avatarPreviewDisplay) console.error("Avatar preview display (avatarPreviewDisplay) not found!");
+    }
+    
+    // 密码校验
+    const accountForm = document.getElementById('accountSettingsForm');
+    if (accountForm) {
+      accountForm.addEventListener('submit', function(event) {
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+        
+        if (newPassword && newPassword.length < 6) {
+          alert('密码长度至少为6个字符');
+          event.preventDefault();
+          return false;
+        }
+        
+        if (newPassword !== confirmNewPassword) {
+          alert('两次输入的密码不一致');
+          event.preventDefault();
+          return false;
+        }
+        
+        return true;
+      });
     }
   });
 </script>

@@ -1,18 +1,8 @@
 package com.lumibee.hive.controller;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import com.lumibee.hive.dto.PortfolioDTO;
-import com.lumibee.hive.dto.PortfolioDetailsDTO;
-import com.lumibee.hive.dto.TagDTO;
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Portfolio;
-import com.lumibee.hive.model.Tag;
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.ArticleService;
-import com.lumibee.hive.service.PortfolioService;
-import com.lumibee.hive.service.TagService;
-import com.lumibee.hive.service.UserService;
+import java.security.Principal;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -20,8 +10,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.security.Principal;
-import java.util.List;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
+import com.lumibee.hive.dto.TagDTO;
+import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.ArticleService;
+import com.lumibee.hive.service.PortfolioService;
+import com.lumibee.hive.service.TagService;
+import com.lumibee.hive.service.UserService;
 
 @Controller
 public class IndexController {
@@ -37,13 +34,16 @@ public class IndexController {
                        Model model) {
         int limit = 6;
 
+
         Page<ArticleExcerptDTO> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
-        List<ArticleExcerptDTO> topArticles = articleService.selectArticleSummaries(limit);
+        List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
+        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles("Markdown基本语法");
         List<TagDTO> allTags = tagService.selectAllTags();
 
         model.addAttribute("articles", articlePage);
-        model.addAttribute("popularArticles", topArticles);
+        model.addAttribute("popularArticles", popularArticles);
         model.addAttribute("tags", allTags);
+        model.addAttribute("featuredArticles", featuredArticles);
 
         return "index";
     }

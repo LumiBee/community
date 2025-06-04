@@ -18,4 +18,6 @@ public class ArticleExcerptDTO {
     private Long userId;
     private String userName;
     private String avatarUrl;
+
+    private String coverImageUrl;
 }

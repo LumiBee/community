@@ -36,7 +36,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             "FROM articles a " +
             "LEFT JOIN user u ON a.user_id = u.id " +
             "WHERE a.deleted = 0 AND a.status = 'published' " +
-            "ORDER BY a.gmt_modified DESC LIMIT #{limit}")
+            "ORDER BY a.view_count DESC LIMIT #{limit}")
     @Results({
             @Result(property = "articleId", column = "article_id"),
             @Result(property = "userId", column = "user_id"),
@@ -70,4 +70,14 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<ArticleExcerptDTO> getArticlesByTagId(@Param("tagId") Integer tagId);
     @Select("SELECT count(*) from articles where user_id = #{id} and deleted = 0")
     Integer countArticlesByUserId(@Param("id")Long id);
+    @Select("SELECT a.article_id, a.title, a.excerpt, a.slug " +
+            "FROM articles a " +
+            "WHERE a.title = #{title} AND a.status = 'published' ")
+    @Results({
+            @Result(property = "articleId", column = "article_id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "slug", column = "slug"),
+            @Result(property = "excerpt", column = "excerpt"),
+    })
+    List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
 }

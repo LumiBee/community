@@ -17,6 +17,14 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1.0.0
+    
+  # 文件上传配置
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 5MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
 
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity # 实体类别名包
@@ -34,3 +42,17 @@ mybatis-plus:
 #logging.level.org.springframework.security : DEBUG
 #logging.level.org.springframework.security.web.authentication.rememberme : TRACE
 #logging.level.com.lumibee.hive.service.UserServiceImpl: DEBUG
+
+# 文件存储配置
+file:
+  upload:
+    dir: ./uploads  # 文件上传目录
+  base:
+    url: /uploads/  # 访问URL前缀
+
+# 头像配置
+avatar:
+  max:
+    size: 2097152   # 头像最大大小 (2MB)
+  allowed:
+    extensions: jpg,jpeg,png,gif  # 允许的文件类型
