@@ -260,11 +260,35 @@ body {
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;
   overflow: hidden;
+  cursor: pointer;
+  position: relative;
 }
 
 .article-item:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  background-color: #fafafa;
+}
+
+.article-item:hover .article-title {
+  color: #ffda58;
+}
+
+.article-item:after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.article-item:hover:after {
+  opacity: 1;
 }
 
 .article-content {

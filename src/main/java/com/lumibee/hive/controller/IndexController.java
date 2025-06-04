@@ -79,13 +79,15 @@ public class IndexController {
         Integer articleCount = articleService.countArticlesByUserId(user.getId());
         Integer fans = userService.countFansByUserId(user.getId());
         Integer following = userService.countFollowingByUserId(user.getId());
+        List<ArticleExcerptDTO> articleExcerptDTO = articleService.getArticlesByUserId(user.getId());
 
         model.addAttribute("user", user);
         model.addAttribute("articleCount", articleCount);
         model.addAttribute("followersCount", fans);
         model.addAttribute("followingCount", following);
+        model.addAttribute("articles", articleExcerptDTO);
 
-        return "profile"; // Assuming you have a Thymeleaf template named 'profile.html'
+        return "profile";
     }
 
     @GetMapping("/messages")

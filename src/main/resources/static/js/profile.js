@@ -234,29 +234,29 @@ function renderArticles(data, container) {
     
     data.articles.forEach(article => {
         html += `
-            <div class="article-item" data-article-id="${article.id}">
-                <div class="article-content">
+            <div class="article-item" data-article-id="${article.articleId}" onclick="window.location.href='/article/${article.slug}'">
+                <div class="article-content" style="cursor: pointer;">
                     <h3 class="article-title">
-                        <a href="/article/${article.id}">${article.title}</a>
+                        <span>${article.title}</span>
                     </h3>
-                    <p class="article-excerpt">${article.summary || '暂无摘要'}</p>
+                    <p class="article-excerpt">${article.excerpt || '暂无摘要'}</p>
                     <div class="article-meta">
                         <span class="article-date">
                             <i class="far fa-calendar-alt"></i>
-                            <span>${formatDate(article.gmtCreate)}</span>
+                            <span>${formatDate(article.gmtModified)}</span>
                         </span>
                         <div class="article-stats">
                             <span class="article-stat article-views">
                                 <i class="far fa-eye"></i>
                                 <span>${article.viewCount || 0}</span>
                             </span>
-                            <span class="article-stat article-likes" data-article-id="${article.id}">
-                                <i class="${article.isLiked ? 'fas' : 'far'} fa-heart"></i>
-                                <span>${article.likeCount || 0}</span>
+                            <span class="article-stat article-likes" data-article-id="${article.articleId}" onclick="event.stopPropagation();">
+                                <i class="${article.likes ? 'fas' : 'far'} fa-heart"></i>
+                                <span>${article.likes || 0}</span>
                             </span>
                             <span class="article-stat article-comments">
                                 <i class="far fa-comment"></i>
-                                <span>${article.commentCount || 0}</span>
+                                <span>${article.viewCount || 0}</span>
                             </span>
                         </div>
                     </div>
@@ -430,7 +430,10 @@ function initArticleLikes() {
     const likeButtons = document.querySelectorAll('.article-likes');
     
     likeButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(event) {
+            // 阻止事件冒泡，防止触发卡片的点击事件
+            event.stopPropagation();
+            
             const articleId = this.getAttribute('data-article-id');
             const likeIcon = this.querySelector('i');
             const likeCount = this.querySelector('span');
@@ -480,7 +483,7 @@ function initArticleLikes() {
                 }
                 
                 // 显示错误提示
-                showToast('操作失败，请稍后重试', 'error');
+                showToast('错误', '操作失败，请稍后重试', 'exclamation-triangle', 'text-danger');
             });
         });
     });

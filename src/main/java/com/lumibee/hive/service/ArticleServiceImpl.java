@@ -230,6 +230,11 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.countArticlesByUserId(id);
     }
 
+    @Override
+    public List<ArticleExcerptDTO> getArticlesByUserId(Long id) {
+        return articleMapper.getArticlesByUserId(id);
+    }
+
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
         if (portfolio == null) return null;
         PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类

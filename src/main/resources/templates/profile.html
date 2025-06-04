@@ -99,117 +99,30 @@
             <div class="col-lg-8">
                 <div class="article-list">
                     <!-- 文章项目1 -->
-                    <div class="article-item" th:each="article : ${articles}" th:attr="data-article-id=${article.id}">
-                        <div class="article-content">
+                    <div class="article-item" th:each="article : ${articles}" th:attr="data-article-id=${article.articleId}" 
+                         th:onclick="'window.location.href=\'' + @{'/article/' + ${article.slug}} + '\''">
+                        <div class="article-content" style="cursor: pointer;">
                             <h3 class="article-title">
-                                <a th:href="@{'/article/' + ${article.id}}" th:text="${article.title}">Spring Boot 实战：构建现代化Web应用</a>
+                                <span th:text="${article.title}">Spring Boot 实战：构建现代化Web应用</span>
                             </h3>
-                            <p class="article-excerpt" th:text="${article.summary != null ? article.summary : '暂无摘要'}">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
+                            <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要'}">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
                             <div class="article-meta">
                                 <span class="article-date">
                                     <i class="far fa-calendar-alt"></i>
-                                    <span th:text="${#temporals.format(article.gmtCreate, 'yyyy-MM-dd')}">2023-06-15</span>
+                                    <span th:text="${#temporals.format(article.gmtModified, 'yyyy-MM-dd')}">2023-06-15</span>
                                 </span>
                                 <div class="article-stats">
                                     <span class="article-stat article-views">
                                         <i class="far fa-eye"></i>
                                         <span th:text="${article.viewCount != null ? article.viewCount : 0}">256</span>
                                     </span>
-                                    <span class="article-stat article-likes" th:attr="data-article-id=${article.id}">
-                                        <i th:class="${article.isLiked != null && article.isLiked ? 'fas fa-heart' : 'far fa-heart'}"></i>
-                                        <span th:text="${article.likeCount != null ? article.likeCount : 0}">42</span>
+                                    <span class="article-stat article-likes" th:attr="data-article-id=${article.articleId}" onclick="event.stopPropagation();">
+                                        <i th:class="${article.likes != null ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                        <span th:text="${article.likes != null ? article.likes : 0}">42</span>
                                     </span>
                                     <span class="article-stat article-comments">
                                         <i class="far fa-comment"></i>
-                                        <span th:text="${article.commentCount != null ? article.commentCount : 0}">18</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 示例文章（实际应用中应通过Thymeleaf循环渲染） -->
-                    <div class="article-item" data-article-id="1" th:if="${articles == null || articles.isEmpty()}">
-                        <div class="article-content">
-                            <h3 class="article-title">
-                                <a href="#">Spring Boot 实战：构建现代化Web应用</a>
-                            </h3>
-                            <p class="article-excerpt">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
-                            <div class="article-meta">
-                                <span class="article-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span>2023-06-15</span>
-                                </span>
-                                <div class="article-stats">
-                                    <span class="article-stat article-views">
-                                        <i class="far fa-eye"></i>
-                                        <span>256</span>
-                                    </span>
-                                    <span class="article-stat article-likes" data-article-id="1">
-                                        <i class="far fa-heart"></i>
-                                        <span>42</span>
-                                    </span>
-                                    <span class="article-stat article-comments">
-                                        <i class="far fa-comment"></i>
-                                        <span>18</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="article-item" data-article-id="2" th:if="${articles == null || articles.isEmpty()}">
-                        <div class="article-content">
-                            <h3 class="article-title">
-                                <a href="#">Java 17新特性详解：提升开发效率的关键变化</a>
-                            </h3>
-                            <p class="article-excerpt">Java 17作为LTS版本带来了许多令人兴奋的新特性，本文将深入探讨这些变化如何提升开发效率和代码质量...</p>
-                            <div class="article-meta">
-                                <span class="article-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span>2023-05-20</span>
-                                </span>
-                                <div class="article-stats">
-                                    <span class="article-stat article-views">
-                                        <i class="far fa-eye"></i>
-                                        <span>312</span>
-                                    </span>
-                                    <span class="article-stat article-likes" data-article-id="2">
-                                        <i class="far fa-heart"></i>
-                                        <span>56</span>
-                                    </span>
-                                    <span class="article-stat article-comments">
-                                        <i class="far fa-comment"></i>
-                                        <span>24</span>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="article-item" data-article-id="3" th:if="${articles == null || articles.isEmpty()}">
-                        <div class="article-content">
-                            <h3 class="article-title">
-                                <a href="#">深入理解Spring Security：构建安全的Web应用</a>
-                            </h3>
-                            <p class="article-excerpt">安全性是Web应用开发中的重要考量，本文将介绍如何使用Spring Security框架实现认证、授权和防护常见安全威胁...</p>
-                            <div class="article-meta">
-                                <span class="article-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span>2023-04-08</span>
-                                </span>
-                                <div class="article-stats">
-                                    <span class="article-stat article-views">
-                                        <i class="far fa-eye"></i>
-                                        <span>189</span>
-                                    </span>
-                                    <span class="article-stat article-likes" data-article-id="3">
-                                        <i class="far fa-heart"></i>
-                                        <span>37</span>
-                                    </span>
-                                    <span class="article-stat article-comments">
-                                        <i class="far fa-comment"></i>
-                                        <span>15</span>
+                                        <span th:text="${article.viewCount != null ? article.viewCount : 0}">18</span>
                                     </span>
                                 </div>
                             </div>
@@ -217,24 +130,24 @@
                     </div>
                 </div>
 
-                <!-- 分页 -->
-                <div class="pagination-container" th:if="${totalPages != null && totalPages > 1}">
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage - 1)}}" aria-label="Previous">
-                                <i class="fas fa-chevron-left"></i>
-                            </a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage ? 'active' : ''}">
-                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + i}}" th:text="${i}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">
-                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage + 1)}}" aria-label="Next">
-                                <i class="fas fa-chevron-right"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+<!--                &lt;!&ndash; 分页 &ndash;&gt;-->
+<!--                <div class="pagination-container" th:if="${totalPages != null && totalPages > 1}">-->
+<!--                    <ul class="pagination">-->
+<!--                        <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">-->
+<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage - 1)}}" aria-label="Previous">-->
+<!--                                <i class="fas fa-chevron-left"></i>-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage ? 'active' : ''}">-->
+<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + i}}" th:text="${i}">1</a>-->
+<!--                        </li>-->
+<!--                        <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">-->
+<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage + 1)}}" aria-label="Next">-->
+<!--                                <i class="fas fa-chevron-right"></i>-->
+<!--                            </a>-->
+<!--                        </li>-->
+<!--                    </ul>-->
+<!--                </div>-->
             </div>
 
             <!-- 右侧侧边栏 -->

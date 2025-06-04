@@ -1,10 +1,8 @@
 package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Tag;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -27,6 +25,10 @@ public interface ArticleMapper extends BaseMapper<Article> {
             "WHERE portfolio_id = #{portfolioId} AND status = 'published' " +
             "ORDER BY gmt_modified DESC")
     List<ArticleExcerptDTO> selectArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
+    @Select("SELECT article_id, title, slug, excerpt, view_count, likes, gmt_modified from articles " +
+            "WHERE user_id = #{id} AND deleted = 0 AND status = 'published' " +
+            "ORDER BY gmt_modified DESC")
+    List<ArticleExcerptDTO> getArticlesByUserId(@Param("id") Long id);
     @Select("SELECT COUNT(*) FROM articles WHERE portfolio_id = #{portfolioId}")
     Integer countArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, " +
