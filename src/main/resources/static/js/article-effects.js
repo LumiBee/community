@@ -110,8 +110,8 @@ async function toggleLike(event) {
     const likeCountSpan = document.getElementById('likeCount'); // 获取显示点赞数的元素
     const likeIcon = likeButton.querySelector('i'); // 获取按钮上的心形图标
 
-    // 2. 从HTML中获取文章ID（假设Thymeleaf的article对象中包含id属性）
-    const articleId = '[[${article.articleId}]]';
+    // 2. 从HTML中获取文章ID
+    const articleId = likeButton.getAttribute('data-article-id');
 
     // 3. 从meta标签中获取CSRF安全令牌
     const token = document.querySelector("meta[name='_csrf']").getAttribute("content");

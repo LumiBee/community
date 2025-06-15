@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -46,7 +47,7 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
         
         // 生成唯一文件名
-        String originalFilename = StringUtils.cleanPath(file.getOriginalFilename());
+        String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         String fileExtension = extractExtension(originalFilename);
         String filename = UUID.randomUUID().toString() + "." + fileExtension;
         
@@ -56,8 +57,7 @@ public class FileStorageServiceImpl implements FileStorageService {
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
             
             // 返回相对于存储根目录的路径
-            String relativePath = subDirectory == null ? filename : subDirectory + "/" + filename;
-            return relativePath;
+            return subDirectory == null ? filename : subDirectory + "/" + filename;
         }
     }
     
@@ -89,10 +89,15 @@ public class FileStorageServiceImpl implements FileStorageService {
     public Path getStorageLocation() {
         return this.rootLocation;
     }
-    
+
+    @Override
+    public String getBaseUrl() {
+        return this.baseUrl;
+    }
+
     private String extractExtension(String filename) {
-        if (filename == null || filename.isEmpty() || !filename.contains(".")) {
-            return "jpg"; // 默认扩展名
+        if (filename == null || !filename.contains(".")) {
+            return "jpg";
         }
         return filename.substring(filename.lastIndexOf(".") + 1);
     }

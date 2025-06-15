@@ -18,4 +18,5 @@ public interface UserService {
     boolean toggleFollow(Long userId, Long followerId);
     Integer countFansByUserId(Long id);
     Integer countFollowingByUserId(Long id);
+    void refreshUserPrincipal(User user);
 }

@@ -4,7 +4,9 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
@@ -201,5 +203,16 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public Integer countFollowingByUserId(Long id) {
         return userFollowingMapper.countFollowingByUserId(id);
+    }
+
+    @Override
+    public void refreshUserPrincipal(User user) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                user,
+                user.getPassword(),
+                user.getAuthorities()
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }

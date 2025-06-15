@@ -56,7 +56,7 @@ public class UserController {
         } else {
             response.put("message", "已取消关注");
         }
-        
+
         return ResponseEntity.ok().body(response);
     }
 }

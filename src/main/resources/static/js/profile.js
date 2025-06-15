@@ -32,7 +32,7 @@ function showToast(title, message, icon = 'info-circle', iconClass = 'text-info'
     const toastTitle = document.getElementById('customToastTitle');
     const toastMessage = document.getElementById('customToastMessage');
     const toastIcon = document.getElementById('customToastIcon');
-    
+        
     // 设置内容
     toastTitle.textContent = title;
     toastMessage.textContent = message;
@@ -103,7 +103,7 @@ async function toggleFollow(buttonElement) {
         
         console.log("Response status:", response.status);
         
-        if (!response.ok) {
+            if (!response.ok) {
             throw new Error(`服务器响应失败，状态码: ${response.status}`);
         }
         
@@ -539,4 +539,97 @@ function formatDate(dateString) {
         month: '2-digit',
         day: '2-digit'
     }).replace(/\//g, '-');
-} 
+}
+
+$(document).ready(function() {
+
+    const changeCoverBtn = $('.change-cover-btn');
+    const coverImageInput = $('#coverImageInput');
+    const coverImageDisplay = $('#coverImageDisplay');
+
+    if (!changeCoverBtn.length || !coverImageInput.length || !coverImageDisplay.length) {
+        console.error("封面修改所需的部分元素未找到。");
+        return;
+    }
+
+    // 存储原始的图片URL，以便上传失败时恢复
+    const initialCoverSrc = coverImageDisplay.attr('src');
+
+    changeCoverBtn.on('click', function() {
+        coverImageInput.click();
+    });
+
+    coverImageInput.on('change', function(event) {
+        const file = event.target.files[0];
+
+        // 如果用户没选文件，则什么都不做
+        if (!file) {
+            return;
+        }
+
+        // A. 校验文件类型
+        if (!file.type.startsWith('image/')) {
+            alert("请选择有效的图片文件 (JPG, PNG等)。");
+            this.value = '';
+            return;
+        }
+
+        // B. 校验文件大小
+        if (file.size > 5 * 1024 * 1024) {
+            alert("封面图片大小不能超过5MB。");
+            this.value = ''; // 清空选择
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            // 将选择的图片在页面上预览
+            coverImageDisplay.attr('src', e.target.result);
+        }
+        reader.readAsDataURL(file);
+        uploadCoverImage(file);
+    });
+
+    /**
+     * AJAX 上传函数
+     * @param {File} file 要上传的文件对象
+     */
+    function uploadCoverImage(file) {
+        const formData = new FormData();
+        formData.append('coverImageFile', file);
+
+        const token = $("meta[name='_csrf']").attr("content");
+        const header = $("meta[name='_csrf_header']").attr("content");
+
+
+        $.ajax({
+            url: '/profile/update-cover',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            beforeSend: function(xhr) {
+                if (token && header) {
+                    xhr.setRequestHeader(header, token);
+                }
+            },
+            success: function(response) {
+                if (response && response.success) {
+                    coverImageDisplay.attr('src', response.newImageUrl);
+                    showToast('封面更新成功！', 'success');
+                } else {
+                    coverImageDisplay.attr('src', initialCoverSrc);
+                    showToast(response.message || '图片上传失败，请重试。', 'error');
+                }
+            },
+            error: function() {
+                coverImageDisplay.attr('src', initialCoverSrc);
+                showToast('请求失败，请检查网络连接。', 'error');
+            },
+            complete: function() {
+                coverImageInput.val('');
+            }
+        });
+    }
+
+});

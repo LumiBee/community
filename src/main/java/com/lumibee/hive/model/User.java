@@ -38,6 +38,7 @@ public class User implements UserDetails, Principal {
     private String password;
     private String githubId;
     private String qqOpenId;
+    private String backgroundImgUrl;
 
     @TableLogic
     @TableField(fill = FieldFill.INSERT)

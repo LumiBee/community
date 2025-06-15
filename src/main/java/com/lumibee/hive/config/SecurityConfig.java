@@ -85,7 +85,9 @@ public class SecurityConfig {
                                                 "/tags/**", // 标签浏览
                                                 "/api/tags/**", // 标签 API
                                                 "/portfolio/**", // 个人作品集
-                                                "/api/portfolio/**" // 个人作品集 API
+                                                "/api/portfolio/**", // 个人作品集 API
+                                                "/avatars/**", // 头像图片
+                                                "/backgrounds/**" // 背景图片
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
                                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问

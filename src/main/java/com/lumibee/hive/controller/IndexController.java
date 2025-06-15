@@ -75,6 +75,8 @@ public class IndexController {
         if (user == null) {
             return "redirect:/login";
         }
+        System.out.println("================================");
+        System.out.println(user.getBackgroundImgUrl());
 
         Integer articleCount = articleService.countArticlesByUserId(user.getId());
         Integer fans = userService.countFansByUserId(user.getId());

@@ -484,6 +484,18 @@ body {
   border-radius: 4px;
 }
 
+.profile-cover {
+  position: relative;
+}
+
+.change-cover-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  /* Optional: Add a subtle shadow for better visibility */
+  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
 /* 热门标签 */
 .popular-tags {
   background-color: #fff;

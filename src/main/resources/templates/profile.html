@@ -30,8 +30,17 @@
     <div class="container">
         <!-- 个人信息卡片 -->
         <div class="profile-header" th:attr="data-user-id=${user.id}">
-            <div class="profile-cover">
-                <img class="profile-cover-img" th:src="@{/img/bg.jpg}" alt="封面图片">
+            <div class="profile-header" th:attr="data-user-id=${user.id}">
+                <div class="profile-cover">
+                    <img class="profile-cover-img" id="coverImageDisplay"
+                         th:src="@{${user.backgroundImgUrl ?: '/img/bg.jpg'}}"
+                         alt="封面图片">
+
+                    <button class="btn btn-outline-light btn-sm change-cover-btn">
+                        <i class="fas"></i> 修改封面
+                    </button>
+                    <input type="file" id="coverImageInput" style="display: none;" accept="image/png, image/jpeg, image/gif, image/jpg">
+                </div>
             </div>
             <div class="profile-avatar-wrapper">
                 <img class="profile-avatar" th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://via.placeholder.com/200x200'}" alt="用户头像">

@@ -17,7 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.AvatarService;
+import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 
@@ -27,12 +27,8 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/user/settings")
 public class SettingsController {
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AvatarService avatarService;
-
+    @Autowired private UserService userService;
+    @Autowired private ImgService imgService;
     @Autowired
     private PasswordEncoder passwordEncoder;
     private CustomUserServiceImpl userDetailsService;
@@ -81,7 +77,7 @@ public class SettingsController {
         // 处理头像上传
         if (avatarFile != null && !avatarFile.isEmpty()) {
             try {
-                String avatarUrl = avatarService.uploadAvatar(currentUser.getId(), avatarFile);
+                String avatarUrl = imgService.uploadAvatar(currentUser.getId(), avatarFile);
                 currentUser.setAvatarUrl(avatarUrl);
                 redirectAttributes.addFlashAttribute("profileSuccess", "个人资料和头像更新成功");
             } catch (IOException e) {
@@ -97,6 +93,7 @@ public class SettingsController {
         }
         
         userService.updateById(currentUser);
+        userService.refreshUserPrincipal(currentUser);
         
         return "redirect:/user/settings?tab=profile";
     }

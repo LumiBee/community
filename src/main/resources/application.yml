@@ -17,8 +17,7 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
     baseline-version: 1.0.0
-    
-  # 文件上传配置
+
   servlet:
     multipart:
       enabled: true
@@ -27,14 +26,14 @@ spring:
       file-size-threshold: 2KB
 
 mybatis-plus:
-  type-aliases-package: com.lumibee.hive.entity # 实体类别名包
+  type-aliases-package: com.lumibee.hive.entity
   global-config:
     db-config:
       id-type: assign_id # 全局主键策略
-      logic-delete-field: deleted # 全局逻辑删除字段名 (如果配置了)
-      logic-delete-value: 1 # 全局逻辑删除值 (如果配置了)
-      logic-not-delete-value: 0 # 全局逻辑未删除值 (如果配置了)
-    banner: false # 关闭MP启动时的banner信息
+      logic-delete-field: deleted # 全局逻辑删除字段名
+      logic-delete-value: 1 # 全局逻辑删除值
+      logic-not-delete-value: 0 # 全局逻辑未删除值
+    banner: false
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志
     map-underscore-to-camel-case: true # 开启驼峰命名转换

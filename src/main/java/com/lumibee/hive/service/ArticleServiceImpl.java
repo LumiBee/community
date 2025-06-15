@@ -78,7 +78,6 @@ public class ArticleServiceImpl implements ArticleService {
         );
 
         articleDTOPage.setRecords(articleDTOList);
-        articleDTOPage.setTotal(articlePage.getPages());
 
         return articleDTOPage;
     }
