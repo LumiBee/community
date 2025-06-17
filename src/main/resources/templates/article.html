@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
 	<th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
 	<title th:text="${article?.title} ?: 'Lumi Hive'">Lumi Hive</title>
+	<meta name="article-id" th:if="${article != null}" th:content="${article.articleId}"/>
 	<link href="/css/article.css" rel="stylesheet"/>
 	<!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
 	<meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
@@ -157,71 +158,34 @@
 				</div>
 
 				<!-- 评论区 -->
-				<div id="comments-section" class="mt-5">
-					<h4 class="comments-title mb-4"><i class="fas fa-comments mr-2"></i>评论区</h4>
-					
-					<!-- 评论表单 -->
-					<div class="comment-form-container mb-4">
-						<form id="commentForm" class="comment-form">
-							<div class="form-group">
-								<textarea class="form-control" id="commentContent" rows="3" placeholder="写下你的评论..." required></textarea>
-							</div>
-							<div class="text-right">
-								<button type="submit" class="btn btn-primary">发表评论</button>
-							</div>
-						</form>
-					</div>
-					
-					<!-- 评论列表 -->
-					<div class="comments-list">
-						<!-- 如果有评论 -->
-						<div th:if="${comments != null and !comments.isEmpty()}" class="comments-container">
-							<div th:each="comment : ${comments}" class="comment-item">
-								<div class="comment-header d-flex align-items-center">
-									<img th:if="${comment.userAvatarUrl}" th:src="${comment.userAvatarUrl}" alt="用户头像" class="comment-avatar">
-									<img th:unless="${comment.userAvatarUrl}" src="/img/default01.jpg" alt="默认头像" class="comment-avatar">
-									<div class="comment-meta">
-										<div class="comment-author" th:text="${comment.userName ?: '匿名用户'}">用户名</div>
-										<div class="comment-date" th:text="${#temporals.format(comment.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
+					<div id="comments-section" class="mt-5">
+						<h4 class="comments-title mb-4"><i class="fas fa-comments mr-2"></i>评论区</h4>
+						<div class="comment-form-container mb-4 card" sec:authorize="isAuthenticated()">
+							<div class="card-body">
+								<form id="commentForm">
+									<div class="form-group">
+										<textarea class="form-control" id="commentContent" rows="3" placeholder="写下你的想法..."></textarea>
 									</div>
-								</div>
-								<div class="comment-content" th:text="${comment.content}">
-									评论内容...
-								</div>
-								<div class="comment-actions">
-									<button class="btn btn-sm btn-link reply-btn" th:attr="data-comment-id=${comment.id}">
-										<i class="fas fa-reply"></i> 回复
-									</button>
-								</div>
-								
-								<!-- 回复列表 -->
-								<div th:if="${comment.replies != null and !comment.replies.isEmpty()}" class="replies-container">
-									<div th:each="reply : ${comment.replies}" class="reply-item">
-										<div class="reply-header d-flex align-items-center">
-											<img th:if="${reply.userAvatarUrl}" th:src="${reply.userAvatarUrl}" alt="用户头像" class="reply-avatar">
-											<img th:unless="${reply.userAvatarUrl}" src="/img/default01.jpg" alt="默认头像" class="reply-avatar">
-											<div class="reply-meta">
-												<div class="reply-author" th:text="${reply.userName ?: '匿名用户'}">用户名</div>
-												<div class="reply-date" th:text="${#temporals.format(reply.createTime, 'yyyy-MM-dd HH:mm')}">2023-01-01 12:00</div>
-											</div>
-										</div>
-										<div class="reply-content" th:text="${reply.content}">
-											回复内容...
-										</div>
+									<div class="text-right">
+										<button type="submit" class="btn btn-primary">发表评论</button>
 									</div>
+								</form>
+							</div>
+						</div>
+						<div class="comment-form-container mb-4 card" sec:authorize="isAnonymous()">
+							<div class="card-body text-center">
+								<p class="mb-0">请<a th:href="@{/login}" class="font-weight-bold">登录</a>后发表评论</p>
+							</div>
+						</div>
+
+						<div id="comments-list" class="comments-list">
+							<div class="text-center py-5">
+								<div class="spinner-border text-warning" role="status">
+									<span class="sr-only">正在加载评论...</span>
 								</div>
 							</div>
 						</div>
-						
-						<!-- 如果没有评论 -->
-						<div th:if="${comments == null or comments.isEmpty()}" class="no-comments">
-							<div class="text-center py-4">
-								<i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
-								<p class="text-muted">暂无评论，来发表第一条评论吧！</p>
-							</div>
-						</div>
 					</div>
-				</div>
 			</article>
 		</div>
 	</div>

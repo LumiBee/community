@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -84,6 +85,7 @@ public class SecurityConfig {
                                                 "/article/**",    // 文章浏览
                                                 "/.well-known/**", // WebFinger 协议
                                                 "/uploads/**",
+                                                "/baidu_verify_codeva-wzTpwijk24.html", // 百度站长验证文件
                                                 "/tags/**", // 标签浏览
                                                 "/api/tags/**", // 标签 API
                                                 "/portfolio/**", // 个人作品集
@@ -92,6 +94,7 @@ public class SecurityConfig {
                                                 "/backgrounds/**" // 背景图片
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings").authenticated()
+                                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
                                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
                 .formLogin(formLogin ->

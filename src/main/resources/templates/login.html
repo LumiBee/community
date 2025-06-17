@@ -154,13 +154,26 @@
         // 密码可见性切换
         const togglePassword = document.getElementById('togglePassword');
         const password = document.getElementById('password');
-        
+
         if(togglePassword && password) {
             togglePassword.addEventListener('click', function() {
-                const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-                password.setAttribute('type', type);
-                this.querySelector('i').classList.toggle('fa-eye');
-                this.querySelector('i').classList.toggle('fa-eye-slash');
+                // 判断当前密码框的类型
+                const isPassword = password.getAttribute('type') === 'password';
+                const icon = this.querySelector('i');
+
+                if (isPassword) {
+                    // 如果是密码，就变成文本
+                    password.setAttribute('type', 'text');
+                    // 图标变成“闭眼”
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    // 如果是文本，就变回密码
+                    password.setAttribute('type', 'password');
+                    // 图标变回“睁眼”
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
             });
         }
     });

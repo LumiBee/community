@@ -6,11 +6,11 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class Comment {
+public class Comments {
     @TableId(type = IdType.AUTO)
     private Long id;
     private Integer articleId;
-    private Integer userId;
+    private Long userId;
     private String content;
     private Long parentCommentId;
     private Long rootCommentId;

@@ -10,4 +10,10 @@ public class UserDTO {
     private String name;
     private String avatarUrl;
     private LocalDateTime gmtCreate;
+
+    public UserDTO(String name, String avatarUrl, Long id) {
+        this.name = name;
+        this.avatarUrl = avatarUrl;
+        this.id = id;
+    }
 }
