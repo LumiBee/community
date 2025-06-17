@@ -74,6 +74,7 @@ public class SecurityConfig {
                                                 "/",              // 首页
                                                 "/login",         // 登录页 (如果单独提供)
                                                 "/signup",        // 注册页
+                                                "/sitemap.xml",  // 网站地图
                                                 "/css/**",        // CSS 文件
                                                 "/js/**",         // JavaScript 文件
                                                 "/img/**",        // 图片文件
@@ -82,6 +83,7 @@ public class SecurityConfig {
                                                 "/api/user/dismiss-password-prompt",
                                                 "/article/**",    // 文章浏览
                                                 "/.well-known/**", // WebFinger 协议
+                                                "/uploads/**",
                                                 "/tags/**", // 标签浏览
                                                 "/api/tags/**", // 标签 API
                                                 "/portfolio/**", // 个人作品集

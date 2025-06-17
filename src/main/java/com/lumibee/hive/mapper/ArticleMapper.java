@@ -80,4 +80,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "excerpt", column = "excerpt"),
     })
     List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
+
+    @Select("SELECT slug, gmt_modified from articles WHERE status = 'published' AND deleted = 0")
+    List<ArticleExcerptDTO> selectSitemapDetails();
 }

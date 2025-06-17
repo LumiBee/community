@@ -37,4 +37,7 @@ public interface PortfolioMapper extends BaseMapper<Portfolio> {
                         map -> ((Number) map.get("article_count")).intValue()
                 ));
     }
+
+    @Select("Select slug, gmt_modified from portfolio where deleted = 0")
+    List<String> selectSitemapDetails();
 }

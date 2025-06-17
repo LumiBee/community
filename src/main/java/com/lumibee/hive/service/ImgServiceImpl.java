@@ -134,6 +134,10 @@ public class ImgServiceImpl implements ImgService {
         
         // 只删除自定义上传的头像，不删除默认头像或第三方OAuth头像
         String avatarUrl = user.getAvatarUrl();
+        if (avatarUrl == null || avatarUrl.isEmpty()) {
+            return ;
+        }
+
         String baseUrl = fileStorageService.getBaseUrl();
         if (baseUrl != null && avatarUrl.startsWith(baseUrl)) {
             // 提取相对路径
@@ -156,6 +160,10 @@ public class ImgServiceImpl implements ImgService {
 
         // 只删除自定义上传的背景，不删除默认背景
         String backgroundImgUrl = user.getBackgroundImgUrl();
+        if (backgroundImgUrl == null || backgroundImgUrl.isEmpty()) {
+            return;
+        }
+
         String baseUrl = fileStorageService.getBaseUrl();
         if (baseUrl != null && backgroundImgUrl.startsWith(baseUrl)) {
             // 提取相对路径

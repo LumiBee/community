@@ -25,4 +25,6 @@ public interface TagMapper extends BaseMapper<Tag> {
     void insertTagArticleRelation(@Param("articleId") Integer articleId, @Param("tagId") Integer tagId);
     @Update("UPDATE tags SET article_count = article_count + 1 WHERE tag_id = #{tagId}")
     void incrementArticleCount(@Param("tagId") Integer tagId);
+    @Select("SELECT slug from tags where deleted = 0")
+    List<TagDTO> selectSitemapDetails();
 }
