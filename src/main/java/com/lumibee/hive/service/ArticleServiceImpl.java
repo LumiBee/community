@@ -13,6 +13,7 @@ import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.model.User;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,43 +46,10 @@ public class ArticleServiceImpl implements ArticleService {
                     .eq(Article::getDeleted, 0)
                     .orderByDesc(Article::getGmtModified);
 
-        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
-        List<Article> articleList = articlePage.getRecords();
-
-        if (articleList.isEmpty()) {
-            return new Page<>(pageNum, pageSize, 0);
-        }
-
-       List<Long> userIds = articleList.stream()
-                                       .map(Article::getUserId)
-                                       .distinct()
-                                       .collect(Collectors.toList());
-
-        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-
-        List<ArticleExcerptDTO> articleDTOList = articleList.stream().map(article -> {
-            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
-            BeanUtils.copyProperties(article, articleDTO);
-            User user = userMap.get(article.getUserId());
-            if (user != null) {
-                articleDTO.setUserName(user.getName());
-                articleDTO.setAvatarUrl(user.getAvatarUrl());
-            }
-            return articleDTO;
-        }).collect(Collectors.toList());
-
-        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(
-                articlePage.getCurrent(),
-                articlePage.getSize(),
-                articlePage.getTotal()
-        );
-
-        articleDTOPage.setRecords(articleDTOList);
-
-        return articleDTOPage;
+        return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
     }
 
+    @Override
     public String createUniqueSlug(String title) {
         String baseSlug = SlugGenerator.generateSlug(title);
         if (baseSlug.isEmpty()) {
@@ -220,6 +188,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> selectArticlesByPortfolioId(Integer id) {
         return articleMapper.selectArticlesByPortfolioId(id);
     }
@@ -231,13 +200,126 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getArticlesByUserId(Long id) {
         return articleMapper.getArticlesByUserId(id);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> selectFeaturedArticles(String title) {
         return articleMapper.selectFeaturedArticles(title);
+    }
+
+    @Override
+    @Transactional
+    public ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId) {
+        Article article = new Article();
+        article.setTitle(requestDTO.getTitle());
+        article.setContent(requestDTO.getContent());
+        article.setExcerpt(requestDTO.getExcerpt());
+        article.setUserId(userId);
+        article.setGmtCreate(LocalDateTime.now());
+        article.setGmtModified(LocalDateTime.now());
+
+        article.setStatus(Article.ArticleStatus.draft);
+        article.setSlug(createUniqueSlug(requestDTO.getTitle()));
+
+        articleMapper.insert(article);
+
+        return getArticleBySlug(article.getSlug());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize) {
+        Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<> ();
+        queryWrapper.eq(Article::getUserId, userId)
+                    .eq(Article::getDeleted, 0)
+                    .eq(Article::getStatus, Article.ArticleStatus.draft)
+                    .orderByDesc(Article::getGmtModified);
+
+        return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
+    }
+
+    @NotNull
+    private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
+        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
+        List<Article> articleList = articlePage.getRecords();
+
+        if (articleList.isEmpty()) {
+            return new Page<>(pageNum, pageSize, 0);
+        }
+
+        List<Long> userIds = articleList.stream()
+                .map(Article::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<ArticleExcerptDTO> articleDTOList = articleList.stream().map(article -> {
+            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
+            BeanUtils.copyProperties(article, articleDTO);
+            User user = userMap.get(article.getUserId());
+            if (user != null) {
+                articleDTO.setUserName(user.getName());
+                articleDTO.setAvatarUrl(user.getAvatarUrl());
+            }
+            return articleDTO;
+        }).collect(Collectors.toList());
+
+        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(
+                articlePage.getCurrent(),
+                articlePage.getSize(),
+                articlePage.getTotal()
+        );
+
+        articleDTOPage.setRecords(articleDTOList);
+
+        return articleDTOPage;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ArticleDetailsDTO getDraftById(Integer articleId, Long userId) {
+        QueryWrapper<Article> wrapper = new QueryWrapper<>();
+        wrapper.eq("article_id", articleId)
+               .eq("user_id", userId)
+               .eq("status", Article.ArticleStatus.draft)
+               .eq("deleted", 0);
+        Article article = articleMapper.selectOne(wrapper);
+
+        if (article == null) {
+            return null; // 如果没有找到草稿文章，返回null
+        }
+
+        ArticleDetailsDTO detailsDTO = new ArticleDetailsDTO();
+        BeanUtils.copyProperties(article, detailsDTO);
+        detailsDTO.setUserId(userId);
+
+        return detailsDTO;
+    }
+
+    @Override
+    @Transactional
+    public ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId) throws Exception {
+        Article existingArticle = articleMapper.selectById(requestDTO.getArticleId());
+        if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
+            throw new Exception("草稿文章不存在或不属于当前用户");
+        }
+
+        existingArticle.setExcerpt(requestDTO.getExcerpt());
+        existingArticle.setTitle(requestDTO.getTitle());
+        existingArticle.setContent(requestDTO.getContent());
+        existingArticle.setGmtModified(LocalDateTime.now());
+        existingArticle.setStatus(Article.ArticleStatus.draft);
+
+        articleMapper.updateById(existingArticle);
+
+        return getArticleBySlug(existingArticle.getSlug());
     }
 
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {

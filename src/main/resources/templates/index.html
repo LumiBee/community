@@ -10,14 +10,14 @@
 <div th:replace="~{fragments/header :: navbar}"></div>
 
 <div class="main-content-wrapper"> <div class="container-fluid" style="max-width: 1300px; width:100%">
-	<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="height: 300px"> 
+	<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="height: 300px">
 		<ol class="carousel-indicators">
-			<li th:each="featuredArticle, iterStat : ${featuredArticles}" 
-				th:attr="data-target='#carouselExampleCaptions', data-slide-to=${iterStat.index}" 
+			<li th:each="featuredArticle, iterStat : ${featuredArticles}"
+				th:attr="data-target='#carouselExampleCaptions', data-slide-to=${iterStat.index}"
 				th:class="${iterStat.first} ? 'active' : ''"></li>
 	</ol>
 		<div class="carousel-inner">
-			<div th:each="featuredArticle, iterStat : ${featuredArticles}" 
+			<div th:each="featuredArticle, iterStat : ${featuredArticles}"
 				 th:class="${iterStat.first} ? 'carousel-item active' : 'carousel-item'"
 				 th:onclick="'window.location.href=\'' + @{'/article/' + ${featuredArticle.slug}} + '\''"
 				 style="cursor: pointer;">
@@ -26,7 +26,7 @@
 					<p th:text="${featuredArticle.excerpt}">精选文章摘要</p>
 				</div>
 			</div>
-            
+
             <!-- 如果没有精选文章，显示默认轮播图 -->
             <div th:if="${featuredArticles == null or featuredArticles.isEmpty()}" class="carousel-item active">
                 <img th:src="@{/img/demo/1.jpg}" class="d-block w-100" alt="默认轮播图1">

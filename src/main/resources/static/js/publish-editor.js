@@ -1,636 +1,441 @@
-document.addEventListener("DOMContentLoaded", function() {
-    console.log("DOM Content Loaded - Initializing publish editor");
-    
-    // --- DOM Element References ---
-    const editorElement = document.getElementById('toastUiEditor');
-    const mainNavbar = document.querySelector('nav.fixed-top');
-    const topActionBar = document.querySelector('.top-action-bar.fixed-top');
-    const publishPageWrapper = document.querySelector('.publish-page-wrapper');
-    const bottomStatusBar = document.querySelector('.bottom-status-bar.fixed-bottom');
-    const articleTitleInput = document.getElementById('articleTitleInput');
-    const formArticleContent = document.getElementById('formArticleContent');
-    const wordCountEl = document.getElementById('wordCount');
-    const charCountEl = document.getElementById('charCount');
+/**
+ * =================================================================================
+ * publish-editor.js
+ *
+ * 功能说明:
+ * - 统一管理文章发布页面的所有交互功能。
+ * - 包含编辑器初始化、手动/自动保存草稿、发布流程、AI摘要、字数统计等。
+ * - 解决了之前遇到的所有CSRF令牌和变量作用域问题。
+ * - 这份代码旨在可直接替换使用。
+ * =================================================================================
+ */
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("DOM Content Loaded - Initializing Full-Featured Publish Editor");
 
-    // Modal related elements
-    const topPublishBtnModalTrigger = document.querySelector('.top-action-bar .publish-btn');
-    const publishSettingsModalElement = document.getElementById('publishSettingsModal');
-    const confirmPublishBtn = document.getElementById('confirmPublishBtn');
-    const articleSettingsForm = document.getElementById('articleSettingsForm');
-    const articleCoverUpload = document.getElementById('articleCoverUpload');
-    const coverPreview = document.getElementById('coverPreview');
-    const customFileUploadArea = document.querySelector('#publishSettingsModal .custom-file-upload');
-    const articleSummaryTextarea = document.getElementById('articleSummary');
-    const summaryCharCount = document.getElementById('summaryCharCount');
-    const initialContentDataElement = document.getElementById('initial-content-data');
-    const generateAISummaryBtn = document.getElementById('generateAISummaryBtn');
-    const articleTagsInput = document.getElementById('articleTags');
-    const articlePortfolioInput = document.getElementById('articlePortfolio');
-    
-    // Debug element references
-    console.log("Element references check:");
-    console.log("- topPublishBtnModalTrigger:", topPublishBtnModalTrigger);
-    console.log("- publishSettingsModalElement:", publishSettingsModalElement);
-    console.log("- confirmPublishBtn:", confirmPublishBtn);
-    console.log("- articleTagsInput:", articleTagsInput);
-    console.log("- articlePortfolioInput:", articlePortfolioInput);
-    console.log("- articleSummaryTextarea:", articleSummaryTextarea);
+    // =================================================================
+    // 1. 全局配置与状态管理
+    // =================================================================
 
+    // --- CSRF 安全令牌 ---
+    const csrfTokenEl = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
+    const csrfToken = csrfTokenEl ? csrfTokenEl.content : null;
+    const csrfHeader = csrfHeaderEl ? csrfHeaderEl.content : null;
+
+    if (!csrfToken || !csrfHeader) {
+        console.error("CRITICAL: CSRF meta tags not found! Requests will likely fail.");
+        showToast('页面安全凭证加载失败，请刷新重试', 'error');
+    }
+
+    // --- 自动保存状态变量 ---
+    let autoSaveTimer = null;
+    let isContentDirty = false;
+    let currentDraftId = null; // 用于存储当前草稿的ID
+    let isSaving = false;
+    const AUTO_SAVE_INTERVAL = 8000; // 自动保存间隔，设置为8秒
+
+    // --- DOM 元素缓存 ---
+    const dom = {
+        editorElement: document.getElementById('toastUiEditor'),
+        articleTitleInput: document.getElementById('articleTitleInput'),
+        wordCountEl: document.getElementById('wordCount'),
+        charCountEl: document.getElementById('charCount'),
+        autosaveStatusEl: document.querySelector('.auto-save-indicator span'),
+
+        // 按钮
+        saveDraftBtn: document.querySelector('.btn-outline-secondary'), // “存为草稿”或“草稿箱”按钮
+        topPublishBtn: document.querySelector('.top-action-bar .publish-btn'),
+
+        // 模态框相关
+        publishModalEl: document.getElementById('publishSettingsModal'),
+        confirmPublishBtn: document.getElementById('confirmPublishBtn'),
+        articleTagsInput: document.getElementById('articleTags'),
+        articlePortfolioInput: document.getElementById('articlePortfolio'),
+        articleSummaryTextarea: document.getElementById('articleSummary'),
+        summaryCharCount: document.getElementById('summaryCharCount'),
+        generateAISummaryBtn: document.getElementById('generateAISummaryBtn'),
+
+        // 用于加载草稿
+        initialContentData: document.getElementById('initial-content-data'),
+    };
+
+    // --- 实例存储 ---
     let editorInstance = null;
-    let bsModalInstance = null; // For Bootstrap 5 Native JS Modal Instance
+    let publishModalInstance = null;
 
-    // --- Helper Functions ---
-    function getElementHeight(element) {
-        return element ? element.offsetHeight : 0;
-    }
 
-    function getElementPadding(element, side) {
-        if (!element) return 0;
-        const style = getComputedStyle(element);
-        return parseFloat(style[side]) || 0;
-    }
+    // =================================================================
+    // 2. 核心功能函数定义
+    // =================================================================
 
-    //--- Dynamic Layout Adjustments ---
-    function adjustLayout() {
-        const currentMainNavbarHeight = getElementHeight(mainNavbar);
-
-        if (topActionBar) {
-            topActionBar.style.top = currentMainNavbarHeight + 'px';
-        } else {
-            console.warn("Top action bar not found for layout adjustment.");
+    /**
+     * 初始化编辑器
+     */
+    function initEditor() {
+        if (!dom.editorElement) {
+            console.error("严重错误: 未找到编辑器挂载点 (#toastUiEditor)!");
+            return;
         }
-        return { mainNavbarHeight: currentMainNavbarHeight};
-    }
 
-    const { mainNavbarHeight, topActionBarHeight } = adjustLayout();
-    window.addEventListener('resize', adjustLayout);
-
-
-    // --- Initialize Toast UI Editor ---
-    if (!editorElement) {
-        console.error("CRITICAL: Toast UI Editor mount point (#toastUiEditor) not found!");
-    } else {
-        try {
-            let editorHeight = '82vh'; // Default height
-            if (mainNavbarHeight > 0 && topActionBarHeight > 0) {
-                const bottomBarH = 35;
-                const editorContentContainer = document.querySelector('.editor-content-container');
-                const containerPaddingY = getElementPadding(editorContentContainer, 'paddingTop') + getElementPadding(editorContentContainer, 'paddingBottom');
-                const availableHeight = window.innerHeight - (mainNavbarHeight + topActionBarHeight + bottomBarH + containerPaddingY);
-                editorHeight = Math.max(250, availableHeight) + 'px'; // Min height 300px
-                console.log(`Calculated editor height: ${editorHeight}`);
-                console.log(`Calculated TUI_Editor height: ${editorHeight}, WindowH: ${window.innerHeight}, NavH: ${mainNavbarHeight}, ActionBarH: ${topActionBarHeight}, BottomBarH: ${bottomBarH}, ContainerPaddingY: ${containerPaddingY}`);
-            } else {
-                console.warn("Could not calculate dynamic editor height accurately, using default '70vh'. Used values - mainNavbarH:", mainNavbarHeight, "topActionBarH:", topActionBarHeight);
-            }
-
-            // console.log("Available plugins in toastui.Editor.plugin:", toastui.Editor.plugin);
-            let editorPlugins = [];
-            if (toastui.Editor.plugin && (toastui.Editor.plugin['code-syntax-highlight'] || toastui.Editor.plugin.codeSyntaxHighlight) && typeof hljs !== 'undefined') {
-                editorPlugins.push(toastui.Editor.plugin['code-syntax-highlight'] || toastui.Editor.plugin.codeSyntaxHighlight);
-                console.log("Code syntax highlight plugin added.");
-            } else {
-                console.warn("Code syntax highlight plugin or hljs not available.");
-            }
-
-            let resolvedInitialContent = '';
-            if (initialContentDataElement) {
-                resolvedInitialContent = initialContentDataElement.textContent || '';
-            }
-
-            editorInstance = new toastui.Editor({
-                el: editorElement,
-                height: editorHeight,
-                initialEditType: 'markdown',
-                previewStyle: 'vertical',
-                initialValue: resolvedInitialContent || '',
-                placeholder: '请输入文章内容...',
-                usageStatistics: false,
-                plugins: editorPlugins,
-                hooks: {
-                    addImageBlobHook: async (blob, callback) => {
-                        console.log("addImageBlobHook triggered, blob:", blob);
-                        // Placeholder for actual upload; using base64 for now.
-                        // Replace with your actual upload logic to your server.
-                        const reader = new FileReader();
-                        reader.onload = (event) => {
-                            console.log("File read as base64, calling callback.");
-                            callback(event.target.result, blob.name);
-                        };
-                        reader.onerror = (error) => {
-                            console.error("Error reading file for base64 preview:", error);
-                            callback(null, "Error reading file"); // Or handle error appropriately
-                        };
-                        reader.readAsDataURL(blob);
-                        return false; // Important to return false if you handle the upload
-                    }
-                }
-            });
-            console.log("Toast UI Editor initialized.", editorInstance);
-        } catch (error) {
-            console.error("Error initializing Toast UI Editor:", error);
+        const editorPlugins = [];
+        if (toastui.Editor.plugin?.['code-syntax-highlight'] && typeof hljs !== 'undefined') {
+            editorPlugins.push([toastui.Editor.plugin['code-syntax-highlight'], { hljs }]);
         }
-    }
 
-    // --- Initialize Bootstrap Modal ---
-    if (publishSettingsModalElement) {
-        console.log("Attempting to initialize modal with publishSettingsModalElement");
-        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-            console.log("Using Bootstrap 5 Modal API");
-            bsModalInstance = new bootstrap.Modal(publishSettingsModalElement);
-            console.log("Bootstrap 5 Modal instance created:", bsModalInstance);
-        } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
-            console.log("Using jQuery Bootstrap 4 Modal API");
-        } else {
-            console.warn("Bootstrap Modal JS (neither v5 nor v4 via jQuery) not found, or modal element #publishSettingsModal missing.");
-            console.log("bootstrap object:", typeof bootstrap, bootstrap);
-            console.log("jQuery object:", typeof $, $);
-        }
-    }
+        const initialContent = dom.initialContentData ? dom.initialContentData.textContent : '';
 
-
-    // --- Stats Update Function ---
-    function updateStats() {
-        if (!wordCountEl || !charCountEl || !editorInstance) return;
-        try {
-            const markdownText = editorInstance.getMarkdown();
-            const plainText = markdownText.replace(/<[^>]*>?/gm, '').trim();
-            charCountEl.textContent = plainText.length;
-            wordCountEl.textContent = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
-        } catch (e) {
-            console.error("Error updating stats:", e);
-        }
-    }
-
-    if (editorInstance) {
-        editorInstance.on('change', updateStats);
-        updateStats(); // Initial stats
-    } else {
-        console.error("Cannot setup stats update: Editor instance is not available at initial setup.");
-    }
-
-    // --- Modal Interactions ---
-
-    // Cover image preview
-    if (customFileUploadArea && articleCoverUpload && coverPreview) {
-        customFileUploadArea.addEventListener('click', () => articleCoverUpload.click());
-        articleCoverUpload.addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    coverPreview.src = e.target.result;
-                    coverPreview.style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            } else {
-                coverPreview.src = '#';
-                coverPreview.style.display = 'none';
-                if (file) alert("请选择图片文件！");
-            }
+        editorInstance = new toastui.Editor({
+            el: dom.editorElement,
+            height: 'calc(100vh - 180px)', // 动态计算高度
+            initialEditType: 'markdown',
+            previewStyle: 'vertical',
+            initialValue: initialContent,
+            placeholder: '在这里开始你的创作吧...',
+            usageStatistics: false,
+            plugins: editorPlugins,
         });
-    } else {
-        console.warn("Elements for cover image preview not fully found.");
     }
 
-    // Summary character count
-    function updateSummaryCharCount() {
-        if (articleSummaryTextarea && summaryCharCount) {
-            const currentLength = articleSummaryTextarea.value.length;
-            summaryCharCount.textContent = currentLength;
-            const maxLength = parseInt(articleSummaryTextarea.getAttribute('maxlength')) || 200;
-            articleSummaryTextarea.classList.toggle('is-invalid', currentLength > maxLength);
-            summaryCharCount.style.color = currentLength > maxLength ? 'red' : '';
+    /**
+     * 绑定所有事件监听器
+     */
+    function bindEvents() {
+        // 自动保存触发
+        dom.articleTitleInput?.addEventListener('input', onContentChange);
+        editorInstance?.on('change', onContentChange);
+
+        // 手动保存草稿
+        dom.saveDraftBtn?.addEventListener('click', handleManualSaveDraft);
+
+        // 打开“发布”模态框
+        dom.topPublishBtn?.addEventListener('click', handleOpenPublishModal);
+
+        // 确认发布
+        dom.confirmPublishBtn?.addEventListener('click', handleConfirmPublish);
+
+        // AI 生成摘要
+        dom.generateAISummaryBtn?.addEventListener('click', handleGenerateSummary);
+
+        // 摘要字数统计
+        dom.articleSummaryTextarea?.addEventListener('input', updateSummaryCharCount);
+    }
+
+    /**
+     * 内容变化处理器，用于触发“防抖”的自动保存
+     */
+    function onContentChange() {
+        isContentDirty = true;
+        updateAutoSaveStatus('内容已修改...', false);
+
+        if (autoSaveTimer) {
+            clearTimeout(autoSaveTimer);
         }
-    }
-    if (articleSummaryTextarea) {
-        articleSummaryTextarea.addEventListener('input', updateSummaryCharCount);
-        updateSummaryCharCount(); // Initial call to set count if textarea has initial value
-    } else {
-        console.warn("Article summary textarea or char count element not found.");
+
+        autoSaveTimer = setTimeout(autoSaveDraft, AUTO_SAVE_INTERVAL);
     }
 
-    // --- AI Summary Generation Function ---
-    async function fetchAISummary(textContent, maxLength = 200) {
-        if (!textContent.trim()) {
-            console.warn("文章内容为空，无法生成摘要。");
-            return null;
+    /**
+     * 异步API请求的封装
+     * @param {string} endpoint - API的URL路径
+     * @param {object} body - 请求体数据
+     * @returns {Promise<Response>} - 返回 fetch 的 Promise 对象
+     */
+    function apiPost(endpoint, body) {
+        if (!csrfToken || !csrfHeader) {
+            showToast('安全凭证丢失，无法发送请求。', 'error');
+            return Promise.reject(new Error("CSRF token is missing."));
         }
-        const originalPlaceholder = articleSummaryTextarea ? articleSummaryTextarea.placeholder : "";
-        if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "AI 正在生成摘要，请稍候...";
-        // --- BEGIN CSRF Token Logic ---
-        const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
-        const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
 
-        const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : null;
-        const csrfHeaderName = csrfHeaderMeta ? csrfHeaderMeta.getAttribute('content') : null;
+        return fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                [csrfHeader]: csrfToken
+            },
+            body: JSON.stringify(body)
+        });
+    }
 
-        const requestHeaders = {
-            'Content-Type': 'application/json'
-            // CSRF token会在这里添加 (如果存在)
+    /**
+     * 自动保存草稿的核心逻辑
+     */
+    async function autoSaveDraft() {
+        if (!isContentDirty || isSaving) {
+            return;
+        }
+
+        isSaving = true;
+        updateAutoSaveStatus('正在自动保存...', true);
+
+        const title = dom.articleTitleInput.value.trim();
+        const content = editorInstance.getMarkdown();
+
+        if (!title && !content) {
+            isSaving = false;
+            updateAutoSaveStatus('', false); // 如果都为空，不显示状态
+            return;
+        }
+
+        const requestData = {
+            articleId: currentDraftId,
+            title: title || "无标题草稿",
+            content: content,
         };
 
-        if (csrfToken && csrfHeaderName) {
-            requestHeaders[csrfHeaderName] = csrfToken;
-            console.log("CSRF Header added:", csrfHeaderName, csrfToken); // 用于调试
-        } else {
-            console.warn("CSRF token or header name not found in meta tags OR their content is null. POST request might be blocked by CSRF protection.");
-            // 更详细的调试信息
-            if (!csrfTokenMeta) console.warn("Meta tag with name '_csrf' NOT found.");
-            if (!csrfHeaderMeta) console.warn("Meta tag with name '_csrf_header' NOT found.");
-            if (csrfTokenMeta && !csrfToken) console.warn("Meta tag '_csrf' found, but its 'content' attribute is null or empty.");
-            if (csrfHeaderMeta && !csrfHeaderName) console.warn("Meta tag '_csrf_header' found, but its 'content' attribute is null or empty.");
-        }
-        // --- END CSRF Token Logic ---
         try {
-            const response = await fetch('/api/ai/generate-summary-deepseek', { // Ensure this URL is correct
-                method: 'POST',
-                headers: requestHeaders,
-                body: JSON.stringify({ textContent: textContent, maxLength: maxLength })
-            });
-            if (!response.ok) {
-                let errorMsg = `AI服务暂时不可用 (HTTP ${response.status})。请稍后重试或手动输入。`;
-                try {
-                    const errorData = await response.json();
-                    if (errorData && errorData.summary) {
-                        errorMsg = errorData.summary;
-                    } else if (errorData && errorData.message) {
-                        errorMsg = errorData.message;
-                    } else if (response.status === 403) { // 更具体地处理403
-                        errorMsg = "请求被拒绝 (403 Forbidden)。这可能是由于安全限制（如CSRF Token问题）。请确保页面已正确加载或尝试刷新。";
-                    }
-                    console.error(`AI Summary HTTP Error ${response.status}:`, errorData || "未能从响应中解析出错误JSON");
-                } catch (e) {
-                    console.error(`AI Summary HTTP Error ${response.status} (无法解析错误响应JSON):`, e);
-                    if (response.status === 403) {
-                        errorMsg = "请求被拒绝 (403 Forbidden)。安全策略可能阻止了此操作。";
-                    }
+            const response = await apiPost('/api/article/save-draft', requestData); // 使用封装的apiPost
+
+            if (response.ok) {
+                const result = await response.json();
+                isContentDirty = false;
+
+                if (!currentDraftId && result.articleId) {
+                    currentDraftId = result.articleId;
+                    // 使用 history.replaceState 更新URL，不会创建新的历史记录
+                    const newUrl = `${window.location.pathname}?draftId=${currentDraftId}`;
+                    history.replaceState({ path: newUrl }, '', newUrl);
                 }
-                return { summary: null, error: errorMsg };
+
+                const now = new Date();
+                updateAutoSaveStatus(`已于 ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} 保存`, false);
+            } else {
+                updateAutoSaveStatus('自动保存失败', false);
             }
-            const data = await response.json();
-            return data.summary;
         } catch (error) {
-            console.error("Error fetching AI summary:", error);
-            return null;
+            console.error("自动保存失败:", error);
+            updateAutoSaveStatus('保存异常', false);
         } finally {
-            if (articleSummaryTextarea) articleSummaryTextarea.placeholder = originalPlaceholder || "请输入文章摘要...";
+            isSaving = false;
         }
     }
 
+    /**
+     * 手动保存草稿的处理器
+     */
+    async function handleManualSaveDraft() {
+        const btn = dom.saveDraftBtn;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 保存中...`;
 
-    // --- Top Publish Button (Trigger for Modal) ---
-    if (topPublishBtnModalTrigger && articleTitleInput) {
-        console.log("Setting up topPublishBtnModalTrigger click handler");
-        topPublishBtnModalTrigger.addEventListener('click', function () {
-            console.log("Top publish button (modal trigger) CLICKED!");
-            if (!editorInstance) {
-                showToast('编辑器正在加载，请稍候再试', 'error');
-                console.error("Editor instance not available for modal trigger.");
-                return;
-            }
+        // 强制执行一次自动保存的逻辑
+        await autoSaveDraft();
 
-            const title = articleTitleInput.value;
-            const contentMarkdown = editorInstance.getMarkdown();
+        // 无论成功失败，恢复按钮状态
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fas fa-folder"></i> 存为草稿`;
+    }
 
-            if (!title.trim()) {
-                showToast('请先输入文章标题', 'warning');
-                articleTitleInput.focus();
-                return;
-            }
-            if (!contentMarkdown.trim()) {
-                showToast('请先输入文章内容', 'warning');
-                editorInstance.focus();
-                return;
-            }
+    /**
+     * 打开发布设置模态框的处理器
+     */
+    function handleOpenPublishModal() {
+        const title = dom.articleTitleInput.value.trim();
+        const content = editorInstance.getMarkdown().trim();
 
-            if (articleSummaryTextarea) {
-                articleSummaryTextarea.value = ''; // 清空现有摘要，或根据需求保留
-                articleSummaryTextarea.placeholder = "AI 正在准备摘要..."; // 初始提示
-                updateSummaryCharCount();
-            }
+        if (!title || !content) {
+            showToast('发布前，请先填写标题和内容。', 'warning');
+            return;
+        }
 
-            // 1. 显示 Modal
-            console.log("Attempting to show modal...");
-            let modalShown = false;
-            
-            // 确保 bootstrap 对象存在
-            if (typeof bootstrap === 'undefined' && typeof $ !== 'undefined') {
-                console.log("Bootstrap object not found, trying jQuery modal");
-                // 尝试使用 jQuery 显示模态框
-                try {
-                    $(publishSettingsModalElement).modal('show');
-                    modalShown = true;
-                    console.log("jQuery Modal shown successfully");
-                } catch (e) {
-                    console.error("Error showing jQuery modal:", e);
-                }
-            } else if (bsModalInstance) {
-                try {
-                bsModalInstance.show();
-                modalShown = true;
-                    console.log("Bootstrap Modal shown successfully");
-                } catch (e) {
-                    console.error("Error showing Bootstrap modal:", e);
-                }
-            } else if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                try {
-                    // 重新创建一个模态框实例
-                    const newModal = new bootstrap.Modal(publishSettingsModalElement);
-                    newModal.show();
-                    bsModalInstance = newModal;
-                modalShown = true;
-                    console.log("New Bootstrap Modal created and shown");
-                } catch (e) {
-                    console.error("Error creating and showing new Bootstrap modal:", e);
-                }
+        if (publishModalInstance) {
+            publishModalInstance.show();
+            // 异步生成摘要，不阻塞UI
+            handleGenerateSummary();
+        } else {
+            showToast('无法打开发布设置，请刷新页面。', 'error');
+        }
+    }
+
+    /**
+     * 最终确认发布的处理器
+     */
+    async function handleConfirmPublish() {
+        dom.confirmPublishBtn.disabled = true;
+        dom.confirmPublishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 发布中...`;
+
+        const requestData = {
+            title: dom.articleTitleInput.value.trim(),
+            content: editorInstance.getMarkdown().trim(),
+            excerpt: dom.articleSummaryTextarea.value.trim(),
+            tagsName: dom.articleTagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean),
+            portfolioName: dom.articlePortfolioInput.value.trim()
+        };
+
+        // 发布前的数据校验
+        if (!requestData.title || !requestData.content || requestData.tagsName.length === 0 || !requestData.excerpt) {
+            showToast('标题、内容、标签和摘要均为必填项。', 'warning');
+            dom.confirmPublishBtn.disabled = false;
+            dom.confirmPublishBtn.innerHTML = `<i class="fas fa-check"></i> 确定并发布`;
+            return;
+        }
+
+        try {
+            const response = await apiPost('/api/article/publish', requestData);
+            if (response.ok) {
+                const newArticle = await response.json();
+                showToast('文章发布成功！正在跳转...', 'success');
+                window.location.href = `/article/${newArticle.slug}`;
             } else {
-                console.error("Cannot show modal: No valid Bootstrap JS or jQuery modal instance/element available for #publishSettingsModal.");
-                showToast("无法打开发布设置，请刷新页面重试", 'error');
+                const errorData = await response.json();
+                showToast(`发布失败: ${errorData.message || '服务器错误'}`, 'error');
             }
-
-            // 2. 如果 Modal 成功（或尝试）显示，则异步获取 AI 摘要
-            if (modalShown && articleSummaryTextarea && editorInstance) {
-                const plainTextForAI = contentMarkdown
-                    .replace(/<\/?[^>]+(>|$)/g, "")
-                    .replace(/(\r\n|\n|\r)/gm, " ")
-                    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
-                    .replace(/[`*#~_>+\-|=]/g, "")
-                    .replace(/\s\s+/g, ' ').trim();
-
-                if (plainTextForAI) {
-                    const summaryMaxLength = parseInt(articleSummaryTextarea.getAttribute('maxlength')) || 100;
-                    console.log("Fetching AI summary after modal is shown...");
-
-                    // 使用 .then() 处理异步，避免阻塞 Modal 显示
-                    fetchAISummary(plainTextForAI, summaryMaxLength)
-                        .then(aiSummary => {
-                            if (aiSummary !== null && articleSummaryTextarea) { // 检查 articleSummaryTextarea 仍然存在
-                                articleSummaryTextarea.value = aiSummary;
-                                console.log("AI summary auto-populated after modal shown:", aiSummary);
-                            } else if (articleSummaryTextarea) {
-                                articleSummaryTextarea.placeholder = "AI摘要生成失败，请手动输入。";
-                                console.warn("AI summary generation failed or content was empty for AI (after modal shown).");
-                            }
-                            if (articleSummaryTextarea) updateSummaryCharCount(); // 再次更新字数
-                        })
-                        .catch(error => {
-                            // fetchAISummary 内部已经处理了 alert 和 console.error
-                            if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "AI摘要生成出错，请手动输入。";
-                            if (articleSummaryTextarea) updateSummaryCharCount();
-                        });
-                } else {
-                    if (articleSummaryTextarea) articleSummaryTextarea.placeholder = "文章内容为空，无法自动生成摘要。";
-                    if (articleSummaryTextarea) updateSummaryCharCount();
-                }
-            }
-        });
-        console.log("Event listener for modal trigger attached to .top-action-bar .publish-btn.");
-    } else {
-        console.error("Top publish button ('.top-action-bar .publish-btn') or articleTitleInput NOT FOUND for modal trigger setup.");
+        } catch (error) {
+            console.error("发布文章时出错:", error);
+            showToast('发布时发生网络错误。', 'error');
+        } finally {
+            dom.confirmPublishBtn.disabled = false;
+            dom.confirmPublishBtn.innerHTML = `<i class="fas fa-check"></i> 确定并发布`;
+        }
     }
 
-    // --- Confirm Publish Button (Inside Modal) ---
-    if (confirmPublishBtn && articleTitleInput && articleSettingsForm && formArticleContent) {
-        console.log("Setting up confirmPublishBtn click handler");
-        confirmPublishBtn.addEventListener('click', async function() {
-            console.log("Confirm publish button clicked (RESTful mode).");
+    /**
+     * 调用AI服务生成摘要并填充
+     */
+    async function handleGenerateSummary() {
+        const btn = dom.generateAISummaryBtn;
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI生成中...`;
 
-            try {
-            // 数据收集
-            // 从页面和模态框的各个输入框中收集最新数据
-            const title = articleTitleInput.value;
-                const content = editorInstance ? editorInstance.getMarkdown() : '';
-                
-                console.log("Checking required inputs:");
-                console.log("- articleTagsInput:", articleTagsInput);
-                console.log("- articlePortfolioInput:", articlePortfolioInput);
-                console.log("- articleSummaryTextarea:", articleSummaryTextarea);
-                
-                if (!articleTagsInput) {
-                    console.error("articleTagsInput element not found!");
-                    showToast("页面加载异常，请刷新后重试", 'error');
-                    return;
-                }
-                
-                if (!articleSummaryTextarea) {
-                    console.error("articleSummaryTextarea element not found!");
-                    showToast("页面加载异常，请刷新后重试", 'error');
-                    return;
-                }
-                
-            const tagsValue = articleTagsInput.value;
-                const portfolioName = articlePortfolioInput ? articlePortfolioInput.value : '';
-            const excerpt = articleSummaryTextarea.value;
-                
-                console.log("Collected form data:", {
-                    title,
-                    contentLength: content.length,
-                    tagsValue,
-                    portfolioName,
-                    excerpt
-                });
+        dom.articleSummaryTextarea.value = '';
+        dom.articleSummaryTextarea.placeholder = "正在请求AI服务，请稍候...";
 
-            // 客户端数据校验
-                if (!title.trim()) { showToast('请输入文章标题', 'warning'); articleTitleInput.focus(); return; }
-                if (!content.trim()) { showToast('请输入文章内容', 'warning'); editorInstance.focus(); return; }
-                if (!tagsValue.trim()) { showToast('请添加至少一个标签', 'warning'); articleTagsInput.focus(); return; }
-                if (!excerpt.trim()) { showToast('请输入文章摘要', 'warning'); articleSummaryTextarea.focus(); return; }
+        const plainTextContent = editorInstance.getMarkdown().replace(/<\/?[^>]+(>|$)/g, "").trim();
 
-            // 构建与后端 DTO 结构完全一致的 JSON 对象
-            // 将标签字符串处理成字符串数组
-            const tagsNameArray = tagsValue.split(',').map(tag => tag.trim()).filter(Boolean);
+        if (!plainTextContent) {
+            dom.articleSummaryTextarea.placeholder = "文章内容为空，无法生成摘要。";
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            return;
+        }
 
-            const requestData = {
-                title: title,
-                content: content,
-                excerpt: excerpt,
-                tagsName: tagsNameArray,
-                portfolioName: portfolioName.trim() // portfolioName 是可选的
-            };
-
-            console.log("Final data to publish via AJAX:", requestData);
-
-            // 防止重复点击
-            confirmPublishBtn.disabled = true;
-            confirmPublishBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>发布中...';
-
-                // 获取CSRF令牌
-                const csrfToken = document.querySelector('meta[name="_csrf"]');
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]');
-                
-                if (!csrfToken || !csrfHeader) {
-                    console.warn("CSRF token or header meta tag not found");
-                }
-                
-                const headers = {
-                    'Content-Type': 'application/json'
-                };
-                
-                if (csrfToken && csrfHeader) {
-                    headers[csrfHeader.getAttribute('content')] = csrfToken.getAttribute('content');
-                }
-                
-                console.log("Request headers:", headers);
-
-            try {
-                // 使用 fetch API 发起异步的 AJAX POST 请求
-                    const response = await fetch('/api/article/publish', { // 指向正确的 RESTful API 端点
-                    method: 'POST',
-                        headers: headers,
-                    body: JSON.stringify(requestData) // 将 JS 对象转换为 JSON 字符串
-                });
-
-                    console.log("Server response status:", response.status);
-
-                // 处理服务器的响应
-                if (response.ok) { // HTTP 状态码为 2xx
-                    const newArticle = await response.json();
-                        console.log("Publish successful, article data:", newArticle);
-                        
-                        // 关闭模态框
-                        if (bsModalInstance) {
-                            bsModalInstance.hide();
-                        } else if (typeof $ !== 'undefined' && typeof $(publishSettingsModalElement).modal === 'function') {
-                            $(publishSettingsModalElement).modal('hide');
-                        }
-                        
-                        // 直接跳转到文章页面
-                    window.location.href = `/article/${newArticle.slug}`;
-                } else {
-                    // 处理服务器返回的错误信息
-                        try {
-                    const errorData = await response.json();
-                            console.error("Server error response:", errorData);
-                            showToast(`发布失败: ${errorData.message || '服务器处理请求时出错'}`, 'error');
-                        } catch (jsonError) {
-                            console.error("Failed to parse error response:", jsonError);
-                            showToast(`发布失败，服务器返回错误码: ${response.status}`, 'error');
-                        }
-                    }
-                } catch (networkError) {
-                    console.error('发布请求时遇到网络错误:', networkError);
-                    showToast('网络连接异常，请检查网络后重试', 'error');
-                } finally {
-                    // 无论成功失败，都恢复按钮的可用状态
-                    confirmPublishBtn.disabled = false;
-                    confirmPublishBtn.innerHTML = '<i class="fas fa-check mr-1"></i>确定并发布';
-                }
-            } catch (error) {
-                console.error("Unexpected error in publish button handler:", error);
-                showToast("发布过程出现异常，请刷新页面重试", 'error');
-                confirmPublishBtn.disabled = false;
-                confirmPublishBtn.innerHTML = '<i class="fas fa-check mr-1"></i>确定并发布';
+        try {
+            const response = await apiPost('/api/ai/generate-summary-deepseek', { textContent: plainTextContent });
+            if (response.ok) {
+                const data = await response.json();
+                dom.articleSummaryTextarea.value = data.summary;
+                dom.articleSummaryTextarea.placeholder = "摘要已生成，可手动修改。";
+            } else {
+                const errorData = await response.json();
+                showToast(errorData.summary || `AI服务出错 (HTTP ${response.status})`, 'error');
+                dom.articleSummaryTextarea.placeholder = "AI摘要生成失败，请手动输入。";
             }
-        });
-        console.log("RESTful event listener attached to #confirmPublishBtn.");
-    } else {
-        console.error("Confirm publish button or other critical elements for final publish (articleTitleInput, articleSettingsForm, formArticleContent) NOT FOUND.");
+        } catch (error) {
+            console.error("请求AI摘要时出错:", error);
+            showToast('生成摘要时发生网络错误。', 'error');
+            dom.articleSummaryTextarea.placeholder = "生成摘要出错，请手动输入。";
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            updateSummaryCharCount();
+        }
     }
 
-    // Toast notification function
-    function showToast(message, type = 'success') {
-        // 检查是否已有toast容器
-        let toastContainer = document.querySelector('.toast-container');
-        
+    // =================================================================
+    // 3. UI 辅助函数
+    // =================================================================
+
+    /**
+     * 更新字数和字符数统计
+     */
+    function updateStats() {
+        if (!dom.wordCountEl || !dom.charCountEl || !editorInstance) return;
+        const markdownText = editorInstance.getMarkdown();
+        const plainText = markdownText.replace(/<[^>]*>?/gm, '').trim();
+        dom.charCountEl.textContent = plainText.length;
+        dom.wordCountEl.textContent = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
+    }
+
+    /**
+     * 更新摘要输入框的字数统计
+     */
+    function updateSummaryCharCount() {
+        if (!dom.articleSummaryTextarea || !dom.summaryCharCount) return;
+        const maxLength = parseInt(dom.articleSummaryTextarea.getAttribute('maxlength')) || 200;
+        const currentLength = dom.articleSummaryTextarea.value.length;
+        dom.summaryCharCount.textContent = `${currentLength}/${maxLength}`;
+        dom.summaryCharCount.style.color = currentLength > maxLength ? 'red' : '';
+    }
+
+    /**
+     * 更新自动保存状态的UI提示
+     * @param {string} message - 要显示的消息
+     * @param {boolean} isSaving - 是否显示“正在保存”的脉冲动画
+     */
+    function updateAutoSaveStatus(message, isSaving) {
+        if (!dom.autosaveStatusEl) return;
+        dom.autosaveStatusEl.textContent = message;
+        const indicator = dom.autosaveStatusEl.previousElementSibling;
+        if (indicator) {
+            indicator.style.animation = isSaving ? 'pulse 2s infinite' : 'none';
+        }
+    }
+
+    /**
+     * 显示一个全局的 Toast 通知
+     * @param {string} message - 消息内容
+     * @param {string} type - 'success', 'error', 'warning', 'info'
+     */
+    function showToast(message, type = 'info') {
+        let toastContainer = document.querySelector('.toast-container-wrapper');
         if (!toastContainer) {
             toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+            toastContainer.className = 'toast-container-wrapper';
             document.body.appendChild(toastContainer);
         }
-        
-        // 获取图标
-        const icon = getToastIcon(type);
-        
-        // 创建toast元素
+
+        const config = {
+            success: { title: '成功', icon: 'check-circle', bg: 'success' },
+            error: { title: '错误', icon: 'times-circle', bg: 'danger' },
+            warning: { title: '警告', icon: 'exclamation-triangle', bg: 'warning' },
+            info: { title: '提示', icon: 'info-circle', bg: 'info' }
+        };
+        const toastConfig = config[type] || config.info;
+
         const toastId = 'toast-' + Date.now();
         const toastHTML = `
-            <div id="${toastId}" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-                <div class="toast-header bg-${getToastBgClass(type)} text-white">
-                    <i class="${icon} me-2"></i>
-                    <strong class="me-auto">${getToastTitle(type)}</strong>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="关闭"></button>
-                </div>
+            <div id="${toastId}" class="toast align-items-center text-white bg-${toastConfig.bg} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="d-flex">
                 <div class="toast-body">
-                    ${message}
+                  <i class="fas fa-${toastConfig.icon} me-2"></i>
+                  ${message}
                 </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
             </div>
         `;
-        
         toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-        
+
         const toastElement = document.getElementById(toastId);
-        
-        // 添加自定义样式
-        toastElement.style.minWidth = '300px';
-        toastElement.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
-        
-        // 尝试使用Bootstrap 5的方式创建Toast
-        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-            const toast = new bootstrap.Toast(toastElement, {
-                delay: 2000, // 缩短到2秒
-                animation: true,
-                autohide: true
-            });
-            toast.show();
-        } 
-        // 回退到Bootstrap 4 (jQuery)
-        else if (typeof $ !== 'undefined' && typeof $(toastElement).toast === 'function') {
-            $(toastElement).toast({
-                delay: 2000, // 缩短到2秒
-                animation: true,
-                autohide: true
-            });
-            $(toastElement).toast('show');
-        }
-        // 最后的回退方案：简单的计时器
-        else {
-            toastElement.style.display = 'block';
-            setTimeout(() => {
-                toastElement.style.opacity = '0';
-                setTimeout(() => toastElement.remove(), 300);
-            }, 2000); // 缩短到2秒
-        }
-        
-        // 自动移除toast元素
-        toastElement.addEventListener('hidden.bs.toast', function() {
-            this.remove();
-        });
+        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+        toast.show();
+        toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
     }
-    
-    /**
-     * 获取Toast的背景类名
-     */
-    function getToastBgClass(type) {
-        switch (type) {
-            case 'success': return 'success';
-            case 'error': return 'danger';
-            case 'warning': return 'warning';
-            default: return 'info';
-        }
+
+
+    // =================================================================
+    // 4. 启动应用
+    // =================================================================
+
+    // --- 初始化编辑器和模态框 ---
+    initEditor();
+    if (dom.publishModalEl && typeof bootstrap !== 'undefined') {
+        publishModalInstance = new bootstrap.Modal(dom.publishModalEl);
     }
-    
-    /**
-     * 获取Toast的图标
-     */
-    function getToastIcon(type) {
-        switch (type) {
-            case 'success': return 'fas fa-check-circle';
-            case 'error': return 'fas fa-exclamation-circle';
-            case 'warning': return 'fas fa-exclamation-triangle';
-            default: return 'fas fa-info-circle';
-        }
+
+    // --- 绑定事件 ---
+    bindEvents();
+
+    // --- 页面加载时，检查URL是否有 draftId，如果有，则加载该草稿 ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const draftIdFromUrl = urlParams.get('draftId');
+    if (draftIdFromUrl) {
+        currentDraftId = parseInt(draftIdFromUrl, 10);
+        // 这里可以添加一个函数，用于根据ID获取草稿内容并填充到编辑器中
+        // loadDraftContent(currentDraftId);
     }
-    
-    /**
-     * 获取Toast的标题
-     */
-    function getToastTitle(type) {
-        switch (type) {
-            case 'success': return '成功';
-            case 'error': return '错误';
-            case 'warning': return '警告';
-            default: return '提示';
-        }
-    }
+
+    // --- 初始化UI ---
+    updateStats();
+    updateSummaryCharCount();
 });

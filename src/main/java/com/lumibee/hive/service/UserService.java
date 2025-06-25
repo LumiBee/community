@@ -3,7 +3,6 @@ package com.lumibee.hive.service;
 import com.lumibee.hive.model.User;
 
 import java.security.Principal;
-import java.util.List;
 
 public interface UserService {
     User selectByName(String name);

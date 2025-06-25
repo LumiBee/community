@@ -5,7 +5,6 @@ import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.dto.LikeResponse;
-import com.lumibee.hive.model.Article;
 
 import java.util.List;
 
@@ -23,4 +22,8 @@ public interface ArticleService {
     Integer countArticlesByUserId(Long id);
     List<ArticleExcerptDTO> getArticlesByUserId(Long id);
     List<ArticleExcerptDTO> selectFeaturedArticles(String title);
+    ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId);
+    Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
+    ArticleDetailsDTO getDraftById(Integer articleId, Long userId);
+    ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId) throws Exception;
 }

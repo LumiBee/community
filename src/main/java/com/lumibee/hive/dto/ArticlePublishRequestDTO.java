@@ -6,6 +6,7 @@ import java.util.List;
 
 @Data
 public class ArticlePublishRequestDTO {
+    private Integer articleId;
     private String title;
     private String content;
     private String excerpt;
