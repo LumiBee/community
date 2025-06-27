@@ -4,6 +4,8 @@
   <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
   <title>个人设置 - Lumi Hive</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
   <link rel="stylesheet" th:href="@{/css/settings.css}">
 </head>
 <body>
@@ -230,99 +232,34 @@
   </div>
 </div>
 
+<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" aria-labelledby="cropModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cropModalLabel">剪裁图片</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <img id="imageToCrop" src="" alt="待剪裁图片" style="max-width: 100%;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+        <button type="button" class="btn btn-primary" id="cropAndUpload">剪裁并上传</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 
 <script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const avatarUploadInput = document.getElementById('avatarUploadInput');
-    const avatarPreviewDisplay = document.getElementById('avatarPreviewDisplay');
-    const defaultAvatarSrc = '/img/default01.jpg';
-    
-    // 激活指定的标签页
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabToActivate = urlParams.get('tab');
-
-    if (tabToActivate) {
-      const tabButtonId = tabToActivate + '-tab-btn';
-      const tabElement = document.getElementById(tabButtonId);
-      if (tabElement) {
-          $(tabElement).tab('show');
-      } else {
-          console.error(`Tab with ID ${tabButtonId} not found.`);
-      }
-    }
-
-    // 头像上传预览
-    if (avatarUploadInput && avatarPreviewDisplay) {
-      let initialAvatarSrc = avatarPreviewDisplay.src;
-      if (!initialAvatarSrc || initialAvatarSrc.endsWith(window.location.pathname)) {
-        initialAvatarSrc = defaultAvatarSrc;
-        avatarPreviewDisplay.src = defaultAvatarSrc;
-      }
-      avatarPreviewDisplay.dataset.defaultSrc = initialAvatarSrc;
-
-      // 点击头像也可以触发文件选择
-      avatarPreviewDisplay.addEventListener('click', function() {
-        avatarUploadInput.click();
-      });
-
-      // 预览所选头像
-      avatarUploadInput.addEventListener('change', function(event) {
-        const file = event.target.files[0];
-        if (file && file.type.startsWith('image/')) {
-          // 验证文件大小（最大2MB）
-          if (file.size > 2 * 1024 * 1024) {
-            alert("头像文件大小不能超过2MB");
-            this.value = ''; // 清空选择
-            return;
-          }
-          
-          const reader = new FileReader();
-          reader.onload = function(e) {
-            avatarPreviewDisplay.src = e.target.result;
-          }
-          reader.readAsDataURL(file);
-        } else {
-          avatarPreviewDisplay.src = avatarPreviewDisplay.dataset.defaultSrc;
-          if (file) {
-            alert("请选择有效的图片文件 (JPG, PNG等)。");
-            this.value = ''; // 清空选择
-          }
-        }
-      });
-    } else {
-      if (!avatarUploadInput) console.error("Avatar upload input (avatarUploadInput) not found!");
-      if (!avatarPreviewDisplay) console.error("Avatar preview display (avatarPreviewDisplay) not found!");
-    }
-    
-    // 密码校验
-    const accountForm = document.getElementById('accountSettingsForm');
-    if (accountForm) {
-      accountForm.addEventListener('submit', function(event) {
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmNewPassword = document.getElementById('confirmNewPassword').value;
-        
-        if (newPassword && newPassword.length < 6) {
-          alert('密码长度至少为6个字符');
-          event.preventDefault();
-          return false;
-        }
-        
-        if (newPassword !== confirmNewPassword) {
-          alert('两次输入的密码不一致');
-          event.preventDefault();
-          return false;
-        }
-        
-        return true;
-      });
-    }
-  });
-</script>
+<script th:src="@{/js/settings.js}" type="text/javascript"></script>
 </body>
 </html>

@@ -346,7 +346,7 @@ public class ArticleServiceImpl implements ArticleService {
         existingArticle.setGmtModified(LocalDateTime.now());
 
         // 更新作品集
-        if (requestDTO.getPortfolioName() != null || !requestDTO.getPortfolioName().isEmpty()) {
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
             existingArticle.setPortfolioId(portfolio.getId());
         }else {
@@ -355,7 +355,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 更新标签
         articleMapper.deleteArticleTagByArticleId(articleId);
-        if (requestDTO.getPortfolioName() != null || !requestDTO.getPortfolioName().isEmpty()) {
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
             for (Tag tag : tags) {
                 if (tag != null) {
@@ -365,6 +365,7 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
+        existingArticle.setStatus(Article.ArticleStatus.published);
         articleMapper.updateById(existingArticle);
 
         return getArticleBySlug(existingArticle.getSlug());

@@ -1,55 +1,47 @@
 /**
  * =================================================================================
- * publish-editor.js
+ * publish-editor.js (v4 - 独立 Toast 实现)
  *
- * 功能说明:
- * - 统一管理文章发布页面的所有交互功能。
- * - 包含编辑器初始化、手动/自动保存草稿、发布流程、AI摘要、字数统计等。
- * - 解决了之前遇到的所有CSRF令牌和变量作用域问题。
- * - 这份代码旨在可直接替换使用。
+ * 变更日志:
+ * - v4: 完全重写 showToast 函数，使其不依赖任何 Bootstrap JS 插件，从而根除
+ * "toast is not a function" 的错误。该函数现在是自包含的。
+ * - v3: 修正了 Bootstrap 4 模态框的调用方法。
  * =================================================================================
  */
 document.addEventListener("DOMContentLoaded", function () {
-    console.log("DOM Content Loaded - Initializing Full-Featured Publish Editor");
+    console.log("DOM Content Loaded - Initializing Publish Editor v4 (Independent Toast)");
 
     // =================================================================
     // 1. 全局配置与状态管理
     // =================================================================
 
-    // --- CSRF 安全令牌 ---
     const csrfTokenEl = document.querySelector('meta[name="_csrf"]');
     const csrfHeaderEl = document.querySelector('meta[name="_csrf_header"]');
     const csrfToken = csrfTokenEl ? csrfTokenEl.content : null;
     const csrfHeader = csrfHeaderEl ? csrfHeaderEl.content : null;
 
     if (!csrfToken || !csrfHeader) {
-        console.error("CRITICAL: CSRF meta tags not found! Requests will likely fail.");
-        showToast('页面安全凭证加载失败，请刷新重试', 'error');
+        console.error("CRITICAL: CSRF meta tags not found!");
+        alert('页面安全凭证加载失败，请刷新重试');
     }
 
-    // --- 自动保存状态变量 ---
     let autoSaveTimer = null;
     let isContentDirty = false;
-    let currentDraftId = null; // 用于存储当前草稿的ID
     let isSaving = false;
-    const AUTO_SAVE_INTERVAL = 3000; // 自动保存间隔，设置为3秒
+    const AUTO_SAVE_INTERVAL = 2000;
 
     const articleIdInput = document.getElementById('articleId');
     const articleId = articleIdInput ? articleIdInput.value : null;
+    const isEditMode = !!articleId;
 
-    // --- DOM 元素缓存 ---
     const dom = {
         editorElement: document.getElementById('toastUiEditor'),
         articleTitleInput: document.getElementById('articleTitleInput'),
         wordCountEl: document.getElementById('wordCount'),
         charCountEl: document.getElementById('charCount'),
         autosaveStatusEl: document.querySelector('.auto-save-indicator span'),
-
-        // 按钮
-        saveDraftBtn: document.querySelector('.btn-outline-secondary'), // “存为草稿”或“草稿箱”按钮
-        topPublishBtn: document.querySelector('.top-action-bar .publish-btn'),
-
-        // 模态框相关
+        saveDraftBtn: document.getElementById('saveDraftBtn'),
+        topPublishBtn: document.querySelector('.publish-btn'),
         publishModalEl: document.getElementById('publishSettingsModal'),
         confirmPublishBtn: document.getElementById('confirmPublishBtn'),
         articleTagsInput: document.getElementById('articleTags'),
@@ -57,39 +49,25 @@ document.addEventListener("DOMContentLoaded", function () {
         articleSummaryTextarea: document.getElementById('articleSummary'),
         summaryCharCount: document.getElementById('summaryCharCount'),
         generateAISummaryBtn: document.getElementById('generateAISummaryBtn'),
-
-        // 用于加载草稿
         initialContentData: document.getElementById('initial-content-data'),
     };
 
-    // --- 实例存储 ---
     let editorInstance = null;
-    let publishModalInstance = null;
-
 
     // =================================================================
     // 2. 核心功能函数定义
     // =================================================================
 
-    /**
-     * 初始化编辑器
-     */
     function initEditor() {
-        if (!dom.editorElement) {
-            console.error("严重错误: 未找到编辑器挂载点 (#toastUiEditor)!");
-            return;
-        }
-
+        if (!dom.editorElement) return;
         const editorPlugins = [];
         if (toastui.Editor.plugin?.['code-syntax-highlight'] && typeof hljs !== 'undefined') {
             editorPlugins.push([toastui.Editor.plugin['code-syntax-highlight'], { hljs }]);
         }
-
         const initialContent = dom.initialContentData ? dom.initialContentData.textContent : '';
-
         editorInstance = new toastui.Editor({
             el: dom.editorElement,
-            height: 'calc(100vh - 180px)', // 动态计算高度
+            height: 'calc(100vh - 200px)',
             initialEditType: 'markdown',
             previewStyle: 'vertical',
             initialValue: initialContent,
@@ -97,188 +75,92 @@ document.addEventListener("DOMContentLoaded", function () {
             usageStatistics: false,
             plugins: editorPlugins,
         });
+        editorInstance.on('change', updateStats);
     }
 
-    async function fetchArticleData(id) {
-        try {
-            const response = await fetch(`/api/article/by-id/${id}`); // 假设有这样一个API
-            if (response.ok) {
-                const article = await response.json();
-
-                // 填充表单
-                if (articleTitleInput) articleTitleInput.value = article.title;
-                if (editorInstance) editorInstance.setMarkdown(article.content);
-                if (articleSummaryTextarea) articleSummaryTextarea.value = article.excerpt;
-                if (articleTagsInput && article.tags) {
-                    articleTagsInput.value = article.tags.map(tag => tag.name).join(',');
-                }
-                if (articlePortfolioInput && article.portfolio) {
-                    articlePortfolioInput.value = article.portfolio.name;
-                }
-
-                updateStats(); // 更新字数统计
-            } else {
-                showToast('加载文章数据失败', 'error');
-            }
-        } catch (error) {
-            console.error('加载文章数据时出错:', error);
-            showToast('网络错误，无法加载文章数据', 'error');
-        }
-    }
-
-    /**
-     * 绑定所有事件监听器
-     */
     function bindEvents() {
-        // 自动保存触发
         dom.articleTitleInput?.addEventListener('input', onContentChange);
         editorInstance?.on('change', onContentChange);
-
-        // 手动保存草稿
         dom.saveDraftBtn?.addEventListener('click', handleManualSaveDraft);
-
-        // 打开“发布”模态框
         dom.topPublishBtn?.addEventListener('click', handleOpenPublishModal);
-
-        // 确认发布
         dom.confirmPublishBtn?.addEventListener('click', handleConfirmSubmit);
-
-        // AI 生成摘要
         dom.generateAISummaryBtn?.addEventListener('click', handleGenerateSummary);
-
-        // 摘要字数统计
         dom.articleSummaryTextarea?.addEventListener('input', updateSummaryCharCount);
     }
 
-    /**
-     * 内容变化处理器，用于触发“防抖”的自动保存
-     */
     function onContentChange() {
         isContentDirty = true;
         updateAutoSaveStatus('内容已修改...', false);
-
-        if (autoSaveTimer) {
-            clearTimeout(autoSaveTimer);
-        }
-
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
         autoSaveTimer = setTimeout(autoSaveDraft, AUTO_SAVE_INTERVAL);
     }
 
-    /**
-     * 异步API请求的封装
-     * @param {string} endpoint - API的URL路径
-     * @param {object} body - 请求体数据
-     * @returns {Promise<Response>} - 返回 fetch 的 Promise 对象
-     */
-    function apiPost(endpoint, body) {
-        if (!csrfToken || !csrfHeader) {
-            showToast('安全凭证丢失，无法发送请求。', 'error');
-            return Promise.reject(new Error("CSRF token is missing."));
-        }
-
-        return fetch(endpoint, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                [csrfHeader]: csrfToken
-            },
-            body: JSON.stringify(body)
-        });
-    }
-
-    /**
-     * 自动保存草稿的核心逻辑
-     */
     async function autoSaveDraft() {
-        if (!isContentDirty || isSaving) {
-            return;
-        }
-
+        if (!isContentDirty || isSaving) return;
         isSaving = true;
         updateAutoSaveStatus('正在自动保存...', true);
-
         const title = dom.articleTitleInput.value.trim();
         const content = editorInstance.getMarkdown();
-
         if (!title && !content) {
             isSaving = false;
-            updateAutoSaveStatus('', false); // 如果都为空，不显示状态
+            updateAutoSaveStatus('草稿为空', false);
             return;
         }
-
         const requestData = {
-            articleId: currentDraftId,
+            articleId: articleId,
             title: title || "无标题草稿",
             content: content,
         };
-
         try {
-            const response = await apiPost('/api/article/save-draft', requestData); // 使用封装的apiPost
-
+            const response = await apiRequest('/api/article/save-draft', 'POST', requestData);
             if (response.ok) {
                 const result = await response.json();
                 isContentDirty = false;
-
-                if (!currentDraftId && result.articleId) {
-                    currentDraftId = result.articleId;
-                    // 使用 history.replaceState 更新URL，不会创建新的历史记录
-                    const newUrl = `${window.location.pathname}?draftId=${currentDraftId}`;
+                if (!articleId && result.articleId) {
+                    const newUrl = window.location.pathname + `?draftId=${result.articleId}`;
                     history.replaceState({ path: newUrl }, '', newUrl);
+                    if(articleIdInput) articleIdInput.value = result.articleId;
                 }
-
                 const now = new Date();
-                updateAutoSaveStatus(`已于 ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')} 保存`, false);
+                updateAutoSaveStatus(`已于 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} 保存`, false);
             } else {
+                const errorData = await response.json().catch(() => ({ message: '保存失败，请检查网络连接' }));
+                showToast(errorData.message, 'error');
                 updateAutoSaveStatus('自动保存失败', false);
             }
         } catch (error) {
-            console.error("自动保存失败:", error);
             updateAutoSaveStatus('保存异常', false);
         } finally {
             isSaving = false;
         }
     }
 
-    /**
-     * 手动保存草稿的处理器
-     */
-    async function handleManualSaveDraft() {
-        const btn = dom.saveDraftBtn;
-        btn.disabled = true;
-        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 保存中...`;
-
-        // 强制执行一次自动保存的逻辑
-        await autoSaveDraft();
-
-        // 无论成功失败，恢复按钮状态
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fas fa-folder"></i> 存为草稿`;
+    function handleManualSaveDraft() {
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        autoSaveDraft();
     }
 
-    /**
-     * 打开发布设置模态框的处理器
-     */
     function handleOpenPublishModal() {
+        if (!editorInstance) {
+            showToast('编辑器尚未准备就绪，请稍后重试。', 'error');
+            return;
+        }
         const title = dom.articleTitleInput.value.trim();
         const content = editorInstance.getMarkdown().trim();
-
         if (!title || !content) {
             showToast('发布前，请先填写标题和内容。', 'warning');
             return;
         }
-
-        if (publishModalInstance) {
-            publishModalInstance.show();
-            // 异步生成摘要，不阻塞UI
-            handleGenerateSummary();
+        if (dom.publishModalEl && typeof $ !== 'undefined') {
+            $(dom.publishModalEl).modal('show');
+            if(!dom.articleSummaryTextarea.value){
+                handleGenerateSummary();
+            }
         } else {
-            showToast('无法打开发布设置，请刷新页面。', 'error');
+            showToast('发布窗口组件初始化失败。', 'error');
         }
     }
 
-    /**
-     * 最终确认发布的处理器
-     */
     async function handleConfirmSubmit() {
         const requestData = {
             title: dom.articleTitleInput.value.trim(),
@@ -287,60 +169,47 @@ document.addEventListener("DOMContentLoaded", function () {
             tagsName: dom.articleTagsInput.value.split(',').map(tag => tag.trim()).filter(Boolean),
             portfolioName: dom.articlePortfolioInput.value.trim()
         };
-
-        if (!requestData.title || !requestData.content || !requestData.excerpt || requestData.tagsName.length === 0) {
+        if (!requestData.title || !requestData.content || !requestData.excerpt === 0) {
             showToast('标题、内容、摘要和标签均为必填项', 'warning');
             return;
         }
-
         dom.confirmPublishBtn.disabled = true;
         dom.confirmPublishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 处理中...`;
-
-        // 根据是否存在 articleId 决定调用哪个API
         const apiUrl = isEditMode ? `/api/article/${articleId}/edit` : '/api/article/publish';
         const method = isEditMode ? 'PUT' : 'POST';
-
         try {
             const response = await apiRequest(apiUrl, method, requestData);
             if (response.ok) {
                 const result = await response.json();
                 showToast(isEditMode ? '文章更新成功！' : '文章发布成功！', 'success');
-                window.location.href = `/article/${result.slug}`; // 跳转到文章详情页
+                window.location.href = `/article/${result.slug}`;
             } else {
                 const errorData = await response.json();
                 throw new Error(errorData.message || '服务器返回了错误');
             }
         } catch (error) {
-            console.error('提交文章失败:', error);
             showToast(`提交失败: ${error.message}`, 'error');
             dom.confirmPublishBtn.disabled = false;
             dom.confirmPublishBtn.innerHTML = isEditMode ? '确定并更新' : '确定并发布';
         }
     }
 
-    /**
-     * 调用AI服务生成摘要并填充
-     */
     async function handleGenerateSummary() {
         const btn = dom.generateAISummaryBtn;
         const originalText = btn.innerHTML;
         btn.disabled = true;
         btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> AI生成中...`;
-
         dom.articleSummaryTextarea.value = '';
         dom.articleSummaryTextarea.placeholder = "正在请求AI服务，请稍候...";
-
         const plainTextContent = editorInstance.getMarkdown().replace(/<\/?[^>]+(>|$)/g, "").trim();
-
         if (!plainTextContent) {
             dom.articleSummaryTextarea.placeholder = "文章内容为空，无法生成摘要。";
             btn.disabled = false;
             btn.innerHTML = originalText;
             return;
         }
-
         try {
-            const response = await apiPost('/api/ai/generate-summary-deepseek', { textContent: plainTextContent });
+            const response = await apiRequest('/api/ai/generate-summary-deepseek', 'POST', { textContent: plainTextContent });
             if (response.ok) {
                 const data = await response.json();
                 dom.articleSummaryTextarea.value = data.summary;
@@ -351,7 +220,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 dom.articleSummaryTextarea.placeholder = "AI摘要生成失败，请手动输入。";
             }
         } catch (error) {
-            console.error("请求AI摘要时出错:", error);
             showToast('生成摘要时发生网络错误。', 'error');
             dom.articleSummaryTextarea.placeholder = "生成摘要出错，请手动输入。";
         } finally {
@@ -362,29 +230,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // =================================================================
-    // 3. UI 辅助函数
+    // 4. UI 辅助函数
     // =================================================================
 
-    /**
-     * 填充表单以反映编辑模式
-     */
+    function apiRequest(endpoint, method, body) {
+        if (!csrfToken || !csrfHeader) {
+            showToast('安全凭证丢失，无法发送请求。', 'error');
+            return Promise.reject(new Error("CSRF token is missing."));
+        }
+        return fetch(endpoint, {
+            method: method.toUpperCase(),
+            headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+            body: JSON.stringify(body)
+        });
+    }
+
     function populateFormForEditMode() {
         if (!isEditMode) return;
-        console.log(`页面处于编辑模式, 文章/草稿 ID: ${articleId}`);
-
-        // 后端通过Thymeleaf已经将标题、标签等注入到<input>的value中
-        // 我们只需更新按钮文本和状态
         if (dom.topPublishBtn) dom.topPublishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 更新文章';
         if (dom.confirmPublishBtn) dom.confirmPublishBtn.innerHTML = '<i class="fas fa-check"></i> 确定并更新';
-        if (dom.autosaveStatusEl) dom.autosaveStatusEl.textContent = '已加载草稿';
-
-        // 确保模态框里的数据也同步
         updateSummaryCharCount();
     }
 
-    /**
-     * 更新字数和字符数统计
-     */
     function updateStats() {
         if (!dom.wordCountEl || !dom.charCountEl || !editorInstance) return;
         const markdownText = editorInstance.getMarkdown();
@@ -393,9 +260,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dom.wordCountEl.textContent = plainText ? plainText.split(/\s+/).filter(Boolean).length : 0;
     }
 
-    /**
-     * 更新摘要输入框的字数统计
-     */
     function updateSummaryCharCount() {
         if (!dom.articleSummaryTextarea || !dom.summaryCharCount) return;
         const maxLength = parseInt(dom.articleSummaryTextarea.getAttribute('maxlength')) || 200;
@@ -404,11 +268,6 @@ document.addEventListener("DOMContentLoaded", function () {
         dom.summaryCharCount.style.color = currentLength > maxLength ? 'red' : '';
     }
 
-    /**
-     * 更新自动保存状态的UI提示
-     * @param {string} message - 要显示的消息
-     * @param {boolean} isSaving - 是否显示“正在保存”的脉冲动画
-     */
     function updateAutoSaveStatus(message, isSaving) {
         if (!dom.autosaveStatusEl) return;
         dom.autosaveStatusEl.textContent = message;
@@ -419,70 +278,109 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
-     * 显示一个全局的 Toast 通知
+     * 【v4 版 - 独立实现】显示一个全局的 Toast 通知
+     * 这个函数不依赖任何外部库 (如 Bootstrap JS), 纯原生 JavaScript 实现。
      * @param {string} message - 消息内容
      * @param {string} type - 'success', 'error', 'warning', 'info'
      */
     function showToast(message, type = 'info') {
-        let toastContainer = document.querySelector('.toast-container-wrapper');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container-wrapper';
-            document.body.appendChild(toastContainer);
+        let container = document.getElementById('toast-container-main');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container-main';
+            Object.assign(container.style, {
+                position: 'fixed',
+                top: '80px',
+                right: '20px',
+                zIndex: '2000',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+            });
+            document.body.appendChild(container);
         }
 
-        const config = {
-            success: { title: '成功', icon: 'check-circle', bg: 'success' },
-            error: { title: '错误', icon: 'times-circle', bg: 'danger' },
-            warning: { title: '警告', icon: 'exclamation-triangle', bg: 'warning' },
-            info: { title: '提示', icon: 'info-circle', bg: 'info' }
-        };
-        const toastConfig = config[type] || config.info;
-
+        const toastElement = document.createElement('div');
         const toastId = 'toast-' + Date.now();
-        const toastHTML = `
-            <div id="${toastId}" class="toast align-items-center text-white bg-${toastConfig.bg} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-              <div class="d-flex">
-                <div class="toast-body">
-                  <i class="fas fa-${toastConfig.icon} me-2"></i>
-                  ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-              </div>
-            </div>
+        toastElement.id = toastId;
+
+        const colors = {
+            success: '#28a745',
+            error: '#dc3545',
+            warning: '#ffc107',
+            info: '#17a2b8'
+        };
+        const icons = {
+            success: 'fa-check-circle',
+            error: 'fa-times-circle',
+            warning: 'fa-exclamation-triangle',
+            info: 'fa-info-circle'
+        };
+
+        const bgColor = colors[type] || colors.info;
+        const iconClass = icons[type] || icons.info;
+
+        Object.assign(toastElement.style, {
+            backgroundColor: bgColor,
+            color: 'white',
+            padding: '15px 20px',
+            borderRadius: '5px',
+            boxShadow: '0 4px 10px rgba(0,0,0,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            opacity: '0',
+            transform: 'translateX(100%)',
+            transition: 'opacity 0.3s ease, transform 0.3s ease'
+        });
+
+        toastElement.innerHTML = `
+            <i class="fas ${iconClass}" style="font-size: 1.2em;"></i>
+            <span>${message}</span>
+            <button style="background:none; border:none; color:white; font-size:1.2em; cursor:pointer; margin-left:auto; padding:0 5px;">&times;</button>
         `;
-        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
 
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
-        toast.show();
-        toastElement.addEventListener('hidden.bs.toast', () => toastElement.remove());
+        container.appendChild(toastElement);
+
+        // Animate in
+        setTimeout(() => {
+            toastElement.style.opacity = '1';
+            toastElement.style.transform = 'translateX(0)';
+        }, 10);
+
+        // Close button logic
+        toastElement.querySelector('button').addEventListener('click', () => {
+            closeToast(toastElement);
+        });
+
+        // Auto-close logic
+        const autoCloseTimeout = setTimeout(() => {
+            closeToast(toastElement);
+        }, 5000);
+
+        toastElement.dataset.timeoutId = autoCloseTimeout.toString();
+
+        function closeToast(el) {
+            const timeoutId = parseInt(el.dataset.timeoutId, 10);
+            clearTimeout(timeoutId);
+            el.style.opacity = '0';
+            el.style.transform = 'translateX(100%)';
+            el.addEventListener('transitionend', () => {
+                el.remove();
+                if (container.children.length === 0) {
+                    container.remove();
+                }
+            }, { once: true });
+        }
     }
 
 
     // =================================================================
-    // 4. 启动应用
+    // 5. 启动应用
     // =================================================================
-
-    // --- 初始化编辑器和模态框 ---
     initEditor();
-    if (dom.publishModalEl && typeof bootstrap !== 'undefined') {
-        publishModalInstance = new bootstrap.Modal(dom.publishModalEl);
-    }
-
-    // --- 绑定事件 ---
     bindEvents();
-
-    // --- 页面加载时，检查URL是否有 draftId，如果有，则加载该草稿 ---
-    const urlParams = new URLSearchParams(window.location.search);
-    const draftIdFromUrl = urlParams.get('draftId');
-    if (draftIdFromUrl) {
-        currentDraftId = parseInt(draftIdFromUrl, 10);
-        // 这里可以添加一个函数，用于根据ID获取草稿内容并填充到编辑器中
-        // loadDraftContent(currentDraftId);
-    }
-
-    // --- 初始化UI ---
+    populateFormForEditMode();
     updateStats();
     updateSummaryCharCount();
 });
