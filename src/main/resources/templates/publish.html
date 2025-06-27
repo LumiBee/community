@@ -401,9 +401,10 @@
 
 <div class="publish-page-wrapper">
     <div class="editor-content-container container-fluid w-100">
-        <form id="publishForm" method="post" th:action="@{/article/publish}">
-            <input type="hidden" id="formArticleContent" name="content">
-            <script id="initial-content-data" type="text/template" th:text="${article?.content}"></script>
+        <input type="hidden" id="articleId" th:value="${article?.articleId}">
+        <script id="initial-content-data" type="text/template" th:text="${article?.content}"></script>
+
+        <form id="publishForm" method="post" th:action="@{/api/article/publish}">
             <div id="toastUiEditor"></div>
         </form>
     </div>

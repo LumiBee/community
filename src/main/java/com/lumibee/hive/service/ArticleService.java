@@ -10,6 +10,7 @@ import java.util.List;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
+    Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize);
     String createUniqueSlug(String title);
     ArticleDetailsDTO getArticleBySlug(String slug);
     LikeResponse toggleLike(long userId, int articleId);
@@ -24,6 +25,8 @@ public interface ArticleService {
     List<ArticleExcerptDTO> selectFeaturedArticles(String title);
     ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId);
     Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
-    ArticleDetailsDTO getDraftById(Integer articleId, Long userId);
+    ArticleDetailsDTO selectDraftById(Integer articleId);
     ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId) throws Exception;
+    ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
+    ArticleDetailsDTO deleteArticleById(Integer articleId);
 }

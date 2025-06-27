@@ -3,6 +3,8 @@ package com.lumibee.hive.controller;
 import java.security.Principal;
 import java.util.List;
 
+import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.model.Article;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -50,7 +52,15 @@ public class IndexController {
 
 
     @GetMapping("/publish")
-    public String publish() {
+    public String publish(@RequestParam(name = "draftId", required = false) Integer draftId,
+                          Model model) {
+        if (draftId != null) {
+            ArticleDetailsDTO draft = articleService.selectDraftById(draftId);
+            // System.out.println(draft.getContent());
+            if (draft != null) {
+                model.addAttribute("article", draft);
+            }
+        }
         return "publish";
     }
 
@@ -69,25 +79,29 @@ public class IndexController {
     }
 
     @GetMapping("/profile")
-    public String showProfile(Model model,
+    public String showProfile(@RequestParam(name = "page", defaultValue = "1") long pageNum,
+                              @RequestParam(name = "size", defaultValue = "6") long pageSize,
+                              Model model,
                               @AuthenticationPrincipal Principal principal) {
         User user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
             return "redirect:/login";
         }
-        System.out.println("================================");
-        System.out.println(user.getBackgroundImgUrl());
+        // 判断是否为当前用户的个人资料页面
+        boolean isOwner = true;
 
         Integer articleCount = articleService.countArticlesByUserId(user.getId());
         Integer fans = userService.countFansByUserId(user.getId());
         Integer following = userService.countFollowingByUserId(user.getId());
-        List<ArticleExcerptDTO> articleExcerptDTO = articleService.getArticlesByUserId(user.getId());
+        Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
 
         model.addAttribute("user", user);
         model.addAttribute("articleCount", articleCount);
         model.addAttribute("followersCount", fans);
         model.addAttribute("followingCount", following);
-        model.addAttribute("articles", articleExcerptDTO);
+        model.addAttribute("articles", articlePage);
+
+        model.addAttribute("isOwner", isOwner);
 
         return "profile";
     }

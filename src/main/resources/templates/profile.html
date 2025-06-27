@@ -4,6 +4,7 @@
     <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
     <title>个人空间 - LumiHive</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="stylesheet" th:href="@{/css/profile.css}">
     <!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
     <meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
@@ -19,7 +20,7 @@
       <i id="customToastIcon" class="fas fa-info-circle text-info mr-2"></i>
       <strong id="customToastTitle">提示</strong>
     </div>
-    <button onclick="hideCustomToast()" style="background: none; border: none; cursor: pointer; font-size: 16px;">×</button>
+      <button style="background: none; border: none; cursor: pointer; font-size: 16px;">&times;</button>
   </div>
   <div id="customToastMessage" style="padding: 15px; font-size: 14px;">
     消息内容
@@ -36,7 +37,7 @@
                          th:src="@{${user.backgroundImgUrl ?: '/img/bg.jpg'}}"
                          alt="封面图片">
 
-                    <button class="btn btn-outline-light btn-sm change-cover-btn">
+                    <button class="btn btn-outline-light btn-sm change-cover-btn" th:if="${isOwner}">
                         <i class="fas"></i> 修改封面
                     </button>
                     <input type="file" id="coverImageInput" style="display: none;" accept="image/png, image/jpeg, image/gif, image/jpg">
@@ -107,56 +108,87 @@
             <!-- 左侧文章列表 -->
             <div class="col-lg-8">
                 <div class="article-list">
-                    <!-- 文章项目1 -->
-                    <div class="article-item" th:each="article : ${articles}" th:attr="data-article-id=${article.articleId}" 
-                         th:onclick="'window.location.href=\'' + @{'/article/' + ${article.slug}} + '\''">
-                        <div class="article-content" style="cursor: pointer;">
+                    <div class="article-item" th:each="article : ${articles.records}" th:attr="data-article-id=${article.articleId}">
+
+                        <div class="article-content" style="cursor: pointer;"
+                             th:onclick="'window.location.href=\'' + @{'/article/' + ${article.slug}} + '\''">
+
                             <h3 class="article-title">
-                                <span th:text="${article.title}">Spring Boot 实战：构建现代化Web应用</span>
+                                <span th:text="${article.title}">标题</span>
                             </h3>
-                            <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要'}">Spring Boot是一个用于简化Spring应用开发的框架，本文将介绍如何使用Spring Boot快速构建一个现代化的Web应用...</p>
-                            <div class="article-meta">
-                                <span class="article-date">
-                                    <i class="far fa-calendar-alt"></i>
-                                    <span th:text="${#temporals.format(article.gmtModified, 'yyyy-MM-dd')}">2023-06-15</span>
-                                </span>
-                                <div class="article-stats">
-                                    <span class="article-stat article-views">
-                                        <i class="far fa-eye"></i>
-                                        <span th:text="${article.viewCount != null ? article.viewCount : 0}">256</span>
+                            <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要'}">摘要</p>
+
+                            <div class="article-meta" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="meta-left-content" style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="article-date">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <span th:text="${#temporals.format(article.gmtModified, 'yyyy-MM-dd')}">时间</span>
                                     </span>
-                                    <span class="article-stat article-likes" th:attr="data-article-id=${article.articleId}" onclick="event.stopPropagation();">
-                                        <i th:class="${article.likes != null ? 'fas fa-heart' : 'far fa-heart'}"></i>
-                                        <span th:text="${article.likes != null ? article.likes : 0}">42</span>
-                                    </span>
-                                    <span class="article-stat article-comments">
-                                        <i class="far fa-comment"></i>
-                                        <span th:text="${article.viewCount != null ? article.viewCount : 0}">18</span>
-                                    </span>
+                                    <div class="article-stats">
+                                        <span class="article-stat article-views">
+                                            <i class="far fa-eye"></i>
+                                            <span th:text="${article.viewCount != null ? article.viewCount : 0}">0</span>
+                                        </span>
+                                        <span class="article-stat article-likes" th:attr="data-article-id=${article.articleId}" onclick="event.stopPropagation();">
+                                            <i th:class="${article.likes != null ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                            <span th:text="${article.likes != null ? article.likes : 0}">0</span>
+                                        </span>
+                                        <span class="article-stat article-comments">
+                                            <i class="far fa-comment"></i>
+                                            <span th:text="${article.viewCount != null ? article.viewCount : 0}">0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="article-actions" th:if="${isOwner}" style="display: flex; gap: 0.5rem;">
+                                    <a th:href="@{'/publish?draftId=' + ${article.articleId}}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       onclick="event.stopPropagation();"> <i class="fas fa-edit"></i> 编辑
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            th:attr="data-article-id=${article.articleId}"
+                                            onclick="event.stopPropagation(); deleteArticle(this.getAttribute('data-article-id'));">
+                                        <i class="fas fa-trash-alt"></i> 删除
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-<!--                &lt;!&ndash; 分页 &ndash;&gt;-->
-<!--                <div class="pagination-container" th:if="${totalPages != null && totalPages > 1}">-->
-<!--                    <ul class="pagination">-->
-<!--                        <li class="page-item" th:classappend="${currentPage == 1 ? 'disabled' : ''}">-->
-<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage - 1)}}" aria-label="Previous">-->
-<!--                                <i class="fas fa-chevron-left"></i>-->
-<!--                            </a>-->
-<!--                        </li>-->
-<!--                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}" th:classappend="${i == currentPage ? 'active' : ''}">-->
-<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + i}}" th:text="${i}">1</a>-->
-<!--                        </li>-->
-<!--                        <li class="page-item" th:classappend="${currentPage == totalPages ? 'disabled' : ''}">-->
-<!--                            <a class="page-link" th:href="@{${'/user/' + user.id + '?page=' + (currentPage + 1)}}" aria-label="Next">-->
-<!--                                <i class="fas fa-chevron-right"></i>-->
-<!--                            </a>-->
-<!--                        </li>-->
-<!--                    </ul>-->
-<!--                </div>-->
+                <nav th:if="${articles != null and articles.pages > 1L}" aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+
+                        <th:block th:with="currentPage=${articles.current}, totalPages=${articles.pages}, startPage=${T(java.lang.Math).max(1L, currentPage - 2L)}, endPage=${T(java.lang.Math).min(totalPages, currentPage + 2L)}">
+
+                            <li class="page-item" th:classappend="${currentPage == 1L} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${currentPage - 1L}, size=${articles.size})}">上一页</a>
+                            </li>
+
+                            <li class="page-item" th:if="${startPage > 1L}">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=1L, size=${articles.size})}">1</a>
+                            </li>
+                            <li class="page-item disabled" th:if="${startPage > 2L}">
+                                <span class="page-link">...</span>
+                            </li>
+
+                            <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${i}, size=${articles.size})}" th:text="${i}"></a>
+                            </li>
+
+                            <li class="page-item disabled" th:if="${endPage < totalPages - 1L}">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li class="page-item" th:if="${endPage < totalPages}">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${totalPages}, size=${articles.size})}" th:text="${totalPages}"></a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${currentPage + 1L}, size=${articles.size})}">下一页</a>
+                            </li>
+
+                        </th:block>
+                    </ul>
+                </nav>
             </div>
 
             <!-- 右侧侧边栏 -->
@@ -287,7 +319,8 @@
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 <script th:src="@{/js/profile.js}" type="text/javascript"></script>
 
 </body>
-</html> 
+</html>

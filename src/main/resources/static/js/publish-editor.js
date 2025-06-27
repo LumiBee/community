@@ -32,7 +32,10 @@ document.addEventListener("DOMContentLoaded", function () {
     let isContentDirty = false;
     let currentDraftId = null; // 用于存储当前草稿的ID
     let isSaving = false;
-    const AUTO_SAVE_INTERVAL = 8000; // 自动保存间隔，设置为8秒
+    const AUTO_SAVE_INTERVAL = 3000; // 自动保存间隔，设置为3秒
+
+    const articleIdInput = document.getElementById('articleId');
+    const articleId = articleIdInput ? articleIdInput.value : null;
 
     // --- DOM 元素缓存 ---
     const dom = {
@@ -96,6 +99,33 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    async function fetchArticleData(id) {
+        try {
+            const response = await fetch(`/api/article/by-id/${id}`); // 假设有这样一个API
+            if (response.ok) {
+                const article = await response.json();
+
+                // 填充表单
+                if (articleTitleInput) articleTitleInput.value = article.title;
+                if (editorInstance) editorInstance.setMarkdown(article.content);
+                if (articleSummaryTextarea) articleSummaryTextarea.value = article.excerpt;
+                if (articleTagsInput && article.tags) {
+                    articleTagsInput.value = article.tags.map(tag => tag.name).join(',');
+                }
+                if (articlePortfolioInput && article.portfolio) {
+                    articlePortfolioInput.value = article.portfolio.name;
+                }
+
+                updateStats(); // 更新字数统计
+            } else {
+                showToast('加载文章数据失败', 'error');
+            }
+        } catch (error) {
+            console.error('加载文章数据时出错:', error);
+            showToast('网络错误，无法加载文章数据', 'error');
+        }
+    }
+
     /**
      * 绑定所有事件监听器
      */
@@ -111,7 +141,7 @@ document.addEventListener("DOMContentLoaded", function () {
         dom.topPublishBtn?.addEventListener('click', handleOpenPublishModal);
 
         // 确认发布
-        dom.confirmPublishBtn?.addEventListener('click', handleConfirmPublish);
+        dom.confirmPublishBtn?.addEventListener('click', handleConfirmSubmit);
 
         // AI 生成摘要
         dom.generateAISummaryBtn?.addEventListener('click', handleGenerateSummary);
@@ -249,10 +279,7 @@ document.addEventListener("DOMContentLoaded", function () {
     /**
      * 最终确认发布的处理器
      */
-    async function handleConfirmPublish() {
-        dom.confirmPublishBtn.disabled = true;
-        dom.confirmPublishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 发布中...`;
-
+    async function handleConfirmSubmit() {
         const requestData = {
             title: dom.articleTitleInput.value.trim(),
             content: editorInstance.getMarkdown().trim(),
@@ -261,30 +288,33 @@ document.addEventListener("DOMContentLoaded", function () {
             portfolioName: dom.articlePortfolioInput.value.trim()
         };
 
-        // 发布前的数据校验
-        if (!requestData.title || !requestData.content || requestData.tagsName.length === 0 || !requestData.excerpt) {
-            showToast('标题、内容、标签和摘要均为必填项。', 'warning');
-            dom.confirmPublishBtn.disabled = false;
-            dom.confirmPublishBtn.innerHTML = `<i class="fas fa-check"></i> 确定并发布`;
+        if (!requestData.title || !requestData.content || !requestData.excerpt || requestData.tagsName.length === 0) {
+            showToast('标题、内容、摘要和标签均为必填项', 'warning');
             return;
         }
 
+        dom.confirmPublishBtn.disabled = true;
+        dom.confirmPublishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 处理中...`;
+
+        // 根据是否存在 articleId 决定调用哪个API
+        const apiUrl = isEditMode ? `/api/article/${articleId}/edit` : '/api/article/publish';
+        const method = isEditMode ? 'PUT' : 'POST';
+
         try {
-            const response = await apiPost('/api/article/publish', requestData);
+            const response = await apiRequest(apiUrl, method, requestData);
             if (response.ok) {
-                const newArticle = await response.json();
-                showToast('文章发布成功！正在跳转...', 'success');
-                window.location.href = `/article/${newArticle.slug}`;
+                const result = await response.json();
+                showToast(isEditMode ? '文章更新成功！' : '文章发布成功！', 'success');
+                window.location.href = `/article/${result.slug}`; // 跳转到文章详情页
             } else {
                 const errorData = await response.json();
-                showToast(`发布失败: ${errorData.message || '服务器错误'}`, 'error');
+                throw new Error(errorData.message || '服务器返回了错误');
             }
         } catch (error) {
-            console.error("发布文章时出错:", error);
-            showToast('发布时发生网络错误。', 'error');
-        } finally {
+            console.error('提交文章失败:', error);
+            showToast(`提交失败: ${error.message}`, 'error');
             dom.confirmPublishBtn.disabled = false;
-            dom.confirmPublishBtn.innerHTML = `<i class="fas fa-check"></i> 确定并发布`;
+            dom.confirmPublishBtn.innerHTML = isEditMode ? '确定并更新' : '确定并发布';
         }
     }
 
@@ -334,6 +364,23 @@ document.addEventListener("DOMContentLoaded", function () {
     // =================================================================
     // 3. UI 辅助函数
     // =================================================================
+
+    /**
+     * 填充表单以反映编辑模式
+     */
+    function populateFormForEditMode() {
+        if (!isEditMode) return;
+        console.log(`页面处于编辑模式, 文章/草稿 ID: ${articleId}`);
+
+        // 后端通过Thymeleaf已经将标题、标签等注入到<input>的value中
+        // 我们只需更新按钮文本和状态
+        if (dom.topPublishBtn) dom.topPublishBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 更新文章';
+        if (dom.confirmPublishBtn) dom.confirmPublishBtn.innerHTML = '<i class="fas fa-check"></i> 确定并更新';
+        if (dom.autosaveStatusEl) dom.autosaveStatusEl.textContent = '已加载草稿';
+
+        // 确保模态框里的数据也同步
+        updateSummaryCharCount();
+    }
 
     /**
      * 更新字数和字符数统计

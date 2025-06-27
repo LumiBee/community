@@ -38,6 +38,7 @@ public class ArticleController {
         ArticleDetailsDTO article = articleService.getArticleBySlug(slug);
 
         if (article == null) {
+            // 如果文章不存在，返回 404 页面
             return "error/404";
         }
 

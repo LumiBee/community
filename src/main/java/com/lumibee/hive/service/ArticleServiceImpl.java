@@ -50,6 +50,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
+        Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
+                    .eq(Article::getDeleted, 0)
+                    .eq(Article::getUserId, userId)
+                    .orderByDesc(Article::getGmtModified);
+
+        return getArticleExcerptDTOPage(pageNum, pageSize, articleProfilePageRequest, queryWrapper);
+    }
+
+    @Override
     public String createUniqueSlug(String title) {
         String baseSlug = SlugGenerator.generateSlug(title);
         if (baseSlug.isEmpty()) {
@@ -284,11 +297,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ArticleDetailsDTO getDraftById(Integer articleId, Long userId) {
+    public ArticleDetailsDTO selectDraftById(Integer articleId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId)
-               .eq("user_id", userId)
-               .eq("status", Article.ArticleStatus.draft)
                .eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
 
@@ -298,7 +309,6 @@ public class ArticleServiceImpl implements ArticleService {
 
         ArticleDetailsDTO detailsDTO = new ArticleDetailsDTO();
         BeanUtils.copyProperties(article, detailsDTO);
-        detailsDTO.setUserId(userId);
 
         return detailsDTO;
     }
@@ -320,6 +330,89 @@ public class ArticleServiceImpl implements ArticleService {
         articleMapper.updateById(existingArticle);
 
         return getArticleBySlug(existingArticle.getSlug());
+    }
+
+    @Override
+    @Transactional
+    public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
+        Article existingArticle = articleMapper.selectById(articleId);
+        if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
+            throw new  RuntimeException("文章不存在或不属于当前用户");
+        }
+
+        existingArticle.setTitle(requestDTO.getTitle());
+        existingArticle.setContent(requestDTO.getContent());
+        existingArticle.setExcerpt(requestDTO.getExcerpt());
+        existingArticle.setGmtModified(LocalDateTime.now());
+
+        // 更新作品集
+        if (requestDTO.getPortfolioName() != null || !requestDTO.getPortfolioName().isEmpty()) {
+            Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
+            existingArticle.setPortfolioId(portfolio.getId());
+        }else {
+            existingArticle.setPortfolioId(null);
+        }
+
+        // 更新标签
+        articleMapper.deleteArticleTagByArticleId(articleId);
+        if (requestDTO.getPortfolioName() != null || !requestDTO.getPortfolioName().isEmpty()) {
+            Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
+            for (Tag tag : tags) {
+                if (tag != null) {
+                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
+                    tagService.incrementArticleCount(tag.getTagId());
+                }
+            }
+        }
+
+        articleMapper.updateById(existingArticle);
+
+        return getArticleBySlug(existingArticle.getSlug());
+    }
+
+    @Override
+    @Transactional
+    public ArticleDetailsDTO deleteArticleById(Integer articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new RuntimeException("文章不存在");
+        }
+
+        int result = articleMapper.deleteById(articleId);
+        if (result == 0) {
+            throw new RuntimeException("删除文章失败");
+        }
+
+        return convertToArticleDetailsDTO(article);
+    }
+
+    private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {
+        if (article == null) return null;
+        ArticleDetailsDTO dto = new ArticleDetailsDTO();
+        BeanUtils.copyProperties(article, dto);
+
+        // 获取用户信息
+        User user = userMapper.selectById(article.getUserId());
+        if (user != null) {
+            dto.setUserId(user.getId());
+            dto.setUserName(user.getName());
+            dto.setAvatarUrl(user.getAvatarUrl());
+        }
+
+        // 获取作品集信息
+        Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
+        dto.setPortfolio(convertToPortfolioDTO(portfolio));
+
+        // 获取标签信息
+        List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
+        if (tags != null && !tags.isEmpty()) {
+            List<TagDTO> tagDTOs = tags.stream()
+                    .map(this::convertToTagDTO)
+                    .collect(Collectors.toList());
+            dto.setTags(tagDTOs);
+        }
+
+        return dto;
     }
 
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {

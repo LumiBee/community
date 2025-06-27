@@ -590,50 +590,21 @@ body {
 }
 
 /* 分页 */
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 2rem;
+.pagination .page-item.active .page-link {
+    background-color: #ffda58;
+    border-color: #ffda58;
+    color: white; /* Text color for active page, ensure contrast */
 }
-
-.pagination {
-  display: flex;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.pagination .page-link {
+  color: #ffda58;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
-
-.page-item {
-  margin: 0 0.25rem;
+.pagination .page-link:hover {
+  background-color: #e9ecef;
+  color: #ffda58; /* Keep color or change to a darker shade for better feedback */
 }
-
-.page-link {
-  display: block;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  text-align: center;
-  border-radius: 50%;
-  background-color: #fff;
-  color: #555;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.page-link:hover {
-  background-color: #f0f0f0;
-}
-
-.page-item.active .page-link {
-  background-color: #ffda58;
-  color: #333;
-  box-shadow: 0 3px 8px rgba(255, 218, 88, 0.3);
-}
-
-.page-item.disabled .page-link {
-  color: #ccc;
-  cursor: not-allowed;
+.pagination .page-item.disabled .page-link {
+  color: #6c757d;
 }
 
 /* 响应式调整 */
