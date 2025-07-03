@@ -29,10 +29,22 @@ document.addEventListener("DOMContentLoaded", function () {
     let isContentDirty = false;
     let isSaving = false;
     const AUTO_SAVE_INTERVAL = 2000;
+    let currentDraftId = null;
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const draftIdFromUrl = urlParams.get('draftId');
     const articleIdInput = document.getElementById('articleId');
-    const articleId = articleIdInput ? articleIdInput.value : null;
-    const isEditMode = !!articleId;
+    const initialArticleId = articleIdInput ? articleIdInput.value : null;
+
+    if (draftIdFromUrl) {
+        currentDraftId = parseInt(draftIdFromUrl, 10);
+        console.log(`草稿ID从URL中加载: ${currentDraftId}`);
+    } else if (initialArticleId) {
+        currentDraftId = parseInt(initialArticleId, 10);
+        console.log(`文章/草稿ID从页面加载: ${currentDraftId}`);
+    }
+
+    const isEditMode = !!initialArticleId;
 
     const dom = {
         editorElement: document.getElementById('toastUiEditor'),
@@ -107,7 +119,7 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
         const requestData = {
-            articleId: articleId,
+            articleId: currentDraftId,
             title: title || "无标题草稿",
             content: content,
         };
@@ -116,10 +128,13 @@ document.addEventListener("DOMContentLoaded", function () {
             if (response.ok) {
                 const result = await response.json();
                 isContentDirty = false;
-                if (!articleId && result.articleId) {
-                    const newUrl = window.location.pathname + `?draftId=${result.articleId}`;
+                // [修改] 如果是第一次保存（currentDraftId为空），则从后端返回的数据中获取新的ID
+                if (!currentDraftId && result.articleId) {
+                    currentDraftId = result.articleId;
+                    console.log(`新草稿创建成功，ID: ${currentDraftId}`);
+                    // 使用 history.replaceState 更新URL，不会创建新的历史记录
+                    const newUrl = `${window.location.pathname}?draftId=${currentDraftId}`;
                     history.replaceState({ path: newUrl }, '', newUrl);
-                    if(articleIdInput) articleIdInput.value = result.articleId;
                 }
                 const now = new Date();
                 updateAutoSaveStatus(`已于 ${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} 保存`, false);
@@ -163,6 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     async function handleConfirmSubmit() {
         const requestData = {
+            articleId: currentDraftId, // 传递草稿ID
             title: dom.articleTitleInput.value.trim(),
             content: editorInstance.getMarkdown().trim(),
             excerpt: dom.articleSummaryTextarea.value.trim(),
@@ -175,8 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         dom.confirmPublishBtn.disabled = true;
         dom.confirmPublishBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 处理中...`;
-        const apiUrl = isEditMode ? `/api/article/${articleId}/edit` : '/api/article/publish';
-        const method = isEditMode ? 'PUT' : 'POST';
+        const apiUrl = '/api/article/publish';
+        const method = 'POST';
         try {
             const response = await apiRequest(apiUrl, method, requestData);
             if (response.ok) {
@@ -278,7 +294,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     /**
-     * 【v4 版 - 独立实现】显示一个全局的 Toast 通知
+     * 显示一个全局的 Toast 通知
      * 这个函数不依赖任何外部库 (如 Bootstrap JS), 纯原生 JavaScript 实现。
      * @param {string} message - 消息内容
      * @param {string} type - 'success', 'error', 'warning', 'info'

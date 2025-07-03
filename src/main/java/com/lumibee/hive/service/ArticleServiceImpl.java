@@ -167,6 +167,10 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId) {
+        if (requestDTO.getArticleId() != null) {
+            return updateArticle(requestDTO.getArticleId(), requestDTO, userId);
+        }
+
         Article article = new Article();
         article.setTitle(requestDTO.getTitle());
         article.setContent(requestDTO.getContent());
@@ -315,21 +319,27 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
-    public ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId) throws Exception {
-        Article existingArticle = articleMapper.selectById(requestDTO.getArticleId());
-        if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
-            throw new Exception("草稿文章不存在或不属于当前用户");
+    public ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId){
+        Article article;
+
+        if (requestDTO.getArticleId() != null) {
+            article = articleMapper.selectById(requestDTO.getArticleId());
+            if (!article.getUserId().equals(userId)) {
+                throw new RuntimeException("草稿文章不存在或不属于当前用户");
+            }
+        }else {
+            article = new Article();
+            article.setUserId(userId);
+            article.setStatus(Article.ArticleStatus.draft);
         }
 
-        existingArticle.setExcerpt(requestDTO.getExcerpt());
-        existingArticle.setTitle(requestDTO.getTitle());
-        existingArticle.setContent(requestDTO.getContent());
-        existingArticle.setGmtModified(LocalDateTime.now());
-        existingArticle.setStatus(Article.ArticleStatus.draft);
+        article.setExcerpt(requestDTO.getExcerpt());
+        article.setTitle(requestDTO.getTitle());
+        article.setContent(requestDTO.getContent());
+        article.setGmtModified(LocalDateTime.now());
+        articleMapper.updateById(article);
 
-        articleMapper.updateById(existingArticle);
-
-        return getArticleBySlug(existingArticle.getSlug());
+        return getArticleBySlug(article.getSlug());
     }
 
     @Override
