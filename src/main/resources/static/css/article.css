@@ -5,6 +5,19 @@ body {
     line-height: 1.7;
 }
 
+/* 1. 为所有常规段落设置首行缩进 */
+p {
+    text-indent: 2em;
+    /* 其他段落样式，如行高、间距等 */
+    line-height: 1.8;
+    margin-bottom: 1em;
+}
+
+/* 2. 为有序列表(ol)和无序列表(ul)中的段落，取消首行缩进 */
+li p {
+    text-indent: 0;
+}
+
 /* 文章标题区域美化 */
 .jumbotron {
     padding: 3rem 0;
@@ -124,11 +137,6 @@ body {
 
 .article-content {
     margin-bottom: 2rem;
-}
-
-.article-content p {
-    text-indent: 2em;
-    margin-bottom: 1.5rem;
 }
 
 .article-content h1, 

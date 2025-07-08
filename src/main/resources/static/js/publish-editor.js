@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
     let autoSaveTimer = null;
     let isContentDirty = false;
     let isSaving = false;
-    const AUTO_SAVE_INTERVAL = 2000;
+    const AUTO_SAVE_INTERVAL = 1000;
     let currentDraftId = null;
 
     const urlParams = new URLSearchParams(window.location.search);

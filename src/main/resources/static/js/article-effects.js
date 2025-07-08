@@ -253,7 +253,7 @@ function generateTableOfContents() {
 
     // 1. 创建右侧边栏容器
     const rightSidebar = document.createElement('div');
-    rightSidebar.className = 'col-lg-2 d-none d-lg-block'; // 在大屏幕上显示
+    rightSidebar.className = 'col-lg-3 d-none d-lg-block pl-lg-4'; // 在大屏幕上显示
     rightSidebar.style.paddingLeft = '0';
 
     // 2. 创建固定容器

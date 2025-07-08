@@ -385,10 +385,9 @@
                         <div class="indicator"></div>
                         <span>自动保存至草稿箱</span>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary mr-2" id="saveDraftBtn">
-                        <i class="fas fa-folder"></i>
-                        草稿箱
-                    </button>
+                    <a class="btn btn-outline-secondary mr-2" th:href="@{/drafts}">
+                        <i class="fas fa-folder"></i>草稿箱
+                    </a>
                     <button type="button" class="btn btn-warning publish-btn">
                         <i class="fas fa-paper-plane"></i>
                         发布文章
