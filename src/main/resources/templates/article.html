@@ -13,7 +13,7 @@
 <div th:replace="~{fragments/header :: navbar}"></div>
 
 <!-- 文章头部区域 -->
-<div class="container-fluid" style="max-width: 1300px;">
+<div class="container-fluid" style="max-width: 1600px;">
 	<div class="jumbotron jumbotron-fluid mb-3 pl-0 pt-0 pb-0 bg-white position-relative">
 		<div class="h-100 tofront">
 			<div class="justify-content-between">
@@ -26,7 +26,7 @@
 					<div class="mb-4 w-100" th:if="${article.tags != null and not #lists.isEmpty(article.tags)}">
 						<div style="display: flex; align-items: end; width: 100%;">
 							<div th:each="tag : ${article.tags}" class="d-inline-block">
-								<a th:href="@{'/articles/tag/' + ${tag.slug}}"
+								<a th:href="@{'/tags#' + ${tag.name}}"
 								   class="badge badge-tag mr-2 mb-2 tag-link"
 								   th:text="${tag.name}"
 								   th:title="'查看更多 ' + ${tag.name} + ' 相关文章'">
@@ -121,7 +121,7 @@
 </div>
 
 <!-- 主要内容区域 -->
-<div class="container-fluid pt-4 pb-4" style="max-width: 1300px;">
+<div class="container-fluid pt-4 pb-4" style="max-width: 1600px;">
 	<div class="row">
 		<!-- 分享按钮侧边栏 -->
 		<div class="col-lg-1 col-md-2 pr-3 mb-4" >
@@ -159,13 +159,12 @@
 		</div>
 
 		<!-- 文章正文 -->
-		<div class="col-lg-8 col-md-10">
+		<div class="col-lg-8 col-md-9">
 			<article class="article-post">
 				<!-- 文章内容 -->
 				<div th:utext="${renderedHtmlContent}" class="article-content">
 					<p>文章正文内容将在这里显示...</p>
 				</div>
-
 				<!-- 显示阅读量 -->
 				<div class="mt-4 pt-4 border-top">
 					<div class="d-flex justify-content-end align-items-center">
@@ -210,7 +209,7 @@
 </div>
 
 <!-- 相关文章推荐 -->
-<div class="container-fluid pt-4 pb-4" style="max-width: 1300px;">
+<div class="container-fluid pt-4 pb-4" style="max-width: 1600px;">
 	<h5 class="font-weight-bold spanborder"><span>相关阅读</span></h5>
 	<div class="row" th:if="${relatedArticles != null and !relatedArticles.isEmpty()}">
 		<div class="col-lg-6" th:each="relatedArticle : ${relatedArticles}">

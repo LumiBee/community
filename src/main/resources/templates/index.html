@@ -9,7 +9,7 @@
 <body>
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="main-content-wrapper"> <div class="container-fluid" style="max-width: 1300px; width:100%">
+<div class="main-content-wrapper"> <div class="container-fluid" style="max-width: 1400px; width:100%">
 	<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="height: 300px">
 		<ol class="carousel-indicators">
 			<li th:each="featuredArticle, iterStat : ${featuredArticles}"
@@ -61,7 +61,7 @@
 	</div>
 </div>
 
-	<div class="container-fluid" style="max-width: 1300px; margin-top:20px">
+	<div class="container-fluid" style="max-width: 1400px; margin-top:20px">
 		<div class="row justify-content-between">
 			<div class="col-md-8"> <h5 class="font-weight-bold spanborder"><span>所有文章</span></h5>
 				<div th:if="${articles != null}">
@@ -172,7 +172,7 @@
 				<h5 class="font-weight-bold spanborder"><span>热门标签</span></h5>
 				<div id="tagBubbleContainer" class="tag-cloud-container"
 					 style="position: relative;
-					height: 600px;
+					height: 700px;
 					margin-bottom: 20px;">
 					<a th:each="tag, iterStat : ${tags}"
 					   class="tag-bubble"

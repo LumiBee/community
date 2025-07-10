@@ -32,7 +32,7 @@ public class IndexController {
 
     @GetMapping("/")
     public String home(@RequestParam(name = "page", defaultValue = "1") long pageNum,
-                       @RequestParam(name = "size", defaultValue = "6") long pageSize,
+                       @RequestParam(name = "size", defaultValue = "8") long pageSize,
                        Model model) {
         int limit = 6;
 
