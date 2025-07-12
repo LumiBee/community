@@ -18,12 +18,4 @@ public class HiveApplication {
         SpringApplication.run(HiveApplication.class, args);
     }
 
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) { // 注入 RestTemplateBuilder
-
-        return builder
-                .build();
-    }
-
-
 }

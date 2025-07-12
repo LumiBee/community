@@ -91,7 +91,10 @@ public class SecurityConfig {
                                                 "/portfolio/**", // 个人作品集
                                                 "/api/portfolio/**", // 个人作品集 API
                                                 "/avatars/**", // 头像图片
-                                                "/backgrounds/**" // 背景图片
+                                                "/backgrounds/**", // 背景图片
+                                                "/search", // 搜索页面
+                                                "/api/search/**", // 搜索 API
+                                                "/RealTimeSearch.html" // 实时搜索页面
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
                                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
@@ -131,6 +134,7 @@ public class SecurityConfig {
                 .csrf(csrf ->
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                                .ignoringRequestMatchers("/api/search/**") // API路径忽略CSRF
                 );
 
 

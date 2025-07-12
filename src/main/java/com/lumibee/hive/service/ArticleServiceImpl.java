@@ -1,6 +1,7 @@
 package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
@@ -9,10 +10,7 @@ import com.lumibee.hive.mapper.ArticleLikesMapper;
 import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.mapper.UserMapper;
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Portfolio;
-import com.lumibee.hive.model.Tag;
-import com.lumibee.hive.model.User;
+import com.lumibee.hive.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private TagService tagService;
     @Autowired private PortfolioService portfolioService;
     @Autowired private ArticleLikesMapper articleLikesMapper;
+    @Autowired private ArticleRepository articleRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -48,6 +47,28 @@ public class ArticleServiceImpl implements ArticleService {
 
         return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticleDetailsDTO> selectAll() {
+        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("deleted", 0)
+                    .eq("status", Article.ArticleStatus.published)
+                    .orderByDesc("gmt_modified");
+        List<Article> articles = articleMapper.selectList(queryWrapper);
+        List<ArticleDetailsDTO> articleDetailsDTOs = new ArrayList<>();
+        for (Article article : articles) {
+            ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
+            BeanUtils.copyProperties(article, articleDetailsDTO);
+            User user = userMapper.selectById(article.getUserId());
+            if (user != null) {
+                articleDetailsDTO.setUserName(user.getName());
+            }
+            articleDetailsDTOs.add(articleDetailsDTO);
+        }
+        return articleDetailsDTOs;
+    }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -201,6 +222,21 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
+        // 将文章保存到 Elasticsearch
+        User user = userMapper.selectById(userId);
+        ArticleDocument articleDocument = new ArticleDocument();
+        articleDocument.setId(articleId);
+        articleDocument.setContent(requestDTO.getContent());
+        articleDocument.setUserName(user.getName());  // 修正：使用getName()而不是getUsername()
+        articleDocument.setTitle(requestDTO.getTitle());
+        articleDocument.setSlug(article.getSlug());
+        articleDocument.setLikes(article.getLikes());
+        articleDocument.setViewCount(article.getViewCount());
+        articleDocument.setAvatarUrl(user.getAvatarUrl());  // 确保头像URL被正确设置
+        
+        // 保存到Elasticsearch - 这是关键的缺失步骤
+        articleRepository.save(articleDocument);
+
         return this.getArticleBySlug(article.getSlug());
     }
 
@@ -337,6 +373,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setTitle(requestDTO.getTitle());
         article.setContent(requestDTO.getContent());
         article.setGmtModified(LocalDateTime.now());
+        article.setSlug(createUniqueSlug(requestDTO.getTitle()));
         articleMapper.updateById(article);
 
         return getArticleBySlug(article.getSlug());
@@ -378,6 +415,21 @@ public class ArticleServiceImpl implements ArticleService {
         existingArticle.setStatus(Article.ArticleStatus.published);
         articleMapper.updateById(existingArticle);
 
+        // 更新Elasticsearch中的文章数据
+        User user = userMapper.selectById(userId);
+        ArticleDocument articleDocument = new ArticleDocument();
+        articleDocument.setId(articleId);
+        articleDocument.setContent(requestDTO.getContent());
+        articleDocument.setUserName(user.getName());
+        articleDocument.setTitle(requestDTO.getTitle());
+        articleDocument.setSlug(existingArticle.getSlug());
+        articleDocument.setLikes(existingArticle.getLikes());
+        articleDocument.setViewCount(existingArticle.getViewCount());
+        articleDocument.setAvatarUrl(user.getAvatarUrl());
+        
+        // 保存/更新到Elasticsearch
+        articleRepository.save(articleDocument);
+
         return getArticleBySlug(existingArticle.getSlug());
     }
 
@@ -393,10 +445,10 @@ public class ArticleServiceImpl implements ArticleService {
         if (result == 0) {
             throw new RuntimeException("删除文章失败");
         }
+        articleRepository.deleteById(articleId);
 
         return convertToArticleDetailsDTO(article);
     }
-
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {
         if (article == null) return null;
         ArticleDetailsDTO dto = new ArticleDetailsDTO();
@@ -438,6 +490,11 @@ public class ArticleServiceImpl implements ArticleService {
         TagDTO dto = new TagDTO(); // 假设您已创建 TagDTO 类
         BeanUtils.copyProperties(tag, dto);
         return dto;
+    }
+
+    @Override
+    public List<ArticleDocument> searchArticles(String query) {
+        return articleRepository.findByTitleOrContentWithPrefix(query);
     }
 
 }

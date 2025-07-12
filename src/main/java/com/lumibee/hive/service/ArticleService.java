@@ -7,6 +7,7 @@ import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.dto.LikeResponse;
 
 import java.util.List;
+import com.lumibee.hive.model.ArticleDocument;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
@@ -29,4 +30,6 @@ public interface ArticleService {
     ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId);
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
     ArticleDetailsDTO deleteArticleById(Integer articleId);
+    List<ArticleDetailsDTO> selectAll();
+    List<ArticleDocument> searchArticles(String query);
 }

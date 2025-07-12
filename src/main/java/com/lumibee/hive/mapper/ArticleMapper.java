@@ -1,6 +1,7 @@
 package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.model.Article;
 import org.apache.ibatis.annotations.*;
@@ -80,7 +81,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "excerpt", column = "excerpt"),
     })
     List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
-
     @Select("SELECT slug, gmt_modified from articles WHERE status = 'published' AND deleted = 0")
     List<ArticleExcerptDTO> selectSitemapDetails();
 }

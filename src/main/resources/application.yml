@@ -8,9 +8,34 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
-    username: root
-    password: cgqlbh114514
+    # 敏感信息在 application-secret.yml 中配置
+    # Druid 连接池配置优化
+    druid:
+      initial-size: 5              # 初始连接数
+      min-idle: 5                  # 最小空闲连接数
+      max-active: 20               # 最大活跃连接数
+      max-wait: 60000              # 获取连接最大等待时间(60秒)
+      time-between-eviction-runs-millis: 60000    # 检测空闲连接的间隔(60秒)
+      min-evictable-idle-time-millis: 300000      # 空闲连接最小生存时间(5分钟)
+      validation-query: SELECT 1 FROM DUAL        # 验证连接有效性的SQL
+      test-while-idle: true        # 空闲时验证连接
+      test-on-borrow: false        # 获取连接时不验证(提高性能)
+      test-on-return: false        # 归还连接时不验证(提高性能)
+      pool-prepared-statements: true              # 开启预编译语句池
+      max-pool-prepared-statement-per-connection-size: 20  # 每个连接的预编译语句数量
+      filters: stat,wall,slf4j     # 开启监控统计、防火墙、日志功能
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+      # 监控配置
+      web-stat-filter:
+        enabled: true
+        url-pattern: /*
+        exclusions: "*.js,*.gif,*.jpg,*.png,*.css,*.ico,/druid/*"
+      stat-view-servlet:
+        enabled: true
+        url-pattern: /druid/*
+        reset-enable: false
+        login-username: admin
+        login-password: admin123
 
   flyway:
     enabled: true
@@ -25,6 +50,9 @@ spring:
       max-request-size: 10MB
       file-size-threshold: 2KB
 
+  elasticsearch:
+    # 敏感信息在 application-secret.yml 中配置
+
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
   global-config:
@@ -35,7 +63,6 @@ mybatis-plus:
       logic-not-delete-value: 0 # 全局逻辑未删除值
     banner: false
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 打印SQL日志
     map-underscore-to-camel-case: true # 开启驼峰命名转换
 
 #logging.level.org.springframework.security : DEBUG
@@ -55,3 +82,43 @@ avatar:
     size: 2097152   # 头像最大大小 (2MB)
   allowed:
     extensions: jpg,jpeg,png,gif  # 允许的文件类型
+
+# 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,env,beans,configprops
+  endpoint:
+    health:
+      show-details: when_authorized
+      show-components: always
+  metrics:
+    export:
+      prometheus:
+        step: 60s
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        jdbc.connections.active: true
+  info:
+    env:
+      enabled: true
+    git:
+      mode: full
+
+# 日志配置
+logging:
+  level:
+    com.lumibee.hive: INFO
+    org.springframework.security: WARN
+    com.alibaba.druid: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n"
+  file:
+    name: logs/hive.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
