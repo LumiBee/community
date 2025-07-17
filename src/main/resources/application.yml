@@ -2,13 +2,12 @@ server:
   port: 8090
 
 spring:
-  config:
-    import:
-        - "optional:application-secret.yml"
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # 敏感信息在 application-secret.yml 中配置
+    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: cgqlbh114514
     # Druid 连接池配置优化
     druid:
       initial-size: 5              # 初始连接数
@@ -50,9 +49,6 @@ spring:
       max-request-size: 10MB
       file-size-threshold: 2KB
 
-  elasticsearch:
-    # 敏感信息在 application-secret.yml 中配置
-
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
   global-config:
@@ -64,10 +60,6 @@ mybatis-plus:
     banner: false
   configuration:
     map-underscore-to-camel-case: true # 开启驼峰命名转换
-
-#logging.level.org.springframework.security : DEBUG
-#logging.level.org.springframework.security.web.authentication.rememberme : TRACE
-#logging.level.com.lumibee.hive.service.UserServiceImpl: DEBUG
 
 # 文件存储配置
 file:
@@ -122,3 +114,6 @@ logging:
     rollingpolicy:
       max-file-size: 10MB
       max-history: 30
+deepseek:
+  api:
+    key: sk-2

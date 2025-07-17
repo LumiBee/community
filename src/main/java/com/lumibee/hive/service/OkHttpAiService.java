@@ -40,7 +40,7 @@ public class OkHttpAiService {
     private DeepSeekRequest createRequest(String textContent, int maxLength) {
         DeepSeekMessage message = new DeepSeekMessage();
         message.setRole("user");
-        message.setContent("请为一下文本生成一个不多于 " + maxLength + " 字的摘要：\n" + textContent);
+        message.setContent("请为一下文本生成一个不多于 " + maxLength + " 字的摘要：\n" + textContent + "。输出的内容应该只包含摘要内容，而没有其他任何多余的信息！");
 
         DeepSeekRequest request = new DeepSeekRequest();
         request.setModel("deepseek-chat");
