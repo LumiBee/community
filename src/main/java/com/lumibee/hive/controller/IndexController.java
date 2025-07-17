@@ -114,7 +114,7 @@ public class IndexController {
     @GetMapping("/search")
     public String search(@RequestParam("query") String query, Model model) {
         List<com.lumibee.hive.model.ArticleDocument> searchResults = 
-            articleService.searchArticles(query);
+            articleService.selectArticles(query);
         model.addAttribute("searchResults", searchResults);
         model.addAttribute("query", query);
         return "search";

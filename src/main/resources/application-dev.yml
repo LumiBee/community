@@ -3,19 +3,6 @@ spring:
   config:
     activate:
       on-profile: dev
-  elasticsearch:
-    uris: http://localhost:9200
-    username: elastic
-    password: Tt8ex*ydsKOaLZHxHf39
-
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: Ov23liozBCUzvsyIyOJT
-            client-secret: 1259c7bcec84cc493824004ad11bf6680ef64f51
-            redirect-uri: "http://localhost:8090/callback"
 
 elasticsearch:
   index-prefix: dev

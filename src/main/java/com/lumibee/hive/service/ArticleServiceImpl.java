@@ -449,6 +449,32 @@ public class ArticleServiceImpl implements ArticleService {
 
         return convertToArticleDetailsDTO(article);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticleDocument> selectArticles(String query) {
+        return articleRepository.findByTitleOrContentWithPrefix(query);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ArticleDocument> selectRelatedArticles(ArticleDetailsDTO currentArticle, int limit) {
+        if (currentArticle == null || currentArticle.getArticleId() == null) {
+            return new ArrayList<>();
+        }
+
+        List<ArticleDocument> relatedArticles = articleRepository.selectRelatedArticles(
+                currentArticle.getTitle(),
+                currentArticle.getContent(),
+                currentArticle.getArticleId());
+
+        if (relatedArticles.size() > limit) {
+            return relatedArticles.subList(0, limit);
+        }
+
+        return relatedArticles;
+    }
+
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {
         if (article == null) return null;
         ArticleDetailsDTO dto = new ArticleDetailsDTO();
@@ -491,10 +517,4 @@ public class ArticleServiceImpl implements ArticleService {
         BeanUtils.copyProperties(tag, dto);
         return dto;
     }
-
-    @Override
-    public List<ArticleDocument> searchArticles(String query) {
-        return articleRepository.findByTitleOrContentWithPrefix(query);
-    }
-
 }

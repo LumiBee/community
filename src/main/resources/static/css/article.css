@@ -386,6 +386,41 @@ li p {
     width: 5rem;
 }
 
+/* 卡片悬停效果 & 链接样式处理 */
+/* 为悬停效果添加过渡动画 */
+.card-hover {
+    transition: transform .2s ease-in-out, box-shadow .2s ease-in-out;
+}
+
+/* 定义悬停时的具体效果：上浮、阴影加深 */
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 强制卡片内的所有链接（包括普通和悬停状态）都无下划线 */
+.card-hover a,
+.card-hover a:hover {
+    text-decoration: none !important;
+}
+
+/* 为卡片标题在悬停时提供颜色变化的视觉反馈 */
+.card-hover:hover .card-title a {
+    color: #d5ad0c !important;
+}
+
+/* --- 核心修复：手动实现 Stretched-Link --- */
+.card .stretched-link::after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1; /* 这个层级低于作者头像的 z-index: 2 */
+    content: "";
+    background-color: rgba(0, 0, 0, 0); /* 伪元素本身是透明的，仅用于捕获点击 */
+}
+
 /* 返回顶部按钮美化 */
 #backToTop {
     width: 48px;

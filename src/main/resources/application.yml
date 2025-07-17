@@ -2,6 +2,10 @@ server:
   port: 8090
 
 spring:
+  elasticsearch:
+    uris: http://localhost:9200
+    username: elastic
+    password: Tt8ex*ydsKOaLZHxHf39
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -35,6 +39,15 @@ spring:
         reset-enable: false
         login-username: admin
         login-password: admin123
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: fake
+            client-secret: fake
+            redirect-uri: "http://localhost:8090/callback"
 
   flyway:
     enabled: true

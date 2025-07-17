@@ -3,6 +3,8 @@ package com.lumibee.hive.controller;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+
+import com.lumibee.hive.model.ArticleDocument;
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
 
@@ -65,6 +67,9 @@ public class ArticleController {
             article.setLiked(false);
         }
 
+        List<ArticleDocument> relatedArticles = articleService.selectRelatedArticles(article,6);
+        model.addAttribute("relatedArticles", relatedArticles);
+
         String markdownContent = article.getContent();
         String renderedHtmlContent = "";
         // 解析 Markdown 内容
@@ -82,6 +87,7 @@ public class ArticleController {
 
         // 增加文章浏览量
         articleService.incrementViewCount(article.getArticleId());
+
 
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);

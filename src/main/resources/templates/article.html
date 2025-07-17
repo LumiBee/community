@@ -211,45 +211,47 @@
 <!-- 相关文章推荐 -->
 <div class="container-fluid pt-4 pb-4" style="max-width: 1600px;">
 	<h5 class="font-weight-bold spanborder"><span>相关阅读</span></h5>
-	<div class="row" th:if="${relatedArticles != null and !relatedArticles.isEmpty()}">
-		<div class="col-lg-6" th:each="relatedArticle : ${relatedArticles}">
-			<div class="card border-0 mb-4 box-shadow h-xl-300">
+	<div class="row" th:if="${relatedArticles != null and not #lists.isEmpty(relatedArticles)}">
+		<div class="col-md-6 col-lg-4 mb-4" th:each="relatedArticle : ${relatedArticles}">
+			<div class="card border-0 shadow-sm h-100 card-hover position-relative">
+				<div class="card-body d-flex flex-column">
+					<div style="position: relative; z-index: 2;">
+						<div class="d-flex align-items-center mb-3">
+							<a th:href="@{'/profile/' + ${relatedArticle.userName}}">
+								<img th:src="${relatedArticle.avatarUrl ?: '/assets/img/avatars/default.png'}" alt="作者头像" class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+							</a>
+							<a class="text-muted" th:href="@{'/profile/' + ${relatedArticle.userName}}" th:text="${relatedArticle.userName ?: '佚名'}"></a>
+						</div>
+					</div>
 
-				<div class="card-body px-0 pb-0 d-flex flex-column align-items-start">
-					<h2 class="h4 font-weight-bold">
-						<a class="text-dark" th:href="@{'/article/' + ${relatedArticle.slug}}" th:text="${relatedArticle.title}">相关文章标题</a>
-					</h2>
-					<p class="card-text" th:text="${relatedArticle.excerpt}">
-						相关文章摘要内容...
-					</p>
 					<div>
-						<small class="d-block">
-							<a class="text-muted" th:text="${relatedArticle.userName ?: '佚名'}">作者</a>
-						</small>
-						<small class="text-muted">
-							<th:block th:if="${relatedArticle.gmtCreate}" th:with="
-							 now = ${T(java.time.LocalDateTime).now()},
-							 duration = ${T(java.time.Duration).between(relatedArticle.gmtCreate, now)},
-							 days = ${duration.toDays()},
-							 totalHours = ${duration.toHours()},
-							 totalMinutes = ${duration.toMinutes()}">
-								<span th:if="${days > 0}" th:text="${days + ' 天前'}"></span>
-								<span th:if="${days == 0 and totalHours > 0}" th:text="${totalHours + ' 小时前'}"></span>
-								<span th:if="${days == 0 and totalHours == 0 and totalMinutes > 0}" th:text="${totalMinutes + ' 分钟前'}"></span>
-								<span th:if="${days == 0 and totalHours == 0 and totalMinutes == 0}" th:text="'刚刚'"></span>
-							</th:block>
-						</small>
+						<h4 class="card-title h5 font-weight-bold">
+							<a th:href="@{'/article/' + ${relatedArticle.slug}}" class="stretched-link text-dark" th:text="${relatedArticle.title}">文章标题</a>
+						</h4>
+						<p class="card-text flex-grow-1 text-muted" th:text="${#strings.abbreviate(relatedArticle.content, 100)}">
+							文章摘要...
+						</p>
+					</div>
+
+					<div class="d-flex justify-content-between align-items-center mt-auto pt-3 text-muted small">
+						<div>
+							<i class="fa fa-eye me-1"></i>
+							<span th:text="${relatedArticle.viewCount}">0</span>
+						</div>
+						<div>
+							<i class="fa fa-heart me-1"></i>
+							<span th:text="${relatedArticle.likes}">0</span>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- 如果没有相关文章，显示默认推荐 -->
-	<div class="row" th:if="${relatedArticles == null or relatedArticles.isEmpty()}">
-		<div class="col-12">
-			<p class="text-muted">暂无相关文章推荐</p>
-			<a href="/" class="btn btn-primary">返回首页浏览更多文章</a>
+	<div class="row" th:if="${relatedArticles == null or #lists.isEmpty(relatedArticles)}">
+		<div class="col-12 text-center py-5">
+			<p class="text-muted">还没有相关的文章，去看看别的吧！</p>
+			<a href="/" class="btn btn-primary">返回首页</a>
 		</div>
 	</div>
 </div>

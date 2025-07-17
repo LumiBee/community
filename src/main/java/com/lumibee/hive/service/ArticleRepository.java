@@ -41,4 +41,35 @@ public interface ArticleRepository extends ElasticsearchRepository<ArticleDocume
         }
         """)
     List<ArticleDocument> findByTitleOrContentWithPrefix(String query);
+
+    @Query("""
+        {
+          "bool": {
+              "must": [
+                {
+                  "more_like_this": {
+                    "fields": ["title", "content"],
+                    "like": [
+                      {
+                        "_index": "#{@elasticsearchProperties.indexName}",
+                        "_id": "?2"
+                      }
+                    ],
+                    "min_term_freq": 1,
+                    "max_query_terms": 12,
+                    "min_doc_freq": 1
+                  }
+                }
+              ],
+              "must_not": [
+                {
+                  "term": {
+                    "_id": "?2"
+                  }
+                }
+              ]
+            }
+        }
+        """)
+    List<ArticleDocument> selectRelatedArticles(String title, String content, Integer articleId);
 }

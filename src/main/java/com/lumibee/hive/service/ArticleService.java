@@ -31,5 +31,6 @@ public interface ArticleService {
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
     ArticleDetailsDTO deleteArticleById(Integer articleId);
     List<ArticleDetailsDTO> selectAll();
-    List<ArticleDocument> searchArticles(String query);
+    List<ArticleDocument> selectArticles(String query);
+    List<ArticleDocument> selectRelatedArticles(ArticleDetailsDTO currentArticle, int limit);
 }
