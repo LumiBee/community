@@ -23,7 +23,7 @@ public interface ArticleService {
     List<ArticleExcerptDTO> selectArticlesByPortfolioId(Integer id);
     Integer countArticlesByUserId(Long id);
     List<ArticleExcerptDTO> getArticlesByUserId(Long id);
-    List<ArticleExcerptDTO> selectFeaturedArticles(String title);
+    List<ArticleExcerptDTO> selectFeaturedArticles();
     ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId);
     Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
     ArticleDetailsDTO selectDraftById(Integer articleId);

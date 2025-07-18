@@ -9,18 +9,20 @@
 <body>
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div class="main-content-wrapper"> <div class="container-fluid" style="max-width: 1400px; width:100%">
+<div class="main-content-wrapper">
+	<div class="container-fluid" style="max-width: 1400px; width:100%">
 	<div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel" style="height: 300px">
 		<ol class="carousel-indicators">
 			<li th:each="featuredArticle, iterStat : ${featuredArticles}"
 				th:attr="data-target='#carouselExampleCaptions', data-slide-to=${iterStat.index}"
 				th:class="${iterStat.first} ? 'active' : ''"></li>
-	</ol>
+		</ol>
 		<div class="carousel-inner">
 			<div th:each="featuredArticle, iterStat : ${featuredArticles}"
 				 th:class="${iterStat.first} ? 'carousel-item active' : 'carousel-item'"
 				 th:onclick="'window.location.href=\'' + @{'/article/' + ${featuredArticle.slug}} + '\''"
 				 style="cursor: pointer;">
+				<img th:src="${featuredArticle.backgroundUrl}" class="d-block w-100" th:alt="${featuredArticle.title}">
 				<div class="carousel-caption d-none d-md-block" style="background-color: rgba(0,0,0,0.5); border-radius: 10px; padding: 15px;">
 					<h5 th:text="${featuredArticle.title}">精选文章标题</h5>
 					<p th:text="${featuredArticle.excerpt}">精选文章摘要</p>

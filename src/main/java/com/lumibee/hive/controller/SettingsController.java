@@ -5,14 +5,13 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -55,17 +54,16 @@ public class SettingsController {
     }
 
     @PostMapping("/profile")
-    public String updateProfile(@RequestParam("username") String username,
-                               @RequestParam("bio") String bio,
-                               @RequestParam("email") String email,
-                               @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
-                               @AuthenticationPrincipal Principal principal,
-                               RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> updateProfile(@RequestParam("username") String username,
+                                           @RequestParam("bio") String bio,
+                                           @RequestParam("email") String email,
+                                           @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
+                                           @AuthenticationPrincipal Principal principal) {
         
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
-            redirectAttributes.addFlashAttribute("profileError", "用户信息获取失败");
-            return "redirect:/user/settings?tab=profile";
+            return new ResponseEntity<>("用户信息获取失败", HttpStatus.BAD_REQUEST);
         }
         
         // 更新基本信息
@@ -79,23 +77,18 @@ public class SettingsController {
             try {
                 String avatarUrl = imgService.uploadAvatar(currentUser.getId(), avatarFile);
                 currentUser.setAvatarUrl(avatarUrl);
-                redirectAttributes.addFlashAttribute("profileSuccess", "个人资料和头像更新成功");
             } catch (IOException e) {
                 System.err.println("Avatar upload error: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("profileError", "头像上传失败: " + e.getMessage());
-                return "redirect:/user/settings?tab=profile";
+                return new ResponseEntity<>("头像上传失败，请稍后再试", HttpStatus.INTERNAL_SERVER_ERROR);
             } catch (IllegalArgumentException e) {
-                redirectAttributes.addFlashAttribute("profileError", e.getMessage());
-                return "redirect:/user/settings?tab=profile";
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
             }
-        } else {
-            redirectAttributes.addFlashAttribute("profileSuccess", "个人资料更新成功");
         }
         
         userService.updateById(currentUser);
         userService.refreshUserPrincipal(currentUser);
         
-        return "redirect:/user/settings?tab=profile";
+        return new ResponseEntity<>("用户信息更新成功", HttpStatus.OK);
     }
 
     @PostMapping("/account")

@@ -260,8 +260,25 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> selectFeaturedArticles(String title) {
-        return articleMapper.selectFeaturedArticles(title);
+    public List<ArticleExcerptDTO> selectFeaturedArticles() {
+        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("deleted", 0)
+                    .eq("status", Article.ArticleStatus.published)
+                    .eq("is_featured", true)
+                    .orderByDesc("gmt_modified");
+
+        List<Article> featuredArticles = articleMapper.selectList(queryWrapper);
+        if (featuredArticles.isEmpty()) {
+            return new ArrayList<>(); // 如果没有精选文章，返回空列表
+        }
+        List<ArticleExcerptDTO> articleExcerptDTOS = new ArrayList<>();
+        for (Article article : featuredArticles) {
+            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
+            BeanUtils.copyProperties(article, articleDTO);
+            articleExcerptDTOS.add(articleDTO);
+        }
+
+        return articleExcerptDTOS;
     }
 
     @Override

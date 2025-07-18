@@ -31,6 +31,9 @@ public class Article implements Serializable {
     private Integer likes;
     private Integer allowComments;
 
+    private String backgroundUrl;
+    private boolean isFeatured;
+
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
     private Integer deleted;

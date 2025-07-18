@@ -19,4 +19,6 @@ public class ArticleExcerptDTO {
     private String userName;
     private String avatarUrl;
 
+    private String backgroundUrl;
+
 }

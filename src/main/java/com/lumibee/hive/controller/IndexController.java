@@ -39,7 +39,7 @@ public class IndexController {
 
         Page<ArticleExcerptDTO> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
         List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
-        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles("Markdown基本语法");
+        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
         List<TagDTO> allTags = tagService.selectAllTags();
 
         model.addAttribute("articles", articlePage);

@@ -726,4 +726,26 @@ hr {
 
 .btn-outline-primary.upload-btn:hover {
   transform: translateY(-2px);
-} 
+}
+/* 可以根据您的主题调整颜色 */
+.modal-header .btn-close {
+  opacity: 0.7;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.preview-label {
+  font-weight: bold;
+  color: #555;
+}
+
+.avatar-preview {
+  border: 1px solid #ddd;
+  background-color: #eee; /* 占位背景色 */
+}
+
+.cropper-bg {
+  background-image: none !important;
+}
