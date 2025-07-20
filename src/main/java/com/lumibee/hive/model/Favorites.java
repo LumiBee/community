@@ -11,7 +11,9 @@ public class Favorites {
     private Long id;
     private Long userId;
     private String name;
+    private String slug;
     private String description;
+    private boolean isPublic;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime gmtCreate;

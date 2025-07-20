@@ -64,6 +64,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             return List.of();
         }
 
+        // 获取所有用户ID
         List<Long> userIds = portfolios.stream()
                 .map(Portfolio::getUserId)
                 .filter(Objects::nonNull)
@@ -80,7 +81,6 @@ public class PortfolioServiceImpl implements PortfolioService {
         if(!portfolioIds.isEmpty()){
             articleCountsMap = portfolioMapper.countArticlesForPortfolios(portfolioIds);
         }
-
 
         List<PortfolioDetailsDTO> portfolioDTOs = new ArrayList<>();
         for (Portfolio portfolio : portfolios) {

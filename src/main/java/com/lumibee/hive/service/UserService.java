@@ -18,4 +18,5 @@ public interface UserService {
     Integer countFansByUserId(Long id);
     Integer countFollowingByUserId(Long id);
     void refreshUserPrincipal(User user);
+    boolean isFavoritedByCurrentUser(Long id, Integer articleId);
 }

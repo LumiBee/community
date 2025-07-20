@@ -20,5 +20,4 @@ public class ArticleExcerptDTO {
     private String avatarUrl;
 
     private String backgroundUrl;
-
 }

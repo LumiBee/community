@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class ArticleFavorites {
-    private Long favoritesId;
-    private Long articleId;
+    private Long favoriteId;
+    private Integer articleId;
+    private Long userId;
 }

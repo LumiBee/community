@@ -3,6 +3,8 @@ package com.lumibee.hive.service;
 import java.security.Principal;
 import java.time.LocalDateTime;
 
+import com.lumibee.hive.mapper.ArticleFavoritesMapper;
+import com.lumibee.hive.mapper.FavoriteMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired private UserMapper userMapper;
     @Autowired private UserFollowingMapper userFollowingMapper;
+    @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -64,8 +67,19 @@ public class UserServiceImpl implements UserService {
         // userId是当前用户ID，followerId是作者ID
         // 检查当前用户(userId)是否关注了作者(followerId)
         Integer result = userFollowingMapper.isFollowing(userId, followerId);
-        System.out.println("检查用户 " + userId + " 是否关注了作者 " + followerId + ": " + (result == 1));
         return result == 1; // 返回 true 如果存在关注关系
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
+        if (id == null || articleId == null) {
+            // 如果用户ID或文章ID无效，直接返回false
+            return false;
+        }
+
+        Integer result = articleFavoritesMapper.selectIfFavoriteExists(id, articleId);
+        return result == 1; // 返回 true 如果存在收藏关系
     }
 
     @Override
@@ -215,4 +229,6 @@ public class UserServiceImpl implements UserService {
 
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+
+
 }

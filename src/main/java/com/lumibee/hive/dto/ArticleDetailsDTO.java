@@ -18,6 +18,7 @@ public class ArticleDetailsDTO {
     private LocalDateTime gmtModified;
     private Integer viewCount;
     private Integer likes;
+    private Integer favoriteCount;
 
     private Long userId;
     private String userName;
@@ -26,5 +27,6 @@ public class ArticleDetailsDTO {
     private List<TagDTO> tags;
 
     private boolean isLiked;
-    private boolean isFollowedByCurrentUser;
+    private boolean isFollowed;
+    private boolean isFavorited;
 }

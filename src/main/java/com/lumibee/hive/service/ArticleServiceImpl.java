@@ -1,15 +1,11 @@
 package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
 import com.lumibee.hive.dto.*;
-import com.lumibee.hive.mapper.ArticleLikesMapper;
-import com.lumibee.hive.mapper.ArticleMapper;
-import com.lumibee.hive.mapper.PortfolioMapper;
-import com.lumibee.hive.mapper.UserMapper;
+import com.lumibee.hive.mapper.*;
 import com.lumibee.hive.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
@@ -24,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -35,6 +32,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private PortfolioService portfolioService;
     @Autowired private ArticleLikesMapper articleLikesMapper;
     @Autowired private ArticleRepository articleRepository;
+    @Autowired private ArticleFavoritesMapper favoriteMapper;
 
     @Override
     @Transactional(readOnly = true)
@@ -490,6 +488,15 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return relatedArticles;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public int getFavoriteCount(Integer articleId) {
+        if (articleId == null) {
+            return 0; // 如果文章ID无效，返回0
+        }
+        return favoriteMapper.countArticlesFavorited(articleId);
     }
 
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {

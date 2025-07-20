@@ -1,16 +1,3 @@
-/**
- * =================================================================================
- * article-effects.js
- * 统一管理文章页面的所有交互效果
- *
- * 功能说明:
- * - 页面加载时初始化所有功能，避免冲突。
- * - 保留了您原有的点赞 (toggleLike) 和关注 (toggleFollow) 功能。
- * - 实现了动态的右侧目录导航 (generateTableOfContents)，并有滚动高亮效果。
- * - 实现了全新的动态评论系统 (initializeCommentSection)，支持加载、发表和回复，无需刷新页面。
- * - 保留了返回顶部、代码复制、分享等其他您已有的功能。
- * =================================================================================
- */
 
 // --- 1. 页面加载主入口 ---
 document.addEventListener('DOMContentLoaded', function() {
@@ -125,11 +112,8 @@ async function toggleLike(event) {
         likeButton.disabled = false;
     }
 }
-/**
- * 更新关注按钮的UI状态
- * @param {HTMLElement} buttonElement - 要更新的按钮元素
- * @param {boolean} isFollowing - 当前是否为“已关注”状态
- */
+
+// 更新关注按钮的UI状态
 function updateFollowButtonUI(buttonElement, isFollowing) {
     const icon = buttonElement.querySelector('i');
     const textSpan = buttonElement.querySelector('span');
@@ -161,12 +145,12 @@ function updateFollowButtonUI(buttonElement, isFollowing) {
 
 
 /**
- * 切换用户的关注状态 (优化后版本)
+ * 切换用户的关注状态
  * @param {number} userId - 被关注用户的ID
  * @param {HTMLElement} buttonElement - 被点击的关注按钮
  */
 async function toggleFollow(userId, buttonElement) {
-    // --- 1. 前置校验 (保持不变) ---
+    // --- 1. 前置校验 ---
     const currentUserId = document.querySelector('meta[name="current-user-id"]')?.getAttribute("content");
     if (currentUserId && currentUserId === String(userId)) {
         showToast('提示', '不能关注自己喵，试试关注其他作者吧！', 'warning');
@@ -180,7 +164,7 @@ async function toggleFollow(userId, buttonElement) {
         return;
     }
 
-    // --- 2. 发送API请求 (保持不变) ---
+    // --- 2. 发送API请求 ---
     buttonElement.disabled = true;
     try {
         const response = await fetch(`/api/user/${userId}/follow`, {
@@ -188,13 +172,13 @@ async function toggleFollow(userId, buttonElement) {
             headers: { [header]: token }
         });
 
-        if (!response.ok) {å
+        if (!response.ok) {
             throw new Error(`服务器响应失败: ${response.status}`);
         }
 
         const data = await response.json();
 
-        // --- 3. 处理响应并更新UI (优化部分) ---
+        // --- 3. 处理响应并更新UI ---
         if (data.success) {
             // 调用独立的UI更新函数
             updateFollowButtonUI(buttonElement, data.isFollowing);
@@ -213,20 +197,198 @@ async function toggleFollow(userId, buttonElement) {
         console.error('关注操作失败:', error);
         showToast('错误', '操作失败，请稍后重试。', 'error');
     } finally {
-        // --- 4. 无论成功失败，最后都恢复按钮可用 (保持不变) ---
+        // --- 4. 无论成功失败，最后都恢复按钮可用 ---
         buttonElement.disabled = false;
     }
 }
+
 // 收藏功能
-function toggleFavorite() {
-    alert('收藏功能开发中...');
+// 总的点击处理函数
+function handleFavoriteClick(buttonElement) {
+    const isFavorited = buttonElement.getAttribute('data-is-favorited') === 'true';
+    const articleId = buttonElement.getAttribute('data-article-id');
+
+    if (isFavorited) {
+        // 如果已收藏，则执行取消全部收藏的操作
+        removeAllFavorites(articleId, buttonElement);
+    } else {
+        // 如果未收藏，则打开选择收藏夹的模态框
+        openFavoriteModal(articleId, buttonElement);
+    }
+}
+
+// 1. 打开并填充收藏夹模态框
+async function openFavoriteModal(articleId, buttonElement) {
+    const modal = $('#favoriteModal');
+    modal.modal('show');
+    modal.data('article-id', articleId); // 将 articleId 存储在模态框上
+
+    modal.data('main-button-element', buttonElement);
+    const listContainer = document.getElementById('favorite-folders-list');
+    listContainer.innerHTML = `<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>`;
+
+    try {
+        const response = await fetch('/api/favorites/my-folders');
+        if (!response.ok) {
+            if (response.status === 401) throw new Error('请先登录');
+            throw new Error('无法获取收藏夹列表');
+        }
+        const folders = await response.json();
+        listContainer.innerHTML = ''; // 清空加载动画
+
+        if (folders.length === 0) {
+            listContainer.innerHTML = '<p class="text-muted">您还没有创建任何收藏夹。</p>';
+        } else {
+            folders.forEach(folder => {
+                const folderEl = document.createElement('button');
+                folderEl.className = 'btn btn-outline-primary btn-block text-left mb-2';
+                folderEl.textContent = folder.name;
+                folderEl.onclick = () => addArticleToExistingFolder(articleId, folder.id, buttonElement);
+                listContainer.appendChild(folderEl);
+            });
+        }
+    } catch (error) {
+        listContainer.innerHTML = `<p class="text-danger">${error.message}</p>`;
+    }
+}
+
+// 2. 将文章添加到已存在的收藏夹
+async function addArticleToExistingFolder(articleId, favoriteId, buttonElement) {
+    showToast('提示', '正在收藏...', 'info');
+    const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+    try {
+        const response = await fetch('/api/favorites/add-to-folder', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', [header]: token },
+            body: JSON.stringify({ articleId, favoriteId })
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('成功', result.message, 'success');
+            $('#favoriteModal').modal('hide');
+            // 收藏成功后，更新按钮状态
+            updateFavoriteButtonUI(buttonElement, true, result.articlesCount);
+        } else {
+            showToast('失败', result.message, 'warning');
+        }
+    } catch (err) {
+        showToast('错误', '网络请求失败', 'error');
+    }
+}
+
+// 3. 创建新收藏夹并添加文章 (绑定到按钮)
+document.addEventListener('DOMContentLoaded', function() {
+});
+
+async function createNewFavoriteAndAddArticle(buttonElement) {
+    const newNameInput = document.getElementById('new-favorite-name');
+
+    // 如果因为某些原因还是找不到元素，我们可以提前给出更明确的提示
+    if (!newNameInput) {
+        console.error("代码错误: 无法找到ID为 'new-favorite-name' 的输入框！");
+        showToast('错误', '页面存在一个错误，请联系管理员。', 'error');
+        return;
+    }
+
+    const FavoriteName = newNameInput.value.trim();
+    const articleId = $('#favoriteModal').data('article-id');
+    const mainFavoriteButton = $('#favoriteModal').data('main-button-element');
+
+    if (!FavoriteName) {
+        showToast('提示', '收藏夹名称不能为空！', 'warning');
+        return;
+    }
+
+    buttonElement.disabled = true;
+    buttonElement.textContent = '创建中...';
+
+    const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+    try {
+        const response = await fetch('/api/favorites/create-and-add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', [header]: token },
+            body: JSON.stringify({ articleId: articleId, favoriteName: FavoriteName })
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            showToast('成功', result.message, 'success');
+            $('#favoriteModal').modal('hide');
+            newNameInput.value = '';
+
+            if (mainFavoriteButton) {
+                updateFavoriteButtonUI(mainFavoriteButton, true, result.articlesCount);
+            }
+        } else {
+            showToast('失败', result.message, 'error');
+        }
+    } catch (err) {
+        showToast('错误', '网络请求失败', 'error');
+    } finally {
+        buttonElement.disabled = false;
+        buttonElement.textContent = '创建并收藏';
+    }
+}
+
+
+// 4. 取消对该文章的所有收藏
+async function removeAllFavorites(articleId, buttonElement) {
+    const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
+    const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
+
+    try {
+        const response = await fetch(`/api/favorites/remove-all/${articleId}`, {
+            method: 'DELETE',
+            headers: { [header]: token }
+        });
+        const result = await response.json();
+        if (result.success) {
+            showToast('成功', result.message, 'info');
+            updateFavoriteButtonUI(buttonElement, false);
+        } else {
+            showToast('失败', result.message, 'error');
+        }
+    } catch (err) {
+        showToast('错误', '网络请求失败', 'error');
+    }
+}
+
+// 5. 统一的UI更新函数
+function updateFavoriteButtonUI(buttonElement, isFavorited, newCount) {
+    const icon = buttonElement.querySelector('i');
+    const countSpan = document.getElementById('favoriteCount');
+    let currentCount = parseInt(countSpan.textContent, 10);
+
+    buttonElement.setAttribute('data-is-favorited', isFavorited);
+
+    if (isFavorited) {
+        buttonElement.classList.remove('btn-outline-primary');
+        buttonElement.classList.add('btn-primary');
+        icon.classList.remove('far');
+        icon.classList.add('fas');
+        if (newCount !== null && newCount !== undefined) {
+            countSpan.textContent = newCount;
+        } else {
+            countSpan.textContent = currentCount + 1;
+        }
+    } else {
+        buttonElement.classList.remove('btn-primary');
+        buttonElement.classList.add('btn-outline-primary');
+        icon.classList.remove('fas');
+        icon.classList.add('far');
+        countSpan.textContent = Math.max(0, currentCount - 1); // 避免变为负数
+    }
 }
 
 // 分享功能
 function shareToWeibo() {
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent(document.title);
-    window.open(`http://service.weibo.com/share/share.php?url=${url}&title=${title}`);
+    window.open(`https://service.weibo.com/share/share.php?url=${url}&title=${title}`);
 }
 
 function copyLink() {
@@ -241,7 +403,6 @@ function scrollToComments() {
         commentsSection.scrollIntoView({ behavior: 'smooth' });
     }
 }
-
 
 // --- 右侧目录导航功能 ---
 function generateTableOfContents() {
@@ -338,7 +499,6 @@ function setupScrollSpy() {
 
     headings.forEach(heading => observer.observe(heading));
 }
-
 
 // --- 动态评论区功能 ---
 function initializeCommentSection() {

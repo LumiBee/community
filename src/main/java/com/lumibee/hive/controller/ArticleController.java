@@ -48,23 +48,28 @@ public class ArticleController {
             return "error/404";
         }
 
+        // 获取文章的总收藏数
+        int favoriteCount = articleService.getFavoriteCount(article.getArticleId());
+        article.setFavoriteCount(favoriteCount);
+
         if (user != null) {
-            System.out.println("当前用户ID: " + user.getId() + ", 文章作者ID: " + article.getUserId());
-            
             // 检查用户是否点赞
             boolean isLiked = articleService.isUserLiked(user.getId(), article.getArticleId());
             article.setLiked(isLiked);
             
             // 判断当前用户是否关注了作者
             boolean followedByCurrentUser = userService.isFollowing(user.getId(), article.getUserId());
-            article.setFollowedByCurrentUser(followedByCurrentUser);
-            
-            System.out.println("是否关注作者: " + followedByCurrentUser);
+            article.setFollowed(followedByCurrentUser);
+
+            // 判断当前用户是否收藏了文章
+            boolean favoritedByCurrentUser = userService.isFavoritedByCurrentUser(user.getId(), article.getArticleId());
+            article.setFavorited(favoritedByCurrentUser);
         } else {
             System.out.println("当前用户未登录，默认未关注作者");
             // 未登录用户默认未关注和未点赞
-            article.setFollowedByCurrentUser(false);
+            article.setFollowed(false);
             article.setLiked(false);
+            article.setFavorited(false);
         }
 
         List<ArticleDocument> relatedArticles = articleService.selectRelatedArticles(article,6);
@@ -85,13 +90,8 @@ public class ArticleController {
             renderedHtmlContent = renderer.render(document);
         }
 
-        // 增加文章浏览量
-        articleService.incrementViewCount(article.getArticleId());
-
-
         model.addAttribute("article", article);
         model.addAttribute("renderedHtmlContent", renderedHtmlContent);
-        System.out.println("文章对象中的关注状态: " + article.isFollowedByCurrentUser());
 
         return "article";
     }
@@ -111,6 +111,4 @@ public class ArticleController {
 
         return ResponseEntity.ok(response);
     }
-
-
 }

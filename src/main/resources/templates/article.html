@@ -45,6 +45,7 @@
 						</a>
 					</div>
 
+					<!-- 作者信息 -->
 					<div class="d-flex align-items-center">
 					<a th:if="${article.userName}" th:href="@{'/profile/' + ${article.userName}}" title="查看作者主页">
 						<img th:if="${article.avatarUrl != null and !article.avatarUrl.isEmpty()}"
@@ -80,10 +81,10 @@
 							<div>
 								<button type="button"
 										th:id="${'followButton-' + article.userId}"
-										th:class="${article.isFollowedByCurrentUser} ? 'btn btn-secondary btn-sm' : 'btn btn-outline-primary btn-sm'"
+										th:class="${article.isFollowed} ? 'btn btn-secondary btn-sm' : 'btn btn-outline-primary btn-sm'"
 										th:onclick="'toggleFollow(\'' + ${article.userId} + '\', this)'">
-									<span th:if="${article.isFollowedByCurrentUser}"><i class="fas fa-user-check"></i> 已关注</span>
-									<span th:unless="${article.isFollowedByCurrentUser}"><i class="fas fa-user-plus"></i> 关注</span>
+									<span th:if="${article.isFollowed}"><i class="fas fa-user-check"></i> 已关注</span>
+									<span th:unless="${article.isFollowed}"><i class="fas fa-user-plus"></i> 关注</span>
 								</button>
 							</div>
 						</div>
@@ -147,8 +148,12 @@
 							<i class="fas fa-heart"></i>
 							<span id="likeCount" th:text="${article.likes ?: '0'}">0</span>
 						</button>
-						<button class="btn btn-outline-primary btn-sm mb-2 w-100" onclick="toggleFavorite()" title="收藏">
-							<i class="fas fa-bookmark"></i>
+						<button th:class="${article.isFavorited} ? 'btn btn-primary btn-sm mb-2 w-100' : 'btn btn-outline-primary btn-sm mb-2 w-100'"
+								th:attr="data-article-id=${article.articleId}, data-is-favorited=${article.isFavorited}"
+								onclick="handleFavoriteClick(this)"
+								title="收藏">
+							<i th:class="${article.isFavorited} ? 'fas fa-bookmark' : 'far fa-bookmark'"></i>
+							<span id="favoriteCount" th:text="${article.favoriteCount ?: '0'}">0</span>
 						</button>
 						<button class="btn btn-outline-info btn-sm mb-2 w-100" onclick="scrollToComments()" title="评论">
 							<i class="fas fa-comments"></i>
@@ -261,7 +266,7 @@
 	<i class="fas fa-arrow-up"></i>
 </button>
 
-<!-- 替换原来的Toast消息组件 -->
+<!-- Toast消息组件 -->
 <div id="customToast" style="display: none; position: fixed; bottom: 30px; right: 30px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 9999; min-width: 300px; max-width: 400px;">
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #eee;">
     <div style="display: flex; align-items: center;">
@@ -273,6 +278,36 @@
   <div id="customToastMessage" style="padding: 15px; font-size: 14px;">
     消息内容
   </div>
+</div>
+
+<!-- 收藏夹模态框 -->
+<div class="modal fade" id="favoriteModal" tabindex="-1" aria-labelledby="favoriteModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="favoriteModalLabel">收藏到...</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div id="favorite-folders-list" class="mb-3">
+					<div class="text-center">
+						<div class="spinner-border text-primary" role="status">
+							<span class="sr-only">正在加载...</span>
+						</div>
+					</div>
+				</div>
+				<hr>
+				<div class="input-group">
+					<input type="text" class="form-control" id="new-favorite-name" placeholder="输入新收藏夹名称">
+					<div class="input-group-append">
+						<button class="btn btn-outline-secondary" type="button" id="create-and-add-btn" onclick="createNewFavoriteAndAddArticle(this)">创建并收藏</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <!-- 页脚 -->

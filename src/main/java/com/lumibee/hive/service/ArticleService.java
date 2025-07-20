@@ -33,4 +33,5 @@ public interface ArticleService {
     List<ArticleDetailsDTO> selectAll();
     List<ArticleDocument> selectArticles(String query);
     List<ArticleDocument> selectRelatedArticles(ArticleDetailsDTO currentArticle, int limit);
+    int getFavoriteCount(Integer articleId);
 }
