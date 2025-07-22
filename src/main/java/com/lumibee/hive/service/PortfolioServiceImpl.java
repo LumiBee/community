@@ -140,4 +140,18 @@ public class PortfolioServiceImpl implements PortfolioService {
         return dto;
     }
 
+    @Override
+    @Transactional
+    public void updatePortfolioGmt(Integer id, Long userId) {
+        if (id == null || userId == null) {
+            throw new IllegalArgumentException("id和userId不能为空");
+        }
+        Portfolio portfolio = portfolioMapper.selectById(id);
+        if (portfolio == null || !portfolio.getUserId().equals(userId)) {
+            throw new IllegalArgumentException("作品集不存在或不属于当前用户");
+        }
+        portfolio.setGmtModified(LocalDateTime.now());
+    }
+
+
 }

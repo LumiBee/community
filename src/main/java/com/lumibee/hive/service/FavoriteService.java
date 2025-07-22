@@ -9,7 +9,7 @@ import java.util.Map;
 
 public interface FavoriteService {
     Favorites createFavorite(String favoriteName, String description,Long userId);
-    FavoriteDetailsDTO selectPortfolioBySlug(String slug);
+    FavoriteDetailsDTO selectPortfolioById(Long favoriteId);
     List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId);
     FavoriteResponse addArticleToFavorite(Long userId, Integer articleId, Long favoriteId);
     FavoriteResponse createFavoriteAndAddArticle(Long userId, Integer articleId, String favoriteName);

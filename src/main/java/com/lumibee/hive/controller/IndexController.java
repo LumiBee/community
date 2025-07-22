@@ -3,7 +3,7 @@ package com.lumibee.hive.controller;
 import java.security.Principal;
 import java.util.List;
 
-import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.dto.*;
 import com.lumibee.hive.model.Article;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import com.lumibee.hive.dto.PortfolioDetailsDTO;
-import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.PortfolioService;
@@ -120,5 +117,9 @@ public class IndexController {
         return "search";
     }
 
+    @GetMapping("/favorites")
+    public String showFavorites() {
+        return "favorites";
+    }
 
 }

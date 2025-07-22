@@ -2,6 +2,7 @@ package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteResponse;
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
@@ -11,16 +12,15 @@ import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.ArticleFavorites;
 import com.lumibee.hive.model.Favorites;
+import com.lumibee.hive.model.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FavoriteServiceImpl implements FavoriteService {
@@ -53,28 +53,68 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public FavoriteDetailsDTO selectPortfolioBySlug(String slug) {
+    public FavoriteDetailsDTO selectPortfolioById(Long favoriteId) {
+        // 1. 获取收藏夹基本信息
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("slug", slug)
-                    .eq("deleted", 0);
+        queryWrapper.eq("id", favoriteId).eq("deleted", 0);
         Favorites favorite = favoriteMapper.selectOne(queryWrapper);
-        if (favorite != null) {
-            FavoriteDetailsDTO favoriteDetailsDTO = new FavoriteDetailsDTO();
-            BeanUtils.copyProperties(favorite, favoriteDetailsDTO);
-            favoriteDetailsDTO.setArticlesCount(articleFavoritesMapper.countArticlesInFavorite(favorite.getId()));
 
-            // 获取用户信息
-            if (favorite.getUserId() != null) {
-                favoriteDetailsDTO.setUserName(userMapper.selectById(favorite.getUserId()).getUsername());
-            }
-
-            // 获取文章列表
-            favoriteDetailsDTO.setArticles(articleFavoritesMapper.selectArticlesByFavoriteId(favorite.getId()));
-
-            return favoriteDetailsDTO;
+        if (favorite == null) {
+            return null; // 如果收藏夹不存在，直接返回null
         }
-        return null; // 如果没有找到对应的Favorites，返回null
+
+        // 2. 获取该收藏夹下的所有文章摘要
+        List<ArticleExcerptDTO> articles = articleFavoritesMapper.selectArticlesByFavoriteId(favorite.getId());
+
+        // 3. 收集所有需要查询的用户ID
+        // 首先添加收藏夹创建者的ID
+        Set<Long> userIdsToFetch = new HashSet<>();
+        if (favorite.getUserId() != null) {
+            userIdsToFetch.add(favorite.getUserId());
+        }
+        // 然后添加所有文章作者的ID
+        articles.stream()
+                .map(ArticleExcerptDTO::getUserId)
+                .filter(Objects::nonNull)
+                .forEach(userIdsToFetch::add);
+
+        // 4. 一次性批量查询所有用户信息
+        Map<Long, User> userMap = new HashMap<>();
+        if (!userIdsToFetch.isEmpty()) {
+            List<User> users = userMapper.selectBatchIds(userIdsToFetch);
+            userMap = users.stream().collect(Collectors.toMap(User::getId, user -> user, (a, b) -> a));
+        }
+
+        // 5. 组装返回的 DTO (FavoriteDetailsDTO)
+        FavoriteDetailsDTO favoriteDetailsDTO = new FavoriteDetailsDTO();
+        BeanUtils.copyProperties(favorite, favoriteDetailsDTO);
+        favoriteDetailsDTO.setArticlesCount(articles.size()); // 直接用列表大小，避免再次查询数据库
+
+        // 5.1 设置收藏夹创建者的信息
+        if (favorite.getUserId() != null) {
+            User owner = userMap.get(favorite.getUserId());
+            if (owner != null) {
+                favoriteDetailsDTO.setUserName(owner.getUsername());
+                favoriteDetailsDTO.setAvatarUrl(owner.getAvatarUrl());
+            }
+        }
+
+        // 5.2 遍历文章列表，设置每篇文章的作者信息
+        for (ArticleExcerptDTO article : articles) {
+            if (article.getUserId() != null) {
+                User author = userMap.get(article.getUserId());
+                if (author != null) {
+                    article.setUserName(author.getUsername());
+                    article.setAvatarUrl(author.getAvatarUrl());
+                }
+            }
+        }
+        favoriteDetailsDTO.setArticles(articles);
+
+        return favoriteDetailsDTO;
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -92,6 +132,8 @@ public class FavoriteServiceImpl implements FavoriteService {
             FavoriteDetailsDTO favoriteDTO = new FavoriteDetailsDTO();
             BeanUtils.copyProperties(favorite, favoriteDTO);
             favoriteDTO.setArticlesCount(articleFavoritesMapper.countArticlesInFavorite(favorite.getId()));
+            favoriteDTO.setAvatarUrl(userMapper.selectById(favorite.getUserId()).getAvatarUrl());
+            favoriteDTO.setUserName(userMapper.selectById(favorite.getUserId()).getUsername());
             return favoriteDTO;
         }).toList();
 
@@ -112,6 +154,11 @@ public class FavoriteServiceImpl implements FavoriteService {
         ArticleFavorites existingArticleFavorite = articleFavoritesMapper.selectOne(queryWrapper);
         if (existingArticleFavorite != null) {
             return new FavoriteResponse(false, "文章已在收藏夹中", true, null);
+        }
+
+        // 检查文章是否存在（如果不存在：说明只要创建收藏夹，不需要添加文章）
+        if (articleId == null) {
+            return new FavoriteResponse(true, "成功只创建了收藏夹", false, null);
         }
 
         ArticleFavorites newArticleFavorite = new ArticleFavorites();

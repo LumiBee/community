@@ -1,9 +1,9 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.dto.AddRequestDTO;
-import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteRequestDTO;
+import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteResponse;
+import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.FavoriteService;
 import com.lumibee.hive.service.UserService;
@@ -36,7 +36,7 @@ public class FavoriteController {
     }
 
     @PostMapping("/add-to-folder")
-    public ResponseEntity<FavoriteResponse> addArticleToFolder(@RequestBody AddRequestDTO request,
+    public ResponseEntity<FavoriteResponse> addArticleToFolder(@RequestBody FavoriteRequestDTO request,
                                                                @AuthenticationPrincipal Principal principal) {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
@@ -49,17 +49,32 @@ public class FavoriteController {
     }
 
     @PostMapping("/create-and-add")
-    public ResponseEntity<FavoriteResponse> createAndAdd(@RequestBody AddRequestDTO request,
+    public ResponseEntity<FavoriteResponse> createAndAdd(@RequestBody FavoriteRequestDTO request,
                                                             @AuthenticationPrincipal Principal principal) {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
-        System.out.println("Current User: " + currentUser);
-        System.out.printf("Request: %s%n", request);
         if (currentUser == null) {
             return ResponseEntity.status(401).build();
         }
         FavoriteResponse response = favoriteService.createFavoriteAndAddArticle(
                 currentUser.getId(), request.getArticleId(), request.getFavoriteName()
         );
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/create-folder")
+    public ResponseEntity<FavoriteResponse> createFolder(@RequestBody FavoriteRequestDTO request,
+                                                         @AuthenticationPrincipal Principal principal) {
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+        if (request.getFavoriteName() == null || request.getFavoriteName().isEmpty()) {
+            return ResponseEntity.badRequest().body(null);
+        }
+        FavoriteResponse response = favoriteService.createFavoriteAndAddArticle(
+                currentUser.getId(), null, request.getFavoriteName()
+        );
+
         return ResponseEntity.ok(response);
     }
 
@@ -73,5 +88,14 @@ public class FavoriteController {
 
         Map<String, Object> result = favoriteService.removeAllArticlesFromFavorite(currentUser.getId(), articleId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/details/{favoriteId}")
+    public ResponseEntity<FavoriteDetailsDTO> getFavoriteDetails(@PathVariable("favoriteId") Long favoriteId) {
+        FavoriteDetailsDTO favoriteDetails = favoriteService.selectPortfolioById(favoriteId);
+        if (favoriteDetails == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(favoriteDetails);
     }
 }

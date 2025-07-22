@@ -204,6 +204,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId).getId();
             article.setPortfolioId(portfolioId);
+            portfolioService.updatePortfolioGmt(portfolioId, userId);
         }
 
         articleMapper.insert(article);
@@ -411,6 +412,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
             existingArticle.setPortfolioId(portfolio.getId());
+            portfolioService.updatePortfolioGmt(portfolio.getId(), userId);
         }else {
             existingArticle.setPortfolioId(null);
         }

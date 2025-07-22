@@ -5,7 +5,7 @@
 	<title th:text="${article?.title} ?: 'Lumi Hive'">Lumi Hive</title>
 	<meta name="article-id" th:if="${article != null}" th:content="${article.articleId}"/>
 	<link href="/css/article.css" rel="stylesheet"/>
-	<!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
+
 	<meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
 </head>
 <body>
@@ -189,7 +189,7 @@
 										<textarea class="form-control" id="commentContent" rows="3" placeholder="写下你的想法..."></textarea>
 									</div>
 									<div class="text-right">
-										<button type="submit" class="btn btn-primary">发表评论</button>
+										<button type="submit" class="btn btn-primary btn-comment">发表评论</button>
 									</div>
 								</form>
 							</div>
@@ -282,27 +282,56 @@
 
 <!-- 收藏夹模态框 -->
 <div class="modal fade" id="favoriteModal" tabindex="-1" aria-labelledby="favoriteModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="favoriteModalLabel">收藏到...</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content modern-modal">
+			<div class="modal-header modern-header">
+				<div class="header-icon">
+					<i class="fas fa-bookmark"></i>
+				</div>
+				<div class="header-content">
+					<h5 class="modal-title" id="favoriteModalLabel">收藏到文件夹</h5>
+					<p class="modal-subtitle">选择一个收藏夹或创建新的收藏夹</p>
+				</div>
+				<button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
+					<i class="fas fa-times"></i>
 				</button>
 			</div>
-			<div class="modal-body">
-				<div id="favorite-folders-list" class="mb-3">
-					<div class="text-center">
-						<div class="spinner-border text-primary" role="status">
-							<span class="sr-only">正在加载...</span>
+			<div class="modal-body modern-body">
+				<!-- 现有收藏夹列表 -->
+				<div class="favorite-folders-section">
+					<div class="section-label">
+						<i class="fas fa-folder-open"></i>
+						<span>我的收藏夹</span>
+					</div>
+					<div id="favorite-folders-list" class="folders-grid">
+						<div class="loading-container">
+							<div class="modern-spinner">
+								<div class="spinner-ring"></div>
+							</div>
+							<p class="loading-text">目前没有收藏夹哦</p>
 						</div>
 					</div>
 				</div>
-				<hr>
-				<div class="input-group">
-					<input type="text" class="form-control" id="new-favorite-name" placeholder="输入新收藏夹名称">
-					<div class="input-group-append">
-						<button class="btn btn-outline-secondary" type="button" id="create-and-add-btn" onclick="createNewFavoriteAndAddArticle(this)">创建并收藏</button>
+
+				<!-- 分隔线 -->
+				<div class="modern-divider">
+					<span>或</span>
+				</div>
+
+				<!-- 创建新收藏夹 -->
+				<div class="create-folder-section">
+					<div class="section-label">
+						<i class="fas fa-plus-circle"></i>
+						<span>创建新收藏夹</span>
+					</div>
+					<div class="create-folder-form">
+						<div class="input-wrapper">
+							<input type="text" class="form-control modern-input" id="new-favorite-name" placeholder="输入收藏夹名称">
+							<button class="btn modern-create-btn" type="button" id="create-and-add-btn" onclick="createNewFavoriteAndAddArticle(this)">
+								<i class="fas fa-plus"></i>
+								<span>创建并收藏</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -319,237 +348,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/js/bootstrap.min.js" integrity="sha384-w1Q4orYjBQndcko6MimVbzY0tgp4pWB4lZ7lr30WKz0vr/aWKhXdBNmNb5D92v7s" crossorigin="anonymous"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 <script th:src="@{/js/article-effects.js}" type="text/javascript"></script>
-
-<style>
-/* 作品集样式 */
-.portfolio-pill {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 14px;
-    background-color: #f0f7ff;
-    border-radius: 30px;
-    font-size: 0.9rem;
-    color: #0366d6;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid #cce4ff;
-}
-
-.portfolio-pill:hover {
-    background-color: #0366d6;
-    color: white;
-    text-decoration: none;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 5px rgba(3, 102, 214, 0.2);
-}
-
-/* 文章内容样式优化 */
-.article-content {
-    font-size: 1.05rem;
-    line-height: 1.8;
-    color: #333;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.article-content p {
-    margin-bottom: 1.5rem;
-}
-
-.article-content h1, .article-content h2, .article-content h3,
-.article-content h4, .article-content h5, .article-content h6 {
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-weight: 600;
-    line-height: 1.4;
-}
-
-.article-content img {
-    max-width: 100%;
-    height: auto;
-    margin: 1.5rem 0;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.article-content blockquote {
-    border-left: 4px solid #007bff;
-    padding-left: 1rem;
-    margin-left: 0;
-    color: #555;
-    font-style: italic;
-}
-
-.article-content code {
-    background-color: #f5f5f5;
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
-    font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
-    font-size: 0.9em;
-}
-
-.article-content pre {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 5px;
-    overflow-x: auto;
-    margin: 1.5rem 0;
-    position: relative;
-}
-
-/* 评论区样式 */
-.comments-title {
-    font-weight: 600;
-    color: #343a40;
-    padding-bottom: 10px;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.comment-form-container {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 5px;
-}
-
-.comment-item {
-    padding: 15px 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.comment-avatar, .reply-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-.reply-avatar {
-    width: 30px;
-    height: 30px;
-}
-
-.comment-meta, .reply-meta {
-    flex-grow: 1;
-}
-
-.comment-author, .reply-author {
-    font-weight: 600;
-    font-size: 0.95rem;
-}
-
-.comment-date, .reply-date {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-.comment-content, .reply-content {
-    margin: 10px 0;
-    white-space: pre-wrap;
-}
-
-.comment-actions {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.reply-btn {
-    color: #6c757d;
-    padding: 0;
-}
-
-.reply-btn:hover {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.replies-container {
-    margin-left: 30px;
-    margin-top: 10px;
-    padding-left: 15px;
-    border-left: 2px solid #e9ecef;
-}
-
-.reply-item {
-    padding: 10px 0;
-}
-
-.reply-form {
-    margin-left: 30px;
-    padding-left: 15px;
-    border-left: 2px solid #e9ecef;
-}
-
-.no-comments {
-    padding: 30px 0;
-    color: #6c757d;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .article-content {
-        font-size: 1rem;
-        line-height: 1.7;
-    }
-    
-    .container {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-}
-
-/* 优化链接样式 */
-.article-content a {
-    color: #007bff;
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.2s ease;
-}
-
-.article-content a:hover {
-    border-bottom-color: #007bff;
-}
-
-/* 优化表格样式 */
-.article-content table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 1.5rem 0;
-}
-
-.article-content table th,
-.article-content table td {
-    border: 1px solid #dee2e6;
-    padding: 0.75rem;
-}
-
-.article-content table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.article-content table tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-/* Toast样式 */
-.toast {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 6px;
-    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.15);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-.toast-header {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.toast-body {
-    padding: 12px;
-    font-size: 0.95rem;
-    line-height: 1.5;
-}
-</style>
 
 </body>
 </html>

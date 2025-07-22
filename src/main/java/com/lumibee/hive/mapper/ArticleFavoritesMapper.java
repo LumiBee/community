@@ -12,7 +12,7 @@ import java.util.List;
 public interface ArticleFavoritesMapper extends BaseMapper<ArticleFavorites> {
     @Select("SELECT COUNT(*) FROM article_favorites WHERE favorite_id = #{id}")
     Integer countArticlesInFavorite(@Param("id") Long id);
-    @Select("SELECT a.article_id, a.title, a.slug, a.excerpt, a.gmt_create AS gmtCreate, a.gmt_modified AS gmtModified " +
+    @Select("SELECT a.article_id, a.title, a.slug, a.excerpt, a.user_id, a.gmt_create AS gmtCreate, a.gmt_modified AS gmtModified " +
             "FROM article_favorites af " +
             "JOIN articles a ON af.article_id = a.article_id " +
             "WHERE af.favorite_id = #{id}")

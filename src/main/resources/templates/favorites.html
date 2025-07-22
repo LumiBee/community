@@ -2,96 +2,64 @@
 <html lang="zh" xmlns:th="http://www.thymeleaf.org">
 <head>
   <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
-
   <title>我的收藏 - Lumi Hive</title>
 
   <link rel="stylesheet" th:href="@{/css/tags.css}"/>
+  <link rel="stylesheet" th:href="@{/css/favorites.css}"/>
 </head>
 <body>
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
 <div class="main-container">
-  <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-content">
       <h1 class="hero-title">我的收藏</h1>
-      <p class="hero-subtitle">珍藏您喜爱的文章、作品集和创意灵感</p>
+      <p class="hero-subtitle">在这里管理您的收藏夹，珍藏每一个灵感瞬间</p>
     </div>
   </section>
 
   <div class="content-container">
     <div class="container">
       <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 sidebar fade-in">
+
+        <div class="col-md-3 sidebar fade-in">
           <div class="sidebar-header">
-            <h4>收藏分类</h4>
+            <h4>我的收藏夹</h4>
           </div>
           <div class="sidebar-content">
-            <ul class="sidebar-nav">
-              <li class="sidebar-item active" data-type="all" onclick="handleTypeClick(this)">
-                <i class="fas fa-layer-group"></i> 全部收藏
-              </li>
-              <li class="sidebar-item" data-type="article" onclick="handleTypeClick(this)">
-                <i class="fas fa-file-alt"></i> 文章
-              </li>
-              <li class="sidebar-item" data-type="portfolio" onclick="handleTypeClick(this)">
-                <i class="fas fa-book-open"></i> 作品集
-              </li>
-              <li class="sidebar-item" data-type="tag" onclick="handleTypeClick(this)">
-                <i class="fas fa-tag"></i> 标签
-              </li>
+            <ul id="favorite-folders-list" class="sidebar-nav">
+              <div id="sidebar-loading-spinner" class="loading-spinner-small spinner-border text-primary" role="status">
+                <span class="sr-only">正在加载...</span>
+              </div>
             </ul>
-            
-            <div class="custom-collections">
-              <h5>自定义收藏夹</h5>
-              <ul class="sidebar-nav custom-nav">
-                <li class="sidebar-item" data-type="custom-1" onclick="handleTypeClick(this)">
-                  <i class="fas fa-folder"></i> 技术学习
-                </li>
-                <li class="sidebar-item" data-type="custom-2" onclick="handleTypeClick(this)">
-                  <i class="fas fa-folder"></i> 项目参考
-                </li>
-              </ul>
-            </div>
-            
             <div class="add-collection">
-              <button class="add-collection-btn" onclick="showAddCollectionModal()">
+              <button class="add-collection-btn">
                 <i class="fas fa-plus"></i> 添加收藏夹
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-10">
-          <!-- Search Section -->
+        <div class="col-md-9">
           <div class="search-section fade-in">
             <div class="search-container">
-              <div class="search-icon">
-                <i class="fas fa-search"></i>
-              </div>
-              <input type="search" id="favoriteSearchInput" class="search-input" placeholder="搜索我的收藏...">
+              <div class="search-icon"><i class="fas fa-search"></i></div>
+              <input type="search" id="favoriteSearchInput" class="search-input" placeholder="在当前收藏夹内搜索...">
             </div>
           </div>
 
-          <!-- Favorites Section -->
           <section class="articles-section">
             <h2 class="section-title">
               收藏列表
-              <small id="favoriteListTitle" class="section-subtitle">(全部收藏)</small>
+              <small id="favoriteListTitle" class="section-subtitle">(请选择一个收藏夹)</small>
             </h2>
-
             <div id="article-display-container">
-              <div id="loadingSpinner" class="loading-spinner"></div>
-              
-              <!-- 书架容器 -->
+              <div id="loadingSpinner" class="loading-spinner" style="display: none;"></div>
               <div class="bookshelf-container">
                 <div class="bookshelf">
                   <div class="shelf-shadow"></div>
                   <div id="articleGrid" class="shelf-content">
-                    <!-- 这里将动态加载收藏内容 -->
                   </div>
                 </div>
               </div>
@@ -103,15 +71,12 @@
   </div>
 </div>
 
-<!-- 添加收藏夹模态框 -->
 <div class="modal fade" id="addCollectionModal" tabindex="-1" role="dialog" aria-labelledby="addCollectionModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="addCollectionModalLabel">添加自定义收藏夹</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title" id="addCollectionModalLabel">创建新收藏夹</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <div class="modal-body">
         <form id="addCollectionForm">
@@ -119,37 +84,20 @@
             <label for="collectionName">收藏夹名称</label>
             <input type="text" class="form-control" id="collectionName" placeholder="输入收藏夹名称" required>
           </div>
-          <div class="form-group">
-            <label>图标选择</label>
-            <div class="icon-selection">
-              <div class="icon-option active"><i class="fas fa-folder"></i></div>
-              <div class="icon-option"><i class="fas fa-star"></i></div>
-              <div class="icon-option"><i class="fas fa-heart"></i></div>
-              <div class="icon-option"><i class="fas fa-bookmark"></i></div>
-              <div class="icon-option"><i class="fas fa-lightbulb"></i></div>
-              <div class="icon-option"><i class="fas fa-code"></i></div>
-            </div>
-            <input type="hidden" id="selectedIcon" value="fa-folder">
-          </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary" onclick="addNewCollection()">添加</button>
+        <button type="button" class="btn btn-primary">创建</button>
       </div>
     </div>
   </div>
 </div>
 
-<div th:replace="~{fragments/footer :: page-footer}"></div>
-
-<!-- 文章收藏模板 -->
 <template id="articleFavoriteTemplate">
   <div class="book-item article-favorite">
     <a href="#" class="book">
-      <div class="book-spine">
-        <span class="book-type"><i class="fas fa-file-alt"></i></span>
-      </div>
+      <div class="book-spine"><span class="book-type"><i class="fas fa-file-alt"></i></span></div>
       <div class="book-cover">
         <div class="book-cover-content">
           <div class="book-title-area">
@@ -167,1012 +115,32 @@
   </div>
 </template>
 
-<!-- 作品集收藏模板 -->
-<template id="portfolioFavoriteTemplate">
-  <div class="book-item portfolio-favorite">
-    <a href="#" class="book">
-      <div class="book-spine">
-        <span class="book-type"><i class="fas fa-book-open"></i></span>
-      </div>
-      <div class="book-cover">
-        <div class="book-cover-content">
-          <div class="book-title-area">
-            <h3 class="book-title">作品集标题</h3>
-            <span class="favorite-date">收藏日期</span>
-          </div>
-          <div class="book-author">
-            <img src="/img/default01.jpg" alt="创建者头像" class="author-avatar">
-            <span class="author-name">创建者</span>
-          </div>
-          <p class="book-description">作品集描述...</p>
-        </div>
-      </div>
-    </a>
-  </div>
-</template>
-
-<!-- 标签收藏模板 -->
-<template id="tagFavoriteTemplate">
-  <div class="book-item tag-favorite">
-    <a href="#" class="book">
-      <div class="book-spine">
-        <span class="book-type"><i class="fas fa-tag"></i></span>
-      </div>
-      <div class="book-cover">
-        <div class="book-cover-content">
-          <div class="book-title-area">
-            <h3 class="book-title">标签名称</h3>
-            <span class="favorite-date">收藏日期</span>
-          </div>
-          <div class="tag-stats">
-            <span><i class="fas fa-file-alt"></i> 相关文章数</span>
-          </div>
-          <p class="book-description">标签描述...</p>
-        </div>
-      </div>
-    </a>
-  </div>
-</template>
-
-<!-- 空收藏模板 -->
 <template id="emptyFavoriteTemplate">
   <div class="empty-shelf">
-    <div class="empty-shelf-icon">
-      <i class="fas fa-bookmark"></i>
-    </div>
-    <h3>暂无收藏</h3>
-    <p>您还没有添加任何收藏，浏览内容时点击收藏按钮即可添加</p>
-    <a href="/explore" class="explore-button">
-      <i class="fas fa-compass"></i> 探索内容
-    </a>
+    <div class="empty-shelf-icon"><i class="fas fa-bookmark"></i></div>
+    <h3>此收藏夹为空</h3>
+    <p>浏览内容时点击收藏按钮，即可将文章添加到这里</p>
+    <a href="/" class="explore-button"><i class="fas fa-compass"></i> 探索内容</a>
   </div>
 </template>
 
-<!-- 错误模板 -->
 <template id="errorTemplate">
   <div class="error-shelf">
-    <div class="error-icon">
-      <i class="fas fa-exclamation-triangle"></i>
-    </div>
+    <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
     <h3>加载失败</h3>
-    <p>无法加载收藏列表，请检查网络连接后重试</p>
-    <button onclick="fetchAndRenderFavorites(activeType)" class="retry-button">
-      <i class="fas fa-sync-alt"></i> 重试
-    </button>
+    <p>无法加载收藏列表，请检查网络连接或稍后重试</p>
+    <button class="retry-button"><i class="fas fa-sync-alt"></i> 重试</button>
   </div>
 </template>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
 
 <script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 
-<script>
-  // 全局变量
-  let activeType = 'all';
-
-  // DOM加载完成后执行
-  document.addEventListener('DOMContentLoaded', function() {
-    const favoriteSearchInput = document.getElementById('favoriteSearchInput');
-
-    // 添加搜索功能
-    favoriteSearchInput.addEventListener('input', handleFavoriteSearch);
-
-    // 初始加载所有收藏
-    fetchAndRenderFavorites(activeType);
-
-    // 添加页面加载动画
-    setTimeout(() => {
-      document.querySelector('.sidebar').classList.add('fade-in');
-      document.querySelector('.search-section').classList.add('fade-in');
-    }, 300);
-    
-    // 图标选择器
-    document.querySelectorAll('.icon-option').forEach(option => {
-      option.addEventListener('click', function() {
-        document.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('active'));
-        this.classList.add('active');
-        const iconClass = this.querySelector('i').className.split(' ')[1];
-        document.getElementById('selectedIcon').value = iconClass;
-      });
-    });
-  });
-
-  // 处理类型点击
-  function handleTypeClick(element) {
-    // 移除所有激活状态
-    document.querySelectorAll('.sidebar-item').forEach(item => {
-      item.classList.remove('active');
-    });
-
-    // 激活当前类型
-    element.classList.add('active');
-
-    // 更新活跃类型和标题
-    activeType = element.getAttribute('data-type');
-    let typeName;
-    switch(activeType) {
-      case 'article':
-        typeName = '文章收藏';
-        break;
-      case 'portfolio':
-        typeName = '作品集收藏';
-        break;
-      case 'tag':
-        typeName = '标签收藏';
-        break;
-      case 'custom-1':
-        typeName = '技术学习';
-        break;
-      case 'custom-2':
-        typeName = '项目参考';
-        break;
-      default:
-        typeName = '全部收藏';
-    }
-    
-    document.getElementById('favoriteListTitle').textContent = `(${typeName})`;
-    
-    // 获取收藏
-    fetchAndRenderFavorites(activeType);
-  }
-
-  // 处理收藏搜索
-  function handleFavoriteSearch(event) {
-    const filterValue = event.target.value.toLowerCase();
-    const favoriteItems = document.querySelectorAll('#articleGrid .book-item');
-
-    favoriteItems.forEach(item => {
-      const title = item.querySelector('.book-title').textContent.toLowerCase();
-      const description = item.querySelector('.book-description').textContent.toLowerCase();
-      
-      if (title.includes(filterValue) || description.includes(filterValue)) {
-        item.style.display = '';
-      } else {
-        item.style.display = 'none';
-      }
-    });
-    
-    // 检查是否有可见的项目
-    const visibleItems = document.querySelectorAll('#articleGrid .book-item:not([style*="display: none"])');
-    if (visibleItems.length === 0 && filterValue !== '') {
-      showEmptySearchResult();
-    } else {
-      const emptySearch = document.querySelector('.empty-search-result');
-      if (emptySearch) {
-        emptySearch.remove();
-      }
-    }
-  }
-  
-  // 显示空搜索结果
-  function showEmptySearchResult() {
-    const articleGrid = document.getElementById('articleGrid');
-    const existingEmpty = document.querySelector('.empty-search-result');
-    
-    if (!existingEmpty) {
-      const emptyResult = document.createElement('div');
-      emptyResult.className = 'empty-search-result';
-      emptyResult.innerHTML = `
-        <div class="empty-search-icon">
-          <i class="fas fa-search"></i>
-        </div>
-        <h3>未找到匹配的收藏</h3>
-        <p>尝试使用其他关键词搜索</p>
-      `;
-      articleGrid.appendChild(emptyResult);
-    }
-  }
-
-  // 显示添加收藏夹模态框
-  function showAddCollectionModal() {
-    $('#addCollectionModal').modal('show');
-  }
-  
-  // 添加新收藏夹
-  function addNewCollection() {
-    const collectionName = document.getElementById('collectionName').value;
-    const iconClass = document.getElementById('selectedIcon').value;
-    
-    if (!collectionName) {
-      alert('请输入收藏夹名称');
-      return;
-    }
-    
-    const customNav = document.querySelector('.custom-nav');
-    const newItem = document.createElement('li');
-    newItem.className = 'sidebar-item';
-    newItem.setAttribute('data-type', `custom-${Date.now()}`);
-    newItem.onclick = function() { handleTypeClick(this); };
-    newItem.innerHTML = `<i class="fas ${iconClass}"></i> ${collectionName}`;
-    
-    customNav.appendChild(newItem);
-    
-    // 关闭模态框并重置表单
-    $('#addCollectionModal').modal('hide');
-    document.getElementById('addCollectionForm').reset();
-    document.querySelectorAll('.icon-option').forEach(opt => opt.classList.remove('active'));
-    document.querySelector('.icon-option').classList.add('active');
-    document.getElementById('selectedIcon').value = 'fa-folder';
-  }
-
-  // 创建收藏卡片
-  function createFavoriteCard(favorite) {
-    let template;
-    
-    // 根据类型选择模板
-    switch(favorite.type) {
-      case 'article':
-        template = document.getElementById('articleFavoriteTemplate');
-        break;
-      case 'portfolio':
-        template = document.getElementById('portfolioFavoriteTemplate');
-        break;
-      case 'tag':
-        template = document.getElementById('tagFavoriteTemplate');
-        break;
-      default:
-        // 对于自定义收藏夹，使用文章模板
-        template = document.getElementById('articleFavoriteTemplate');
-    }
-    
-    // 确保模板存在
-    if (!template) {
-      console.error('找不到模板:', favorite.type);
-      return document.createElement('div'); // 返回空元素防止错误
-    }
-    
-    const cardClone = template.content.cloneNode(true);
-    const bookItem = cardClone.querySelector('.book-item');
-    const link = cardClone.querySelector('.book a');
-    const title = cardClone.querySelector('.book-title');
-    const description = cardClone.querySelector('.book-description');
-    const authorName = cardClone.querySelector('.author-name');
-    const authorAvatar = cardClone.querySelector('.author-avatar');
-    const favoriteDate = cardClone.querySelector('.favorite-date');
-    const bookSpine = cardClone.querySelector('.book-spine');
-    const bookCover = cardClone.querySelector('.book-cover');
-    
-    // 设置随机书脊颜色
-    const colors = [
-      'linear-gradient(135deg, #3498db, #2c3e50)',
-      'linear-gradient(135deg, #e74c3c, #c0392b)',
-      'linear-gradient(135deg, #2ecc71, #27ae60)',
-      'linear-gradient(135deg, #f39c12, #d35400)',
-      'linear-gradient(135deg, #9b59b6, #8e44ad)',
-      'linear-gradient(135deg, #1abc9c, #16a085)'
-    ];
-    
-    const randomColor = colors[Math.floor(Math.random() * colors.length)];
-    bookSpine.style.background = randomColor;
-    
-    // 添加封面设计
-    if (favorite.type === 'article' || favorite.type.startsWith('custom')) {
-      if (favorite.title.includes('Spring')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(76, 175, 80, 0.8), rgba(27, 94, 32, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fab fa-java"></i></div>';
-      } else if (favorite.title.includes('React')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(33, 150, 243, 0.8), rgba(13, 71, 161, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fab fa-react"></i></div>';
-      } else if (favorite.title.includes('Docker')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(41, 128, 185, 0.8), rgba(52, 73, 94, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fab fa-docker"></i></div>';
-      } else if (favorite.title.includes('线程')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(46, 204, 113, 0.8), rgba(39, 174, 96, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-project-diagram"></i></div>';
-      } else if (favorite.title.includes('Security')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(155, 89, 182, 0.8), rgba(142, 68, 173, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-shield-alt"></i></div>';
-      } else if (favorite.title.includes('电商')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(243, 156, 18, 0.8), rgba(211, 84, 0, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-shopping-cart"></i></div>';
-      } else {
-        // 默认风格
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(189, 195, 199, 0.8), rgba(44, 62, 80, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-file-alt"></i></div>';
-      }
-    } else if (favorite.type === 'portfolio') {
-      if (favorite.title.includes('Java')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(46, 204, 113, 0.8), rgba(39, 174, 96, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-code"></i></div>';
-      } else if (favorite.title.includes('数据')) {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(155, 89, 182, 0.8), rgba(142, 68, 173, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-database"></i></div>';
-      } else {
-        bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(52, 152, 219, 0.8), rgba(41, 128, 185, 0.9))";
-        bookCover.style.backgroundSize = "cover";
-        bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-book-open"></i></div>';
-      }
-    } else if (favorite.type === 'tag') {
-      bookCover.style.backgroundImage = "linear-gradient(45deg, rgba(230, 126, 34, 0.8), rgba(211, 84, 0, 0.9))";
-      bookCover.style.backgroundSize = "cover";
-      bookCover.innerHTML += '<div class="book-icon"><i class="fas fa-tag"></i></div>';
-    }
-    
-    // 设置链接和内容
-    link.href = favorite.url;
-    title.textContent = favorite.title;
-    description.textContent = favorite.description || '暂无描述...';
-    
-    // 设置作者信息
-    if (favorite.author) {
-      authorName.textContent = favorite.author.name || '佚名';
-      authorAvatar.src = favorite.author.avatarUrl || '/img/default01.jpg';
-    }
-
-    // 格式化收藏日期
-    if (favorite.favoriteDate) {
-      // 如果是字符串日期，直接使用
-      if (typeof favorite.favoriteDate === 'string') {
-        favoriteDate.textContent = favorite.favoriteDate;
-      } else {
-        // 否则当作Date对象处理
-        const date = new Date(favorite.favoriteDate);
-        const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-        favoriteDate.textContent = formattedDate;
-      }
-    }
-    
-    // 添加特定类型的数据
-    if (favorite.type === 'tag' && cardClone.querySelector('.tag-stats')) {
-      const tagStats = cardClone.querySelector('.tag-stats span');
-      tagStats.innerHTML = `<i class="fas fa-file-alt"></i> ${favorite.articleCount || 0} 篇文章`;
-    }
-
-    return bookItem;
-  }
-
-  // 获取并渲染收藏
-  function fetchAndRenderFavorites(type) {
-    const articleGrid = document.getElementById('articleGrid');
-    const spinner = document.getElementById('loadingSpinner');
-
-    // 显示加载动画
-    spinner.style.display = 'block';
-    articleGrid.innerHTML = '';
-
-    // 使用假数据演示 - 实际部署时请删除并使用API调用代码
-    const fakeFavorites = [
-      {
-        type: 'article',
-        title: 'Spring Boot 高级应用实践',
-        description: '深入探讨Spring Boot在企业级应用中的最佳实践和性能优化技巧',
-        url: '#',
-        author: {
-          name: '张明',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-09-15'
-      },
-      {
-        type: 'portfolio',
-        title: 'Java全栈开发作品集',
-        description: '包含多个Java企业级应用案例，涵盖Spring Cloud微服务架构、安全框架和高并发处理',
-        url: '#',
-        author: {
-          name: '李华',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-08-20'
-      },
-      {
-        type: 'article',
-        title: 'React与Spring Boot整合指南',
-        description: '前后端分离架构下，如何有效整合React前端和Spring Boot后端',
-        url: '#',
-        author: {
-          name: '王梦',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-10-05'
-      },
-      {
-        type: 'tag',
-        title: 'Spring Boot',
-        description: '相关Spring Boot开发技术、教程和实践案例',
-        url: '#',
-        articleCount: 42,
-        favoriteDate: '2023-07-10'
-      },
-      {
-        type: 'portfolio',
-        title: '大数据分析作品集',
-        description: '基于Hadoop、Spark的大数据处理和机器学习项目案例',
-        url: '#',
-        author: {
-          name: '刘琳',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-09-28'
-      },
-      {
-        type: 'article',
-        title: 'Docker容器化部署Java应用',
-        description: '详解如何使用Docker容器化部署Java应用，提高部署效率和系统可伸缩性',
-        url: '#',
-        author: {
-          name: '赵强',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-10-12'
-      },
-      // 自定义收藏夹的内容
-      {
-        type: 'custom-1',
-        title: 'Java高级多线程编程',
-        description: '深入理解Java并发编程模型和线程安全机制',
-        url: '#',
-        author: {
-          name: '陈刚',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-08-05'
-      },
-      {
-        type: 'custom-1',
-        title: 'Spring Security原理与实践',
-        description: '全面掌握Spring Security认证与授权机制',
-        url: '#',
-        author: {
-          name: '杨光',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-09-18'
-      },
-      {
-        type: 'custom-2',
-        title: '电商平台架构设计',
-        description: '大型电商平台的微服务架构与性能优化案例',
-        url: '#',
-        author: {
-          name: '林波',
-          avatarUrl: '/img/default01.jpg'
-        },
-        favoriteDate: '2023-07-22'
-      }
-    ];
-    
-    // 根据当前选择的类型过滤
-    const filteredFavorites = type === 'all' 
-      ? fakeFavorites 
-      : fakeFavorites.filter(fav => fav.type === type);
-    
-    // 使用假数据
-    const favorites = filteredFavorites;
-    
-    setTimeout(() => {
-      // 隐藏加载动画
-      spinner.style.display = 'none';
-      
-      if (favorites.length === 0) {
-        const emptyTemplate = document.getElementById('emptyFavoriteTemplate');
-        if (emptyTemplate) {
-          articleGrid.appendChild(emptyTemplate.content.cloneNode(true));
-        } else {
-          articleGrid.innerHTML = '<div class="empty-message">暂无收藏</div>';
-        }
-      } else {
-        console.log('渲染收藏项目:', favorites.length);
-        favorites.forEach((favorite, index) => {
-          setTimeout(() => {
-            try {
-              const card = createFavoriteCard(favorite);
-              articleGrid.appendChild(card);
-              
-              // 添加淡入动画
-              setTimeout(() => {
-                card.classList.add('fade-in');
-              }, 50);
-            } catch (err) {
-              console.error('创建收藏卡片失败:', err, favorite);
-            }
-          }, index * 100);
-        });
-      }
-    }, 500); // 延迟500ms加载，确保DOM已完全加载
-  }
-</script>
-
-<style>
-  /* 书架样式 */
-  .bookshelf-container {
-    position: relative;
-    padding: 20px 0;
-  }
-  
-  .bookshelf {
-    position: relative;
-    margin-bottom: 40px;
-  }
-  
-  .shelf-shadow {
-    position: relative;
-    height: 15px;
-    background: #f0f0f0;
-    border-radius: 2px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    margin-bottom: 20px;
-  }
-  
-  .shelf-shadow:after {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 20px;
-    background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.01) 15%, rgba(0,0,0,0.01) 85%, rgba(0,0,0,0.05) 100%);
-    bottom: -20px;
-    left: 0;
-  }
-  
-  .shelf-content {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 30px;
-    padding: 10px 0;
-  }
-  
-  /* 书本样式 */
-  .book-item {
-    height: 280px;
-    perspective: 1000px;
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-  
-  .book-item.fade-in {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  
-  .book {
-    display: block;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transform-style: preserve-3d;
-    transform-origin: left center;
-    transition: transform 0.5s ease;
-    text-decoration: none;
-    color: inherit;
-  }
-  
-  .book-item:hover .book {
-    transform: rotateY(-30deg);
-  }
-  
-  /* 书脊样式 */
-  .book-spine {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 30px;
-    height: 100%;
-    background-color: #2c3e50;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transform: rotateY(90deg) translateX(-15px);
-    transform-origin: left;
-    z-index: 1;
-    border-radius: 3px 0 0 3px;
-    box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.2);
-  }
-  
-  .book-type {
-    transform: rotate(180deg);
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    font-size: 1.2rem;
-    padding: 10px 0;
-  }
-  
-  /* 书封面样式 */
-  .book-cover {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background-color: white;
-    border-radius: 3px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    overflow: hidden;
-    transform: translateZ(0);
-    transition: box-shadow 0.3s ease;
-  }
-  
-  .book-item:hover .book-cover {
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  }
-  
-  .book-cover-content {
-    padding: 15px;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    z-index: 2;
-    background-color: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(3px);
-    border-radius: 0 0 3px 3px;
-  }
-  
-  /* 添加书本图标样式 */
-  .book-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 4rem;
-    color: rgba(255, 255, 255, 0.7);
-    z-index: 1;
-  }
-  
-  .book-cover-content {
-    margin-top: auto;
-    height: 70%;
-  }
-  
-  .book-title-area {
-    margin-bottom: 10px;
-  }
-  
-  .book-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin: 0 0 5px;
-    color: #333;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  
-  .favorite-date {
-    display: block;
-    font-size: 0.75rem;
-    color: #777;
-    margin-bottom: 10px;
-  }
-  
-  .book-author {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .book-author .author-avatar {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    margin-right: 8px;
-  }
-  
-  .book-author .author-name {
-    font-size: 0.85rem;
-    color: #555;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  
-  .book-description {
-    font-size: 0.85rem;
-    color: #666;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.5;
-    flex-grow: 1;
-  }
-  
-  .tag-stats {
-    margin-bottom: 10px;
-    font-size: 0.8rem;
-    color: #777;
-  }
-  
-  .tag-stats span {
-    display: flex;
-    align-items: center;
-  }
-  
-  .tag-stats i {
-    margin-right: 4px;
-  }
-  
-  /* 类型特定样式 */
-  .article-favorite .book-spine {
-    background: linear-gradient(135deg, #3498db, #2c3e50);
-  }
-  
-  .portfolio-favorite .book-spine {
-    background: linear-gradient(135deg, #2ecc71, #27ae60);
-  }
-  
-  .tag-favorite .book-spine {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-  }
-  
-  /* 空收藏和错误样式 */
-  .empty-shelf, .error-shelf, .empty-search-result {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 20px;
-    grid-column: 1 / -1;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    margin: 20px 0;
-  }
-  
-  .empty-shelf-icon, .error-icon, .empty-search-icon {
-    font-size: 3rem;
-    color: #adb5bd;
-    margin-bottom: 15px;
-  }
-  
-  .empty-shelf h3, .error-shelf h3, .empty-search-result h3 {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-    color: #495057;
-  }
-  
-  .empty-shelf p, .error-shelf p, .empty-search-result p {
-    color: #6c757d;
-    margin-bottom: 20px;
-  }
-  
-  .explore-button, .retry-button {
-    display: inline-flex;
-    align-items: center;
-    padding: 8px 16px;
-    background-color: #3498db;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: background-color 0.3s;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .explore-button:hover, .retry-button:hover {
-    background-color: #2980b9;
-    color: white;
-    text-decoration: none;
-  }
-  
-  .explore-button i, .retry-button i {
-    margin-right: 6px;
-  }
-  
-  @media (max-width: 768px) {
-    .shelf-content {
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 20px;
-    }
-    
-    .book-item {
-      height: 240px;
-    }
-    
-    .book-spine {
-      width: 20px;
-      transform: rotateY(90deg) translateX(-10px);
-    }
-    
-    .book-type {
-      font-size: 1rem;
-    }
-  }
-  
-  @media (max-width: 576px) {
-    .shelf-content {
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 15px;
-    }
-    
-    .book-item {
-      height: 220px;
-    }
-    
-    .book-title {
-      font-size: 1rem;
-    }
-    
-    .book-description {
-      -webkit-line-clamp: 2;
-    }
-  }
-
-  /* 侧边栏样式 */
-  .sidebar {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 1.2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-  }
-  
-  .sidebar-header {
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #e9ecef;
-    padding-bottom: 0.5rem;
-  }
-  
-  .sidebar-header h4 {
-    font-size: 1.1rem;
-    color: #495057;
-    margin: 0;
-  }
-  
-  .sidebar-nav {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .sidebar-item {
-    padding: 0.6rem 0.8rem;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.2s;
-    margin-bottom: 0.5rem;
-    color: #495057;
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
-  }
-  
-  .sidebar-item i {
-    margin-right: 0.5rem;
-    width: 16px;
-    text-align: center;
-  }
-  
-  .sidebar-item:hover {
-    background-color: #e9ecef;
-  }
-  
-  .sidebar-item.active {
-    background-color: #3498db;
-    color: white;
-  }
-  
-  .custom-collections {
-    margin-top: 1.5rem;
-    border-top: 1px solid #e9ecef;
-    padding-top: 1rem;
-  }
-  
-  .custom-collections h5 {
-    font-size: 0.9rem;
-    color: #6c757d;
-    margin-bottom: 0.8rem;
-  }
-  
-  .add-collection {
-    margin-top: 1rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #e9ecef;
-  }
-  
-  .add-collection-btn {
-    width: 100%;
-    background-color: transparent;
-    border: 1px dashed #adb5bd;
-    padding: 0.5rem;
-    border-radius: 4px;
-    color: #6c757d;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .add-collection-btn:hover {
-    background-color: #e9ecef;
-    color: #495057;
-  }
-  
-  /* 图标选择器 */
-  .icon-selection {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  .icon-option {
-    width: 40px;
-    height: 40px;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  
-  .icon-option.active {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-  }
-  
-  .icon-option i {
-    font-size: 1.2rem;
-    color: #495057;
-  }
-  
-  /* 搜索框样式 */
-  .search-section {
-    margin-bottom: 1.5rem;
-  }
-  
-  .search-container {
-    position: relative;
-    max-width: 300px;
-  }
-  
-  .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #aaa;
-  }
-  
-  .search-input {
-    width: 100%;
-    padding: 8px 10px 8px 35px;
-    border: 1px solid #ddd;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    transition: all 0.3s;
-  }
-  
-  .search-input:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
-  }
-  
-  /* 响应式调整 */
-  @media (max-width: 768px) {
-    .sidebar {
-      margin-bottom: 1.5rem;
-    }
-    
-    .sidebar-nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-    
-    .sidebar-item {
-      margin-bottom: 0;
-      flex-basis: calc(50% - 0.5rem);
-    }
-  }
-</style>
+<script th:src="@{/js/favorites.js}" type="text/javascript"></script>
 
 </body>
 </html>
