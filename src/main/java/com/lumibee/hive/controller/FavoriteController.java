@@ -62,7 +62,7 @@ public class FavoriteController {
     }
 
     @PostMapping("/create-folder")
-    public ResponseEntity<FavoriteResponse> createFolder(@RequestBody FavoriteRequestDTO request,
+    public ResponseEntity<?> createFolder(@RequestBody FavoriteRequestDTO request,
                                                          @AuthenticationPrincipal Principal principal) {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
@@ -71,9 +71,11 @@ public class FavoriteController {
         if (request.getFavoriteName() == null || request.getFavoriteName().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
-        FavoriteResponse response = favoriteService.createFavoriteAndAddArticle(
+        favoriteService.createFavoriteAndAddArticle(
                 currentUser.getId(), null, request.getFavoriteName()
         );
+
+        List<FavoriteDetailsDTO> response = favoriteService.getFavoritesByUserId(currentUser.getId());
 
         return ResponseEntity.ok(response);
     }

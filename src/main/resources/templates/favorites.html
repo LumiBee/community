@@ -72,23 +72,36 @@
 </div>
 
 <div class="modal fade" id="addCollectionModal" tabindex="-1" role="dialog" aria-labelledby="addCollectionModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addCollectionModalLabel">创建新收藏夹</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content modern-modal">
+      <div class="modal-header modern-header">
+        <div class="header-icon">
+          <i class="fas fa-folder-plus"></i>
+        </div>
+        <div class="header-content">
+          <h5 class="modal-title" id="addCollectionModalLabel">创建新收藏夹</h5>
+          <p class="modal-subtitle">为您的收藏添加一个新的分类</p>
+        </div>
+        <button type="button" class="close modern-close" data-dismiss="modal" aria-label="Close">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
-      <div class="modal-body">
-        <form id="addCollectionForm">
-          <div class="form-group">
-            <label for="collectionName">收藏夹名称</label>
-            <input type="text" class="form-control" id="collectionName" placeholder="输入收藏夹名称" required>
+      <div class="modal-body modern-body">
+        <div class="create-folder-section">
+          <div class="section-label">
+            <i class="fas fa-edit"></i>
+            <span>收藏夹名称</span>
           </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
-        <button type="button" class="btn btn-primary">创建</button>
+          <form id="addCollectionForm" class="create-folder-form" onsubmit="return false;">
+            <div class="input-wrapper">
+              <input type="text" class="form-control modern-input" id="collectionName" placeholder="输入收藏夹名称" required>
+              <button class="btn modern-create-btn" type="submit">
+                <i class="fas fa-plus"></i>
+                <span>创建收藏夹</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>

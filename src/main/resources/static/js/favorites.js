@@ -21,7 +21,8 @@
         }
 
         // 绑定模态框中“确认添加”按钮的事件
-        const confirmAddBtn = document.querySelector('#addCollectionModal .btn-primary');
+        // --- 已修复：将 .btn-primary 修改为 .modern-create-btn ---
+        const confirmAddBtn = document.querySelector('#addCollectionModal .modern-create-btn');
         if (confirmAddBtn) {
             confirmAddBtn.onclick = handleAddNewCollection;
         }
@@ -32,14 +33,15 @@
 
     /**
      * 从后端获取收藏夹列表并渲染到侧边栏
+     * @param {boolean} selectLast - 是否选中最后一个，默认为 false
      */
-    async function fetchAndRenderFolders() {
+    async function fetchAndRenderFolders(selectLast = false) {
         const listContainer = document.getElementById('favorite-folders-list');
         const spinner = document.getElementById('sidebar-loading-spinner');
         if (!listContainer || !spinner) return;
 
         spinner.style.display = 'block';
-        listContainer.innerHTML = ''; // 清空旧列表
+        listContainer.innerHTML = '';
         listContainer.appendChild(spinner);
 
         try {
@@ -48,21 +50,29 @@
 
             const folders = await response.json();
             spinner.style.display = 'none';
-            listContainer.innerHTML = ''; // 再次清空，准备渲染
+            listContainer.innerHTML = '';
 
             if (!folders || folders.length === 0) {
                 listContainer.innerHTML = '<li class="sidebar-item text-muted">暂无收藏夹</li>';
-                // 如果没有收藏夹，主内容区域也显示空状态
                 renderArticles([]);
             } else {
                 folders.forEach(folder => {
                     const listItem = createFolderListItem(folder);
                     listContainer.appendChild(listItem);
                 });
-                // 自动点击第一个收藏夹来加载其内容
-                const firstFolderElement = listContainer.querySelector('.sidebar-item');
-                if(firstFolderElement) {
-                    firstFolderElement.click();
+
+                // 根据 selectLast 参数决定选中哪一个
+                let elementToSelect = null;
+                if (selectLast) {
+                    // 选中最后一个
+                    elementToSelect = listContainer.querySelector('.sidebar-item:last-child');
+                } else {
+                    // 默认选中第一个
+                    elementToSelect = listContainer.querySelector('.sidebar-item:first-child');
+                }
+
+                if (elementToSelect) {
+                    elementToSelect.click();
                 }
             }
         } catch (error) {
@@ -186,7 +196,8 @@
     }
 
     /**
-     * 处理添加新收藏夹的逻辑
+     * 处理添加新收藏夹的逻辑 (最终修复版)
+     * @param {Event} event - 表单提交事件
      */
     async function handleAddNewCollection() {
         const collectionNameInput = document.getElementById('collectionName');
@@ -199,9 +210,13 @@
             return;
         }
 
-        const confirmBtn = document.querySelector('#addCollectionModal .btn-primary');
+        // --- 已修复：不再使用 event.target，而是直接获取按钮 ---
+        const confirmBtn = document.querySelector('#addCollectionModal .modern-create-btn');
+        if (!confirmBtn) return;
+
+        const originalBtnContent = confirmBtn.innerHTML;
         confirmBtn.disabled = true;
-        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 添加中...';
+        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 创建中...';
 
         try {
             const response = await fetch('/api/favorites/create-folder', {
@@ -213,23 +228,43 @@
                 body: JSON.stringify({ favoriteName: name })
             });
 
-            if (!response.ok) throw new Error('创建失败');
+            if (!response.ok) {
+                throw new Error('创建收藏夹失败，服务器返回错误。');
+            }
 
-            // 创建成功后，关闭模态框并刷新侧边栏列表
+            const updatedFolders = await response.json();
+            renderFoldersList(updatedFolders);
             if(window.jQuery) $('#addCollectionModal').modal('hide');
-            fetchAndRenderFolders();
 
         } catch (error) {
             console.error(error);
-            alert('创建收藏夹失败，请重试。');
+            alert('创建收藏夹失败，请稍后重试。');
         } finally {
             confirmBtn.disabled = false;
-            confirmBtn.textContent = '添加';
+            confirmBtn.innerHTML = originalBtnContent;
             if (collectionNameInput) collectionNameInput.value = '';
         }
     }
 
+    function renderFoldersList(folders) {
+        const listContainer = document.getElementById('favorite-folders-list');
+        listContainer.innerHTML = ''; // 清空
 
+        if (!folders || folders.length === 0) {
+            listContainer.innerHTML = '<li class="sidebar-item text-muted">暂无收藏夹</li>';
+            renderArticles([]);
+        } else {
+            folders.forEach(folder => {
+                const listItem = createFolderListItem(folder);
+                listContainer.appendChild(listItem);
+            });
+            // 自动点击第一个
+            const firstFolderElement = listContainer.querySelector('.sidebar-item');
+            if (firstFolderElement) {
+                firstFolderElement.click();
+            }
+        }
+    }
     function showAddCollectionModal() {
         if (window.jQuery) $('#addCollectionModal').modal('show');
     }
