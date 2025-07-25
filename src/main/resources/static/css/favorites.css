@@ -362,7 +362,7 @@
     align-items: center;
     padding: 12px 24px;
     background: #f8f8f8; /* 按钮更亮 */
-    color: #555;
+    color: #7c7b7b;
     border-radius: 25px;
     text-decoration: none;
     font-weight: 600;
@@ -412,6 +412,7 @@
     color: #666;
     display: flex;
     align-items: center;
+    justify-content: space-between; /* <-- MODIFIED: space out content and actions */
     font-size: 0.9rem;
     font-weight: 500;
     position: relative;
@@ -421,6 +422,15 @@
 .sidebar-item::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(0,0,0,0.03), transparent); transition: left 0.5s; }
 .sidebar-item:hover::before { left: 100%; }
 .sidebar-item i { margin-right: 0.8rem; width: 18px; text-align: center; transition: all 0.3s ease; color: #bbb; }
+
+.folder-name { /* <-- NEW */
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* 选中/悬停时变回黄色主题 */
 .sidebar-item:hover {
     background: linear-gradient(135deg, rgba(255,193,7,0.1), rgba(255,193,7,0.05));
@@ -437,6 +447,59 @@
     border-left: 3px solid #ff8f00;
 }
 .sidebar-item.active i { color: white; transform: scale(1.1); }
+
+
+/* --- NEW: Sidebar Folder Action Buttons --- */
+.folder-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0; /* Initially hidden */
+    transform: translateX(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.sidebar-item:hover .folder-actions {
+    opacity: 1; /* Show on hover */
+    transform: translateX(0);
+}
+
+.btn-folder-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background-color: rgba(0,0,0,0.05);
+    color: #888;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.75rem;
+}
+
+.btn-folder-action:hover {
+    transform: scale(1.1);
+    color: white;
+}
+
+.btn-edit-folder:hover {
+    background-color: #007bff; /* A nice blue for edit */
+}
+
+.btn-delete-folder:hover {
+    background-color: #dc3545; /* A standard red for delete */
+}
+
+.btn-delete-folder:hover {
+    background-color: #dc3545;
+}
+
+.btn-folder-action i {
+    margin: 0;
+}
+
 
 /* 添加收藏按钮 */
 .custom-collections { margin-top: 2rem; border-top: 1px solid rgba(0,0,0,0.05); padding-top: 1.5rem; }
@@ -622,7 +685,7 @@
 }
 
 .modern-create-btn {
-    background: linear-gradient(135deg, #20c997, #38d39f);
+    background: linear-gradient(135deg, #f6c609, #e0e026);
     color: white;
     border: none;
     border-radius: 12px;
@@ -644,6 +707,10 @@
 
 .modern-create-btn:active {
     transform: translateY(0);
+}
+
+.bookmark {
+    color: #ffc107;
 }
 
 /* 响应式调整 */

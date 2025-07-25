@@ -1,0 +1,2 @@
+ALTER TABLE favorites
+DROP COLUMN slug;

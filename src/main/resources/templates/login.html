@@ -10,18 +10,6 @@
 
 <div th:replace="~{fragments/header :: navbar}"></div>
 
-<div aria-live="polite" aria-atomic="true" class="toast-container-wrapper">
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000" id="signupSuccessToast" style="display: none;">
-        <div class="toast-header">
-            <strong class="mr-auto">注册成功！</strong>
-            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
-        <div class="toast-body" id="signupSuccessToastBody"></div>
-    </div>
-</div>
-
 <div class="auth-page-wrapper">
     <div class="auth-container">
         <div class="auth-form-section">
@@ -29,6 +17,7 @@
                 <img src="/img/logo.png" alt="Hive Logo">
             </div>
 
+            <!-- 登录表单 -->
             <form th:action="@{/login-process}" method="post">
                 <div class="form-group">
                     <label for="accountInput">账号 (邮箱或用户名)</label>
@@ -72,10 +61,12 @@
                 </button>
             </form>
 
+            <!-- 跳转注册页面 -->
             <div class="auth-links">
                 <p>还没有账户？ <a th:href="@{/signup}">立即注册</a></p>
             </div>
 
+            <!-- oauth2登录 -->
             <div class="social-login">
                 <p>或通过以下方式登录</p>
                 <div>
@@ -88,7 +79,8 @@
                 </div>
             </div>
         </div>
-        
+
+        <!-- 欢迎词 -->
         <div class="auth-info-section">
         <h2>欢迎来到 LumiHive!</h2>
         <p>
@@ -110,74 +102,7 @@
 <script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
-
-<script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-        // 明确检查服务器传递的标志
-        var showToastFlag = /*[[${showSignupSuccessPopup}]]*/ false;
-        var toastMsg = /*[[${popupMessage}]]*/ null;
-
-        // 确保只有当showToastFlag为true且有消息内容时才显示弹窗
-        if (showToastFlag === true && toastMsg && toastMsg.length > 0) {
-            const toastBodyElement = document.getElementById('signupSuccessToastBody');
-            if (toastBodyElement) {
-                toastBodyElement.textContent = toastMsg;
-            }
-
-            const toastElement = $('#signupSuccessToast');
-            if (toastElement.length) {
-                // 确保弹窗可见
-                toastElement.css('display', 'block');
-                
-                // 初始化Bootstrap的toast组件
-                toastElement.toast({
-                    animation: true,
-                    autohide: true,
-                    delay: 7000
-                });
-
-                // 显示弹窗
-                toastElement.toast('show');
-                
-                // 确保关闭按钮正常工作
-                $('.toast .close').on('click', function() {
-                    toastElement.toast('hide');
-                });
-                
-                // 当弹窗隐藏时，确保它被完全移除
-                toastElement.on('hidden.bs.toast', function () {
-                    toastElement.css('display', 'none');
-                });
-            }
-        }
-        
-        // 密码可见性切换
-        const togglePassword = document.getElementById('togglePassword');
-        const password = document.getElementById('password');
-
-        if(togglePassword && password) {
-            togglePassword.addEventListener('click', function() {
-                // 判断当前密码框的类型
-                const isPassword = password.getAttribute('type') === 'password';
-                const icon = this.querySelector('i');
-
-                if (isPassword) {
-                    // 如果是密码，就变成文本
-                    password.setAttribute('type', 'text');
-                    // 图标变成“闭眼”
-                    icon.classList.remove('fa-eye');
-                    icon.classList.add('fa-eye-slash');
-                } else {
-                    // 如果是文本，就变回密码
-                    password.setAttribute('type', 'password');
-                    // 图标变回“睁眼”
-                    icon.classList.remove('fa-eye-slash');
-                    icon.classList.add('fa-eye');
-                }
-            });
-        }
-    });
-</script>
+<script th:src="@{/js/login.js}" type="module"></script>
 
 </body>
 </html>

@@ -79,78 +79,11 @@
                 </li>
             </ul>
         </nav>
-
     </div>
 </div>
 
 <div th:replace="~{fragments/footer :: page-footer}"></div>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
-<script th:inline="javascript">
-    /*<![CDATA[*/
-    document.addEventListener('DOMContentLoaded', function () {
-        const deleteButtons = document.querySelectorAll('.delete-draft-btn');
-
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function (event) {
-                event.preventDefault();
-                const draftId = this.getAttribute('data-draft-id');
-                deleteDraft(draftId);
-            });
-        });
-    });
-
-    function deleteDraft(draftId) {
-        Swal.fire({
-            title: '您确定要删除这篇草稿吗？',
-            text: "这个操作是不可逆的!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '是的，删除!',
-            cancelButtonText: '取消'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
-                const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
-
-                fetch(`/api/article/${draftId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        [header]: token
-                    }
-                }).then(response => {
-                    if (response.ok) {
-                        Swal.fire(
-                            '已删除!',
-                            '您的草稿已经被删除。',
-                            'success'
-                        ).then(() => {
-                            // 移除页面上的草稿项
-                            const articleElement = document.querySelector(`.article-item[data-article-id='${draftId}']`);
-                            if(articleElement) {
-                                articleElement.remove();
-                            }
-                        });
-                    } else {
-                        Swal.fire(
-                            '删除失败!',
-                            '删除过程中发生错误。',
-                            'error'
-                        );
-                    }
-                }).catch(error => {
-                    Swal.fire(
-                        '删除失败!',
-                        '网络请求失败，请稍后再试。',
-                        'error'
-                    );
-                });
-            }
-        });
-    }
-    /*]]>*/
-</script>
-
+<script th:src="@{/js/drafts.js}" type="module"></script>
 </body>
 </html>

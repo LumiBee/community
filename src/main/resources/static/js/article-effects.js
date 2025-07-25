@@ -1,33 +1,206 @@
+import { showToast } from './common-utils.js';
 
-// --- 1. 页面加载主入口 ---
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("LumiHive :: article-effects.js :: DOM fully loaded. Initializing all features.");
+    // 设置统一的事件委托监听器（点击事件）
+    document.addEventListener('click', handleDelegatedClicks);
 
-    // 初始化文章页面的各种UI效果和功能
-    initializeArticlePage();
+    // 设置统一的事件委托监听器（提交评论表单）
+    document.addEventListener('submit', handleDelegatedSubmits);
 
-    // 初始化全新的动态评论系统
+    // 初始化非委托的、页面加载时就需要执行的功能
+    initializePageFeatures();
+
+    // 初始化动态评论系统
     initializeCommentSection();
 });
 
 
 /**
- * 初始化文章页面的所有非评论功能
+ * =========================================================================
+ * 事件委托处理函数（点击事件）
+ * =========================================================================
+ * @param {Event} event - 点击事件对象
  */
-function initializeArticlePage() {
-    // 为所有pre标签添加复制按钮
+function handleDelegatedClicks(event) {
+    const target = event.target;
+
+    // --- 处理关注按钮 ---
+    const followButton = target.closest('.js-toggle-follow');
+    if (followButton) {
+        const userId = followButton.dataset.userId;
+        toggleFollow(userId, followButton);
+        return;
+    }
+
+    // --- 处理点赞按钮 ---
+    const likeButton = target.closest('.js-toggle-like');
+    if (likeButton) {
+        event.preventDefault();
+        toggleLike(event, likeButton);
+        return;
+    }
+
+    // --- 处理微博分享按钮 ---
+    const shareWeiboButton = target.closest('.js-share-weibo');
+    if (shareWeiboButton) {
+        shareToWeibo();
+        return;
+    }
+
+    // --- 处理复制链接按钮 ---
+    const copyLinkButton = target.closest('.js-copy-link');
+    if (copyLinkButton) {
+        copyLink();
+        return;
+    }
+
+    // --- 处理代码块的复制按钮 ---
+    const copyCodeButton = target.closest('pre > .copy-btn');
+    if (copyCodeButton) {
+        const pre = copyCodeButton.parentElement;
+        navigator.clipboard.writeText(pre.innerText.replace('复制', '').trim()).then(() => {
+            copyCodeButton.textContent = '已复制!';
+            setTimeout(() => { copyCodeButton.textContent = '复制'; }, 2000);
+        }).catch(err => console.error('复制失败', err));
+        return;
+    }
+
+    // --- 处理收藏按钮 ---
+    const favoriteButton = target.closest('.js-favorite-button');
+    if (favoriteButton) {
+        handleFavoriteClick(favoriteButton);
+        return;
+    }
+
+    // --- 处理弹窗中的“添加到已有收藏夹”按钮 ---
+    const addToFolderButton = target.closest('.js-add-to-folder');
+    if (addToFolderButton) {
+        const folderId = addToFolderButton.dataset.folderId;
+        const modalElement = document.getElementById('favoriteModal');
+        const articleId = modalElement.dataset.articleId;
+
+        if (articleId && folderId) {
+            const mainFavoriteButton = document.querySelector(`.js-favorite-button[data-article-id="${articleId}"]`);
+            if (mainFavoriteButton) {
+                addArticleToExistingFolder(articleId, folderId, mainFavoriteButton);
+            } else {
+                console.error("无法在页面上找到主收藏按钮。");
+                showToast('发生未知错误', 'error');
+            }
+        } else {
+            console.error("数据不完整，无法执行收藏操作。 articleId:", articleId, "folderId:", folderId);
+            showToast('操作失败：缺少关键数据', 'error');
+        }
+        return;
+    }
+
+    // --- 处理弹窗中的“创建并收藏”按钮 ---
+    const createAndAddButton = target.closest('#create-and-add-btn');
+    if (createAndAddButton) {
+        createNewFavoriteAndAddArticle(createAndAddButton);
+        return;
+    }
+
+    // --- 处理侧边栏的评论按钮点击 ---
+    const scrollToCommentsButton = target.closest('.js-scroll-to-comments');
+    if (scrollToCommentsButton) {
+        event.preventDefault(); // 阻止默认行为
+        const commentsSection = document.getElementById('comments-section');
+        if (commentsSection) {
+            commentsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        return;
+    }
+
+    // --- 处理评论区的“回复”按钮 ---
+    const replyButton = target.closest('.reply-btn');
+    if (replyButton) {
+        const articleId = document.querySelector('meta[name="article-id"]')?.getAttribute('content');
+        if (articleId) {
+            showReplyForm(replyButton, articleId);
+        }
+        return;
+    }
+
+    // --- 处理动态创建的“取消回复”按钮 ---
+    const cancelReplyButton = target.closest('.cancel-reply-btn');
+    if (cancelReplyButton) {
+        const formContainer = cancelReplyButton.closest('.reply-form-container');
+        if (formContainer) {
+            formContainer.innerHTML = '';
+        }
+    }
+}
+
+/**
+ * =========================================================================
+ * 事件委托处理函数（提交表单事件）
+ * =========================================================================
+ * @param {Event} event - 提交表单事件对象
+ */
+function handleDelegatedSubmits(event) {
+    const form = event.target;
+
+    // --- 处理主评论表单的提交 ---
+    if (form.matches('#commentForm')) {
+        event.preventDefault();
+        const articleId = document.querySelector('meta[name="article-id"]')?.getAttribute('content');
+        const contentTextarea = document.getElementById('commentContent');
+        const content = contentTextarea.value.trim();
+        if (content && articleId) {
+            submitComment(articleId, content, null)
+                .then(data => {
+                    if (data.success) {
+                        contentTextarea.value = '';
+                        loadComments(articleId);
+                    } else {
+                        showToast('评论失败: ' + (data.message || '未知错误'), 'error');
+                    }
+                })
+                .catch(err => {
+                    showToast('评论失败: ' + err.message, 'error');
+                });
+        }
+    }
+
+    // --- 处理回复表单的提交 ---
+    if (form.matches('.reply-form')) {
+        event.preventDefault();
+        const articleId = document.querySelector('meta[name="article-id"]')?.getAttribute('content');
+        const parentId = form.dataset.parentId;
+        const content = form.querySelector('textarea').value.trim();
+        if (content && articleId && parentId) {
+            submitComment(articleId, content, parentId)
+                .then(() => {
+                    const container = form.parentElement;
+                    if(container) container.innerHTML = '';
+                    loadComments(articleId);
+                })
+                .catch(err => showToast('回复失败: ' + err.message, 'error'));
+        }
+    }
+}
+
+/**
+ * =========================================================================
+ * 初始化页面加载时就需要执行的、非委托的功能
+ * =========================================================================
+ */
+function initializePageFeatures() {
+    // 为所有 pre 标签添加复制按钮
     document.querySelectorAll('article.article-post pre').forEach(pre => {
-        if (pre.innerText.trim().length === 0) return;
+        // 检查 pre 标签内是否真的有代码（排除只有按钮的情况）
+        const codeText = pre.innerText.replace(pre.querySelector('.copy-btn')?.textContent || '', '').trim();
+        if (codeText.length === 0) return;
+
+        // 如果已经有按钮，则不再添加
+        if (pre.querySelector('.copy-btn')) return;
+
         const button = document.createElement('button');
         button.className = 'copy-btn';
         button.textContent = '复制';
         pre.appendChild(button);
-        button.addEventListener('click', () => {
-            navigator.clipboard.writeText(pre.innerText).then(() => {
-                button.textContent = '已复制!';
-                setTimeout(() => { button.textContent = '复制'; }, 2000);
-            }).catch(err => console.error('复制失败', err));
-        });
     });
 
     // 返回顶部功能
@@ -56,38 +229,28 @@ function initializeArticlePage() {
 }
 
 
-// 自定义toast函数
-function showToast(title, message, icon = 'info-circle', iconClass = 'text-info') {
-    const toast = document.getElementById('customToast');
-    if (!toast) return;
-    document.getElementById('customToastTitle').textContent = title;
-    document.getElementById('customToastMessage').textContent = message;
-    document.getElementById('customToastIcon').className = `fas fa-${icon} ${iconClass} mr-2`;
-    toast.style.display = 'block';
-    setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
+/* ==========================================================================
+   业务逻辑函数
+   ========================================================================== */
 
-function hideCustomToast() {
-    const toast = document.getElementById('customToast');
-    if (toast) {
-        toast.style.display = 'none';
-    }
-}
-
-// 点赞功能
-async function toggleLike(event) {
-    const likeButton = event.currentTarget;
-    const likeCountSpan = document.getElementById('likeCount');
-    const articleId = likeButton.getAttribute('data-article-id');
+// --- 点赞功能 ---
+async function toggleLike(event, buttonElement) {
+    event.stopPropagation();
+    const likeCountSpan = buttonElement.querySelector('.like-count');
+    const articleId = buttonElement.dataset.articleId;
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
 
+    if (!likeCountSpan) {
+        console.error("点赞功能错误: 未找到点赞计数元素。请检查HTML结构。");
+        return;
+    }
     if (!token || !header) {
-        alert("安全令牌丢失，请刷新页面！");
+        showToast('安全令牌丢失，请刷新页面后重试!', 'error');
         return;
     }
 
-    likeButton.disabled = true;
+    buttonElement.disabled = true;
     try {
         const response = await fetch(`/api/article/${articleId}/like`, {
             method: 'POST',
@@ -97,153 +260,103 @@ async function toggleLike(event) {
         const data = await response.json();
         if (data.success) {
             likeCountSpan.textContent = data.likeCount;
-            if (data.liked) {
-                likeButton.classList.add('btn-danger');
-                likeButton.classList.remove('btn-outline-danger');
-            } else {
-                likeButton.classList.add('btn-outline-danger');
-                likeButton.classList.remove('btn-danger');
-            }
+            buttonElement.classList.toggle('btn-danger', data.liked);
+            buttonElement.classList.toggle('btn-outline-danger', !data.liked);
         }
     } catch (error) {
         console.error('点赞操作失败:', error);
-        alert("操作失败，请稍后重试。");
+        showToast(error.message || '操作失败，请稍后再试。', 'error');
     } finally {
-        likeButton.disabled = false;
+        buttonElement.disabled = false;
     }
 }
 
-// 更新关注按钮的UI状态
+// --- 关注功能 ---
 function updateFollowButtonUI(buttonElement, isFollowing) {
     const icon = buttonElement.querySelector('i');
     const textSpan = buttonElement.querySelector('span');
-
-    // 1. 定义两种状态下的UI数据
     const states = {
-        followed: {
-            btnClass: 'btn-secondary',
-            iconClass: 'fas fa-user-check',
-            text: ' 已关注'
-        },
-        notFollowed: {
-            btnClass: 'btn-outline-primary',
-            iconClass: 'fas fa-user-plus',
-            text: ' 关注'
-        }
+        followed: { btnClass: 'btn-secondary', iconClass: 'fas fa-user-check', text: ' 已关注' },
+        notFollowed: { btnClass: 'btn-outline-primary', iconClass: 'fas fa-user-plus', text: ' 关注' }
     };
-
-    // 2. 根据状态选择对应的数据
     const currentState = isFollowing ? states.followed : states.notFollowed;
     const otherState = isFollowing ? states.notFollowed : states.followed;
 
-    // 3. 应用新的UI状态
     buttonElement.classList.remove(otherState.btnClass);
     buttonElement.classList.add(currentState.btnClass);
     if (icon) icon.className = currentState.iconClass;
     if (textSpan) textSpan.textContent = currentState.text;
 }
 
-
-/**
- * 切换用户的关注状态
- * @param {number} userId - 被关注用户的ID
- * @param {HTMLElement} buttonElement - 被点击的关注按钮
- */
 async function toggleFollow(userId, buttonElement) {
-    // --- 1. 前置校验 ---
     const currentUserId = document.querySelector('meta[name="current-user-id"]')?.getAttribute("content");
     if (currentUserId && currentUserId === String(userId)) {
-        showToast('提示', '不能关注自己喵，试试关注其他作者吧！', 'warning');
+        showToast('不能关注自己喵，试试关注其他作者吧！', 'warning');
         return;
     }
 
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
     if (!token || !header) {
-        alert("安全令牌丢失，请刷新页面！");
+        showToast("安全令牌丢失，请刷新页面！", 'error');
         return;
     }
 
-    // --- 2. 发送API请求 ---
     buttonElement.disabled = true;
     try {
         const response = await fetch(`/api/user/${userId}/follow`, {
             method: 'POST',
             headers: { [header]: token }
         });
-
-        if (!response.ok) {
-            throw new Error(`服务器响应失败: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`服务器响应失败: ${response.status}`);
         const data = await response.json();
-
-        // --- 3. 处理响应并更新UI ---
         if (data.success) {
-            // 调用独立的UI更新函数
             updateFollowButtonUI(buttonElement, data.isFollowing);
-
-            // 显示成功提示
             if (data.message) {
-                const toastType = data.isFollowing ? 'success' : 'info';
-                showToast('关注状态', data.message, toastType);
+                showToast(data.message, data.isFollowing ? 'success' : 'info');
             }
         } else {
-            // 显示失败提示
-            showToast('提示', data.message || '操作失败，请稍后再试。', 'warning');
+            showToast(data.message || '操作失败，请稍后再试。', 'error');
         }
-
     } catch (error) {
         console.error('关注操作失败:', error);
-        showToast('错误', '操作失败，请稍后重试。', 'error');
+        showToast('操作失败，请稍后重试。', 'error');
     } finally {
-        // --- 4. 无论成功失败，最后都恢复按钮可用 ---
         buttonElement.disabled = false;
     }
 }
 
-// 收藏功能
-// 总的点击处理函数
+// --- 收藏功能 ---
 function handleFavoriteClick(buttonElement) {
     const isFavorited = buttonElement.getAttribute('data-is-favorited') === 'true';
     const articleId = buttonElement.getAttribute('data-article-id');
-
     if (isFavorited) {
-        // 如果已收藏，则执行取消全部收藏的操作
         removeAllFavorites(articleId, buttonElement);
     } else {
-        // 如果未收藏，则打开选择收藏夹的模态框
         openFavoriteModal(articleId, buttonElement);
     }
 }
 
-// 1. 打开并填充收藏夹模态框
 async function openFavoriteModal(articleId, buttonElement) {
     const modal = $('#favoriteModal');
     modal.modal('show');
-    modal.data('article-id', articleId); // 将 articleId 存储在模态框上
-
-    modal.data('main-button-element', buttonElement);
+    document.getElementById('favoriteModal').dataset.articleId = articleId;
     const listContainer = document.getElementById('favorite-folders-list');
     listContainer.innerHTML = `<div class="text-center"><div class="spinner-border text-primary" role="status"></div></div>`;
 
     try {
         const response = await fetch('/api/favorites/my-folders');
-        if (!response.ok) {
-            if (response.status === 401) throw new Error('请先登录');
-            throw new Error('无法获取收藏夹列表');
-        }
+        if (!response.ok) throw new Error(response.status === 401 ? '请先登录' : '无法获取收藏夹列表');
         const folders = await response.json();
-        listContainer.innerHTML = ''; // 清空加载动画
-
+        listContainer.innerHTML = '';
         if (folders.length === 0) {
-            listContainer.innerHTML = '<p class="text-muted">您还没有创建任何收藏夹。</p>';
+            listContainer.innerHTML = '<p class="text-muted">您还没有创建收藏夹。</p>';
         } else {
             folders.forEach(folder => {
                 const folderEl = document.createElement('button');
-                folderEl.className = 'btn btn-outline-primary btn-block text-left mb-2';
+                folderEl.className = 'btn btn-outline-primary btn-block text-left mb-2 js-add-to-folder';
                 folderEl.textContent = folder.name;
-                folderEl.onclick = () => addArticleToExistingFolder(articleId, folder.id, buttonElement);
+                folderEl.dataset.folderId = folder.id;
                 listContainer.appendChild(folderEl);
             });
         }
@@ -252,94 +365,81 @@ async function openFavoriteModal(articleId, buttonElement) {
     }
 }
 
-// 2. 将文章添加到已存在的收藏夹
 async function addArticleToExistingFolder(articleId, favoriteId, buttonElement) {
-    showToast('提示', '正在收藏...', 'info');
+    console.log(favoriteId);
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
-
     try {
         const response = await fetch('/api/favorites/add-to-folder', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', [header]: token },
             body: JSON.stringify({ articleId, favoriteId })
         });
+        console.log(response.status);
         const result = await response.json();
+        console.log(result);
         if (result.success) {
-            showToast('成功', result.message, 'success');
+            showToast(result.message, 'success');
             $('#favoriteModal').modal('hide');
-            // 收藏成功后，更新按钮状态
             updateFavoriteButtonUI(buttonElement, true, result.articlesCount);
         } else {
-            showToast('失败', result.message, 'warning');
+            showToast(result.message, 'error');
         }
     } catch (err) {
-        showToast('错误', '网络请求失败', 'error');
+        showToast('网络请求失败', 'error');
     }
 }
 
-// 3. 创建新收藏夹并添加文章 (绑定到按钮)
-document.addEventListener('DOMContentLoaded', function() {
-});
-
 async function createNewFavoriteAndAddArticle(buttonElement) {
     const newNameInput = document.getElementById('new-favorite-name');
-
-    // 如果因为某些原因还是找不到元素，我们可以提前给出更明确的提示
     if (!newNameInput) {
-        console.error("代码错误: 无法找到ID为 'new-favorite-name' 的输入框！");
-        showToast('错误', '页面存在一个错误，请联系管理员。', 'error');
+        showToast('页面存在一个错误，请联系管理员。', 'error');
         return;
     }
-
-    const FavoriteName = newNameInput.value.trim();
-    const articleId = $('#favoriteModal').data('article-id');
-    const mainFavoriteButton = $('#favoriteModal').data('main-button-element');
-
-    if (!FavoriteName) {
-        showToast('提示', '收藏夹名称不能为空！', 'warning');
+    const favoriteName = newNameInput.value.trim();
+    const articleId = document.getElementById('favoriteModal').dataset.articleId;
+    if (!favoriteName) {
+        showToast('收藏夹名称不能为空！', 'error');
+        return;
+    }
+    if (!articleId) {
+        showToast('无法获取文章ID，请刷新页面后重试。', 'error');
         return;
     }
 
     buttonElement.disabled = true;
     buttonElement.textContent = '创建中...';
-
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
-
     try {
         const response = await fetch('/api/favorites/create-and-add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', [header]: token },
-            body: JSON.stringify({ articleId: articleId, favoriteName: FavoriteName })
+            body: JSON.stringify({ articleId: articleId, favoriteName: favoriteName })
         });
         const result = await response.json();
-
         if (result.success) {
-            showToast('成功', result.message, 'success');
+            showToast(result.message, 'success');
             $('#favoriteModal').modal('hide');
             newNameInput.value = '';
-
+            const mainFavoriteButton = document.querySelector(`.js-favorite-button[data-article-id="${articleId}"]`);
             if (mainFavoriteButton) {
                 updateFavoriteButtonUI(mainFavoriteButton, true, result.articlesCount);
             }
         } else {
-            showToast('失败', result.message, 'error');
+            showToast(result.message, 'error');
         }
     } catch (err) {
-        showToast('错误', '网络请求失败', 'error');
+        showToast('网络请求失败', 'error');
     } finally {
         buttonElement.disabled = false;
         buttonElement.textContent = '创建并收藏';
     }
 }
 
-
-// 4. 取消对该文章的所有收藏
 async function removeAllFavorites(articleId, buttonElement) {
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
-
     try {
         const response = await fetch(`/api/favorites/remove-all/${articleId}`, {
             method: 'DELETE',
@@ -347,99 +447,69 @@ async function removeAllFavorites(articleId, buttonElement) {
         });
         const result = await response.json();
         if (result.success) {
-            showToast('成功', result.message, 'info');
+            showToast(result.message, 'success');
             updateFavoriteButtonUI(buttonElement, false);
         } else {
-            showToast('失败', result.message, 'error');
+            showToast(result.message, 'error');
         }
     } catch (err) {
-        showToast('错误', '网络请求失败', 'error');
+        showToast('网络请求失败', 'error');
     }
 }
 
-// 5. 统一的UI更新函数
 function updateFavoriteButtonUI(buttonElement, isFavorited, newCount) {
     const icon = buttonElement.querySelector('i');
     const countSpan = document.getElementById('favoriteCount');
+    if (!countSpan) return;
     let currentCount = parseInt(countSpan.textContent, 10);
-
     buttonElement.setAttribute('data-is-favorited', isFavorited);
-
     if (isFavorited) {
-        buttonElement.classList.remove('btn-outline-primary');
-        buttonElement.classList.add('btn-primary');
-        icon.classList.remove('far');
-        icon.classList.add('fas');
-        if (newCount !== null && newCount !== undefined) {
-            countSpan.textContent = newCount;
-        } else {
-            countSpan.textContent = currentCount + 1;
-        }
+        buttonElement.classList.replace('btn-outline-primary', 'btn-primary');
+        icon.classList.replace('far', 'fas');
+        countSpan.textContent = newCount !== null && newCount !== undefined ? newCount : currentCount + 1;
     } else {
-        buttonElement.classList.remove('btn-primary');
-        buttonElement.classList.add('btn-outline-primary');
-        icon.classList.remove('fas');
-        icon.classList.add('far');
-        countSpan.textContent = Math.max(0, currentCount - 1); // 避免变为负数
+        buttonElement.classList.replace('btn-primary', 'btn-outline-primary');
+        icon.classList.replace('fas', 'far');
+        countSpan.textContent = Math.max(0, currentCount - 1);
     }
 }
 
-// 分享功能
+// --- 分享功能 ---
 function shareToWeibo() {
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent(document.title);
     window.open(`https://service.weibo.com/share/share.php?url=${url}&title=${title}`);
 }
-
 function copyLink() {
     navigator.clipboard.writeText(window.location.href).then(() => {
-        alert('链接已复制到剪贴板');
+        showToast('链接已复制到剪贴板', 'success');
     });
-}
-
-function scrollToComments() {
-    const commentsSection = document.getElementById('comments-section');
-    if (commentsSection) {
-        commentsSection.scrollIntoView({ behavior: 'smooth' });
-    }
 }
 
 // --- 右侧目录导航功能 ---
 function generateTableOfContents() {
     const articleContent = document.querySelector('.article-content');
     const headings = articleContent ? Array.from(articleContent.querySelectorAll('h2, h3, h4')) : [];
-
-    // 如果页面上没有标题，则不生成目录
     if (headings.length < 1) return;
 
-    // 1. 创建右侧边栏容器
     const rightSidebar = document.createElement('div');
-    rightSidebar.className = 'col-lg-2 d-none d-lg-block pl-lg-4'; // 在大屏幕上显示
+    rightSidebar.className = 'col-lg-2 d-none d-lg-block pl-lg-4';
     rightSidebar.style.paddingLeft = '0';
-
-    // 2. 创建固定容器
     const stickyContainer = document.createElement('div');
     stickyContainer.className = 'sticky-top';
     stickyContainer.style.top = '80px';
     rightSidebar.appendChild(stickyContainer);
-
-    // 3. 创建目录容器
     const tocContainer = document.createElement('div');
     tocContainer.className = 'toc-sidebar';
     tocContainer.id = 'toc-sidebar';
     stickyContainer.appendChild(tocContainer);
-
-    // 4. 创建目录标题
     const tocHeader = document.createElement('div');
     tocHeader.className = 'toc-header';
     tocHeader.innerHTML = '<h5>文章目录</h5>';
     tocContainer.appendChild(tocHeader);
-
-    // 5. 创建目录列表
     const tocList = document.createElement('ul');
     tocList.className = 'toc-list';
 
-    // 6. 为每个标题创建目录项
     headings.forEach((heading, index) => {
         const id = `heading-${index}`;
         heading.id = id;
@@ -463,27 +533,20 @@ function generateTableOfContents() {
     });
 
     tocContainer.appendChild(tocList);
-
-    // 7. 将整个侧边栏添加到页面布局中
     const articleRow = document.querySelector('.container-fluid .row');
     if (articleRow) {
         articleRow.appendChild(rightSidebar);
-        // 为目录注入CSS样式
         const style = document.createElement('style');
-        style.textContent = `
-            .toc-sidebar{background-color:#f8f9fa;border-radius:8px;padding:1.25rem;border-left:4px solid #ffda58;max-height:calc(100vh - 100px);overflow-y:auto;}.toc-header h5{margin-top:0;margin-bottom:1rem;font-size:1.1rem;font-weight:600;}.toc-list{list-style:none;padding-left:0;margin-bottom:0;}.toc-item{margin-bottom:0.5rem;line-height:1.3;}.toc-item a{color:#4a5568;text-decoration:none;transition:all .2s ease;display:block;padding:.25rem 0;border-bottom:none;font-size:.9rem;}.toc-item a:hover{color:#ffda58;transform:translateX(3px);}.toc-item.active a{color:#ffda58;font-weight:600;}.toc-h3{padding-left:1rem;font-size:.85rem;}.toc-h4{padding-left:2rem;font-size:.8rem;}@media (max-width:991.98px){.toc-sidebar{display:none;}}
-        `;
+        style.textContent = `.toc-sidebar{background-color:#f8f9fa;border-radius:8px;padding:1.25rem;border-left:4px solid #ffda58;max-height:calc(100vh - 100px);overflow-y:auto;}.toc-header h5{margin-top:0;margin-bottom:1rem;font-size:1.1rem;font-weight:600;}.toc-list{list-style:none;padding-left:0;margin-bottom:0;}.toc-item{margin-bottom:0.5rem;line-height:1.3;}.toc-item a{color:#4a5568;text-decoration:none;transition:all .2s ease;display:block;padding:.25rem 0;border-bottom:none;font-size:.9rem;}.toc-item a:hover{color:#ffda58;transform:translateX(3px);}.toc-item.active a{color:#ffda58;font-weight:600;}.toc-h3{padding-left:1rem;font-size:.85rem;}.toc-h4{padding-left:2rem;font-size:.8rem;}@media (max-width:991.98px){.toc-sidebar{display:none;}}`;
         document.head.appendChild(style);
-        setupScrollSpy(); // 设置滚动监听
+        setupScrollSpy();
     }
 }
 
-// 目录滚动监听
 function setupScrollSpy() {
     const headings = document.querySelectorAll('.article-content h2, .article-content h3, .article-content h4');
     if (headings.length === 0) return;
     const tocLinks = document.querySelectorAll('.toc-item a');
-
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -496,26 +559,18 @@ function setupScrollSpy() {
             }
         });
     }, { rootMargin: '-80px 0px -60% 0px' });
-
     headings.forEach(heading => observer.observe(heading));
 }
 
 // --- 动态评论区功能 ---
 function initializeCommentSection() {
     const articleIdMeta = document.querySelector('meta[name="article-id"]');
-    if (!articleIdMeta) {
-        console.error("评论功能错误: 页面缺少 <meta name='article-id'> 标签。");
-        return;
-    }
+    if (!articleIdMeta) return;
     const articleId = articleIdMeta.getAttribute('content');
     loadComments(articleId);
 
     const mainCommentForm = document.getElementById('commentForm');
     if (mainCommentForm) {
-        // 先移除可能存在的旧的jQuery事件监听器，避免冲突
-        if (window.jQuery) {
-            $(mainCommentForm).off('submit');
-        }
         mainCommentForm.addEventListener('submit', function (e) {
             e.preventDefault();
             const contentTextarea = document.getElementById('commentContent');
@@ -527,12 +582,11 @@ function initializeCommentSection() {
                             contentTextarea.value = '';
                             loadComments(articleId);
                         } else {
-                            alert('评论失败: ' + (data.message || '未知错误'));
+                            showToast('评论失败: ' + (data.message || '未知错误'), 'error');
                         }
                     })
                     .catch(err => {
-                        console.error("评论提交失败:", err);
-                        alert('评论失败: ' + err.message);
+                        showToast('评论失败: ' + err.message, 'error');
                     });
             }
         });
@@ -563,22 +617,16 @@ async function submitComment(articleId, content, parentId) {
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
     if (!token || !header) throw new Error("安全令牌(CSRF Token)丢失，请刷新页面后重试。");
-
     const payload = { content: content, parentId: parentId };
     const response = await fetch(`/api/article/${articleId}/comment`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', [header]: token },
         body: JSON.stringify(payload)
     });
-
     if (!response.ok) {
         if (response.status === 401 || response.status === 403) throw new Error("无权限操作，请先登录。");
-        try {
-            const errorData = await response.json();
-            throw new Error(errorData.message || '发生未知错误');
-        } catch (e) {
-            throw new Error(`发生网络错误 (状态: ${response.status})`);
-        }
+        const errorData = await response.json().catch(() => ({ message: '发生未知错误' }));
+        throw new Error(errorData.message);
     }
     return response.json();
 }
@@ -608,7 +656,6 @@ function createCommentElement(comment, articleId) {
         ${repliesHtml}
         <div class="reply-form-container" id="reply-form-for-${comment.id}"></div>
     `;
-    commentDiv.querySelector('.reply-btn').addEventListener('click', (e) => showReplyForm(e.currentTarget, articleId));
     return commentDiv;
 }
 
@@ -633,26 +680,21 @@ function showReplyForm(button, articleId) {
     const commentId = button.dataset.commentId;
     const container = document.getElementById(`reply-form-for-${commentId}`);
     if (container.querySelector('form')) {
-        container.innerHTML = ''; return;
+        container.innerHTML = '';
+        return;
     }
     document.querySelectorAll('.reply-form-container').forEach(c => c.innerHTML = '');
+
     const authorName = button.closest('.comment-item').querySelector('.comment-author').innerText;
     const form = document.createElement('form');
+    // 给表单也加上一个class，用于事件委托
     form.className = 'reply-form mt-2';
+    // 将父评论ID存到表单的data属性上
+    form.dataset.parentId = commentId;
     form.innerHTML = `
         <div class="form-group"><textarea class="form-control" rows="2" placeholder="回复 @${authorName}..." required></textarea></div>
         <div class="text-right"><button type="button" class="btn btn-sm btn-secondary cancel-reply-btn mr-2">取消</button><button type="submit" class="btn btn-sm btn-primary">回复</button></div>
     `;
     container.appendChild(form);
     form.querySelector('textarea').focus();
-    form.querySelector('.cancel-reply-btn').addEventListener('click', () => container.innerHTML = '');
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const content = form.querySelector('textarea').value.trim();
-        if (content) {
-            submitComment(articleId, content, commentId)
-                .then(() => { container.innerHTML = ''; loadComments(articleId); })
-                .catch(err => alert('回复失败: ' + err.message));
-        }
-    });
 }

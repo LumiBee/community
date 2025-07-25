@@ -60,6 +60,7 @@
     border-radius: 20px 0 0 20px;
     border-right: none;
     transition: all 0.3s ease;
+    height: 39px;
 }
 
 .topnav.navbar .input-group-append button {

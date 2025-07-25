@@ -1,16 +1,36 @@
 /* 全局样式优化 */
+:root {
+    --primary-color: #ffda58;
+    --primary-hover: #ffc107;
+    --text-primary: #1a202c;
+    --text-secondary: #4a5568;
+    --text-muted: #6c757d;
+    --border-light: #e2e8f0;
+    --bg-light: #f8f9fa;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --gradient-warm: linear-gradient(135deg, #ffda58 0%, #ff7e5f 100%);
+    --gradient-cool: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
 body {
-    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    color: #2c3e50;
-    line-height: 1.7;
+    font-family: 'Inter', 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 16px;
+    background-color: #fafbfc;
 }
 
 /* 1. 为所有常规段落设置首行缩进 */
 p {
     text-indent: 2em;
-    /* 其他段落样式，如行高、间距等 */
-    line-height: 1.8;
-    margin-bottom: 1em;
+    line-height: 1.7;
+    margin-bottom: 1.2em;
+    color: var(--text-primary);
 }
 
 /* 2. 为有序列表(ol)和无序列表(ul)中的段落，取消首行缩进 */
@@ -20,13 +40,23 @@ li p {
 
 /* 文章标题区域美化 */
 .jumbotron {
-    padding: 3rem 0;
-    background: linear-gradient(to right, rgba(255,255,255,0.95), rgba(255,255,255,0.8));
-    background-size: cover;
-    border-radius: 0;
-    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 0 0 24px 24px;
+    padding: 4rem 0 3rem;
+    margin-bottom: 3rem;
     position: relative;
-    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border: none;
+}
+
+.jumbotron::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--gradient-warm);
 }
 
 .jumbotron::after {
@@ -60,32 +90,40 @@ li p {
 /* 标签样式优化 */
 .tag-link {
     text-decoration: none;
-    transition: all 0.3s ease;
     display: inline-block;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.tag-link:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.badge-tag {
-    background-color: #f8f9fa;
-    color: #495057;
-    border: 1px solid #eaeaea;
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-    border-radius: 30px;
-    font-weight: 500;
+    margin: 0 8px 8px 0;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.tag-link:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.badge-tag {
+    background: white;
+    color: var(--text-secondary);
+    border: 1.5px solid var(--border-light);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+}
+
 .badge-tag:hover {
-    background: linear-gradient(135deg, #ffda58, #ffc107);
-    color: #2c3e50;
+    background: var(--gradient-warm);
+    color: white;
     border-color: transparent;
+    box-shadow: var(--shadow-md);
+}
+
+/* 作品集信息美化 */
+
+.portfolio-pill:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
 }
 
 /* 作者信息区域美化 */
@@ -107,24 +145,41 @@ li p {
     font-weight: 600;
 }
 
+/* 按钮样式现代化 */
+.btn {
+    border-radius: 24px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-width: 1.5px;
+    padding: 8px 20px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+
 .btn-outline-primary {
-    border-color: #ffda58;
-    color: #2c3e50;
-    transition: all 0.3s ease;
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+    background: white;
 }
 
 .btn-outline-primary:hover {
-    background-color: #ffda58;
-    border-color: #ffda58;
-    color: #2c3e50;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(255,218,88,0.3);
+    background: var(--gradient-warm);
+    border-color: transparent;
+    color: white;
+    box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-    background-color: #e9ecef;
+    background: #e9ecef;
     border-color: #e9ecef;
-    color: #2c3e50;
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover {
+    background: #dee2e6;
+    transform: translateY(-2px);
 }
 
 /* 文章内容区域美化 */
@@ -419,27 +474,6 @@ li p {
     z-index: 1; /* 这个层级低于作者头像的 z-index: 2 */
     content: "";
     background-color: rgba(0, 0, 0, 0); /* 伪元素本身是透明的，仅用于捕获点击 */
-}
-
-/* 返回顶部按钮美化 */
-#backToTop {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background-color: #ffda58;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    border: none;
-    transition: all 0.3s ease;
-}
-
-#backToTop:hover {
-    background-color: #ffc107;
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
 }
 
 /* 响应式调整 */
@@ -787,6 +821,16 @@ article:first-letter {
     border-radius: 50%;
     object-fit: cover;
     margin-right: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.reply-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    margin-left: 40px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
 }
 

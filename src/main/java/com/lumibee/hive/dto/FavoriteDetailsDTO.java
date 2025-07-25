@@ -10,8 +10,6 @@ public class FavoriteDetailsDTO {
     private Long id;
     private Long userId;
     private String name;
-    private String slug;
-    private String description;
     private LocalDateTime gmtModified;
 
     private String avatarUrl;

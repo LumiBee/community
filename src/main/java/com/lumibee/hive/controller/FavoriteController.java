@@ -3,7 +3,6 @@ package com.lumibee.hive.controller;
 import com.lumibee.hive.dto.FavoriteRequestDTO;
 import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteResponse;
-import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.FavoriteService;
 import com.lumibee.hive.service.UserService;
@@ -62,7 +61,7 @@ public class FavoriteController {
     }
 
     @PostMapping("/create-folder")
-    public ResponseEntity<?> createFolder(@RequestBody FavoriteRequestDTO request,
+    public ResponseEntity<List<FavoriteDetailsDTO> > createFolder(@RequestBody FavoriteRequestDTO request,
                                                          @AuthenticationPrincipal Principal principal) {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
@@ -71,8 +70,8 @@ public class FavoriteController {
         if (request.getFavoriteName() == null || request.getFavoriteName().isEmpty()) {
             return ResponseEntity.badRequest().body(null);
         }
-        favoriteService.createFavoriteAndAddArticle(
-                currentUser.getId(), null, request.getFavoriteName()
+        favoriteService.createFavorite(
+                request.getFavoriteName(), currentUser.getId()
         );
 
         List<FavoriteDetailsDTO> response = favoriteService.getFavoritesByUserId(currentUser.getId());
@@ -89,6 +88,18 @@ public class FavoriteController {
         }
 
         Map<String, Object> result = favoriteService.removeAllArticlesFromFavorite(currentUser.getId(), articleId);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/remove-folder/{favoriteId}")
+    public ResponseEntity<Map<String, Object>> removeFolder(@PathVariable("favoriteId") Integer favoriteId,
+                                                             @AuthenticationPrincipal Principal principal) {
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Object> result = favoriteService.removeFolderFromFavorite(currentUser.getId(), favoriteId);
         return ResponseEntity.ok(result);
     }
 

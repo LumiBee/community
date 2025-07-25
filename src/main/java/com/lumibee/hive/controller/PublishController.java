@@ -41,7 +41,7 @@ public class PublishController {
         return ResponseEntity.ok(updatedArticle);
     }
 
-    @DeleteMapping("/{articleId}")
+    @DeleteMapping("/delete/{articleId}")
     public ResponseEntity<ArticleDetailsDTO> deleteArticle(@PathVariable Integer articleId) {
         ArticleDetailsDTO deletedArticle = articleService.deleteArticleById(articleId);
 

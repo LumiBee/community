@@ -16,8 +16,8 @@
             <div class="logo">
                 <img src="/img/logo.png" alt="Hive Logo">
             </div>
-            
-            <form th:action="@{/signup}" th:object="${signupDTO}" method="post" id="signupForm" novalidate>
+
+            <form th:action="@{/signup}" th:object="${signupDTO}" method="post" id="signupForm">
                 <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger" role="alert">
                     <p th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global error message</p>
                 </div>
@@ -28,11 +28,12 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                         </div>
-                        <input type="text" class="form-control" id="username" th:field="*{username}" 
+                        <input type="text" class="form-control" id="username" th:field="*{username}"
                                placeholder="3-20个字符" required
-                           th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
                     </div>
-                    <div th:if="${#fields.hasErrors('username')}" class="invalid-feedback" th:errors="*{username}"></div>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                    <div class="invalid-feedback"></div>
                 </div>
 
                 <div class="form-group">
@@ -41,29 +42,31 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-envelope"></i></span>
                         </div>
-                        <input type="email" class="form-control" id="email" th:field="*{email}" 
+                        <input type="email" class="form-control" id="email" th:field="*{email}"
                                placeholder="例如：user@example.com" required
-                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
                     </div>
-                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}"></div>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    <div class="invalid-feedback"></div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="password">密码</label>
                     <div class="input-group">
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         </div>
-                        <input type="password" class="form-control" id="password" th:field="*{password}" 
+                        <input type="password" class="form-control" id="password" th:field="*{password}"
                                placeholder="6-30个字符" required
                                th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
                         <div class="input-group-append">
                             <button class="btn" type="button" id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
+                        </div>
                     </div>
-                    </div>
-                    <div th:if="${#fields.hasErrors('password')}" class="invalid-feedback d-block" th:errors="*{password}"></div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                    <div class="invalid-feedback d-block"></div>
                 </div>
 
                 <div class="form-group">
@@ -72,7 +75,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         </div>
-                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}" 
+                        <input type="password" class="form-control" id="confirmPassword" th:field="*{confirmPassword}"
                                placeholder="请再次输入您的密码" required
                                th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
                         <div class="input-group-append">
@@ -81,14 +84,15 @@
                             </button>
                         </div>
                     </div>
-                    <div th:if="${#fields.hasErrors('confirmPassword')}" class="invalid-feedback d-block" th:errors="*{confirmPassword}"></div>
+                    <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
+                    <div class="invalid-feedback d-block"></div>
                 </div>
 
                 <button type="submit" class="btn btn-warning btn-block">
                     <i class="fas fa-user-plus mr-1"></i> 立即注册
                 </button>
             </form>
-            
+
             <div class="auth-links">
                 <p>已经有账户了？ <a th:href="@{/login}">立即登录</a></p>
             </div>
@@ -116,33 +120,7 @@
 <script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
 <script th:src="@{/js/functions.js}" type="text/javascript"></script>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 密码可见性切换
-    const togglePassword = document.getElementById('togglePassword');
-    const password = document.getElementById('password');
-    const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-    const confirmPassword = document.getElementById('confirmPassword');
-    
-    if(togglePassword && password) {
-        togglePassword.addEventListener('click', function() {
-            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-            password.setAttribute('type', type);
-            this.querySelector('i').classList.toggle('fa-eye');
-            this.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-    }
-    
-    if(toggleConfirmPassword && confirmPassword) {
-        toggleConfirmPassword.addEventListener('click', function() {
-            const type = confirmPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-            confirmPassword.setAttribute('type', type);
-            this.querySelector('i').classList.toggle('fa-eye');
-            this.querySelector('i').classList.toggle('fa-eye-slash');
-        });
-    }
-});
-</script>
+<script th:src="@{/js/signup.js}" type="text/javascript"></script>
 
 </body>
 </html>

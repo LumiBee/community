@@ -57,7 +57,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{name}")
-    public String showUserProfile(@PathVariable("name") String name, // <-- 从路径中获取用户名
+    public String showUserProfile(@PathVariable("name") String name,
                                   @RequestParam(name = "page", defaultValue = "1") long pageNum,
                                   @RequestParam(name = "size", defaultValue = "6") long pageSize,
                                   Model model,
@@ -71,8 +71,8 @@ public class ProfileController {
 
         // 判断正在查看的页面是否属于当前登录的用户
         boolean isOwner = false;
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (principal != null) {
-            User currentUser = userService.getCurrentUserFromPrincipal(principal);
             if (currentUser != null && currentUser.getId().equals(user.getId())) {
                 isOwner = true;
             }
@@ -81,15 +81,23 @@ public class ProfileController {
         // 后续的业务逻辑和之前类似
         Integer articleCount = articleService.countArticlesByUserId(user.getId());
         Integer fans = userService.countFansByUserId(user.getId());
-        Integer following = userService.countFollowingByUserId(user.getId());
+        Integer followers = userService.countFollowingByUserId(user.getId());
+        Boolean isFollowed = userService.isFollowing(currentUser.getId(), user.getId());
         Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
 
         model.addAttribute("user", user);
         model.addAttribute("articleCount", articleCount);
         model.addAttribute("followersCount", fans);
-        model.addAttribute("followingCount", following);
+        model.addAttribute("followingCount", followers);
         model.addAttribute("articles", articlePage);
         model.addAttribute("isOwner", isOwner);
+        model.addAttribute("isFollowed", isFollowed);
+        System.out.println("User Profile: " + user.getName() + ", isOwner: " + isOwner);
+        System.out.println("Article Count: " + articleCount);
+        System.out.println("Followers Count: " + fans);
+        System.out.println("Following Count: " + followers);
+        System.out.println("Articles on Page: " + articlePage.getRecords().size());
+        System.out.println("Is Followed: " + isFollowed);
 
         return "profile";
     }

@@ -1,7 +1,6 @@
 package com.lumibee.hive.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.lumibee.hive.config.SlugGenerator;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteResponse;
@@ -9,7 +8,6 @@ import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.mapper.FavoriteMapper;
 import com.lumibee.hive.mapper.UserMapper;
-import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.ArticleFavorites;
 import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
@@ -32,21 +30,18 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     @Transactional
-    public Favorites createFavorite(String favoriteName, String description, Long userId) {
+    public Favorites createFavorite(String favoriteName, Long userId) {
         if (favoriteName == null || favoriteName.isEmpty()) {
             return null; // 如果传入的favoriteName为空，直接返回null
         }
 
         Favorites favorite = new Favorites();
         favorite.setName(favoriteName);
-        favorite.setSlug(SlugGenerator.generateSlug(favoriteName));
-        favorite.setDescription(description);
         favorite.setGmtCreate(LocalDateTime.now());
         favorite.setGmtModified(LocalDateTime.now());
         favorite.setUserId(userId);
         favorite.setPublic(true); // 默认设置为公开
         favoriteMapper.insert(favorite);
-
 
         return favorite;
     }
@@ -156,11 +151,6 @@ public class FavoriteServiceImpl implements FavoriteService {
             return new FavoriteResponse(false, "文章已在收藏夹中", true, null);
         }
 
-        // 检查文章是否存在（如果不存在：说明只要创建收藏夹，不需要添加文章）
-        if (articleId == null) {
-            return new FavoriteResponse(true, "成功只创建了收藏夹", false, null);
-        }
-
         ArticleFavorites newArticleFavorite = new ArticleFavorites();
         newArticleFavorite.setUserId(userId);
         newArticleFavorite.setArticleId(articleId);
@@ -180,7 +170,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         }
 
         // 创建新的收藏夹
-        Favorites newFavorite = createFavorite(favoriteName, null, userId);
+        Favorites newFavorite = createFavorite(favoriteName, userId);
         if (newFavorite == null) {
             return new FavoriteResponse(false, "创建收藏夹失败", false, null);
         }
@@ -204,6 +194,35 @@ public class FavoriteServiceImpl implements FavoriteService {
         }
 
         result.put("isFavorited", false);
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> removeFolderFromFavorite(Long userId, Integer favoriteId) {
+        Map<String, Object> result = new HashMap<>();
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            result.put("success", false);
+            result.put("message", "用户不存在");
+            return result;
+        }
+
+        Favorites favorite = favoriteMapper.selectById(favoriteId);
+        if (favorite == null || !favorite.getUserId().equals(userId)) {
+            result.put("success", false);
+            result.put("message", "收藏夹不存在或不属于当前用户");
+            return result;
+        }
+
+        QueryWrapper<ArticleFavorites> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("favorite_id", favoriteId);
+        articleFavoritesMapper.delete(queryWrapper);
+        favoriteMapper.removeById(favorite.getId());
+
+        result.put("success", true);
+        result.put("message", "收藏夹已成功删除");
 
         return result;
     }

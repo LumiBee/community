@@ -1,279 +1,353 @@
-/* publish.css */
+:root {
+    --primary-color: #4361ee;
+    --primary-hover: #3a56d4;
+    --secondary-color: #6c757d;
+    --light-bg: #f8f9fa;
+    --dark-text: #212529;
+    --border-color: #e9ecef;
+    --success-color: #2ecc71;
+    --transition-speed: 0.3s;
+    --container-padding: 30px; /* 统一容器内边距 */
+    --content-width: 80%; /* 内容宽度 */
+}
+
 html, body {
     height: 100%;
-    overflow: hidden !important;
     margin: 0;
-    padding-top: 148px; /* 为固定的顶部操作栏和主导航栏留出空间 */
-    padding-bottom: 5px; /* 为固定的底部状态栏留出空间 */
-    background-color: #f8f9fa; /* 浅灰色背景 */
-    font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-}
-
-/* 编辑器区域的容器 */
-.editor-content-container {
-    padding-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-/* Toast UI 编辑器样式调整 */
-.toastui-editor-defaultUI {
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     overflow: hidden;
+    background-color: #f8f9fa; /* 恢复浅灰色背景，使中央内容区域更加突出 */
+    padding-top: 56px;
+    padding-bottom: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* 确保主导航栏在顶部操作栏之下 */
-.topnav.fixed-top {
-    z-index: 1030;
-}
-
-.editor-area {
-    padding-top: 100px;
-    padding-bottom: 80px;
-}
-
-.publish-container {
-    padding-top: 200px;
-}
-
-/* 顶部操作栏美化 */
+/* 顶部操作栏 */
 .top-action-bar {
-    background-color: #ffffff;
-    border-bottom: 1px solid #eaeaea;
-    padding: 12px 0;
-    width: 100%;
-    z-index: 1031;
-    top: 67px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    transition: all 0.3s ease;
+    position: fixed;
+    top: 56px;
+    left: 0;
+    right: 0;
+    height: 70px;
+    z-index: 1029;
+    background-color: #f8f9fa; /* 与背景色保持一致 */
+    box-shadow: none;
+    transition: all var(--transition-speed) ease;
+    padding: 0;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    border-bottom: none;
+}
+
+.top-action-bar::after {
+    content: none; /* 移除额外的分隔线 */
 }
 
 .top-action-bar .container-fluid {
-    max-width: 1400px;
+    height: 100%;
+    padding: 0;
+    width: var(--content-width);
+    max-width: var(--content-width);
     margin: 0 auto;
+    background-color: #fff; /* 白色背景 */
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 0 20px;
 }
 
-body.has-fixed-topnav {
-    /* padding-top: 130px; */
-}
-
-.top-action-bar.with-fixed-topnav {
-    /* top: 70px; */
-}
-
-/* 文章标题输入框美化 */
-.article-title-input {
+.top-action-bar .row {
+    height: 100%;
+    align-items: center;
     width: 100%;
+}
+
+.article-title-input {
     border: none;
-    font-size: 1.6rem;
-    font-weight: 600;
-    box-shadow: none !important;
-    color: #333;
-    padding: 8px 12px;
-    border-radius: 6px;
-    background-color: #f9f9f9;
+    border-radius: 0;
+    padding: 0.75rem 0;
+    font-size: 1.35rem;
+    font-weight: 500;
+    color: var(--dark-text);
+    background-color: transparent;
     transition: all 0.3s ease;
+    width: 100%;
+    text-align: left;
+    box-shadow: none !important;
+    outline: none !important;
 }
 
 .article-title-input:focus {
-    border: none;
+    outline: none;
     box-shadow: none;
-    background-color: #f0f0f0;
 }
 
-/* 操作按钮美化 */
-.action-buttons .btn-icon {
-    color: #6c757d;
-    background-color: transparent;
-    border: none;
+.article-title-input::placeholder {
+    color: #adb5bd;
+    font-weight: 400;
+    opacity: 0.7;
+}
+
+/* 操作按钮 */
+.action-buttons {
+    padding-right: 30px;
+    white-space: nowrap;
+}
+
+.auto-save-indicator {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--secondary-color);
+}
+
+.auto-save-indicator .indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--success-color);
+    margin-right: 8px;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+.action-buttons .btn {
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.9rem;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
 }
 
-.action-buttons .btn-icon:hover {
-    color: #343a40;
-    transform: translateY(-1px);
+.action-buttons .btn i {
+    margin-right: 6px;
+    font-size: 0.9rem;
 }
 
 .action-buttons .btn-outline-secondary {
-    border-radius: 20px;
-    padding: 5px 15px;
-    font-weight: 500;
-    border-color: #ddd;
-    transition: all 0.2s ease;
+    color: var(--secondary-color);
+    border-color: #dee2e6;
+    background-color: transparent;
 }
 
 .action-buttons .btn-outline-secondary:hover {
-    background-color: #f0f0f0;
-    border-color: #ccc;
+    background-color: #f8f9fa;
+    border-color: #c1c9d0;
 }
 
 .action-buttons .btn-primary {
-    border-radius: 20px;
-    padding: 5px 18px;
-    font-weight: 500;
-    background-color: #ffda58;
-    border-color: #ffda58;
-    color: #333;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
 }
 
 .action-buttons .btn-primary:hover {
-    background-color: #ffd333;
-    border-color: #ffd333;
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
 }
 
-.editor-area {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.05);
-    margin-bottom: 60px;
+/* 编辑器容器 */
+.publish-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 126px - 50px); /* 导航栏(56px) + 操作栏(70px) + 底部状态栏(50px) */
+    width: var(--content-width);
+    max-width: var(--content-width);
+    margin: 0 auto;
+    overflow: hidden;
+    background-color: transparent;
+    box-sizing: border-box;
+    position: fixed;
+    top: 126px;
+    bottom: 50px;
+    left: 0;
+    right: 0;
+    padding: 0;
+    transition: all var(--transition-speed) ease;
 }
 
-.editor-toolbar .btn-icon {
-    color: #495057;
-    margin-right: 2px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.editor-toolbar .btn-icon:hover {
-    background-color: #e9ecef;
-}
-
-.article-content-input {
-    outline: none;
-}
-
-/* 底部状态栏美化 */
-.bottom-status-bar {
-    padding: 8px 20px;
-    font-size: 0.85em;
-    z-index: 1029;
-    color: #495057;
-    background-color: #ffffff;
-    border-top: 1px solid #eaeaea;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
-    transition: all 0.3s ease;
-}
-
-.bottom-status-bar .stats {
-    font-weight: 500;
-    color: #666;
-}
-
-.bottom-status-bar .controls .btn-link {
-    color: #495057;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    padding: 4px 8px;
-    border-radius: 4px;
-}
-
-.bottom-status-bar .controls .btn-link:hover {
-    color: #ffda58;
-    background-color: #f8f9fa;
-}
-
-.top-action-bar.fixed-top {
-    background-color: #ffffff;
+.publish-page-wrapper::before {
+    content: none; /* 移除顶部渐变 */
 }
 
 .editor-content-container.container-fluid {
-    padding-bottom: 1rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
-    max-width: 1400px;
-    margin: 0 auto;
-}
-
-/* 编辑器内容区域字体大小 */
-.toastui-editor-contents {
-    font-size: 18px;
-    line-height: 1.7;
-}
-
-/* Markdown模式下的编辑区 */
-.toastui-editor-md-container .ProseMirror {
-    font-size: 18px !important;
-    line-height: 1.7;
-}
-
-.toastui-editor-md-container .CodeMirror-code,
-.toastui-editor-md-container .CodeMirror-line,
-.toastui-editor-md-container .CodeMirror pre.CodeMirror-line {
-    font-size: inherit !important;
+    height: 100%;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom: none; /* 移除底部边框 */
 }
 
 #publishForm {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    width: 100%;
 }
 
 #toastUiEditor {
     flex-grow: 1;
-    min-height: 0;
-}
-
-.toastui-editor-defaultUI {
-    border: 1px solid #e0e0e0;
-    flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    height: 100%;
+    width: 100%;
+    border-radius: 0;
+}
+
+/* Toast UI 编辑器自定义样式 */
+.toastui-editor-defaultUI {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    border-top: none !important;
+    background-color: transparent;
+    transition: all var(--transition-speed) ease;
+    margin-top: 10px;
+}
+
+.toastui-editor-defaultUI .toastui-editor-toolbar {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-bottom: none;
+    box-shadow: none;
+    padding: 6px 0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    margin-top: 0;
+    transition: all var(--transition-speed) ease;
+    position: relative;
+    z-index: 3;
+}
+
+.toastui-editor-defaultUI:focus-within .toastui-editor-toolbar {
+    background-color: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
 }
 
 .toastui-editor-defaultUI .toastui-editor-main {
     flex-grow: 1 !important;
     overflow-y: auto !important;
-    min-height: 0;
+    height: calc(100% - 40px) !important;
+    transition: background-color var(--transition-speed) ease;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    margin-bottom: 0; /* 确保没有底部间距 */
 }
 
-/* 文件上传区域美化 */
-.custom-file-upload {
-    border: 2px dashed #ddd;
-    padding: 2.5rem;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    transition: all 0.3s ease;
-    text-align: center;
-    cursor: pointer;
+.toastui-editor-defaultUI .toastui-editor-main .toastui-editor-md-container,
+.toastui-editor-defaultUI .toastui-editor-main .toastui-editor-ww-container {
+    background: #fff;
+    transition: background var(--transition-speed) ease;
 }
 
-.custom-file-upload:hover {
-    background-color: #f0f0f0;
-    border-color: #ccc;
+/* 底部状态栏 */
+.bottom-status-bar.fixed-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 1030;
+    background-color: #fff;
+    border-top: 1px solid var(--border-color);
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    width: 100%;
 }
 
-.custom-file-upload i {
-    font-size: 2rem;
-    color: #aaa;
-    margin-bottom: 1rem;
-    display: block;
+.bottom-status-bar .container-fluid {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 30px;
+    height: 100%;
 }
 
-/* 模态框美化 */
+.stats {
+    display: flex;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.stat-item i {
+    margin-right: 6px;
+    font-size: 0.9rem;
+    color: #adb5bd;
+}
+
+.stat-item .count {
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+.controls .btn-link {
+    color: var(--secondary-color);
+    font-size: 0.9rem;
+    text-decoration: none;
+    padding: 0.4rem 0.75rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.controls .btn-link:hover {
+    background-color: #f8f9fa;
+    color: var(--dark-text);
+}
+
+/* 发布设置模态框自定义样式 */
 .modal-content {
     border: none;
-    border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .modal-header {
-    border-bottom: 1px solid #f0f0f0;
-    padding: 1.2rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
 }
 
-.modal-header .modal-title {
+.modal-title {
     font-weight: 600;
-    color: #333;
+    color: var(--dark-text);
 }
 
 .modal-body {
@@ -281,135 +355,19 @@ body.has-fixed-topnav {
 }
 
 .modal-footer {
-    border-top: 1px solid #f0f0f0;
-    padding: 1.2rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
 }
 
-/* 表单控件美化 */
-.form-control {
-    border-radius: 6px;
-    border: 1px solid #e0e0e0;
-    padding: 10px 12px;
-    transition: all 0.3s ease;
+#toastUiEditor .toastui-editor-contents {
+    font-size: 18px !important;
 }
 
-.form-control:focus {
-    border-color: #ffda58;
-    box-shadow: 0 0 0 0.2rem rgba(255, 218, 88, 0.25);
-}
-
-.form-group label {
-    font-weight: 500;
-    color: #555;
-    margin-bottom: 0.5rem;
-}
-
-/* 编辑器工具栏美化 */
-.toastui-editor-defaultUI .toastui-editor-toolbar {
-    background-color: #f9f9f9;
-    border-bottom: 1px solid #eaeaea;
-}
-
-.toastui-editor-defaultUI .toastui-editor-toolbar button {
-    border-radius: 4px;
-    margin: 0 2px;
-    transition: all 0.2s ease;
-}
-
-.toastui-editor-defaultUI .toastui-editor-toolbar button:hover {
-    background-color: #f0f0f0;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .article-title-input {
-        font-size: 1.3rem;
-    }
-    
-    .top-action-bar {
-        padding: 8px 0;
-    }
-    
-    .action-buttons .text-muted {
-        display: none;
-    }
-    
-    .bottom-status-bar {
-        padding: 6px 15px;
-    }
-}
-
-/* 动画效果 */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.publish-page-wrapper {
-    animation: fadeIn 0.4s ease-out;
-}
-
-/* Toast UI 编辑器预览区域美化 */
-.toastui-editor-contents p {
-    margin: 1.2em 0;
-}
-
-.toastui-editor-contents h1,
-.toastui-editor-contents h2,
-.toastui-editor-contents h3,
-.toastui-editor-contents h4,
-.toastui-editor-contents h5,
-.toastui-editor-contents h6 {
-    margin-top: 1.5em;
-    margin-bottom: 0.8em;
-    color: #333;
-}
-
-.toastui-editor-contents blockquote {
-    border-left: 4px solid #ffda58;
-    padding: 0.6em 1.2em;
-    background-color: #f9f9f9;
-    margin: 1.5em 0;
-    color: #555;
-}
-
-.toastui-editor-contents code {
-    background-color: #f0f0f0;
-    padding: 2px 4px;
-    border-radius: 3px;
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-}
-
-.toastui-editor-contents pre {
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    padding: 1em;
-}
-
-.toastui-editor-contents img {
-    max-width: 100%;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.toastui-editor-contents table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 1.5em 0;
-}
-
-.toastui-editor-contents th,
-.toastui-editor-contents td {
-    border: 1px solid #e0e0e0;
-    padding: 8px 12px;
-}
-
-.toastui-editor-contents th {
-    background-color: #f5f5f5;
-}
-
-.toastui-editor-contents hr {
-    border: none;
-    border-top: 2px solid #f0f0f0;
-    margin: 2em 0;
+.ProseMirror {
+    overflow-X: hidden;
+    color: #222;
+    font-family: Open Sans,Helvetica Neue,Helvetica,Arial,나눔바른고딕,Nanum Barun Gothic,맑은고딕,Malgun Gothic,sans-serif;
+    font-size: 18px;
+    height: calc(100% - 36px);
+    overflow-y: auto
 }
