@@ -248,7 +248,7 @@ async function handleDeleteFolder(event, folderId, folderName) {
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
 
     if (!token || !header) {
-        alert('安全令牌丢失，无法删除。请刷新页面后重试。');
+        showToast('安全令牌丢失，无法删除。请刷新页面后重试。','error');
         return;
     }
 
@@ -262,7 +262,6 @@ async function handleDeleteFolder(event, folderId, folderName) {
 
         if (response.ok) {
             showToast(`收藏夹 "${folderName}" 已成功删除，请刷新页面刷新目录`, 'success');
-            await fetchAndRenderFolders();
         } else {
             console.error('删除失败，服务器响应:', response.status);
             showToast(`删除收藏夹 "${folderName}" 失败，请稍后重试。`, 'error');
@@ -284,7 +283,7 @@ async function handleAddNewCollection() {
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
 
     if (!name) {
-        alert('请输入收藏夹名称');
+        showToast('请输入收藏夹名称', 'warning');
         return;
     }
 
@@ -318,7 +317,7 @@ async function handleAddNewCollection() {
 
     } catch (error) {
         console.error(error);
-        alert('创建收藏夹失败，请稍后重试。');
+        showToast('创建收藏夹失败，请稍后重试。', 'error');
     } finally {
         confirmBtn.disabled = false;
         confirmBtn.innerHTML = originalBtnContent;

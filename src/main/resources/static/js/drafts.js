@@ -64,16 +64,6 @@ async function handleDeleteDraft(draftId, title, elementToRemove) {
 
         if (response.ok) {
             showToast(`草稿 "${title}" 已成功删除。`, 'success');
-            // 淡出并移除DOM元素
-            if (elementToRemove) {
-                elementToRemove.style.transition = 'opacity 0.3s ease-out';
-                elementToRemove.style.opacity = '0';
-
-                // 在动画结束后执行移除操作
-                setTimeout(() => {
-                    elementToRemove.remove();
-                }, 300);
-            }
         } else {
             console.error('删除失败，服务器响应:', response.status);
             showToast(`删除草稿 "${title}" 失败，请稍后重试。`, 'error');

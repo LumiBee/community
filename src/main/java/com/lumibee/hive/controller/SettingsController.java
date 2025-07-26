@@ -3,7 +3,9 @@ package com.lumibee.hive.controller;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
+import com.lumibee.hive.service.FileStorageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +30,8 @@ public class SettingsController {
 
     @Autowired private UserService userService;
     @Autowired private ImgService imgService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    private CustomUserServiceImpl userDetailsService;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private FileStorageService fileStorageService;
 
     @GetMapping
     public String userSettingsPage(Model model,
@@ -151,5 +152,19 @@ public class SettingsController {
         
         redirectAttributes.addFlashAttribute("preferencesSuccess", "偏好设置更新成功");
         return "redirect:/user/settings?tab=preferences";
+    }
+
+    @PostMapping("/upload-image")
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file,
+                                                           @RequestParam(value = "images", required = false) String subDirectory) {
+        try {
+            String filePath = fileStorageService.storeFile(file, subDirectory);
+            String fileUrl = fileStorageService.getBaseUrl() + filePath;
+
+            return ResponseEntity.ok(Map.of("url", fileUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to upload image: " + e.getMessage()));
+        }
     }
 }

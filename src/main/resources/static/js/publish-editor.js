@@ -80,6 +80,45 @@ document.addEventListener("DOMContentLoaded", function () {
             placeholder: '在这里开始你的创作吧...',
             usageStatistics: false,
             plugins: editorPlugins,
+
+            hooks: {
+                addImageBlobHook: async (blob, callback) => {
+                    console.log("捕获到图片文件:", blob);
+
+                    // 创建一个 FormData 对象来包装图片文件
+                    const formData = new FormData();
+                    formData.append('file', blob);
+
+                    // 发送 POST 请求
+                    try {
+                        const response = await fetch('/api/article/upload-image', {
+                            method: 'POST',
+                            headers: {
+                                [csrfHeader]: csrfToken
+                            },
+                            body: formData,
+                        });
+
+                        const result = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(result.error || '服务器返回了错误');
+                        }
+
+                        // 从服务器返回的 JSON 中获取图片 URL
+                        const imageUrl = result.url;
+                        console.log("图片上传成功, URL:", imageUrl);
+
+                        // 调用编辑器的 callback 函数，将返回的 URL 插入到编辑器中
+                        // 第一个参数是图片URL，第二个是图片的 alt 文本
+                        callback(imageUrl, 'image');
+
+                    } catch (error) {
+                        console.error('图片上传失败:', error);
+                        showToast(`图片上传失败: ${error.message}`, 'error');
+                    }
+                }
+            }
         });
         // 注意：编辑器库的自定义事件无法通过DOM事件委托，必须直接绑定
         editorInstance.on('change', onContentChange);
