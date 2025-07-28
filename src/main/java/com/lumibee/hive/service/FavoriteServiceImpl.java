@@ -48,7 +48,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Override
     @Transactional(readOnly = true)
-    public FavoriteDetailsDTO selectPortfolioById(Long favoriteId) {
+    public FavoriteDetailsDTO selectFavoritesById(Long favoriteId) {
         // 1. 获取收藏夹基本信息
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", favoriteId).eq("deleted", 0);

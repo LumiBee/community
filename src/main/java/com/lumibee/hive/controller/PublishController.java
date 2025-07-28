@@ -28,6 +28,7 @@ public class PublishController {
 
         Long userId = userService.getCurrentUserFromPrincipal(principal).getId();
 
+        System.out.println(requestDTO);
         ArticleDetailsDTO newArticle = articleService.publishArticle(requestDTO, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newArticle);

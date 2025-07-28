@@ -10,14 +10,15 @@ import com.lumibee.hive.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -33,8 +34,10 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private ArticleLikesMapper articleLikesMapper;
     @Autowired private ArticleRepository articleRepository;
     @Autowired private ArticleFavoritesMapper favoriteMapper;
+    @Autowired private CacheManager cacheManager;
 
     @Override
+    @Cacheable(value = "homepageArticles", key = "#pageNum + '-' + #pageSize")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
@@ -67,8 +70,8 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDetailsDTOs;
     }
 
-
     @Override
+    @Cacheable(value = "profileArticles", key = "#userId + '-' + #pageNum + '-' + #pageSize")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
@@ -98,6 +101,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Cacheable(value = "articleDetails", key = "#slug")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
@@ -153,6 +157,12 @@ public class ArticleServiceImpl implements ArticleService {
             newLikedStatus = false;
         }
 
+        // --- 手动清除缓存 ---
+        Article article = articleMapper.selectById(articleId);
+        if (article != null) {
+            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+        }
+
         //获取当前文章的点赞数量
         Integer likesCount = articleMapper.countLikes(articleId);
 
@@ -184,6 +194,13 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "homepageArticles", allEntries = true),
+            @CacheEvict(value = "profileArticles", allEntries = true),
+            @CacheEvict(value = "featuredArticles", allEntries = true),
+            @CacheEvict(value = "allTags", allEntries = true),
+            @CacheEvict(value = "allPortfolios", allEntries = true)
+    })
     @Transactional
     public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId) {
         if (requestDTO.getArticleId() != null) {
@@ -258,6 +275,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Cacheable("featuredArticles")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> selectFeaturedArticles() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -370,32 +388,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
-    public ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId){
-        Article article;
-
-        if (requestDTO.getArticleId() != null) {
-            article = articleMapper.selectById(requestDTO.getArticleId());
-            if (!article.getUserId().equals(userId)) {
-                throw new RuntimeException("草稿文章不存在或不属于当前用户");
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "articleDetails", key = "#result.slug"),
+                    @CacheEvict(value = "allTags", allEntries = true),
+                    @CacheEvict(value = "allPortfolios", allEntries = true),
+                    @CacheEvict(value = "homepageArticles", allEntries = true),
+                    @CacheEvict(value = "profileArticles", allEntries = true),
+                    @CacheEvict(value = "featuredArticles", allEntries = true)
             }
-        }else {
-            article = new Article();
-            article.setUserId(userId);
-            article.setStatus(Article.ArticleStatus.draft);
-        }
-
-        article.setExcerpt(requestDTO.getExcerpt());
-        article.setTitle(requestDTO.getTitle());
-        article.setContent(requestDTO.getContent());
-        article.setGmtModified(LocalDateTime.now());
-        article.setSlug(createUniqueSlug(requestDTO.getTitle()));
-        articleMapper.updateById(article);
-
-        return getArticleBySlug(article.getSlug());
-    }
-
-    @Override
+    )
     @Transactional
     public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
         Article existingArticle = articleMapper.selectById(articleId);
@@ -451,11 +453,20 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "homepageArticles", allEntries = true),
+            @CacheEvict(value = "profileArticles", allEntries = true),
+            @CacheEvict(value = "featuredArticles", allEntries = true)
+    })
     @Transactional
     public ArticleDetailsDTO deleteArticleById(Integer articleId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在");
+        }
+
+        if (article.getSlug() != null) {
+            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
         }
 
         int result = articleMapper.deleteById(articleId);

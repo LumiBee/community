@@ -31,7 +31,7 @@ public class DraftController {
         }
 
         if (requestDTO.getArticleId() != null) {
-            ArticleDetailsDTO updatedDraft = articleService.updateDraft(requestDTO, user.getId());
+            ArticleDetailsDTO updatedDraft = articleService.updateArticle(requestDTO.getArticleId(), requestDTO, user.getId());
             return ResponseEntity.ok(updatedDraft);
         }else {
             if (requestDTO.getTitle() == null || requestDTO.getContent() == null) {

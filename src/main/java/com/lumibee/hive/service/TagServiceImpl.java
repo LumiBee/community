@@ -6,6 +6,8 @@ import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.mapper.TagMapper;
 import com.lumibee.hive.model.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ public class TagServiceImpl implements TagService {
     @Autowired private TagMapper tagMapper;
 
     @Override
+    @CacheEvict(value = "allTags", allEntries = true)
     @Transactional
     public Tag selectOrCreateTag(String tagName) {
         if (tagName == null || tagName.isEmpty()) {
@@ -82,6 +85,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable("allTags")
     @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
         return tagMapper.selectAllTags();
@@ -94,6 +98,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable(value = "tagDetails", key = "#slug")
     @Transactional(readOnly = true)
     public TagDTO selectTagBySlug(String slug) {
         return tagMapper.selectBySlug(slug);

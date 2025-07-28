@@ -27,7 +27,6 @@ public interface ArticleService {
     ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId);
     Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
     ArticleDetailsDTO selectDraftById(Integer articleId);
-    ArticleDetailsDTO updateDraft(ArticlePublishRequestDTO requestDTO, Long userId);
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
     ArticleDetailsDTO deleteArticleById(Integer articleId);
     List<ArticleDetailsDTO> selectAll();

@@ -4,6 +4,7 @@ spring:
     activate:
       on-profile: dev
 
+
 elasticsearch:
   index-prefix: dev
 

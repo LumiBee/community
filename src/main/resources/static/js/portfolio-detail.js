@@ -127,13 +127,7 @@ function handleArticleClick(e) {
 
     const href = card.getAttribute('href');
     if (href) {
-        // 添加点击动画效果
-        card.classList.add('card-clicked');
-
-        // 延迟一小段时间后跳转页面，让动画有时间播放
-        setTimeout(() => {
-            window.location.href = href;
-        }, 150);
+        window.location.href = href;
     }
 }
 

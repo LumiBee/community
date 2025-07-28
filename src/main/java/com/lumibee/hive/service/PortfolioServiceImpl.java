@@ -11,6 +11,9 @@ import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Autowired private ArticleMapper articleMapper;
 
     @Override
+    @CacheEvict(value = "allPortfolios", allEntries = true)
     @Transactional
     public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId) {
         if (portfolioName == null || portfolioName.isEmpty()) {
@@ -54,6 +58,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    @Cacheable(value = "allPortfolios")
     @Transactional(readOnly = true)
     public List<PortfolioDetailsDTO> selectAllPortfolios() {
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
@@ -106,14 +111,15 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    @Cacheable(value = "portfolioDetails", key = "#id")
     @Transactional(readOnly = true)
-    public PortfolioDetailsDTO selectPortfolioBySlug(String slug) {
-        if (slug == null || slug.isEmpty()) {
-            throw new IllegalArgumentException("slug不能为空");
+    public PortfolioDetailsDTO selectPortfolioById(Integer id) {
+        if (id == null) {
+            throw new IllegalArgumentException("id不能为空");
         }
 
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("slug", slug).eq("deleted", 0);
+        queryWrapper.eq("id", id).eq("deleted", 0);
         Portfolio portfolio = portfolioMapper.selectOne(queryWrapper);
 
         if (portfolio == null || portfolio.getId() == null) {
@@ -141,6 +147,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    @CacheEvict(value = "portfolioDetails", key = "#id")
     @Transactional
     public void updatePortfolioGmt(Integer id, Long userId) {
         if (id == null || userId == null) {
@@ -152,6 +159,4 @@ public class PortfolioServiceImpl implements PortfolioService {
         }
         portfolio.setGmtModified(LocalDateTime.now());
     }
-
-
 }

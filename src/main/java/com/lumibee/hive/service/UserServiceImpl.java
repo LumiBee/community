@@ -5,7 +5,11 @@ import java.time.LocalDateTime;
 
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import com.lumibee.hive.mapper.FavoriteMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,24 +30,28 @@ public class UserServiceImpl implements UserService {
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
 
     @Override
+    @Cacheable(value = "users", key = "#name")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
         return userMapper.selectByName(name);
     }
 
     @Override
+    @Cacheable(value = "usersByEmail", key = "#email")
     @Transactional(readOnly = true)
     public User selectByEmail(String email) {
         return userMapper.selectByEmail(email);
     }
 
     @Override
+    @Cacheable(value = "usersByGithubId", key = "#githubId")
     @Transactional(readOnly = true)
     public User selectByGithubId(String githubId) {
         return userMapper.selectByGithubId(githubId);
     }
 
     @Override
+    @CacheEvict(value = "users", key = "#id")
     @Transactional
     public boolean updatePassword(Long id, String newPassword) {
         User user = new User();
@@ -57,6 +65,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "isFollowing", key = "#userId + '-' + #followerId")
     @Transactional(readOnly = true)
     public boolean isFollowing(Long userId, Long followerId) {
         if (userId == null || followerId == null || userId.equals(followerId)) {
@@ -71,6 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "isFavorited", key = "#id + '-' + #articleId")
     @Transactional(readOnly = true)
     public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
         if (id == null || articleId == null) {
@@ -89,12 +99,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Caching(
+            evict = {
+                    @CacheEvict(value = "users", key = "#user.id"),
+                    @CacheEvict(value = "users", key = "#user.name"),
+                    @CacheEvict(value = "usersByEmail", key = "#user.email"),
+                    @CacheEvict(value = "usersByGithubId", key = "#user.githubId", condition = "#user.githubId != null")
+            }
+    )
     @Transactional
     public int updateById(User user) {
         return userMapper.updateById(user);
     }
 
     @Override
+    @Cacheable(value = "users", key = "#id")
     @Transactional(readOnly = true)
     public User selectById(Long id) {
         return userMapper.selectById(id);
@@ -185,6 +204,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "users", key = "#followerId"),
+            @CacheEvict(value = "isFollowing", key = "#userId + '-' + #followerId"),
+            @CacheEvict(value = "followingCount", key = "#userId"),
+            @CacheEvict(value = "fansCount", key = "#followerId")
+    })
     @Transactional
     public boolean toggleFollow(Long userId, Long followerId) {
         // 这里userId是当前用户，followerId是要关注的作者
@@ -208,12 +234,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Cacheable(value = "fansCount", key = "#id")
     @Transactional(readOnly = true)
     public Integer countFansByUserId(Long id) {
         return userFollowingMapper.countFansByUserId(id);
     }
 
     @Override
+    @Cacheable(value = "followingCount", key = "#id")
     @Transactional(readOnly = true)
     public Integer countFollowingByUserId(Long id) {
         return userFollowingMapper.countFollowingByUserId(id);
@@ -229,6 +257,5 @@ public class UserServiceImpl implements UserService {
 
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
-
 
 }

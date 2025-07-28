@@ -30,15 +30,15 @@ public class PortfolioController {
 
     @Autowired private ArticleService articleService;
 
-    @GetMapping("/portfolio/{slug}")
-    public String getPortfolio(@PathVariable("slug") String slug,
+    @GetMapping("/portfolio/{id}")
+    public String getPortfolio(@PathVariable("id") Integer id,
                                Model model) {
 
-        if (slug == null || slug.trim().isEmpty()) {
+        if (id == null) {
             return "error/404";
         }
 
-        PortfolioDetailsDTO portfolioDetails = portfolioService.selectPortfolioBySlug(slug);
+        PortfolioDetailsDTO portfolioDetails = portfolioService.selectPortfolioById(id);
         model.addAttribute("portfolio", portfolioDetails);
 
         return "portfolio-detail";

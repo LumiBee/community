@@ -45,7 +45,7 @@
                         <p>目前还没有作品集，敬请期待</p>
                     </div>
                     <a th:each="portfolio : ${allPortfolios}"
-                          th:href="@{/portfolio/{slug}(slug=${portfolio.slug})}"
+                          th:href="@{/portfolio/{id}(id=${portfolio.id})}"
                           class="article-card portfolio-item"
                           th:attr="data-name=${portfolio.name}, data-description=${portfolio.description != null ? portfolio.description : '暂无描述'}">
                         <div class="portfolio-cover">

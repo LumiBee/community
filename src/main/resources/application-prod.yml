@@ -8,6 +8,10 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  redis:
+    host: ${REDIS_HOST}
+    port: ${REDIS_PORT}
+
   elasticsearch:
     uris: ${ES_URIS}
     username: ${ES_USERNAME}

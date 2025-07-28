@@ -105,7 +105,7 @@ public class FavoriteController {
 
     @GetMapping("/details/{favoriteId}")
     public ResponseEntity<FavoriteDetailsDTO> getFavoriteDetails(@PathVariable("favoriteId") Long favoriteId) {
-        FavoriteDetailsDTO favoriteDetails = favoriteService.selectPortfolioById(favoriteId);
+        FavoriteDetailsDTO favoriteDetails = favoriteService.selectFavoritesById(favoriteId);
         if (favoriteDetails == null) {
             return ResponseEntity.notFound().build();
         }

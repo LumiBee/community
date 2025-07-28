@@ -39,7 +39,7 @@
 					<!-- 作品集信息 -->
 					<div class="mb-4" th:if="${article.portfolio != null}">
 						<span>作品集：</span>
-						<a th:href="@{'/portfolio/' + ${article.portfolio.getSlug()}}" class="portfolio-pill">
+						<a th:href="@{'/portfolio/' + ${article.portfolio.getPortfolioId()}}" class="portfolio-pill">
 							<i class="fas fa-book-open mr-1"></i>
 							<span th:text="${article.portfolio.getName()}">作品集名称</span>
 						</a>
