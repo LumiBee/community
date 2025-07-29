@@ -7,7 +7,7 @@ services:
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD} # 从 .env 文件读取密码
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: community
       MYSQL_USER: root
       MYSQL_PASSWORD: ${DB_PASSWORD}
@@ -17,6 +17,12 @@ services:
       - mysql-data:/var/lib/mysql # 将数据持久化到 volume
     networks:
       - hive-net
+    healthcheck:
+      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 2. Redis 缓存服务
   redis-cache:
@@ -54,9 +60,12 @@ services:
     container_name: hive-app
     restart: always
     depends_on: # 确保在依赖服务启动后再启动
-      - mysql-db
-      - redis-cache
-      - elasticsearch-search
+      mysql-db:
+        condition: service_healthy
+      redis-cache:
+          condition: service_started
+      elasticsearch-search:
+          condition: service_started
     ports:
       - "8090:8090"
     env_file:
