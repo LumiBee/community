@@ -18,7 +18,7 @@ services:
     networks:
       - hive-net
     healthcheck:
-      test: [ "CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}" ]
+      test: ["CMD-SHELL", "mysql -h localhost -u root -p${DB_PASSWORD} -e 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
