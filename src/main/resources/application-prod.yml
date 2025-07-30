@@ -3,25 +3,34 @@ spring:
   config:
     activate:
       on-profile: prod
+
+  # --- 数据库配置 ---
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
+    # 直接写入服务名，不再使用 ${DB_URL}
+    url: jdbc:mysql://mysql-db:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    # 用户名也直接写入
+    username: root
+    # 密码可以继续从 .env 读取，因为这部分之前是成功的
     password: ${DB_PASSWORD}
 
+  # --- Redis 配置 ---
   redis:
-    host: ${REDIS_HOST}
-    port: ${REDIS_PORT}
+    # 直接写入服务名，不再使用 ${REDIS_HOST}
+    host: redis-cache
+    port: 6379
 
+  # --- Elasticsearch 配置 ---
   elasticsearch:
-    uris: ${ES_URIS}
-    username: ${ES_USERNAME}
-    password: ${ES_PASSWORD}
+    # 直接写入服务名，不再使用 ${ES_URIS}
+    uris: http://elasticsearch-search:9200
 
+  # --- Flyway 配置 (可选，但建议保持一致) ---
   flyway:
-    url: ${DB_URL}
-    user: ${DB_USERNAME}
+    url: jdbc:mysql://mysql-db:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    user: root
     password: ${DB_PASSWORD}
 
+  # --- GitHub OAuth 配置 ---
   security:
     oauth2:
       client:

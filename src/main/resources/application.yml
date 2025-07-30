@@ -2,26 +2,15 @@ server:
   port: 8090
 
 spring:
-  elasticsearch:
-    uris: http://localhost:9200
-    username: elastic
-    password: tnAS6Q3vl4xSb6Tf1aEC
-
-  redis:
-    host: localhost
-    port: 6379
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: cgqlbh114514
     # Druid 连接池配置优化
     druid:
       initial-size: 5              # 初始连接数
       min-idle: 5                  # 最小空闲连接数
       max-active: 20               # 最大活跃连接数
-      max-wait: 60000              # 获取连接最大等待时间(60秒)
+      max-wait: 60000              # 获取连接最大等待时间(60秒)≠
       time-between-eviction-runs-millis: 60000    # 检测空闲连接的间隔(60秒)
       min-evictable-idle-time-millis: 300000      # 空闲连接最小生存时间(5分钟)
       validation-query: SELECT 1 FROM DUAL        # 验证连接有效性的SQL
@@ -43,15 +32,6 @@ spring:
         reset-enable: false
         login-username: admin
         login-password: admin123
-
-  security:
-    oauth2:
-      client:
-        registration:
-          github:
-            client-id: fake
-            client-secret: fake
-            redirect-uri: "http://localhost:8090/callback"
 
   flyway:
     enabled: true
