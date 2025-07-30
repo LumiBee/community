@@ -241,20 +241,10 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <properties>
-                <flyway.url>jdbc:mysql://localhost:3306/community?useUnicode=true&amp;characterEncoding=utf-8&amp;serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true</flyway.url>
-                <flyway.user>root</flyway.user>
-                <flyway.password>cgqlbh114514</flyway.password>
-            </properties>
         </profile>
 
         <profile>
             <id>prod</id>
-            <properties>
-                <flyway.url>${env.DB_URL}</flyway.url>
-                <flyway.user>${env.DB_USERNAME}</flyway.user>
-                <flyway.password>${env.DB_PASSWORD}</flyway.password>
-            </properties>
         </profile>
     </profiles>
 
