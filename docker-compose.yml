@@ -68,15 +68,63 @@ services:
       - "8090:8090"
     env_file:
       - .env # 加载环境变量文件
-    networks:
+    好的，感谢提供配置文件，问题已经非常清楚了。
+
+    你的 docker-compose.yml 配置得非常规范，问题出在 Spring Boot 的配置文件 application.yml 上。
+
+    问题根源 🎯
+    Docker 网络: 在你的 docker-compose.yml 中，你创建了一个名为 hive-net 的网络，并且所有服务（hive-app, mysql-db, redis-cache, elasticsearch-search）都连接到了这个网络。这使得它们可以通过服务名（例如 mysql-db）相互通信。
+
+    Spring 配置: 你的 application.yml（默认配置文件）中，所有服务的连接地址都指向了 localhost。
+
+    数据库 URL: jdbc:mysql://localhost:3306/community...
+
+    Redis 主机:
+      host: localhost
+
+    Elasticsearch URI: http://localhost:9200
+
+    核心冲突: 当 hive-app 容器启动时，它加载了 application.yml 的配置，并尝试连接到 localhost。在 Docker 容器的语境里，localhost 指的是容器本身。因此，hive-app 正在自己的容器内部寻找 MySQL、Redis 和 ES 服务，但这些服务实际上是运行在其他独立容器中的，所以自然会连接失败，抛出 Connection refused 异常。
+
+    解决方案 🛠️
+    你有两种方案可以解决这个问题，推荐使用方案一，因为它更符合你当前的prod环境配置。
+
+    方案一 (推荐): 在 Docker 中激活 prod Profile
+    你的项目已经有了 application-prod.yml 文件，它使用环境变量来配置连接，这是在 Docker 中部署的最佳实践。你只需要在 docker-compose.yml 中告诉 Spring Boot 激活这个 prod 配置即可。
+
+    1. 修改 docker-compose.yml
+
+    在 hive-app 服务的 environment 部分（如果不存在，请添加该字段），添加一个环境变量来激活 prod profile：
+
+    YAML
+
+    # 4. Spring Boot 应用服务
+    hive-app:
+      build: .
+      container_name: hive-app
+      restart: always
+      depends_on:
+        mysql-db:
+          condition: service_healthy
+        redis-cache:
+          condition: service_started
+        elasticsearch-search:
+          condition: service_started
+      ports:
+        - "8090:8090"
+      env_file:
+        - .env
+      environment:
+        - SPRING_PROFILES_ACTIVE=prod
+      networks:
       - hive-net
-    command: >
-      /bin/sh -c "
-        echo '--- Waiting for 20 seconds for services to be fully ready... ---'
-        sleep 20
-        echo '--- Starting Spring Boot Application with IPv4 preference... ---'
-        exec java -Djava.net.preferIPv4Stack=true -jar /app.jar
-      "
+      command: >
+        /bin/sh -c "
+          echo '--- Waiting for 20 seconds for services to be fully ready... ---'
+          sleep 20
+          echo '--- Starting Spring Boot Application with IPv4 preference... ---'
+          exec java -Djava.net.preferIPv4Stack=true -jar /app.jar
+        "
 
 # 定义数据卷，用于持久化存储
 volumes:

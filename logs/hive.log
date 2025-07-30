@@ -1,734 +1,105 @@
-2025-07-28 00:01:53 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s667ms).
-2025-07-28 00:17:35 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m41s397ms).
-2025-07-28 00:34:10 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m4s887ms).
-2025-07-28 00:50:11 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=16m1s330ms).
-2025-07-28 01:06:37 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s723ms).
-2025-07-28 01:23:03 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s750ms).
-2025-07-28 01:39:58 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s799ms).
-2025-07-28 01:55:54 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s782ms).
-2025-07-28 02:12:20 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s781ms).
-2025-07-28 02:28:44 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s558ms).
-2025-07-28 02:31:51 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=3m6s509ms).
-2025-07-28 02:48:17 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s928ms).
-2025-07-28 03:04:12 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s583ms).
-2025-07-28 03:20:13 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m30s526ms).
-2025-07-28 03:36:39 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s788ms).
-2025-07-28 03:52:34 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s989ms).
-2025-07-28 04:08:55 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m50s774ms).
-2025-07-28 04:24:50 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s733ms).
-2025-07-28 04:41:46 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s696ms).
-2025-07-28 04:58:12 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s909ms).
-2025-07-28 05:14:38 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s759ms).
-2025-07-28 05:30:34 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s832ms).
-2025-07-28 05:47:00 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m56s648ms).
-2025-07-28 06:03:49 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m48s516ms).
-2025-07-28 06:37:31 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=33m12s578ms).
-2025-07-28 06:53:57 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s719ms).
-2025-07-28 07:09:52 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m54s978ms).
-2025-07-28 07:26:17 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s22ms).
-2025-07-28 07:42:13 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s800ms).
-2025-07-28 07:58:39 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s704ms).
-2025-07-28 08:14:34 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m55s696ms).
-2025-07-28 08:28:09 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=12m4s633ms).
-2025-07-28 08:43:28 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=15m18s619ms).
-2025-07-28 08:45:24 [HikariPool-1 housekeeper] WARN  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m26s252ms).
-2025-07-28 08:59:04 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 08:59:06 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 08:59:06 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 08:59:06 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 08:59:30 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 73980 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
-2025-07-28 08:59:30 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-07-28 08:59:30 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
-2025-07-28 08:59:30 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-07-28 08:59:30 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 56 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2025-07-28 08:59:31 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-28 08:59:31 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-07-28 08:59:31 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-28 08:59:31 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 835 ms
-2025-07-28 08:59:31 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 08:59:31 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 08:59:31 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.027s)
-2025-07-28 08:59:31 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 08:59:31 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 08:59:31 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 08:59:31 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 08:59:31 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 08:59:31 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 08:59:32 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
-2025-07-28 08:59:32 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
-2025-07-28 08:59:32 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
-2025-07-28 08:59:32 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.372 seconds (process running for 2.71)
-2025-07-28 08:59:32 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 08:59:32 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5304c73d
-2025-07-28 08:59:32 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 08:59:32 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-07-28 08:59:32 [restartedMain] ERROR org.springframework.boot.SpringApplication - Application run failed
-org.springframework.data.redis.serializer.SerializationException: Could not read JSON: Unrecognized field "githubOAuthUser" (class com.lumibee.hive.model.User), not marked as ignorable (14 known properties: "authorities", "qqOpenId", "bio", "gmtCreate", "name", "avatarUrl", "gmtModified", "version", "token", "backgroundImgUrl", "id", "email", "githubId", "deleted"])
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 489] (through reference chain: com.lumibee.hive.model.User["githubOAuthUser"])
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:172)
-	at org.springframework.data.redis.serializer.DefaultRedisElementReader.read(DefaultRedisElementReader.java:46)
-	at org.springframework.data.redis.serializer.RedisSerializationContext$SerializationPair.read(RedisSerializationContext.java:277)
-	at org.springframework.data.redis.cache.RedisCache.deserializeCacheValue(RedisCache.java:361)
-	at org.springframework.data.redis.cache.RedisCache.lookup(RedisCache.java:187)
-	at org.springframework.cache.support.AbstractValueAdaptingCache.get(AbstractValueAdaptingCache.java:58)
-	at org.springframework.cache.interceptor.AbstractCacheInvoker.doGet(AbstractCacheInvoker.java:78)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findInCaches(CacheAspectSupport.java:574)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findCachedValue(CacheAspectSupport.java:523)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:446)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:410)
-	at org.springframework.cache.interceptor.CacheInterceptor.invoke(CacheInterceptor.java:65)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
-	at com.lumibee.hive.service.UserServiceImpl$$SpringCGLIB$$0.selectById(<generated>)
-	at com.lumibee.hive.controller.DataSyncController.run(DataSyncController.java:34)
-	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:789)
-	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:82)
-	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
-	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:86)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:788)
-	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:773)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
-	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:773)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:325)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1362)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1351)
-	at com.lumibee.hive.HiveApplication.main(HiveApplication.java:18)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-Caused by: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field "githubOAuthUser" (class com.lumibee.hive.model.User), not marked as ignorable (14 known properties: "authorities", "qqOpenId", "bio", "gmtCreate", "name", "avatarUrl", "gmtModified", "version", "token", "backgroundImgUrl", "id", "email", "githubId", "deleted"])
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 489] (through reference chain: com.lumibee.hive.model.User["githubOAuthUser"])
-	at com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.from(UnrecognizedPropertyException.java:61)
-	at com.fasterxml.jackson.databind.DeserializationContext.handleUnknownProperty(DeserializationContext.java:1153)
-	at com.fasterxml.jackson.databind.deser.std.StdDeserializer.handleUnknownProperty(StdDeserializer.java:2245)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownProperty(BeanDeserializerBase.java:1821)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownVanilla(BeanDeserializerBase.java:1799)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.vanillaDeserialize(BeanDeserializer.java:316)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:177)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer._deserialize(AsArrayTypeDeserializer.java:123)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer.deserializeTypedFromAny(AsArrayTypeDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializerNR.deserializeWithType(UntypedObjectDeserializerNR.java:112)
-	at com.fasterxml.jackson.databind.deser.impl.TypeWrappedDeserializer.deserialize(TypeWrappedDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
-	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3970)
-	at org.springframework.data.redis.serializer.JacksonObjectReader.lambda$create$0(JacksonObjectReader.java:54)
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:170)
-	... 40 common frames omitted
-2025-07-28 08:59:32 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 08:59:34 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 08:59:35 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 08:59:35 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 09:05:31 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 74525 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
-2025-07-28 09:05:31 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-07-28 09:05:31 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 53 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2025-07-28 09:05:31 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-28 09:05:31 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-07-28 09:05:31 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-28 09:05:31 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 734 ms
-2025-07-28 09:05:32 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 09:05:32 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 09:05:32 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.023s)
-2025-07-28 09:05:32 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 09:05:32 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 09:05:32 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 09:05:32 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:05:32 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 09:05:32 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:05:32 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 09:05:32 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
-2025-07-28 09:05:32 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
-2025-07-28 09:05:32 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 09:05:32 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 09:05:32 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
-2025-07-28 09:05:33 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
-2025-07-28 09:05:33 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.175 seconds (process running for 2.458)
-2025-07-28 09:05:33 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 09:05:33 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@3e53425e
-2025-07-28 09:05:33 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:05:33 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:05:33 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-07-28 09:05:33 [restartedMain] ERROR org.springframework.boot.SpringApplication - Application run failed
-org.springframework.data.redis.serializer.SerializationException: Could not read JSON: Unrecognized field "githubOAuthUser" (class com.lumibee.hive.model.User), not marked as ignorable (14 known properties: "authorities", "qqOpenId", "bio", "gmtCreate", "name", "avatarUrl", "gmtModified", "version", "token", "backgroundImgUrl", "id", "email", "githubId", "deleted"])
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 489] (through reference chain: com.lumibee.hive.model.User["githubOAuthUser"])
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:172)
-	at org.springframework.data.redis.serializer.DefaultRedisElementReader.read(DefaultRedisElementReader.java:46)
-	at org.springframework.data.redis.serializer.RedisSerializationContext$SerializationPair.read(RedisSerializationContext.java:277)
-	at org.springframework.data.redis.cache.RedisCache.deserializeCacheValue(RedisCache.java:361)
-	at org.springframework.data.redis.cache.RedisCache.lookup(RedisCache.java:187)
-	at org.springframework.cache.support.AbstractValueAdaptingCache.get(AbstractValueAdaptingCache.java:58)
-	at org.springframework.cache.interceptor.AbstractCacheInvoker.doGet(AbstractCacheInvoker.java:78)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findInCaches(CacheAspectSupport.java:574)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findCachedValue(CacheAspectSupport.java:523)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:446)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:410)
-	at org.springframework.cache.interceptor.CacheInterceptor.invoke(CacheInterceptor.java:65)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
-	at com.lumibee.hive.service.UserServiceImpl$$SpringCGLIB$$0.selectById(<generated>)
-	at com.lumibee.hive.controller.DataSyncController.run(DataSyncController.java:34)
-	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:789)
-	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:82)
-	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
-	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:86)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:788)
-	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:773)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
-	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:773)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:325)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1362)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1351)
-	at com.lumibee.hive.HiveApplication.main(HiveApplication.java:18)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-Caused by: com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException: Unrecognized field "githubOAuthUser" (class com.lumibee.hive.model.User), not marked as ignorable (14 known properties: "authorities", "qqOpenId", "bio", "gmtCreate", "name", "avatarUrl", "gmtModified", "version", "token", "backgroundImgUrl", "id", "email", "githubId", "deleted"])
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 489] (through reference chain: com.lumibee.hive.model.User["githubOAuthUser"])
-	at com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.from(UnrecognizedPropertyException.java:61)
-	at com.fasterxml.jackson.databind.DeserializationContext.handleUnknownProperty(DeserializationContext.java:1153)
-	at com.fasterxml.jackson.databind.deser.std.StdDeserializer.handleUnknownProperty(StdDeserializer.java:2245)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownProperty(BeanDeserializerBase.java:1821)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializerBase.handleUnknownVanilla(BeanDeserializerBase.java:1799)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.vanillaDeserialize(BeanDeserializer.java:316)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:177)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer._deserialize(AsArrayTypeDeserializer.java:123)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer.deserializeTypedFromAny(AsArrayTypeDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializerNR.deserializeWithType(UntypedObjectDeserializerNR.java:112)
-	at com.fasterxml.jackson.databind.deser.impl.TypeWrappedDeserializer.deserialize(TypeWrappedDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
-	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3970)
-	at org.springframework.data.redis.serializer.JacksonObjectReader.lambda$create$0(JacksonObjectReader.java:54)
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:170)
-	... 40 common frames omitted
-2025-07-28 09:05:33 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 09:05:35 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 09:05:35 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 09:05:35 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 09:09:07 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 74787 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
-2025-07-28 09:09:07 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-07-28 09:09:07 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 50 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 09:09:07 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
-2025-07-28 09:09:08 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2025-07-28 09:09:08 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-28 09:09:08 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-07-28 09:09:08 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-28 09:09:08 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 714 ms
-2025-07-28 09:09:08 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 09:09:08 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 09:09:08 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.026s)
-2025-07-28 09:09:08 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 09:09:08 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 09:09:08 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 09:09:08 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:09:08 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 09:09:08 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:09:08 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 09:09:08 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
-2025-07-28 09:09:08 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
-2025-07-28 09:09:08 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 09:09:08 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 09:09:09 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
-2025-07-28 09:09:09 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
-2025-07-28 09:09:09 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.088 seconds (process running for 2.321)
-2025-07-28 09:09:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 09:09:09 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@c9aa7c2
-2025-07-28 09:09:09 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:09:09 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:09:09 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
-
-Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
-2025-07-28 09:09:09 [restartedMain] ERROR org.springframework.boot.SpringApplication - Application run failed
-org.springframework.data.redis.serializer.SerializationException: Could not read JSON: Problem deserializing 'setterless' property ("authorities"): no way to handle typed deser with setterless yet
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 527] (through reference chain: com.lumibee.hive.model.User["authorities"])
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:172)
-	at org.springframework.data.redis.serializer.DefaultRedisElementReader.read(DefaultRedisElementReader.java:46)
-	at org.springframework.data.redis.serializer.RedisSerializationContext$SerializationPair.read(RedisSerializationContext.java:277)
-	at org.springframework.data.redis.cache.RedisCache.deserializeCacheValue(RedisCache.java:361)
-	at org.springframework.data.redis.cache.RedisCache.lookup(RedisCache.java:187)
-	at org.springframework.cache.support.AbstractValueAdaptingCache.get(AbstractValueAdaptingCache.java:58)
-	at org.springframework.cache.interceptor.AbstractCacheInvoker.doGet(AbstractCacheInvoker.java:78)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findInCaches(CacheAspectSupport.java:574)
-	at org.springframework.cache.interceptor.CacheAspectSupport.findCachedValue(CacheAspectSupport.java:523)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:446)
-	at org.springframework.cache.interceptor.CacheAspectSupport.execute(CacheAspectSupport.java:410)
-	at org.springframework.cache.interceptor.CacheInterceptor.invoke(CacheInterceptor.java:65)
-	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184)
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:728)
-	at com.lumibee.hive.service.UserServiceImpl$$SpringCGLIB$$0.selectById(<generated>)
-	at com.lumibee.hive.controller.DataSyncController.run(DataSyncController.java:34)
-	at org.springframework.boot.SpringApplication.lambda$callRunner$5(SpringApplication.java:789)
-	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:82)
-	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60)
-	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:86)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797)
-	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:788)
-	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:773)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(SortedOps.java:357)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:510)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:499)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:596)
-	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:773)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:325)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1362)
-	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1351)
-	at com.lumibee.hive.HiveApplication.main(HiveApplication.java:18)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.boot.devtools.restart.RestartLauncher.run(RestartLauncher.java:50)
-Caused by: com.fasterxml.jackson.databind.exc.InvalidDefinitionException: Problem deserializing 'setterless' property ("authorities"): no way to handle typed deser with setterless yet
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1, column: 527] (through reference chain: com.lumibee.hive.model.User["authorities"])
-	at com.fasterxml.jackson.databind.exc.InvalidDefinitionException.from(InvalidDefinitionException.java:67)
-	at com.fasterxml.jackson.databind.DeserializationContext.reportBadDefinition(DeserializationContext.java:1888)
-	at com.fasterxml.jackson.databind.deser.impl.SetterlessProperty.deserializeAndSet(SetterlessProperty.java:113)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.vanillaDeserialize(BeanDeserializer.java:310)
-	at com.fasterxml.jackson.databind.deser.BeanDeserializer.deserialize(BeanDeserializer.java:177)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer._deserialize(AsArrayTypeDeserializer.java:123)
-	at com.fasterxml.jackson.databind.jsontype.impl.AsArrayTypeDeserializer.deserializeTypedFromAny(AsArrayTypeDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.std.UntypedObjectDeserializerNR.deserializeWithType(UntypedObjectDeserializerNR.java:112)
-	at com.fasterxml.jackson.databind.deser.impl.TypeWrappedDeserializer.deserialize(TypeWrappedDeserializer.java:74)
-	at com.fasterxml.jackson.databind.deser.DefaultDeserializationContext.readRootValue(DefaultDeserializationContext.java:342)
-	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4931)
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3970)
-	at org.springframework.data.redis.serializer.JacksonObjectReader.lambda$create$0(JacksonObjectReader.java:54)
-	at org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer.deserialize(Jackson2JsonRedisSerializer.java:170)
-	... 40 common frames omitted
-2025-07-28 09:09:09 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 09:09:11 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 09:09:11 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 09:09:11 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 09:11:28 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 74965 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
-2025-07-28 09:11:28 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-07-28 09:11:28 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
-2025-07-28 09:11:28 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-07-28 09:11:28 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 52 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2025-07-28 09:11:29 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-28 09:11:29 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-07-28 09:11:29 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-28 09:11:29 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 713 ms
-2025-07-28 09:11:29 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 09:11:29 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 09:11:29 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.106s)
-2025-07-28 09:11:29 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 09:11:29 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 09:11:30 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 09:11:30 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:11:30 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 09:11:30 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:11:30 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 09:11:30 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
-2025-07-28 09:11:30 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:30 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 09:11:30 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 09:11:30 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
-2025-07-28 09:11:30 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
-2025-07-28 09:11:30 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.177 seconds (process running for 2.414)
-2025-07-28 09:11:30 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 09:11:30 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@410b2fcb
-2025-07-28 09:11:30 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:30 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:11:31 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:11:31 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:31 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:11:31 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:31 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:31 [RMI TCP Connection(3)-192.168.1.4] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-07-28 09:11:31 [RMI TCP Connection(3)-192.168.1.4] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
-2025-07-28 09:11:31 [RMI TCP Connection(3)-192.168.1.4] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
-2025-07-28 09:11:31 [elasticsearch-rest-client-0-thread-2] DEBUG org.elasticsearch.client.RestClient - request [GET http://localhost:9200/_cluster/health] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT * FROM user WHERE name = ? LIMIT 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: LumiBee(String)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (slug = ? AND deleted = ?)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 1-2-3-0-1-2(String), 0(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==>  Preparing: UPDATE articles SET view_count = view_count + 1 WHERE article_id = ?
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==> Parameters: 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - <==    Updates: 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE id=? AND deleted=0
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==> Parameters: null
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - <==      Total: 0
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==>  Preparing: SELECT t.tag_id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.tag_id = at.tag_id WHERE at.article_id = ?
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==> Parameters: 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - <==      Total: 0
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==>  Preparing: SELECT * from article_likes WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==> Parameters: 1925216231290916865(Long), 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - <==      Total: 0
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==> Parameters: 1925216231290916865(Long), 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG c.l.h.m.A.selectIfFavoriteExists - <==      Total: 1
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:36 [http-nio-8090-exec-1] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:36 [http-nio-8090-exec-10] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==>  Preparing: SELECT c.*, u.name AS userName, u.avatar_url AS avatarUrl FROM comments c JOIN user u ON c.user_id = u.id WHERE c.article_id = ? AND c.parent_comment_id IS NULL AND c.deleted = 0 ORDER BY c.gmt_create DESC
-2025-07-28 09:11:36 [http-nio-8090-exec-10] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==> Parameters: 58(Integer)
-2025-07-28 09:11:36 [http-nio-8090-exec-10] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - <==      Total: 0
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ?)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ?) ORDER BY gmt_modified DESC LIMIT ?
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 8(Long)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 8
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ? AND is_featured = ?) ORDER BY gmt_modified DESC
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String), true(Boolean)
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 2
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==>  Preparing: SELECT * from tags ORDER BY article_count DESC LIMIT 20
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==> Parameters: 
-2025-07-28 09:11:37 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - <==      Total: 17
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 58(Integer)
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==>  Preparing: SELECT * from article_likes WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==> Parameters: 1925216231290916865(Long), 58(Integer)
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - <==      Total: 0
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:38 [http-nio-8090-exec-9] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==>  Preparing: SELECT * from article_likes WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==> Parameters: 1925216231290916865(Long), 58(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - <==      Total: 0
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.insertLike - ==>  Preparing: INSERT IGNORE INTO article_likes (user_id, article_id) VALUES (?, ?)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.insertLike - ==> Parameters: 1925216231290916865(Long), 58(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleLikesMapper.insertLike - <==    Updates: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.updateArticleLikes - ==>  Preparing: update articles set likes = likes + ? where article_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.updateArticleLikes - ==> Parameters: 1(Integer), 58(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.updateArticleLikes - <==    Updates: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE article_id=? AND deleted=0
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==> Parameters: 58(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.countLikes - ==>  Preparing: SELECT likes FROM articles WHERE article_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.countLikes - ==> Parameters: 58(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.countLikes - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==>  Preparing: SELECT id,user_id,name,is_public,gmt_create,gmt_modified,version,deleted FROM favorites WHERE deleted=0 AND (user_id = ? AND deleted = ?) ORDER BY gmt_create DESC
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==> Parameters: 1925216231290916865(Long), 0(Integer)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - <==      Total: 4
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 9(Long)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 8(Long)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 7(Long)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 1(Long)
-2025-07-28 09:11:39 [http-nio-8090-exec-5] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectById - ==>  Preparing: SELECT id,user_id,name,is_public,gmt_create,gmt_modified,version,deleted FROM favorites WHERE id=? AND deleted=0
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectById - ==> Parameters: 9(Long)
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectById - <==      Total: 1
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.selectList - ==>  Preparing: SELECT favorite_id,article_id,user_id FROM article_favorites WHERE (user_id = ? AND article_id = ? AND favorite_id = ?)
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.selectList - ==> Parameters: 1925216231290916865(Long), 58(Integer), 9(Long)
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.selectList - <==      Total: 0
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.insert - ==>  Preparing: INSERT INTO article_favorites ( favorite_id, article_id, user_id ) VALUES ( ?, ?, ? )
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.insert - ==> Parameters: 9(Long), 58(Integer), 1925216231290916865(Long)
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleFavoritesMapper.insert - <==    Updates: 1
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 58(Integer)
-2025-07-28 09:11:41 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
-2025-07-28 09:11:42 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
-2025-07-28 09:11:42 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
-2025-07-28 09:11:42 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
-2025-07-28 09:11:44 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
-2025-07-28 09:11:44 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 100(Integer)
-2025-07-28 09:11:44 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 22
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE deleted=0 AND (deleted = ?) ORDER BY gmt_modified DESC
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==> Parameters: 0(Integer)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - <==      Total: 8
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==>  Preparing: SELECT portfolio_id, COUNT(*) as article_count FROM articles WHERE portfolio_id IN ( ? , ? , ? , ? , ? , ? , ? , ? ) AND deleted = 0 AND status = 'published' GROUP BY portfolio_id
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==> Parameters: 8(Integer), 7(Integer), 6(Integer), 5(Integer), 4(Integer), 3(Integer), 2(Integer), 1(Integer)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - <==      Total: 5
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==>  Preparing: SELECT id,user_id,name,is_public,gmt_create,gmt_modified,version,deleted FROM favorites WHERE deleted=0 AND (user_id = ? AND deleted = ?) ORDER BY gmt_create DESC
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==> Parameters: 1925216231290916865(Long), 0(Integer)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - <==      Total: 4
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 9(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 8(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 7(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE favorite_id = ?
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - ==> Parameters: 1(Long)
-2025-07-28 09:11:45 [http-nio-8090-exec-8] DEBUG c.l.h.m.A.countArticlesInFavorite - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==>  Preparing: SELECT id,user_id,name,is_public,gmt_create,gmt_modified,version,deleted FROM favorites WHERE deleted=0 AND (id = ? AND deleted = ?)
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - ==> Parameters: 9(Long), 0(Integer)
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.FavoriteMapper.selectList - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.selectArticlesByFavoriteId - ==>  Preparing: SELECT a.article_id, a.title, a.excerpt, a.user_id, a.gmt_create AS gmtCreate, a.gmt_modified AS gmtModified FROM article_favorites af JOIN articles a ON af.article_id = a.article_id WHERE af.favorite_id = ?
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.selectArticlesByFavoriteId - ==> Parameters: 9(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG c.l.h.m.A.selectArticlesByFavoriteId - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==>  Preparing: SELECT count(*) from articles where user_id = ? and deleted = 0
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - ==>  Preparing: SELECT COUNT(*) FROM following WHERE follower_id = ?
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - ==>  Preparing: SELECT COUNT(*) FROM following WHERE user_id = ?
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ? AND user_id = ?)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer), 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ? AND user_id = ?) ORDER BY gmt_modified DESC LIMIT ?
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 1925216231290916865(Long), 6(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 6
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:46 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
-2025-07-28 09:11:47 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
-2025-07-28 09:11:47 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
-2025-07-28 09:11:47 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (slug = ? AND deleted = ?)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: Java(String), 0(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 1
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==>  Preparing: UPDATE articles SET view_count = view_count + 1 WHERE article_id = ?
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==> Parameters: 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - <==    Updates: 1
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE id=? AND deleted=0
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==> Parameters: null
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - <==      Total: 0
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==>  Preparing: SELECT t.tag_id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.tag_id = at.tag_id WHERE at.article_id = ?
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==> Parameters: 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - <==      Total: 0
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==>  Preparing: SELECT * from article_likes WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==> Parameters: 1925216231290916865(Long), 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - <==      Total: 1
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE user_id = ? AND article_id = ?
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==> Parameters: 1925216231290916865(Long), 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG c.l.h.m.A.selectIfFavoriteExists - <==      Total: 1
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:49 [http-nio-8090-exec-7] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
-2025-07-28 09:11:49 [http-nio-8090-exec-4] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==>  Preparing: SELECT c.*, u.name AS userName, u.avatar_url AS avatarUrl FROM comments c JOIN user u ON c.user_id = u.id WHERE c.article_id = ? AND c.parent_comment_id IS NULL AND c.deleted = 0 ORDER BY c.gmt_create DESC
-2025-07-28 09:11:49 [http-nio-8090-exec-4] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==> Parameters: 1(Integer)
-2025-07-28 09:11:49 [http-nio-8090-exec-4] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - <==      Total: 0
-2025-07-28 09:11:50 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==>  Preparing: SELECT count(*) from articles where user_id = ? and deleted = 0
-2025-07-28 09:11:50 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 09:11:50 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - <==      Total: 1
-2025-07-28 09:11:51 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
-2025-07-28 09:11:51 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
-2025-07-28 09:11:51 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
-2025-07-28 09:12:23 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 09:12:25 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 09:12:25 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 09:12:25 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 09:12:35 [main] INFO  com.lumibee.hive.HiveApplicationTests - Starting HiveApplicationTests using Java 17.0.14 with PID 75221 (started by czar in /Users/czar/Java/hive)
-2025-07-28 09:12:35 [main] INFO  com.lumibee.hive.HiveApplicationTests - No active profile set, falling back to 1 default profile: "default"
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 56 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 09:12:36 [main] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Redis repository interfaces.
-2025-07-28 09:12:36 [main] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 09:12:36 [main] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 09:12:36 [main] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.022s)
-2025-07-28 09:12:36 [main] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 09:12:36 [main] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 09:12:36 [main] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 09:12:36 [main] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:12:36 [main] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 09:12:36 [main] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 09:12:37 [main] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 09:12:37 [main] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 09:12:37 [main] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 09:12:37 [main] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 6 endpoints beneath base path '/actuator'
-2025-07-28 09:12:37 [main] INFO  com.lumibee.hive.HiveApplicationTests - Started HiveApplicationTests in 2.197 seconds (process running for 2.52)
-2025-07-28 09:12:37 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 09:12:37 [main] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@142422a4
-2025-07-28 09:12:37 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 09:12:37 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 09:12:38 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
-2025-07-28 14:15:58 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 94908 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
-2025-07-28 14:15:58 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
-2025-07-28 14:15:58 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
-2025-07-28 14:15:58 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-07-28 14:15:58 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 55 ms. Found 1 Elasticsearch repository interface.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
-2025-07-28 14:15:59 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
-2025-07-28 14:15:59 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
-2025-07-28 14:15:59 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
-2025-07-28 14:15:59 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 824 ms
-2025-07-28 14:15:59 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
-2025-07-28 14:15:59 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
-2025-07-28 14:16:00 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.025s)
-2025-07-28 14:16:00 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
-2025-07-28 14:16:00 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
-2025-07-28 14:16:00 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
-2025-07-28 14:16:00 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 14:16:00 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
-2025-07-28 14:16:00 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
-2025-07-28 14:16:00 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
-2025-07-28 14:16:00 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
-2025-07-28 14:16:00 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
-2025-07-28 14:16:00 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
-2025-07-28 14:16:00 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
-2025-07-28 14:16:00 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
-2025-07-28 14:16:00 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
-2025-07-28 14:16:01 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.424 seconds (process running for 2.916)
-2025-07-28 14:16:01 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
-2025-07-28 14:16:01 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6f305b46
-2025-07-28 14:16:01 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
-2025-07-28 14:16:01 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
-2025-07-28 14:16:01 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
-2025-07-28 14:16:01 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
-2025-07-28 14:16:01 [RMI TCP Connection(4)-192.168.1.4] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-07-28 14:16:01 [RMI TCP Connection(4)-192.168.1.4] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
-2025-07-28 14:16:01 [RMI TCP Connection(4)-192.168.1.4] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 0 ms
-2025-07-28 14:16:01 [elasticsearch-rest-client-0-thread-2] DEBUG org.elasticsearch.client.RestClient - request [GET http://localhost:9200/_cluster/health] returned [HTTP/1.1 200 OK]
-2025-07-28 14:16:07 [SpringApplicationShutdownHook] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
-2025-07-28 14:16:09 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
-2025-07-28 14:16:09 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown initiated...
-2025-07-28 14:16:09 [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Shutdown completed.
+2025-07-30 14:09:01 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 17.0.14 with PID 62870 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-07-30 14:09:01 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.4.5, Spring v6.2.6
+2025-07-30 14:09:01 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
+2025-07-30 14:09:01 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-07-30 14:09:01 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 58 ms. Found 1 Elasticsearch repository interface.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Redis repository interfaces.
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-07-30 14:09:02 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-07-30 14:09:02 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.40]
+2025-07-30 14:09:02 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-07-30 14:09:02 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 786 ms
+2025-07-30 14:09:02 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
+2025-07-30 14:09:02 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2025-07-30 14:09:03 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.025s)
+2025-07-30 14:09:03 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
+2025-07-30 14:09:03 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
+2025-07-30 14:09:03 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
+2025-07-30 14:09:03 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-07-30 14:09:03 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
+2025-07-30 14:09:03 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-07-30 14:09:03 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
+2025-07-30 14:09:03 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-07-30 14:09:03 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:03 [restartedMain] ERROR i.n.resolver.dns.DnsServerAddressStreamProviders - Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+2025-07-30 14:09:03 [restartedMain] INFO  o.s.b.a.web.servlet.WelcomePageHandlerMapping - Adding welcome page template: index
+2025-07-30 14:09:03 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
+2025-07-30 14:09:03 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
+2025-07-30 14:09:03 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 2.236 seconds (process running for 2.644)
+2025-07-30 14:09:03 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2025-07-30 14:09:03 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@a32513b
+2025-07-30 14:09:03 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Start completed.
+2025-07-30 14:09:03 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
+2025-07-30 14:09:03 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-07-30 14:09:04 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-07-30 14:09:04 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:04 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:04 [RMI TCP Connection(3)-127.0.0.1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-07-30 14:09:04 [RMI TCP Connection(3)-127.0.0.1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-07-30 14:09:04 [RMI TCP Connection(3)-127.0.0.1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 1 ms
+2025-07-30 14:09:04 [elasticsearch-rest-client-0-thread-2] DEBUG org.elasticsearch.client.RestClient - request [GET http://localhost:9200/_cluster/health] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT * FROM user WHERE name = ? LIMIT 1
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: LumiBee(String)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ?)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ?) ORDER BY gmt_modified DESC LIMIT ?
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 8(Long)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 8
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ? AND is_featured = ?) ORDER BY gmt_modified DESC
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String), true(Boolean)
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 2
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==>  Preparing: SELECT * from tags ORDER BY article_count DESC LIMIT 20
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==> Parameters: 
+2025-07-30 14:09:08 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - <==      Total: 17
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (slug = ? AND deleted = ?)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 1-2-3-0-1-2(String), 0(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 1
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==>  Preparing: UPDATE articles SET view_count = view_count + 1 WHERE article_id = ?
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==> Parameters: 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - <==    Updates: 1
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE id=? AND deleted=0
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==> Parameters: null
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - <==      Total: 0
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==>  Preparing: SELECT t.tag_id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.tag_id = at.tag_id WHERE at.article_id = ?
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==> Parameters: 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - <==      Total: 0
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==>  Preparing: SELECT * from article_likes WHERE user_id = ? AND article_id = ?
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - ==> Parameters: 1925216231290916865(Long), 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.hive.mapper.ArticleLikesMapper.toggleLike - <==      Total: 1
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE user_id = ? AND article_id = ?
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.selectIfFavoriteExists - ==> Parameters: 1925216231290916865(Long), 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG c.l.h.m.A.selectIfFavoriteExists - <==      Total: 1
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:10 [http-nio-8090-exec-3] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?typed_keys=true&search_type=query_then_fetch] returned [HTTP/1.1 200 OK]
+2025-07-30 14:09:10 [http-nio-8090-exec-5] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==>  Preparing: SELECT c.*, u.name AS userName, u.avatar_url AS avatarUrl FROM comments c JOIN user u ON c.user_id = u.id WHERE c.article_id = ? AND c.parent_comment_id IS NULL AND c.deleted = 0 ORDER BY c.gmt_create DESC
+2025-07-30 14:09:10 [http-nio-8090-exec-5] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - ==> Parameters: 58(Integer)
+2025-07-30 14:09:10 [http-nio-8090-exec-5] DEBUG c.l.h.m.CommentMapper.getTopCommentsByArticleId - <==      Total: 0
+2025-07-30 14:09:11 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-07-30 14:09:11 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-07-30 14:09:11 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
