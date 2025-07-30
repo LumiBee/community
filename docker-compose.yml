@@ -6,8 +6,6 @@ services:
     image: mysql:8.0
     container_name: mysql-db
     restart: always
-    env_file:
-      - ./config/prod.env
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: community
