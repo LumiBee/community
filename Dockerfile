@@ -1,5 +1,5 @@
 # 使用一个轻量级的 Java 17 运行环境作为基础镜像
-FROM eclipse-temurin:17-jdk-jammy
+FROM openjdk:17-jdk-slim
 
 # 将 Maven 构建出的 JAR 包作为参数
 ARG JAR_FILE=target/*.jar
