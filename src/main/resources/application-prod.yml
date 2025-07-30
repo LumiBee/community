@@ -17,6 +17,11 @@ spring:
     username: ${ES_USERNAME}
     password: ${ES_PASSWORD}
 
+  flyway:
+    url: ${DB_URL}
+    user: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
   security:
     oauth2:
       client:
