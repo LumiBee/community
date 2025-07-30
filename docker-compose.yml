@@ -72,10 +72,10 @@ services:
       - hive-net
     command: >
       /bin/sh -c "
-        echo '--- Waiting for 15 seconds for services to be fully ready... ---'
-        sleep 15
-        echo '--- Starting Spring Boot Application... ---'
-        exec java -jar /app.jar
+        echo '--- Waiting for 20 seconds for services to be fully ready... ---'
+        sleep 20
+        echo '--- Starting Spring Boot Application with IPv4 preference... ---'
+        exec java -Djava.net.preferIPv4Stack=true -jar /app.jar
       "
 
 # 定义数据卷，用于持久化存储
