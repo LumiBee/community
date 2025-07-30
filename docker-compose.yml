@@ -67,7 +67,7 @@ services:
     ports:
       - "8090:8090"
     env_file:
-      - ./config/prod.env # 加载环境变量文件
+      - .env # 加载环境变量文件
     networks:
       - hive-net
 
