@@ -71,6 +71,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       _JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true"
+      SPRING_CONFIG_LOCATION: "classpath:/,file:/config/override.yml"
+    volumes:
+        - ./config:/config # 挂载配置文件目录
     networks:
       - hive-net
 
