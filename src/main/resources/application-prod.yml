@@ -60,6 +60,12 @@ deepseek:
   api:
     key: ${DEEPSEEK_API_KEY}
 
+file:
+  upload:
+    dir: /opt/data/uploads
+  base:
+    url: /uploads/
+
 logging:
   level:
     com.lumibee.hive: INFO

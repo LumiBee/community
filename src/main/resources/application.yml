@@ -61,7 +61,7 @@ mybatis-plus:
 # 文件存储配置
 file:
   upload:
-    dir: ./uploads  # 文件上传目录
+    dir: /data/uploads  # 文件上传目录 - 独立目录，避免项目更新时丢失
   base:
     url: /uploads/  # 访问URL前缀
 
