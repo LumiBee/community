@@ -1,0 +1,19 @@
+spring:
+  redis:
+    host: redis-cache
+    port: 6379
+    database: 0
+    timeout: 10s
+    connect-timeout: 10s
+    lettuce:
+      pool:
+        max-active: 10
+        max-wait: -1ms
+        max-idle: 5
+        min-idle: 0
+      shutdown-timeout: 200ms
+
+logging:
+  level:
+    io.lettuce: DEBUG
+    org.springframework.data.redis: DEBUG

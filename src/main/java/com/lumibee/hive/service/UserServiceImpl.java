@@ -30,21 +30,21 @@ public class UserServiceImpl implements UserService {
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
 
     @Override
-    @Cacheable(value = "users", key = "#name")
+    @Cacheable(value = "users", key = "#name", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
         return userMapper.selectByName(name);
     }
 
     @Override
-    @Cacheable(value = "usersByEmail", key = "#email")
+    @Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByEmail(String email) {
         return userMapper.selectByEmail(email);
     }
 
     @Override
-    @Cacheable(value = "usersByGithubId", key = "#githubId")
+    @Cacheable(value = "usersByGithubId", key = "#githubId", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByGithubId(String githubId) {
         return userMapper.selectByGithubId(githubId);
@@ -113,7 +113,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users", key = "#id")
+    @Cacheable(value = "users", key = "#id", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectById(Long id) {
         return userMapper.selectById(id);

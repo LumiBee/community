@@ -1,6 +1,15 @@
 # 使用一个轻量级的 Java 17 运行环境作为基础镜像
 FROM openjdk:17-jdk-slim
 
+# 安装网络诊断工具
+RUN apt-get update && apt-get install -y \
+    iputils-ping \
+    telnet \
+    netcat-openbsd \
+    dnsutils \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # 将 Maven 构建出的 JAR 包作为参数
 ARG JAR_FILE=target/*.jar
 

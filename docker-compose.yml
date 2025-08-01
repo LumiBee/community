@@ -25,13 +25,20 @@ services:
     image: redis:6.2-alpine
     container_name: redis-cache
     restart: always
-    command: redis-server --appendonly yes
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - hive-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # 3. Elasticsearch 搜索服务 (带 IK 插件)
   elasticsearch-search:
@@ -59,7 +66,7 @@ services:
       mysql-db:
         condition: service_healthy
       redis-cache:
-        condition: service_started
+        condition: service_healthy
       elasticsearch-search:
         condition: service_started
     ports:
@@ -70,6 +77,11 @@ services:
       SPRING_PROFILES_ACTIVE: prod
       _JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true"
       SPRING_CONFIG_LOCATION: "classpath:/,optional:file:/config/override.yml"
+      # 使用标准Spring Boot环境变量格式
+      SPRING_DATA_REDIS_HOST: redis-cache
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_DATABASE: 0
+      SPRING_DATA_REDIS_TIMEOUT: 10s
     volumes:
       - ./config:/config
     networks:
@@ -85,3 +97,6 @@ volumes:
 networks:
   hive-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16

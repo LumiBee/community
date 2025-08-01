@@ -18,6 +18,19 @@ spring:
     # 直接写入服务名，不再使用 ${REDIS_HOST}
     host: redis-cache
     port: 6379
+    database: 0
+    timeout: 10s
+    connect-timeout: 10s
+    # password: # 如果Redis有密码则填写
+    lettuce:
+      pool:
+        max-active: 10
+        max-wait: -1ms
+        max-idle: 5
+        min-idle: 0
+      shutdown-timeout: 200ms
+    # 添加连接验证
+    client-type: lettuce
 
   # --- Elasticsearch 配置 ---
   elasticsearch:
@@ -51,3 +64,5 @@ logging:
   level:
     com.lumibee.hive: INFO
     org.elasticsearch: WARN
+    org.springframework.data.redis: DEBUG
+    io.lettuce: DEBUG
