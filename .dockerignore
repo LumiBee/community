@@ -1,0 +1,11 @@
+# 忽略不需要的文件，加速构建
+target/
+logs/
+uploads/
+*.log
+.git/
+.idea/
+*.iml
+node_modules/
+.DS_Store
+README.md
