@@ -27,12 +27,12 @@ public class FileUploadConfig implements WebMvcConfigurer {
         String locationPath = "file:" + uploadPath.toString() + "/";
         
         // 添加调试日志
-        System.out.println("=== 文件上传配置 ===");
+        System.out.println("=== File Upload Configuration ===");
         System.out.println("uploadDir: " + uploadDir);
         System.out.println("baseUrl: " + baseUrl);
         System.out.println("uploadPath: " + uploadPath.toString());
         System.out.println("locationPath: " + locationPath);
-        System.out.println("配置静态资源映射: /uploads/** -> " + locationPath);
+        System.out.println("Static resource mapping: /uploads/** -> " + locationPath);
         
         // 配置静态资源映射
         registry.addResourceHandler("/uploads/**")
