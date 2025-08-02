@@ -62,7 +62,7 @@ deepseek:
 
 file:
   upload:
-    dir: /data/uploads  # 匹配Docker映射路径
+    dir: ./uploads  # 项目目录下的uploads文件夹
   base:
     url: /uploads/
 

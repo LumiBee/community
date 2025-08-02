@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class FileUploadConfig implements WebMvcConfigurer {
     
-    @Value("${file.upload.dir:/data/uploads}")
+    @Value("${file.upload.dir:./uploads}")
     private String uploadDir;
     
     @Value("${file.base.url:/uploads/}")

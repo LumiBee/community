@@ -84,7 +84,6 @@ services:
       SPRING_DATA_REDIS_TIMEOUT: 10s
     volumes:
       - ./config:/config
-      - /opt/data/uploads:/data/uploads
     networks:
       - hive-net
 
