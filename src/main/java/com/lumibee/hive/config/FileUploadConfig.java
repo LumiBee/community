@@ -25,11 +25,8 @@ public class FileUploadConfig implements WebMvcConfigurer {
         // 将上传目录映射为可访问的静态资源
         Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
         
-        // 移除baseUrl开头和结尾的斜杠，以确保正确的路径格式
+        // 配置URL路径模式，确保正确映射
         String pathPattern = baseUrl;
-        if (pathPattern.startsWith("/")) {
-            pathPattern = pathPattern.substring(1);
-        }
         if (!pathPattern.endsWith("/")) {
             pathPattern = pathPattern + "/";
         }
