@@ -13,5 +13,5 @@ public interface ArticleLikesMapper extends BaseMapper<ArticleLikes> {
     @Insert("INSERT IGNORE INTO article_likes (user_id, article_id) VALUES (#{userId}, #{articleId})")
     void insertLike(@Param("userId") long userId,@Param("articleId") int articleId);
     @Delete("DELETE FROM article_likes WHERE user_id = #{userId} AND article_id = #{articleId}")
-    void deleteLike(long userId, int articleId);
+    void deleteLike(@Param("userId")long userId, @Param("articleId")int articleId);
 }

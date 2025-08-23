@@ -1,9 +1,8 @@
 package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lumibee.hive.dto.ArticleDetailsDTO;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.model.Article;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

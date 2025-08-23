@@ -2,7 +2,6 @@ server:
   port: 8090
 
 spring:
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # Druid 连接池配置优化
@@ -111,6 +110,3 @@ logging:
     rollingpolicy:
       max-file-size: 10MB
       max-history: 30
-deepseek:
-  api:
-    key: sk-2

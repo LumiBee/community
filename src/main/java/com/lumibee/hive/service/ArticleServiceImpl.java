@@ -27,7 +27,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired private ArticleMapper articleMapper;
     @Autowired private PortfolioMapper portfolioMapper;
-    @Autowired private UserService userService;
+    @Autowired private com.lumibee.hive.service.UserService userService;
     @Autowired private UserMapper userMapper;
     @Autowired private TagService tagService;
     @Autowired private PortfolioService portfolioService;

@@ -94,7 +94,7 @@ public class SecurityConfig {
                                                 "/backgrounds/**", // 背景图片
                                                 "/search", // 搜索页面
                                                 "/api/search/**", // 搜索 API
-                                                "/RealTimeSearch.html" // 实时搜索页面
+                                                "/api/ai" // AI 相关 API
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
                                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()

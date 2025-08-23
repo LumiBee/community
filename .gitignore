@@ -38,3 +38,6 @@ build/
 .zip
 
 uploads/
+
+application-dev.yml
+application-prod.yml

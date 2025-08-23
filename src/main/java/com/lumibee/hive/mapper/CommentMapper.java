@@ -1,8 +1,8 @@
 package com.lumibee.hive.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lumibee.hive.dto.CommentDTO;
 import com.lumibee.hive.model.Comments;
+import com.lumibee.hive.dto.CommentDTO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;

@@ -5,9 +5,10 @@ import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.model.ArticleDocument;
+
 
 import java.util.List;
-import com.lumibee.hive.model.ArticleDocument;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
