@@ -1,25 +1,20 @@
 package com.lumibee.hive.agent;
 
-import com.lumibee.hive.advisors.MyLoggerAdvisor;
-import lombok.extern.log4j.Log4j2;
 import org.json.JSONObject;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.ai.tool.ToolCallbackProvider;
-import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
+
+import com.lumibee.hive.advisors.MyLoggerAdvisor;
 import com.lumibee.hive.rag.QueryRewriter;
-import reactor.core.publisher.Flux;
 import com.lumibee.hive.utils.TransApi;
 
-import java.util.List;
-import java.util.Map;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 @Component
 @Log4j2

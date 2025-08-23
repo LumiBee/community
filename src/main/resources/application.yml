@@ -45,6 +45,10 @@ spring:
       max-request-size: 10MB
       file-size-threshold: 2KB
 
+  ai:
+    dashscope:
+      api-key: "placeholder_dashscope_key"
+
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
   global-config:
@@ -110,3 +114,11 @@ logging:
     rollingpolicy:
       max-file-size: 10MB
       max-history: 30
+
+qweather:
+  api:
+    key: "placeholder_weather_key"
+    weather-base-url: "https://devapi.qweather.com/v7/weather"
+    geo-base-url: "https://geoapi.qweather.com/v2/city"
+
+

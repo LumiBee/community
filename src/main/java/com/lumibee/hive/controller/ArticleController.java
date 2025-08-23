@@ -4,10 +4,8 @@ import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
 
-import com.lumibee.hive.model.ArticleDocument;
 import org.commonmark.Extension;
 import org.commonmark.ext.gfm.tables.TablesExtension;
-
 import org.commonmark.node.Node;
 import org.commonmark.parser.Parser;
 import org.commonmark.renderer.html.HtmlRenderer;
@@ -17,12 +15,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
@@ -110,5 +113,28 @@ public class ArticleController {
         LikeResponse response = articleService.toggleLike(user.getId(), articleId);
 
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * 获取热门文章API
+     */
+    @GetMapping("/api/articles/popular")
+    @ResponseBody
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
+    public ResponseEntity<List<ArticleExcerptDTO>> getPopularArticles(
+            @RequestParam(name = "limit", defaultValue = "6") int limit) {
+        List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
+        return ResponseEntity.ok(popularArticles);
+    }
+
+    /**
+     * 获取精选文章API
+     */
+    @GetMapping("/api/articles/featured")
+    @ResponseBody
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
+    public ResponseEntity<List<ArticleExcerptDTO>> getFeaturedArticles() {
+        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
+        return ResponseEntity.ok(featuredArticles);
     }
 }

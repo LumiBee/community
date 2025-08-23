@@ -1,5 +1,6 @@
 package com.lumibee.hive.controller;
 
+import com.lumibee.hive.agent.BeeManus;
 import com.lumibee.hive.agent.JavaApp;
 import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
@@ -57,5 +58,11 @@ public class AiAgentController {
                         emitter::complete
                 );
         return emitter;
+    }
+
+    @GetMapping("/manus/chat")
+    public SseEmitter doChatWithManus(String message) {
+        BeeManus beeManus = new BeeManus(allTools, dashscopeChatModel);
+        return beeManus.runStream(message);
     }
 }

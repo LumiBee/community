@@ -1,18 +1,25 @@
 package com.lumibee.hive.controller;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.lumibee.hive.dto.*;
-import com.lumibee.hive.model.Article;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
+import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.PortfolioService;
@@ -120,6 +127,32 @@ public class IndexController {
     @GetMapping("/favorites")
     public String showFavorites() {
         return "favorites";
+    }
+
+    /**
+     * 获取首页数据API
+     */
+    @GetMapping("/api/home")
+    @ResponseBody
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
+    public ResponseEntity<Map<String, Object>> getHomeData(
+            @RequestParam(name = "page", defaultValue = "1") long pageNum,
+            @RequestParam(name = "size", defaultValue = "8") long pageSize) {
+        
+        int limit = 6;
+        
+        Page<ArticleExcerptDTO> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
+        List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
+        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
+        List<TagDTO> allTags = tagService.selectAllTags();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("articles", articlePage);
+        response.put("popularArticles", popularArticles);
+        response.put("tags", allTags);
+        response.put("featuredArticles", featuredArticles);
+
+        return ResponseEntity.ok(response);
     }
 
 }

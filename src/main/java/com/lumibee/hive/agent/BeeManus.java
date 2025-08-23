@@ -1,12 +1,12 @@
 package com.lumibee.hive.agent;
 
-import com.lumibee.hive.advisors.MyLoggerAdvisor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
-import org.springframework.stereotype.Component;
 
-@Component
+import com.lumibee.hive.advisors.MyLoggerAdvisor;
+
+// @Component
 public class BeeManus extends ToolCallAgent {
 
     public BeeManus(ToolCallback[] allTools, ChatModel dashscopeChatModel) {

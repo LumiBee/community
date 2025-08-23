@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.net.http.HttpClient;
 
-@Configuration
+ @Configuration
 public class ToolRegistration {
 
     @Value("${search-api.api-key}")

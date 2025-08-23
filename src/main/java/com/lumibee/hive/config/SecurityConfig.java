@@ -90,10 +90,14 @@ public class SecurityConfig {
                                                 "/api/tags/**", // 标签 API
                                                 "/portfolio/**", // 个人作品集
                                                 "/api/portfolio/**", // 个人作品集 API
+                                                "/api/portfolios", // 作品集列表 API
                                                 "/avatars/**", // 头像图片
                                                 "/backgrounds/**", // 背景图片
                                                 "/search", // 搜索页面
                                                 "/api/search/**", // 搜索 API
+                                                "/api/home", // 首页数据 API
+                                                "/api/articles/**", // 文章相关 API
+                                                "/api/user/current", // 获取当前用户 API
                                                 "/api/ai" // AI 相关 API
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
@@ -134,7 +138,14 @@ public class SecurityConfig {
                 .csrf(csrf ->
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                .ignoringRequestMatchers("/api/search/**") // API路径忽略CSRF
+                                .ignoringRequestMatchers(
+                                        "/api/search/**", // 搜索 API
+                                        "/api/home", // 首页 API
+                                        "/api/tags/**", // 标签 API
+                                        "/api/articles/**", // 文章 API
+                                        "/api/portfolios", // 作品集 API
+                                        "/api/user/current" // 用户信息 API
+                                ) // API路径忽略CSRF
                 );
 
 

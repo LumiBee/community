@@ -1,25 +1,20 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import com.lumibee.hive.dto.PortfolioDetailsDTO;
-import com.lumibee.hive.mapper.PortfolioMapper;
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Portfolio;
-import com.lumibee.hive.model.Tag;
-import com.lumibee.hive.service.ArticleService;
-import com.lumibee.hive.service.PortfolioService;
-import com.lumibee.hive.service.PortfolioServiceImpl;
-import org.apache.ibatis.javassist.NotFoundException;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.List;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
+import com.lumibee.hive.mapper.PortfolioMapper;
+import com.lumibee.hive.service.ArticleService;
+import com.lumibee.hive.service.PortfolioService;
 
 @Controller
 public class PortfolioController {
@@ -42,6 +37,17 @@ public class PortfolioController {
         model.addAttribute("portfolio", portfolioDetails);
 
         return "portfolio-detail";
+    }
+
+    /**
+     * 获取所有作品集API
+     */
+    @GetMapping("/api/portfolios")
+    @ResponseBody
+    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
+    public ResponseEntity<List<PortfolioDetailsDTO>> getAllPortfolios() {
+        List<PortfolioDetailsDTO> allPortfolios = portfolioService.selectAllPortfolios();
+        return ResponseEntity.ok(allPortfolios);
     }
 
 }
