@@ -27,88 +27,81 @@
           </div>
         </div>
 
-        <!-- Portfolios Grid -->
-        <div class="portfolios-grid-container">
-          <h3 class="section-title">所有作品集</h3>
-          
-          <div class="portfolios-grid" v-if="filteredPortfolios.length > 0">
-            <router-link
-              v-for="portfolio in filteredPortfolios"
-              :key="portfolio.id"
-              :to="{ name: 'PortfolioDetail', params: { id: portfolio.id } }"
-              class="portfolio-card"
-            >
-              <div class="portfolio-image-container">
-                <img 
-                  :src="portfolio.coverImg || '/img/demo/demo1.jpg'" 
-                  :alt="portfolio.title"
-                  class="portfolio-image"
-                />
-              </div>
-              <div class="portfolio-card-header">
-                <h4 class="portfolio-title">{{ portfolio.title }}</h4>
-              </div>
-              <div class="portfolio-card-footer">
-                <div class="portfolio-stats">
-                  <span class="stat-item">
-                    <i class="fas fa-file-alt"></i>
-                    {{ portfolio.articleCount || 0 }} 篇文章
-                  </span>
-                  <span class="stat-item">
-                    <i class="fas fa-calendar-alt"></i>
-                    {{ formatDate(portfolio.gmtCreate) }}
-                  </span>
-                </div>
-                <div class="author-info">
-                  <img
-                    v-if="portfolio.avatarUrl"
-                    :src="portfolio.avatarUrl"
-                    alt="作者头像"
-                    class="author-avatar"
-                  />
-                  <div class="author-avatar-fallback" v-else>
-                    {{ (portfolio.userName || '佚名').charAt(0).toUpperCase() }}
-                  </div>
-                  <span class="author-name">{{ portfolio.userName || '佚名' }}</span>
-                </div>
-              </div>
-            </router-link>
-          </div>
-          
-          <!-- Empty State -->
-          <div v-else class="empty-state">
-            <div class="empty-state-icon">🎨</div>
-            <h3 class="empty-state-title">{{ searchQuery ? '未找到匹配的作品集' : '暂无作品集' }}</h3>
-            <p class="empty-state-text">
-              {{ searchQuery ? '尝试使用其他关键词搜索' : '还没有创建任何作品集' }}
-            </p>
-            <router-link to="/" class="btn btn-primary">返回首页</router-link>
-          </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="loading-spinner"></div>
+          <p>正在加载作品集...</p>
         </div>
 
-        <!-- Featured Portfolios -->
-        <div class="featured-portfolios-section" v-if="featuredPortfolios.length > 0">
-          <h3 class="section-title">精选作品集</h3>
-          <div class="featured-portfolios">
-            <div 
-              v-for="portfolio in featuredPortfolios" 
-              :key="portfolio.id"
-              class="featured-portfolio-item"
-            >
-              <router-link :to="{ name: 'PortfolioDetail', params: { id: portfolio.id } }">
-                <img 
-                  :src="portfolio.coverImg || '/img/demo/demo1.jpg'" 
-                  :alt="portfolio.title"
-                  class="featured-portfolio-image"
-                />
-                <div class="featured-portfolio-overlay">
-                  <h4 class="featured-portfolio-title">{{ portfolio.title }}</h4>
-                  <span class="featured-portfolio-author">{{ portfolio.userName || '佚名' }}</span>
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+          <div class="error-state-icon">❌</div>
+          <h3 class="error-state-title">加载失败</h3>
+          <p class="error-state-text">{{ error }}</p>
+          <button @click="loadPortfolios" class="btn btn-primary">重试</button>
+        </div>
+
+        <!-- Content when loaded -->
+        <template v-else>
+          <!-- Portfolios Grid -->
+          <div class="portfolios-grid-container">
+            <h3 class="section-title">所有作品集</h3>
+            
+            <div class="portfolios-grid" v-if="filteredPortfolios.length > 0">
+              <router-link
+                v-for="portfolio in filteredPortfolios"
+                :key="portfolio.id"
+                :to="{ name: 'PortfolioDetail', params: { id: portfolio.id } }"
+                class="portfolio-card"
+              >
+                <div class="portfolio-image-container">
+                  <img 
+                    :src="portfolio.coverImgUrl || '/img/demo/demo1.jpg'" 
+                    :alt="portfolio.name"
+                    class="portfolio-image"
+                  />
+                </div>
+                <div class="portfolio-card-header">
+                  <h4 class="portfolio-title">{{ portfolio.name }}</h4>
+                </div>
+                <div class="portfolio-card-footer">
+                  <div class="portfolio-stats">
+                    <span class="stat-item">
+                      <i class="fas fa-file-alt"></i>
+                      {{ portfolio.articlesCount || 0 }} 篇文章
+                    </span>
+                    <span class="stat-item">
+                      <i class="fas fa-calendar-alt"></i>
+                      {{ formatDate(portfolio.gmtModified) }}
+                    </span>
+                  </div>
+                  <div class="author-info">
+                    <img
+                      v-if="portfolio.avatarUrl"
+                      :src="portfolio.avatarUrl"
+                      alt="作者头像"
+                      class="author-avatar"
+                    />
+                    <div class="author-avatar-fallback" v-else>
+                      {{ (portfolio.userName || '佚名').charAt(0).toUpperCase() }}
+                    </div>
+                    <span class="author-name">{{ portfolio.userName || '佚名' }}</span>
+                  </div>
                 </div>
               </router-link>
             </div>
+            
+            <!-- Empty State -->
+            <div v-else class="empty-state">
+              <div class="empty-state-icon">🎨</div>
+              <h3 class="empty-state-title">{{ searchQuery ? '未找到匹配的作品集' : '暂无作品集' }}</h3>
+              <p class="empty-state-text">
+                {{ searchQuery ? '尝试使用其他关键词搜索' : '还没有创建任何作品集' }}
+              </p>
+              <router-link to="/" class="btn btn-primary">返回首页</router-link>
+            </div>
           </div>
-        </div>
+        </template>
       </div>
     </section>
   </div>
@@ -123,28 +116,28 @@ const router = useRouter()
 
 // 响应式数据
 const loading = ref(true)
+const error = ref(null)
 const portfolios = ref([])
 const searchQuery = ref('')
 
 // 计算属性
 const filteredPortfolios = computed(() => {
   if (!searchQuery.value) return portfolios.value
+  const query = searchQuery.value.toLowerCase()
   return portfolios.value.filter(portfolio => 
-    portfolio.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    portfolio.name.toLowerCase().includes(query) || 
+    (portfolio.description && portfolio.description.toLowerCase().includes(query))
   )
 })
 
 const totalPortfolios = computed(() => portfolios.value.length)
-const featuredPortfolios = computed(() => 
-  [...portfolios.value]
-    .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
-    .slice(0, 3)
-)
 
 // 方法
 const loadPortfolios = async () => {
   try {
     loading.value = true
+    error.value = null
+    
     const response = await portfolioAPI.getAllPortfolios()
     console.log('获取到的作品集数据:', response)
     
@@ -152,23 +145,24 @@ const loadPortfolios = async () => {
       // 确保每个作品集有必要的属性
       portfolios.value = response.map(portfolio => ({
         ...portfolio,
-        id: portfolio.portfolioId || portfolio.id || Math.random().toString(36).substr(2, 9),
-        title: portfolio.title || '未命名作品集',
-        articleCount: portfolio.articleCount || 0,
-        gmtCreate: portfolio.gmtCreate || portfolio.createdAt || new Date().toISOString(),
-        coverImg: portfolio.coverImg || null,
+        id: portfolio.id || portfolio.portfolioId || Math.random().toString(36).substr(2, 9),
+        name: portfolio.name || portfolio.title || '未命名作品集',
+        articlesCount: portfolio.articlesCount || 0,
+        gmtModified: portfolio.gmtModified || portfolio.createdAt || new Date().toISOString(),
+        coverImgUrl: portfolio.coverImgUrl || portfolio.coverImg || null,
         userName: portfolio.userName || '佚名',
-        avatarUrl: portfolio.avatarUrl || null,
-        viewCount: portfolio.viewCount || 0
+        avatarUrl: portfolio.avatarUrl || null
       }))
       console.log('处理后的作品集数据:', portfolios.value)
     } else {
       console.error('服务器返回的数据格式不正确:', response)
       portfolios.value = []
+      error.value = '服务器返回的数据格式不正确'
     }
-  } catch (error) {
-    console.error('加载作品集失败:', error)
+  } catch (err) {
+    console.error('加载作品集失败:', err)
     portfolios.value = []
+    error.value = err.message || '加载作品集失败，请稍后重试'
   } finally {
     loading.value = false
   }
@@ -180,8 +174,13 @@ const handleSearch = () => {
 
 const formatDate = (dateString) => {
   if (!dateString) return '未知'
-  const date = new Date(dateString)
-  return date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+  try {
+    const date = new Date(dateString)
+    return date.getFullYear() + '年' + (date.getMonth() + 1) + '月' + date.getDate() + '日'
+  } catch (e) {
+    console.error('日期格式化错误:', e)
+    return '未知'
+  }
 }
 
 // 生命周期
@@ -469,6 +468,60 @@ onMounted(() => {
   font-weight: 500;
 }
 
+/* ===== Loading State ===== */
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 193, 7, 0.08);
+  margin: 2rem 0;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #ffc107;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== Error State ===== */
+.error-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #fff5f5 0%, #ffffff 100%);
+  border-radius: 1.5rem;
+  border: 1px solid rgba(229, 62, 62, 0.1);
+  margin: 2rem 0;
+}
+
+.error-state-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  color: #e53e3e;
+}
+
+.error-state-title {
+  color: #e53e3e;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.error-state-text {
+  color: #64748b;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
 /* ===== Empty State ===== */
 .empty-state {
   text-align: center;
@@ -511,63 +564,6 @@ onMounted(() => {
   font-size: 1.1rem;
   margin-bottom: 2rem;
   line-height: 1.6;
-}
-
-/* ===== Featured Portfolios ===== */
-.featured-portfolios-section {
-  margin-bottom: 3rem;
-}
-
-.featured-portfolios {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-.featured-portfolio-item {
-  position: relative;
-  border-radius: 1.25rem;
-  overflow: hidden;
-  height: 200px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.featured-portfolio-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-
-.featured-portfolio-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-}
-
-.featured-portfolio-item:hover .featured-portfolio-image {
-  transform: scale(1.05);
-}
-
-.featured-portfolio-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 1.5rem;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
-  color: white;
-}
-
-.featured-portfolio-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin: 0 0 0.5rem;
-}
-
-.featured-portfolio-author {
-  font-size: 0.875rem;
-  opacity: 0.8;
 }
 
 /* ===== Button Styles ===== */
@@ -616,11 +612,6 @@ onMounted(() => {
   }
   
   .portfolios-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .featured-portfolios {
     grid-template-columns: 1fr;
     gap: 1rem;
   }

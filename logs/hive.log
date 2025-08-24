@@ -2009,3 +2009,66 @@ java.nio.channels.AsynchronousCloseException: null
 2025-08-24 14:52:47 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
 2025-08-24 14:52:47 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
 2025-08-24 14:52:47 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:23:35 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:23:35 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:23:35 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:31:42 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:31:42 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 5(Integer)
+2025-08-24 15:31:42 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 5
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.TagMapper.selectBySlug - ==>  Preparing: SELECT * FROM tags WHERE slug = ? LIMIT 1
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.TagMapper.selectBySlug - ==> Parameters: 1(String)
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.TagMapper.selectBySlug - <==      Total: 1
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleMapper.getArticlesByTagId - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.gmt_modified, u.name AS user_name, u.avatar_url from articles a LEFT JOIN article_tags at ON a.article_id = at.article_id LEFT JOIN user u ON a.user_id = u.id WHERE at.tag_id = ? ORDER BY a.view_count DESC
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleMapper.getArticlesByTagId - ==> Parameters: 1(Integer)
+2025-08-24 15:31:42 [http-nio-8090-exec-6] DEBUG c.l.hive.mapper.ArticleMapper.getArticlesByTagId - <==      Total: 4
+2025-08-24 15:36:00 [http-nio-8090-exec-6] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:36:00 [http-nio-8090-exec-6] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:36:00 [http-nio-8090-exec-6] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:36:14 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:36:14 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:36:14 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:38:56 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:38:56 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:38:56 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ?)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ?) ORDER BY gmt_modified DESC LIMIT ?
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 8(Long)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 8
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ? AND is_featured = ?) ORDER BY gmt_modified DESC
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String), true(Boolean)
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 2
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==>  Preparing: SELECT * from tags ORDER BY article_count DESC LIMIT 20
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==> Parameters: 
+2025-08-24 15:55:01 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - <==      Total: 17
+2025-08-24 15:58:21 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 15:58:21 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 15:58:21 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE deleted=0 AND (deleted = ?) ORDER BY gmt_modified DESC
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==> Parameters: 0(Integer)
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - <==      Total: 8
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==>  Preparing: SELECT portfolio_id, COUNT(*) as article_count FROM articles WHERE portfolio_id IN ( ? , ? , ? , ? , ? , ? , ? , ? ) AND deleted = 0 AND status = 'published' GROUP BY portfolio_id
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==> Parameters: 8(Integer), 7(Integer), 6(Integer), 5(Integer), 4(Integer), 3(Integer), 2(Integer), 1(Integer)
+2025-08-24 15:58:30 [http-nio-8090-exec-6] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - <==      Total: 5
+2025-08-24 16:06:00 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 16:06:00 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 16:06:00 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 16:06:02 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 16:06:02 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 16:06:02 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 16:06:12 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 16:06:12 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 16:06:12 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-24 16:06:17 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-24 16:06:17 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-24 16:06:17 [http-nio-8090-exec-7] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6

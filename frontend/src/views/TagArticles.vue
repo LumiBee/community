@@ -46,33 +46,35 @@
                 :to="`/article/${article.slug}`"
                 class="article-card"
               >
-                <div class="article-header">
-                  <h4 class="article-title">{{ article.title }}</h4>
-                  <span class="article-date">{{ formatDate(article.gmtModified) }}</span>
-                </div>
-                <p class="article-excerpt">{{ article.excerpt }}</p>
-                <div class="article-footer">
-                  <div class="author-info">
-                    <img
-                      v-if="article.avatarUrl"
-                      :src="article.avatarUrl"
-                      alt="作者头像"
-                      class="author-avatar"
-                    />
-                    <div class="author-avatar-fallback" v-else>
-                      {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
-                    </div>
-                    <span class="author-name">{{ article.userName || '佚名' }}</span>
+                <div class="article-content">
+                  <div class="article-header">
+                    <h4 class="article-title">{{ article.title }}</h4>
+                    <span class="article-date">{{ formatDate(article.gmtModified) }}</span>
                   </div>
-                  <div class="article-stats">
-                    <span class="stat-item">
-                      <i class="fas fa-eye"></i>
-                      {{ article.viewCount || 0 }}
-                    </span>
-                    <span class="stat-item">
-                      <i class="fas fa-heart"></i>
-                      {{ article.likes || 0 }}
-                    </span>
+                  <p class="article-excerpt">{{ article.excerpt }}</p>
+                  <div class="article-footer">
+                    <div class="author-info">
+                      <img
+                        v-if="article.avatarUrl"
+                        :src="article.avatarUrl"
+                        alt="作者头像"
+                        class="author-avatar"
+                      />
+                      <div class="author-avatar-fallback" v-else>
+                        {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
+                      </div>
+                      <span class="author-name">{{ article.userName || '佚名' }}</span>
+                    </div>
+                    <div class="article-stats">
+                      <span class="stat-item">
+                        <i class="fas fa-eye"></i>
+                        {{ article.viewCount || 0 }}
+                      </span>
+                      <span class="stat-item">
+                        <i class="fas fa-heart"></i>
+                        {{ article.likes || 0 }}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </router-link>
@@ -120,9 +122,9 @@
                   :key="tag.id"
                   :to="{ name: 'TagArticles', params: { tagName: tag.name } }"
                   class="tag-link"
+                  :class="getTagColorClass(tag)"
                 >
                   {{ tag.name }}
-                  <span class="tag-count">({{ tag.articleCount }})</span>
                 </router-link>
               </div>
             </div>
@@ -324,6 +326,11 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('zh-CN')
 }
 
+const getTagColorClass = (tag) => {
+  const colorClasses = ['tag-java', 'tag-elasticsearch', 'tag-kabana', 'tag-redis', 'tag-database'];
+  return colorClasses[tag.id % colorClasses.length];
+}
+
 // 监听路由变化
 watch(() => route.params.tagName, (newTagName) => {
   if (newTagName) {
@@ -343,19 +350,22 @@ onMounted(() => {
 <style scoped>
 /* ===== 整体布局 ===== */
 .tag-articles-page {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background-color: #f8f9fa;
   min-height: 100vh;
 }
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding: 3rem 0;
-  background: white;
+  padding: 3rem 0 2rem;
+  background-color: #fff;
   position: relative;
+  text-align: center;
+  border-bottom: 1px solid #eaeaea;
 }
 
 .hero-content {
-  text-align: center;
+  position: relative;
+  z-index: 2;
 }
 
 .tag-info {
@@ -364,49 +374,33 @@ onMounted(() => {
 
 .tag-badge {
   display: inline-block;
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 2rem;
-  font-size: 0.875rem;
-  font-weight: 600;
+  background-color: #ffc107;
+  color: #333;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
   margin-bottom: 1rem;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
 }
 
 .hero-title {
-  font-size: 2.25rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: #2c3e50;
-  margin: 1rem 0;
-  font-family: 'Playfair Display', Georgia, serif;
+  color: #333;
+  margin: 0.5rem 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .hero-subtitle {
   font-size: 1.1rem;
-  color: #64748b;
+  color: #666;
   margin-bottom: 0;
-}
-
-.hero-content::after {
-  content: '';
-  position: absolute;
-  bottom: -15px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 4px;
-  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
-  border-radius: 2px;
 }
 
 /* ===== Content Section ===== */
 .content-section {
-  padding: 3rem 0;
-  background: white;
-  margin-top: -1rem;
-  border-radius: 2rem 2rem 0 0;
-  box-shadow: 0 -8px 32px rgba(255, 193, 7, 0.08);
+  padding: 2.5rem 0;
+  background-color: #f8f9fa;
 }
 
 /* ===== Articles Header ===== */
@@ -414,17 +408,17 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .section-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2c3e50;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
   margin: 0;
   position: relative;
   padding-bottom: 0.5rem;
-  font-family: 'Playfair Display', Georgia, serif;
+  display: inline-block;
 }
 
 .section-title::after {
@@ -432,88 +426,71 @@ onMounted(() => {
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 3rem;
-  height: 3px;
-  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
-  border-radius: 1.5px;
+  width: 40px;
+  height: 2px;
+  background-color: #ffc107;
+  border-radius: 1px;
 }
 
 .sort-controls .sort-select {
   padding: 0.5rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 0.75rem;
-  background: white;
-  color: #64748b;
-  font-size: 0.875rem;
-  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #666;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .sort-select:focus {
   outline: none;
   border-color: #ffc107;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.25);
+  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
 }
 
 /* ===== Articles Grid ===== */
 .articles-grid {
   display: grid;
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
 }
 
 .article-card {
-  background: white;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
   text-decoration: none;
   color: inherit;
-  border: 1px solid rgba(255, 193, 7, 0.12);
-  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.08), 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  transition: transform 0.2s ease;
 }
 
-.article-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-  transform-origin: left;
+.article-content {
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #eaeaea;
+  transition: all 0.2s ease;
 }
 
-.article-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 12px 40px rgba(255, 193, 7, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: rgba(255, 193, 7, 0.3);
-}
-
-.article-card:hover::before {
-  transform: scaleX(1);
+.article-card:hover .article-content {
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  border-color: #ffc107;
+  transform: translateY(-3px);
 }
 
 .article-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   gap: 1rem;
 }
 
 .article-title {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
   margin: 0;
   line-height: 1.4;
-  transition: color 0.3s ease;
   flex: 1;
 }
 
@@ -522,24 +499,28 @@ onMounted(() => {
 }
 
 .article-date {
-  font-size: 0.875rem;
-  color: #94a3b8;
+  font-size: 0.85rem;
+  color: #888;
   white-space: nowrap;
 }
 
 .article-excerpt {
-  color: #64748b;
+  color: #666;
   line-height: 1.6;
   margin-bottom: 1rem;
   font-size: 0.95rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .article-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 1rem;
-  border-top: 1px solid #f1f5f9;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
 }
 
 .author-info {
@@ -559,8 +540,8 @@ onMounted(() => {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
+  background-color: #ffc107;
+  color: #333;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -569,22 +550,22 @@ onMounted(() => {
 }
 
 .author-name {
-  font-size: 0.875rem;
-  color: #64748b;
+  font-size: 0.85rem;
+  color: #666;
   font-weight: 500;
 }
 
 .article-stats {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #64748b;
-  font-size: 0.875rem;
+  color: #888;
+  font-size: 0.85rem;
 }
 
 .stat-item i {
@@ -598,32 +579,33 @@ onMounted(() => {
 }
 
 .sidebar-section {
-  background: white;
-  border-radius: 1.25rem;
-  padding: 1.5rem;
+  background-color: white;
+  border-radius: 10px;
+  padding: 1.25rem;
   margin-bottom: 1.5rem;
-  border: 1px solid rgba(255, 193, 7, 0.12);
-  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.sidebar-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
-  border-radius: 1.25rem 1.25rem 0 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  border: 1px solid #eaeaea;
 }
 
 .sidebar-title {
-  font-size: 1.125rem;
+  font-size: 1.1rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
   margin-bottom: 1rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+  display: inline-block;
+}
+
+.sidebar-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background-color: #ffc107;
+  border-radius: 1px;
 }
 
 /* ===== Related Tags ===== */
@@ -634,23 +616,38 @@ onMounted(() => {
 }
 
 .tag-link {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e2e8f0 100%);
-  color: #64748b;
-  padding: 0.375rem 0.75rem;
-  border-radius: 1rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 20px;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 193, 7, 0.1);
+  transition: all 0.2s ease;
+  color: white;
+}
+
+.tag-java {
+  background-color: #d0bfff;
+}
+
+.tag-elasticsearch {
+  background-color: #ff8fab;
+}
+
+.tag-kabana {
+  background-color: #90e0c5;
+}
+
+.tag-redis {
+  background-color: #ffc478;
+}
+
+.tag-database {
+  background-color: #8ecae6;
 }
 
 .tag-link:hover {
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
-  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
 }
 
 .tag-count {
@@ -662,33 +659,36 @@ onMounted(() => {
 .popular-articles {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .popular-article-item {
   text-decoration: none;
   color: inherit;
-  padding: 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid #f1f5f9;
-  transition: all 0.3s ease;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
 }
 
 .popular-article-item:hover {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-color: rgba(255, 193, 7, 0.2);
+  background-color: #f8f9fa;
+  border-color: #ffc107;
   transform: translateY(-2px);
   text-decoration: none;
-  color: inherit;
 }
 
 .popular-article-title {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: #333;
   margin-bottom: 0.5rem;
   line-height: 1.4;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .popular-article-item:hover .popular-article-title {
@@ -702,13 +702,13 @@ onMounted(() => {
 
 /* ===== Pagination ===== */
 .pagination-nav {
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .pagination {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -720,58 +720,55 @@ onMounted(() => {
 
 .page-link {
   display: block;
-  padding: 0.75rem 1rem;
-  border: 2px solid transparent;
-  border-radius: 0.75rem;
-  background: white;
-  color: #64748b;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background-color: white;
+  color: #666;
   text-decoration: none;
   font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
   cursor: pointer;
 }
 
 .page-link:hover {
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  background-color: #ffc107;
+  color: #333;
+  border-color: #ffc107;
   text-decoration: none;
 }
 
 .page-item.active .page-link {
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  background-color: #ffc107;
+  color: #333;
+  border-color: #ffc107;
 }
 
 .page-item.disabled .page-link {
-  background: #f8f9fa;
-  color: #cbd5e1;
+  background-color: #f8f9fa;
+  color: #ccc;
   cursor: not-allowed;
-  box-shadow: none;
+  border-color: #eaeaea;
 }
 
 .page-item.disabled .page-link:hover {
-  background: #f8f9fa;
-  color: #cbd5e1;
+  background-color: #f8f9fa;
+  color: #ccc;
   transform: none;
-  box-shadow: none;
+  border-color: #eaeaea;
 }
 
 /* ===== Loading & Empty States ===== */
 .loading-state {
   text-align: center;
-  padding: 4rem 2rem;
+  padding: 3rem 0;
 }
 
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 4px solid #f1f5f9;
-  border-top: 4px solid #ffc107;
+  width: 36px;
+  height: 36px;
+  border: 3px solid #f0f0f0;
+  border-top: 3px solid #ffc107;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -784,81 +781,66 @@ onMounted(() => {
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 1.5rem;
-  border: 1px solid rgba(255, 193, 7, 0.08);
-  margin: 2rem 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.empty-state::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
-  border-radius: 1.5rem 1.5rem 0 0;
+  padding: 3rem 2rem;
+  background-color: white;
+  border-radius: 10px;
+  border: 1px solid #eaeaea;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .empty-state-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.8;
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
 .empty-state-title {
-  color: #2c3e50;
-  font-size: 1.5rem;
+  color: #333;
+  font-size: 1.4rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
-  line-height: 1.4;
 }
 
 .empty-state-text {
-  color: #64748b;
-  font-size: 1.1rem;
-  margin-bottom: 2rem;
-  line-height: 1.6;
+  color: #666;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 /* ===== Button Styles ===== */
 .btn {
   display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
   text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
   border: none;
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  background-color: #ffc107;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.3);
 }
 
 .btn-primary:hover {
+  background-color: #ffb300;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-  color: white;
-  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(255, 193, 7, 0.4);
 }
 
 /* ===== 响应式设计 ===== */
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 0 1.5rem;
+  }
+  
   .hero-title {
-    font-size: 1.75rem;
+    font-size: 1.6rem;
   }
   
   .content-section {
-    padding: 2rem 0;
-    border-radius: 1rem 1rem 0 0;
+    padding: 1.5rem 0;
   }
   
   .col-md-4 {
@@ -878,8 +860,8 @@ onMounted(() => {
   }
   
   .page-link {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
   }
 }
 </style>
