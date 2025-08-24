@@ -177,17 +177,17 @@ onMounted(() => {
 <style scoped>
 /* ===== 整体布局 ===== */
 .tags-page {
-  background-color: #f8f9fa;
+  padding: 0 0 2rem 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
 }
 
 /* ===== Hero Section ===== */
 .hero-section {
-  padding: 3rem 0 2rem;
-  background-color: #fff;
+  padding: 3rem 0;
+  background: white;
   text-align: center;
   position: relative;
-  border-bottom: 1px solid #eaeaea;
 }
 
 .hero-content {
@@ -196,36 +196,41 @@ onMounted(() => {
 }
 
 .hero-title {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  margin-bottom: 0.75rem;
-  color: #333;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin-bottom: 1rem;
+  color: #2c3e50;
+  font-family: 'Playfair Display', Georgia, serif;
+  animation: fadeInUp 0.8s ease-out;
 }
 
 .hero-subtitle {
-  font-size: 1.1rem;
-  color: #666;
+  font-size: 1.2rem;
+  color: #64748b;
   font-weight: 400;
   margin-bottom: 0;
+  animation: fadeInUp 0.8s ease-out 0.2s both;
 }
 
 .hero-content::after {
   content: '';
   position: absolute;
-  bottom: -10px;
+  bottom: -15px;
   left: 50%;
   transform: translateX(-50%);
-  width: 60px;
-  height: 3px;
-  background-color: #ffc107;
-  border-radius: 1.5px;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ffc107 0%, #ffda58 100%);
+  border-radius: 2px;
 }
 
 /* ===== Content Section ===== */
 .content-section {
-  padding: 2.5rem 0;
-  background-color: #f8f9fa;
+  padding: 3rem 0;
+  background: white;
+  margin-top: -1rem;
+  border-radius: 2rem 2rem 0 0;
+  box-shadow: 0 -8px 32px rgba(255, 193, 7, 0.08);
 }
 
 /* ===== Filter Section ===== */
@@ -583,4 +588,35 @@ onMounted(() => {
 .tag-card:nth-child(4) { animation-delay: 0.4s; }
 .tag-card:nth-child(5) { animation-delay: 0.5s; }
 .tag-card:nth-child(6) { animation-delay: 0.6s; }
+.tag-card:nth-child(7) { animation-delay: 0.7s; }
+.tag-card:nth-child(8) { animation-delay: 0.8s; }
+.tag-card:nth-child(9) { animation-delay: 0.9s; }
+
+/* 搜索框动画 */
+.search-container {
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+}
+
+/* 热门标签动画 */
+.popular-tags-section {
+  animation: fadeInUp 0.6s ease-out 0.1s both;
+}
+
+.popular-tag {
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.popular-tag:nth-child(1) { animation-delay: 0.1s; }
+.popular-tag:nth-child(2) { animation-delay: 0.15s; }
+.popular-tag:nth-child(3) { animation-delay: 0.2s; }
+.popular-tag:nth-child(4) { animation-delay: 0.25s; }
+.popular-tag:nth-child(5) { animation-delay: 0.3s; }
+.popular-tag:nth-child(6) { animation-delay: 0.35s; }
+.popular-tag:nth-child(7) { animation-delay: 0.4s; }
+.popular-tag:nth-child(8) { animation-delay: 0.45s; }
+.popular-tag:nth-child(9) { animation-delay: 0.5s; }
+.popular-tag:nth-child(10) { animation-delay: 0.55s; }
+.popular-tag:nth-child(11) { animation-delay: 0.6s; }
+.popular-tag:nth-child(12) { animation-delay: 0.65s; }
 </style>

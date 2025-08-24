@@ -262,7 +262,7 @@ onUnmounted(() => {
   justify-content: space-between;
   padding: 0 1rem;
   height: 70px;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -271,6 +271,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   flex: 1;
+  margin-right: auto;
+  padding-right: 20px;
 }
 
 /* Logo样式 */
@@ -279,7 +281,7 @@ onUnmounted(() => {
   align-items: center;
   text-decoration: none;
   margin-right: 1.5rem;
-  margin-left: -0.5rem;
+  margin-left: -1rem;
 }
 
 .navbar-logo {
@@ -298,6 +300,7 @@ onUnmounted(() => {
   align-items: center;
   margin: 0;
   padding: 0;
+  margin-left: -10px;
 }
 
 .desktop-menu .nav-link {
@@ -334,12 +337,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin-left: auto;
+  padding-left: 20px;
 }
 
 /* 搜索框 */
 .search-container {
   position: relative;
-  width: 280px;
+  width: 300px;
+  margin-right: 10px;
 }
 
 .search-input-wrapper {
@@ -465,6 +471,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  margin-left: 10px;
 }
 
 /* 按钮样式 */
@@ -650,11 +657,19 @@ onUnmounted(() => {
   }
   
   .search-container {
-    width: 200px;
+    width: 220px;
   }
   
   .user-actions .btn span {
     display: none;
+  }
+  
+  .navbar-left {
+    padding-right: 10px;
+  }
+  
+  .navbar-right {
+    padding-left: 10px;
   }
 }
 
@@ -667,8 +682,13 @@ onUnmounted(() => {
     height: 40px;
   }
   
+  .navbar-logo-link {
+    margin-left: -0.5rem;
+  }
+  
   .search-container {
-    width: 150px;
+    width: 170px;
+    margin-right: 5px;
   }
   
   .navbar-right {
@@ -679,11 +699,16 @@ onUnmounted(() => {
     padding: 0.4rem 1rem;
     font-size: 0.9rem;
   }
+  
+  .user-actions {
+    margin-left: 5px;
+  }
 }
 
 @media (max-width: 576px) {
   .search-container {
-    width: 120px;
+    width: 130px;
+    margin-right: 3px;
   }
   
   .search-input {
@@ -693,6 +718,18 @@ onUnmounted(() => {
   
   .search-btn {
     padding: 0.5rem 0.75rem;
+  }
+  
+  .user-actions {
+    margin-left: 3px;
+  }
+  
+  .navbar-left {
+    padding-right: 5px;
+  }
+  
+  .navbar-right {
+    padding-left: 5px;
   }
 }
 </style>

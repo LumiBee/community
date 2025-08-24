@@ -11,7 +11,7 @@ export const favoriteAPI = {
    */
   getFavorites(page = 1, size = 10) {
     return request({
-      url: '/api/favorites',
+      url: '/api/favorites/my-folders',
       method: 'get',
       params: { page, size }
     })
@@ -58,7 +58,7 @@ export const favoriteAPI = {
    */
   createFavoriteFolder(favoriteData) {
     return request({
-      url: '/api/favorites/folders',
+      url: '/api/favorites/create-folder',
       method: 'post',
       data: favoriteData
     })
@@ -69,7 +69,7 @@ export const favoriteAPI = {
    */
   getFavoriteFolders() {
     return request({
-      url: '/api/favorites/folders',
+      url: '/api/favorites/my-folders',
       method: 'get'
     })
   },
@@ -80,7 +80,7 @@ export const favoriteAPI = {
    */
   getFavoriteFolderById(folderId) {
     return request({
-      url: `/api/favorites/folders/${folderId}`,
+      url: `/api/favorites/details/${folderId}`,
       method: 'get'
     })
   },
@@ -91,10 +91,15 @@ export const favoriteAPI = {
    * @param {Object} favoriteData - 收藏夹数据
    */
   updateFavoriteFolder(folderId, favoriteData) {
+    // 注意：后端没有直接的更新接口，这里使用创建接口
     return request({
-      url: `/api/favorites/folders/${folderId}`,
-      method: 'put',
-      data: favoriteData
+      url: '/api/favorites/create-folder',
+      method: 'post',
+      data: {
+        favoriteId: folderId,
+        favoriteName: favoriteData.name,
+        description: favoriteData.description
+      }
     })
   },
 
@@ -104,7 +109,7 @@ export const favoriteAPI = {
    */
   deleteFavoriteFolder(folderId) {
     return request({
-      url: `/api/favorites/folders/${folderId}`,
+      url: `/api/favorites/remove-folder/${folderId}`,
       method: 'delete'
     })
   },
@@ -116,9 +121,9 @@ export const favoriteAPI = {
    */
   addToFolder(folderId, articleId) {
     return request({
-      url: `/api/favorites/folders/${folderId}/articles`,
+      url: '/api/favorites/add-to-folder',
       method: 'post',
-      data: { articleId }
+      data: { favoriteId: folderId, articleId: articleId }
     })
   },
 
@@ -129,7 +134,7 @@ export const favoriteAPI = {
    */
   removeFromFolder(folderId, articleId) {
     return request({
-      url: `/api/favorites/folders/${folderId}/articles/${articleId}`,
+      url: `/api/favorites/remove-all/${articleId}`,
       method: 'delete'
     })
   }
