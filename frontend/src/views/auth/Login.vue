@@ -194,7 +194,7 @@ onMounted(() => {
   padding: 2rem 0;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
 }
 
 .auth-container {

@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
-@Controller
+@RestController
 public class DraftController {
     @Autowired private ArticleService articleService;
     @Autowired private UserService userService;

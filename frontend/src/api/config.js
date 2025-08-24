@@ -19,11 +19,15 @@ request.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`
     }
     
-    // 添加CSRF token（如果启用了CSRF保护）
-    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content')
-    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content')
-    if (csrfToken && csrfHeader) {
-      config.headers[csrfHeader] = csrfToken
+    // 添加CSRF token（从cookie中获取）
+    const cookies = document.cookie.split(';')
+    const xsrfCookie = cookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='))
+    if (xsrfCookie) {
+      const xsrfToken = xsrfCookie.split('=')[1]
+      config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
+      console.log('添加CSRF令牌:', xsrfToken)
+    } else {
+      console.log('未找到CSRF令牌')
     }
     
     console.log('请求发送：', config.method.toUpperCase(), config.url)
@@ -38,7 +42,8 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
-    console.log('响应接收：', response.status, response.config.url)
+    console.log('响应接收：', response.status, response.config.url, response.data)
+    // 直接返回响应数据，不做额外处理
     return response.data
   },
   error => {
@@ -52,11 +57,17 @@ request.interceptors.response.use(
           console.error('请求参数错误：', data)
           break
         case 401:
-          // 未登录或认证过期
-          console.error('未授权访问，请重新登录')
+          // 未登录或认证过期，或者用户名密码错误
+          console.error('认证失败：', data)
           localStorage.removeItem('token')
-          // 可以在这里添加重定向到登录页的逻辑
-          // window.location.href = '/login'
+          // 对于登录请求，我们不重定向，而是在页面上显示错误信息
+          if (error.config.url.includes('/login')) {
+            return Promise.reject({
+              status,
+              message: '用户名或密码错误',
+              data
+            })
+          }
           break
         case 403:
           console.error('权限不足：', data)

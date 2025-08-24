@@ -24,7 +24,7 @@ import com.lumibee.hive.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
-@Controller
+@RestController
 @RequestMapping("/user/settings")
 public class SettingsController {
 
@@ -103,18 +103,18 @@ public class SettingsController {
         //1.验证新密码和确认密码是否一致
         if (newPassword == null || newPassword.isBlank()) {
             redirectAttributes.addFlashAttribute("passwordError", "新密码不能为空");
-            return "redirect:/user/settings?tab=account&passwordError=new_empty";
+            return "redirect:/settings?tab=account&passwordError=new_empty";
         }
 
         if (!confirmNewPassword.equals(newPassword)) {
             redirectAttributes.addFlashAttribute("passwordError", "新密码和确认密码不一致");
-            return "redirect:/user/settings?tab=account&passwordError=confirm_mismatch";
+            return "redirect:/settings?tab=account&passwordError=confirm_mismatch";
         }
 
         //2. 验证新密吗强度
         if (newPassword.length() < 6) {
             redirectAttributes.addFlashAttribute("passwordError", "新密码长度至少为6个字符");
-            return "redirect:/user/settings?tab=account&passwordError=new_short";
+            return "redirect:/settings?tab=account&passwordError=new_short";
         }
 
         //3. 加密新密码并更新到数据库
@@ -132,7 +132,7 @@ public class SettingsController {
             redirectAttributes.addFlashAttribute("passwordError", "密码更新失败，请稍后再试");
         }
 
-        return "redirect:/user/settings?tab=account";
+        return "redirect:/settings?tab=account";
     }
     
     @PostMapping("/preferences")
@@ -144,14 +144,14 @@ public class SettingsController {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
             redirectAttributes.addFlashAttribute("preferencesError", "用户信息获取失败");
-            return "redirect:/user/settings?tab=preferences";
+            return "redirect:/settings?tab=preferences";
         }
         
         // 这里应该保存用户偏好设置
         // 如果没有UserPreferences实体，可以考虑创建一个
         
         redirectAttributes.addFlashAttribute("preferencesSuccess", "偏好设置更新成功");
-        return "redirect:/user/settings?tab=preferences";
+        return "redirect:/settings?tab=preferences";
     }
 
     @PostMapping("/upload-image")

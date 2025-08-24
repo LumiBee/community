@@ -218,8 +218,8 @@ const validateForm = () => {
   if (!signupForm.value.username) {
     fieldErrors.value.username = '请输入用户名'
     isValid = false
-  } else if (signupForm.value.username.length < 2) {
-    fieldErrors.value.username = '用户名至少需要2个字符'
+  } else if (signupForm.value.username.length < 3) {
+    fieldErrors.value.username = '用户名至少需要3个字符'
     isValid = false
   } else if (signupForm.value.username.length > 20) {
     fieldErrors.value.username = '用户名不能超过20个字符'
@@ -270,29 +270,44 @@ const handleSignup = async () => {
     errorMessage.value = ''
     fieldErrors.value = {}
 
-    const success = await authStore.register({
+    console.log('提交注册表单:', {
+      username: signupForm.value.username,
+      email: signupForm.value.email,
+      password: signupForm.value.password.length,
+      confirmPassword: signupForm.value.confirmPassword.length
+    })
+
+    const result = await authStore.register({
       username: signupForm.value.username,
       email: signupForm.value.email,
       password: signupForm.value.password,
       confirmPassword: signupForm.value.confirmPassword
     })
 
-    if (success) {
+    // 检查结果类型
+    if (result === true) {
       // 注册成功，跳转到登录页面
       router.push({ name: 'Login', query: { registered: 'true' } })
+    } else if (result && typeof result === 'object' && result.fieldErrors) {
+      // 处理字段级别的错误
+      console.log('注册表单字段错误:', result.fieldErrors)
+      fieldErrors.value = result.fieldErrors
     } else {
-      // 处理注册失败
+      // 处理一般错误
       const error = authStore.error
-      if (error.includes('用户名')) {
+      console.error('注册失败，错误信息:', error)
+      
+      // 尝试从错误消息中识别特定字段错误
+      if (error && error.toLowerCase().includes('用户名')) {
         fieldErrors.value.username = '该用户名已被注册'
-      } else if (error.includes('邮箱')) {
+      } else if (error && error.toLowerCase().includes('邮箱')) {
         fieldErrors.value.email = '该邮箱已被注册'
       } else {
         errorMessage.value = error || '注册失败，请稍后重试'
       }
     }
   } catch (error) {
-    console.error('注册失败:', error)
+    console.error('注册过程发生异常:', error)
     errorMessage.value = '注册失败，请稍后重试'
   } finally {
     isLoading.value = false
@@ -325,7 +340,7 @@ watch(() => signupForm.value.confirmPassword, () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #ffffff;
   padding: 2rem 0;
 }
 

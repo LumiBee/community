@@ -121,4 +121,7 @@ qweather:
     weather-base-url: "https://devapi.qweather.com/v7/weather"
     geo-base-url: "https://geoapi.qweather.com/v2/city"
 
+search-api:
+  api-key: "placeholder_search_key"
+
 

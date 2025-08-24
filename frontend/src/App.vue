@@ -21,9 +21,16 @@ import Footer from '@/components/layout/Footer.vue'
 
 const authStore = useAuthStore()
 
-onMounted(() => {
-  // 初始化时检查用户登录状态
-  authStore.checkAuthStatus()
+onMounted(async () => {
+  try {
+    // 初始化时检查用户登录状态，但不要在每次刷新时都检查
+    // 只有当本地存储中有token时才检查
+    if (localStorage.getItem('token')) {
+      await authStore.checkAuthStatus()
+    }
+  } catch (error) {
+    console.error('检查认证状态失败:', error)
+  }
 })
 </script>
 

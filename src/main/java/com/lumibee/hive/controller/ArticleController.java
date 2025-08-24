@@ -1,20 +1,13 @@
 package com.lumibee.hive.controller;
 
 import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
 
-import org.commonmark.Extension;
-import org.commonmark.ext.gfm.tables.TablesExtension;
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,73 +23,23 @@ import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
 
-@Controller
+@RestController
 public class ArticleController {
 
     @Autowired private ArticleService articleService;
 
     @Autowired private UserService userService;
 
+    /**
+     * 重定向文章页面到前端SPA
+     * 由于这是一个Vue.js SPA应用，文章页面应该由前端路由处理
+     */
     @GetMapping("/article/{slug}")
-    public String viewArticle(@PathVariable("slug") String slug,
-                              @AuthenticationPrincipal Principal principal,
-                              Model model) {
-        // 获取当前用户
-        User user = userService.getCurrentUserFromPrincipal(principal);
-        // 根据 slug 获取文章
-        ArticleDetailsDTO article = articleService.getArticleBySlug(slug);
-
-        if (article == null) {
-            // 如果文章不存在，返回 404 页面
-            return "error/404";
-        }
-
-        // 获取文章的总收藏数
-        int favoriteCount = articleService.getFavoriteCount(article.getArticleId());
-        article.setFavoriteCount(favoriteCount);
-
-        if (user != null) {
-            // 检查用户是否点赞
-            boolean isLiked = articleService.isUserLiked(user.getId(), article.getArticleId());
-            article.setLiked(isLiked);
-            
-            // 判断当前用户是否关注了作者
-            boolean followedByCurrentUser = userService.isFollowing(user.getId(), article.getUserId());
-            article.setFollowed(followedByCurrentUser);
-
-            // 判断当前用户是否收藏了文章
-            boolean favoritedByCurrentUser = userService.isFavoritedByCurrentUser(user.getId(), article.getArticleId());
-            article.setFavorited(favoritedByCurrentUser);
-        } else {
-            System.out.println("当前用户未登录，默认未关注作者");
-            // 未登录用户默认未关注和未点赞
-            article.setFollowed(false);
-            article.setLiked(false);
-            article.setFavorited(false);
-        }
-
-        List<ArticleDocument> relatedArticles = articleService.selectRelatedArticles(article,6);
-        model.addAttribute("relatedArticles", relatedArticles);
-
-        String markdownContent = article.getContent();
-        String renderedHtmlContent = "";
-        // 解析 Markdown 内容
-        if (markdownContent != null) {
-            List<Extension> extensions = Arrays.asList(TablesExtension.create());
-            Parser parser = Parser.builder()
-                    .extensions(extensions)
-                    .build();
-            Node document = parser.parse(markdownContent);
-            HtmlRenderer renderer = HtmlRenderer.builder()
-                    .extensions(extensions)
-                    .build();
-            renderedHtmlContent = renderer.render(document);
-        }
-
-        model.addAttribute("article", article);
-        model.addAttribute("renderedHtmlContent", renderedHtmlContent);
-
-        return "article";
+    public ResponseEntity<Void> redirectToFrontend(@PathVariable("slug") String slug) {
+        // 重定向到前端首页，让Vue Router处理路由
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "/article/" + slug)
+                .build();
     }
 
     @PostMapping("/api/article/{articleId}/like")
@@ -120,7 +63,6 @@ public class ArticleController {
      */
     @GetMapping("/api/articles/popular")
     @ResponseBody
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
     public ResponseEntity<List<ArticleExcerptDTO>> getPopularArticles(
             @RequestParam(name = "limit", defaultValue = "6") int limit) {
         List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
@@ -132,9 +74,68 @@ public class ArticleController {
      */
     @GetMapping("/api/articles/featured")
     @ResponseBody
-    @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
     public ResponseEntity<List<ArticleExcerptDTO>> getFeaturedArticles() {
         List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
         return ResponseEntity.ok(featuredArticles);
+    }
+
+    /**
+     * 通过slug获取文章详情API
+     */
+    @GetMapping("/api/article/{slug}")
+    @ResponseBody
+    public ResponseEntity<ArticleDetailsDTO> getArticleBySlugAPI(@PathVariable("slug") String slug,
+                                                                 @AuthenticationPrincipal Principal principal) {
+        // 获取当前用户
+        User user = userService.getCurrentUserFromPrincipal(principal);
+        
+        // 根据 slug 获取文章
+        ArticleDetailsDTO article = articleService.getArticleBySlug(slug);
+
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // 获取文章的总收藏数
+        int favoriteCount = articleService.getFavoriteCount(article.getArticleId());
+        article.setFavoriteCount(favoriteCount);
+
+        if (user != null) {
+            // 检查用户是否点赞
+            boolean isLiked = articleService.isUserLiked(user.getId(), article.getArticleId());
+            article.setLiked(isLiked);
+            
+            // 判断当前用户是否关注了作者
+            boolean followedByCurrentUser = userService.isFollowing(user.getId(), article.getUserId());
+            article.setFollowed(followedByCurrentUser);
+
+            // 判断当前用户是否收藏了文章
+            boolean favoritedByCurrentUser = userService.isFavoritedByCurrentUser(user.getId(), article.getArticleId());
+            article.setFavorited(favoritedByCurrentUser);
+        } else {
+            // 未登录用户默认未关注和未点赞
+            article.setFollowed(false);
+            article.setLiked(false);
+            article.setFavorited(false);
+        }
+
+        return ResponseEntity.ok(article);
+    }
+
+    /**
+     * 获取相关文章API
+     */
+    @GetMapping("/api/article/{articleId}/related")
+    @ResponseBody
+    public ResponseEntity<List<ArticleDocument>> getRelatedArticles(@PathVariable("articleId") Integer articleId) {
+        
+        // 通过articleId获取文章详情，然后获取相关文章
+        ArticleDetailsDTO article = articleService.getArticleByIdSimple(articleId);
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        List<ArticleDocument> relatedArticles = articleService.selectRelatedArticles(article, 6);
+        return ResponseEntity.ok(relatedArticles);
     }
 }

@@ -1,12 +1,13 @@
 package com.lumibee.hive.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.dto.*;
-import com.lumibee.hive.mapper.*;
-import com.lumibee.hive.model.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,26 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.ArticlePublishRequestDTO;
+import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.dto.PortfolioDTO;
+import com.lumibee.hive.dto.TagDTO;
+import com.lumibee.hive.mapper.ArticleFavoritesMapper;
+import com.lumibee.hive.mapper.ArticleLikesMapper;
+import com.lumibee.hive.mapper.ArticleMapper;
+import com.lumibee.hive.mapper.PortfolioMapper;
+import com.lumibee.hive.mapper.UserMapper;
+import com.lumibee.hive.model.Article;
+import com.lumibee.hive.model.ArticleDocument;
+import com.lumibee.hive.model.Portfolio;
+import com.lumibee.hive.model.Tag;
+import com.lumibee.hive.model.User;
 
 
 @Service
@@ -112,28 +130,66 @@ public class ArticleServiceImpl implements ArticleService {
             return null; // 如果没有找到文章，返回null
         }
 
-        articleMapper.incrementViewCount(article.getArticleId());
-        User user = userService.selectById(article.getUserId());
-        Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
-        List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
+        try {
+            articleMapper.incrementViewCount(article.getArticleId());
+            User user = userService.selectById(article.getUserId());
+            Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
+            List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
 
+            ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
+            BeanUtils.copyProperties(article, articleDetailsDTO);
+            if (user != null) {
+                articleDetailsDTO.setUserName(user.getName());
+                articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
+            }
+            if (portfolio != null) {
+                articleDetailsDTO.setPortfolio(convertToPortfolioDTO(portfolio));
+            }
+            if (tags != null && !tags.isEmpty()) {
+                List<TagDTO> tagDTOs = new ArrayList<>();
+                for (Tag tag : tags) {
+                    tagDTOs.add(convertToTagDTO(tag));
+                }
+                articleDetailsDTO.setTags(tagDTOs);
+            }
+
+            // 确保文章存在于Elasticsearch中
+            try {
+                if (!articleRepository.existsById(article.getArticleId())) {
+                    // 如果文章不存在于Elasticsearch，尝试重新索引
+                    ArticleDocument articleDocument = new ArticleDocument();
+                    articleDocument.setId(article.getArticleId());
+                    articleDocument.setContent(article.getContent());
+                    articleDocument.setUserName(user != null ? user.getName() : "");
+                    articleDocument.setTitle(article.getTitle());
+                    articleDocument.setSlug(article.getSlug());
+                    articleDocument.setLikes(article.getLikes());
+                    articleDocument.setViewCount(article.getViewCount());
+                    articleDocument.setAvatarUrl(user != null ? user.getAvatarUrl() : "");
+                    articleRepository.save(articleDocument);
+                }
+            } catch (Exception e) {
+                // 如果Elasticsearch操作失败，仍然返回文章详情
+                System.err.println("Elasticsearch索引文章失败: " + e.getMessage());
+            }
+
+            return articleDetailsDTO;
+        } catch (Exception e) {
+            System.err.println("获取文章详情失败: " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Override
+    public ArticleDetailsDTO getArticleByIdSimple(Integer articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            return null;
+        }
+        
         ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
         BeanUtils.copyProperties(article, articleDetailsDTO);
-        if (user != null) {
-            articleDetailsDTO.setUserName(user.getName());
-            articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
-        }
-        if (portfolio != null) {
-            articleDetailsDTO.setPortfolio(convertToPortfolioDTO(portfolio));
-        }
-        if (tags != null && !tags.isEmpty()) {
-            List<TagDTO> tagDTOs = new ArrayList<>();
-            for (Tag tag : tags) {
-                tagDTOs.add(convertToTagDTO(tag));
-            }
-            articleDetailsDTO.setTags(tagDTOs);
-        }
-
         return articleDetailsDTO;
     }
 

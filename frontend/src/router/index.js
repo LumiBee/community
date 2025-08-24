@@ -12,6 +12,7 @@ import Portfolio from '@/views/Portfolio.vue'
 import PortfolioDetail from '@/views/PortfolioDetail.vue'
 import Favorites from '@/views/Favorites.vue'
 import Tags from '@/views/Tags.vue'
+import TagArticles from '@/views/TagArticles.vue'
 import Search from '@/views/Search.vue'
 import Settings from '@/views/Settings.vue'
 import Drafts from '@/views/Drafts.vue'
@@ -82,6 +83,13 @@ const routes = [
     meta: { title: '标签' }
   },
   {
+    path: '/tags/:tagName',
+    name: 'TagArticles',
+    component: TagArticles,
+    meta: { title: '标签文章' },
+    props: true
+  },
+  {
     path: '/search',
     name: 'Search',
     component: Search,
@@ -134,17 +142,26 @@ router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - Lumi Hive` : 'Lumi Hive'
   
-  // 检查是否需要登录
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ 
-      name: 'Login', 
-      query: { redirect: to.fullPath } 
-    })
-    return
+  // 检查当前路由是否是登录或注册页面
+  const isAuthPage = to.name === 'Login' || to.name === 'Signup'
+  
+  // 检查是否有token
+  const hasToken = localStorage.getItem('token')
+  
+  // 避免无限重定向循环
+  // 如果是需要认证的页面，但没有token，则重定向到登录页
+  if (to.meta.requiresAuth && !hasToken) {
+    if (!isAuthPage) {
+      next({ 
+        name: 'Login', 
+        query: { redirect: to.fullPath } 
+      })
+      return
+    }
   }
   
-  // 检查是否需要游客身份（如登录、注册页面）
-  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+  // 如果是游客页面(登录/注册)，但有token，则重定向到首页
+  if (to.meta.requiresGuest && hasToken) {
     next({ name: 'Home' })
     return
   }

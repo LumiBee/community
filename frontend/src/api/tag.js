@@ -36,7 +36,7 @@ export const tagAPI = {
    */
   getArticlesByTagName(tagName, page = 1, size = 10) {
     return request({
-      url: `/api/tags/${encodeURIComponent(tagName)}/articles`,
+      url: `/api/tags/${encodeURIComponent(tagName)}`,
       method: 'get',
       params: { page, size }
     })

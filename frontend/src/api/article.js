@@ -23,8 +23,14 @@ export const articleAPI = {
    */
   getArticleBySlug(slug) {
     return request({
-      url: `/article/${slug}`,
+      url: `/api/article/${slug}`,
       method: 'get'
+    }).catch(error => {
+      console.error(`获取文章失败 [${slug}]:`, error)
+      if (error.status === 404) {
+        return { status: 404 }
+      }
+      throw error
     })
   },
 
@@ -57,9 +63,12 @@ export const articleAPI = {
    */
   getRelatedArticles(articleId, limit = 6) {
     return request({
-      url: `/api/articles/${articleId}/related`,
+      url: `/api/article/${articleId}/related`,
       method: 'get',
       params: { limit }
+    }).catch(error => {
+      console.error(`获取相关文章失败 [${articleId}]:`, error)
+      return []
     })
   },
 

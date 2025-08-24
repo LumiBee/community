@@ -12,20 +12,12 @@ export const authAPI = {
    */
   login(loginData) {
     return request({
-      url: '/login',
+      url: '/api/login', // 使用新的API登录端点
       method: 'post',
       data: loginData,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      transformRequest: [function (data) {
-        // 将对象转换为表单格式，因为Spring Security默认期望表单数据
-        let ret = ''
-        for (let key in data) {
-          ret += encodeURIComponent(key) + '=' + encodeURIComponent(data[key]) + '&'
-        }
-        return ret.slice(0, -1)
-      }]
+        'Content-Type': 'application/json' // 使用JSON格式
+      }
     })
   },
 
@@ -39,19 +31,12 @@ export const authAPI = {
    */
   register(signupData) {
     return request({
-      url: '/signup',
+      url: '/api/signup',
       method: 'post',
       data: signupData,
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      transformRequest: [function (data) {
-        let ret = ''
-        for (let key in data) {
-          ret += encodeURIComponent(key) + '=' + encodeURIComponent(data[key]) + '&'
-        }
-        return ret.slice(0, -1)
-      }]
+        'Content-Type': 'application/json'
+      }
     })
   },
 

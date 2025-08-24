@@ -278,7 +278,8 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   text-decoration: none;
-  margin-right: 0.5rem;
+  margin-right: 1.5rem;
+  margin-left: -0.5rem;
 }
 
 .navbar-logo {

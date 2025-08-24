@@ -1,5 +1,7 @@
 package com.lumibee.hive.service;
 
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
@@ -7,14 +9,12 @@ import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.dto.LikeResponse;
 import com.lumibee.hive.model.ArticleDocument;
 
-
-import java.util.List;
-
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
     Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize);
     String createUniqueSlug(String title);
     ArticleDetailsDTO getArticleBySlug(String slug);
+    ArticleDetailsDTO getArticleByIdSimple(Integer articleId);
     LikeResponse toggleLike(long userId, int articleId);
     boolean isUserLiked(long userId, int articleId);
     void incrementViewCount(Integer articleId);

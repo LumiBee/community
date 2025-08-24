@@ -15,7 +15,6 @@ import com.lumibee.hive.service.ArticleRepository;
 
 @RestController
 @RequestMapping("/api/search")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"}, allowCredentials = "true")
 public class SearchController {
 
     @Autowired ArticleRepository articleRepository;

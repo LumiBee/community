@@ -7,38 +7,45 @@ import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.Map;
 
-@Controller
-@RequestMapping("/profile")
+@RestController
 public class ProfileController {
 
     @Autowired private UserService userService;
     @Autowired private ImgService imgService;
     @Autowired private ArticleService articleService;
 
+    /**
+     * 更新用户封面图片API
+     */
     @PostMapping("/update-cover")
-    @ResponseBody
-    public Map<String, Object> updateUserCover(@RequestParam("coverImageFile") MultipartFile coverImageFile,
-                                               @AuthenticationPrincipal Principal principal) {
+    public ResponseEntity<Map<String, Object>> updateUserCover(@RequestParam("coverImageFile") MultipartFile coverImageFile,
+                                                              @AuthenticationPrincipal Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+        
         // 检查用户是否登录
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
-            return Map.of("success", false, "message", "用户未登录或不存在");
+            response.put("success", false);
+            response.put("message", "用户未登录或不存在");
+            return ResponseEntity.status(401).body(response);
         }
 
         // 验证背景图片
         if (coverImageFile.isEmpty() || coverImageFile.getSize() == 0) {
-            return Map.of("success", false, "message", "背景图片不能为空");
+            response.put("success", false);
+            response.put("message", "背景图片不能为空");
+            return ResponseEntity.badRequest().body(response);
         }
 
         try {
@@ -46,59 +53,65 @@ public class ProfileController {
             // 更新用户信息
             currentUser.setBackgroundImgUrl(newImageUrl);
 
-            return Map.of(
-                "success", true,
-                "message", "背景图片更新成功",
-                "newImageUrl", newImageUrl
-            );
+            response.put("success", true);
+            response.put("message", "背景图片更新成功");
+            response.put("newImageUrl", newImageUrl);
+            
+            return ResponseEntity.ok(response);
         } catch (IOException e) {
-            return Map.of("success", false, "message", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
 
-    @GetMapping("/{name}")
-    public String showUserProfile(@PathVariable("name") String name,
-                                  @RequestParam(name = "page", defaultValue = "1") long pageNum,
-                                  @RequestParam(name = "size", defaultValue = "6") long pageSize,
-                                  Model model,
-                                  @AuthenticationPrincipal Principal principal) {
+    /**
+     * 重定向用户资料页到Vue SPA
+     */
+    @GetMapping("/profile/{name}")
+    public ResponseEntity<Void> redirectToUserProfileSPA(@PathVariable("name") String name) {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "/profile/" + name)
+                .build();
+    }
+
+    /**
+     * 获取用户资料数据API
+     */
+    @GetMapping("/api/profile/{name}")
+    public ResponseEntity<Map<String, Object>> getUserProfileData(@PathVariable("name") String name,
+                                                                  @RequestParam(name = "page", defaultValue = "1") long pageNum,
+                                                                  @RequestParam(name = "size", defaultValue = "6") long pageSize,
+                                                                  @AuthenticationPrincipal Principal principal) {
         // 根据路径中的name查找用户
         User user = userService.selectByName(name);
         if (user == null) {
-            // 如果用户不存在，可以跳转到404页面
-            return "error/404";
+            return ResponseEntity.notFound().build();
         }
 
         // 判断正在查看的页面是否属于当前登录的用户
         boolean isOwner = false;
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
-        if (principal != null) {
-            if (currentUser != null && currentUser.getId().equals(user.getId())) {
-                isOwner = true;
-            }
+        if (principal != null && currentUser != null && currentUser.getId().equals(user.getId())) {
+            isOwner = true;
         }
 
-        // 后续的业务逻辑和之前类似
+        // 获取用户统计数据
         Integer articleCount = articleService.countArticlesByUserId(user.getId());
         Integer fans = userService.countFansByUserId(user.getId());
         Integer followers = userService.countFollowingByUserId(user.getId());
-        Boolean isFollowed = userService.isFollowing(currentUser.getId(), user.getId());
+        Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
         Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
 
-        model.addAttribute("user", user);
-        model.addAttribute("articleCount", articleCount);
-        model.addAttribute("followersCount", fans);
-        model.addAttribute("followingCount", followers);
-        model.addAttribute("articles", articlePage);
-        model.addAttribute("isOwner", isOwner);
-        model.addAttribute("isFollowed", isFollowed);
-        System.out.println("User Profile: " + user.getName() + ", isOwner: " + isOwner);
-        System.out.println("Article Count: " + articleCount);
-        System.out.println("Followers Count: " + fans);
-        System.out.println("Following Count: " + followers);
-        System.out.println("Articles on Page: " + articlePage.getRecords().size());
-        System.out.println("Is Followed: " + isFollowed);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user", user);
+        response.put("articleCount", articleCount);
+        response.put("followersCount", fans);
+        response.put("followingCount", followers);
+        response.put("articles", articlePage);
+        response.put("isOwner", isOwner);
+        response.put("isFollowed", isFollowed);
 
-        return "profile";
+        return ResponseEntity.ok(response);
     }
 }

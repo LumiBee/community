@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
@@ -51,6 +53,11 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+    
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
 
     @Bean
     public PersistentTokenRepository persistentTokenRepository() {
@@ -71,6 +78,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                                 authorizeRequests
+                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
                                         .requestMatchers(
                                                 "/",              // 首页
                                                 "/login",         // 登录页 (如果单独提供)
@@ -97,7 +105,10 @@ public class SecurityConfig {
                                                 "/api/search/**", // 搜索 API
                                                 "/api/home", // 首页数据 API
                                                 "/api/articles/**", // 文章相关 API
+                                                "/api/article/**", // 单篇文章 API
                                                 "/api/user/current", // 获取当前用户 API
+                                                "/api/signup", // 注册API
+                                                "/api/login", // API登录端点
                                                 "/api/ai" // AI 相关 API
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
@@ -139,12 +150,16 @@ public class SecurityConfig {
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                 .ignoringRequestMatchers(
+                                        "/login-process", // 登录处理URL
+                                        "/api/login", // API登录端点
                                         "/api/search/**", // 搜索 API
                                         "/api/home", // 首页 API
                                         "/api/tags/**", // 标签 API
                                         "/api/articles/**", // 文章 API
+                                        "/api/article/**", // 单篇文章 API
                                         "/api/portfolios", // 作品集 API
-                                        "/api/user/current" // 用户信息 API
+                                        "/api/user/current", // 用户信息 API
+                                        "/api/signup" // 注册 API
                                 ) // API路径忽略CSRF
                 );
 
