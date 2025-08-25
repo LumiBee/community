@@ -84,6 +84,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
                         .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                                        "/uploads/**", // 上传的文件（包括头像）
                                         "/api/home", // 首页 API
                                         "/api/tags/**", // 标签 API
                                         "/api/articles/**", // 文章 API
@@ -94,7 +95,8 @@ public class SecurityConfig {
                                         "/api/login", // API登录端点
                                         "/api/ai", // AI 相关 API
                                         "/api/profile/**", // 个人资料 API
-                                        "/api/debug/**" // 调试API
+                                        "/api/debug/**", // 调试API
+                                        "/login-process" // 登录处理URL
                                         ).permitAll() // 以上路径允许所有用户访问
                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()

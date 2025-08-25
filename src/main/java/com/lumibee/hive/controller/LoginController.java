@@ -37,9 +37,8 @@ public class LoginController {
      */
     @GetMapping("/login")
     public ResponseEntity<Void> redirectToLoginSPA() {
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/login")
-                .build();
+        // 直接返回成功状态，让前端Vue路由处理
+        return ResponseEntity.ok().build();
     }
 
     /**

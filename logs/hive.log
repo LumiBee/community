@@ -6610,3 +6610,892 @@ java.nio.channels.AsynchronousCloseException: null
 2025-08-25 14:45:20 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
 2025-08-25 14:45:20 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
 2025-08-25 14:45:20 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-08-25 15:03:37 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-25 15:03:37 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-25 15:03:37 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 18 ms
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ?)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ?) ORDER BY gmt_modified DESC LIMIT ?
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 8(Long)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 8
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ? AND is_featured = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String), true(Boolean)
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 2
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==>  Preparing: SELECT * from tags ORDER BY article_count DESC LIMIT 20
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - ==> Parameters: 
+2025-08-25 15:03:37 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.TagMapper.selectAllTags - <==      Total: 17
+2025-08-25 15:03:41 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:03:41 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:03:41 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:03:47 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:03:47 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:03:47 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:03:53 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:03:53 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:03:53 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:04:05 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:04:05 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: lumibee(String)
+2025-08-25 15:04:06 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:04:06 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:06 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:06 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:04:06 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:04:06 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:06 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:06 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE deleted=0 AND (deleted = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - ==> Parameters: 0(Integer)
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectList - <==      Total: 8
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==>  Preparing: SELECT portfolio_id, COUNT(*) as article_count FROM articles WHERE portfolio_id IN ( ? , ? , ? , ? , ? , ? , ? , ? ) AND deleted = 0 AND status = 'published' GROUP BY portfolio_id
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - ==> Parameters: 8(Integer), 7(Integer), 6(Integer), 5(Integer), 4(Integer), 3(Integer), 2(Integer), 1(Integer)
+2025-08-25 15:04:07 [http-nio-8090-exec-1] DEBUG c.l.h.m.P.countArticlesForPortfolioIdsInternal - <==      Total: 5
+2025-08-25 15:04:15 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:15 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:15 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:04:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:04:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:04:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:05:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:05:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:05:10 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:05:42 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:05:42 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:05:42 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:06:15 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:06:15 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:06:15 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:06:51 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:06:51 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:06:51 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:07:29 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:07:29 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:07:29 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:08:05 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:08:05 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:08:05 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:08:43 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:08:43 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:08:43 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:09:18 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:09:18 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:09:18 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:09:54 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:09:54 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:09:54 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:10:37 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:10:37 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:10:37 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:11:08 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:11:08 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:11:08 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:39 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:39 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:39 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:32:39 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:32:39 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:39 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:39 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:41 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:41 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:41 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:53 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:53 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:53 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:32:53 [http-nio-8090-exec-10] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:32:53 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:53 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:53 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:32:54 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:32:54 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:32:54 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:37:19 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:37:19 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:37:19 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:37:22 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:37:22 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:37:23 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:39:10 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:39:10 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:39:10 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:39:18 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:39:18 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: lumibee(String)
+2025-08-25 15:39:18 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:39:19 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:39:19 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:39:19 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:40:13 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:40:13 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:40:13 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:40:15 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:40:15 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:40:15 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:40:25 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:40:25 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: lumibee(String)
+2025-08-25 15:40:25 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:40:25 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:40:25 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:40:25 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: LumiBee(String)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==>  Preparing: SELECT count(*) from articles where user_id = ? and deleted = 0
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - <==      Total: 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - ==>  Preparing: SELECT COUNT(*) FROM following WHERE follower_id = ?
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.UserFollowingMapper.countFansByUserId - <==      Total: 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - ==>  Preparing: SELECT COUNT(*) FROM following WHERE user_id = ?
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.h.m.UserFollowingMapper.countFollowingByUserId - <==      Total: 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==>  Preparing: SELECT COUNT(*) AS total FROM articles WHERE deleted = 0 AND (status = ? AND deleted = ? AND user_id = ?)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - ==> Parameters: published(String), 0(Integer), 1925216231290916865(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG c.l.hive.mapper.ArticleMapper.selectList_mpCount - <==      Total: 1
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (status = ? AND deleted = ? AND user_id = ?) ORDER BY gmt_modified DESC LIMIT ?
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: published(String), 0(Integer), 1925216231290916865(Long), 6(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 6
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id IN ( ? ) AND deleted=0
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:40:43 [http-nio-8090-exec-1] DEBUG com.lumibee.hive.mapper.UserMapper.selectByIds - <==      Total: 1
+2025-08-25 15:41:09 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:41:09 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:41:09 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (slug = ? AND deleted = ?)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 1-2-3-0-1(String), 0(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==>  Preparing: UPDATE articles SET view_count = view_count + 1 WHERE article_id = ?
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==> Parameters: 57(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - <==    Updates: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE id=? AND deleted=0
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==> Parameters: 7(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==>  Preparing: SELECT t.tag_id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.tag_id = at.tag_id WHERE at.article_id = ?
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==> Parameters: 57(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles/_doc/57] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 57(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-10] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE article_id=? AND deleted=0
+2025-08-25 15:41:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==> Parameters: 57(Integer)
+2025-08-25 15:41:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - <==      Total: 1
+2025-08-25 15:41:11 [http-nio-8090-exec-5] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?search_type=query_then_fetch&typed_keys=true] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:11 [http-nio-8090-exec-5] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?search_type=query_then_fetch&typed_keys=true] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:13 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:41:13 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:41:13 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (slug = ? AND deleted = ?)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: s-p-r-i-n-g-s-e-c-u-r-i-t-y(String), 0(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 1
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==>  Preparing: UPDATE articles SET view_count = view_count + 1 WHERE article_id = ?
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - ==> Parameters: 17(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.ArticleMapper.incrementViewCount - <==    Updates: 1
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==>  Preparing: SELECT id,name,user_id,slug,description,cover_img_url,gmt_create,gmt_modified,deleted,version FROM portfolio WHERE id=? AND deleted=0
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - ==> Parameters: 2(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.lumibee.hive.mapper.PortfolioMapper.selectById - <==      Total: 1
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==>  Preparing: SELECT t.tag_id, t.name, t.slug FROM tags t INNER JOIN article_tags at ON t.tag_id = at.tag_id WHERE at.article_id = ?
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - ==> Parameters: 17(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.hive.mapper.TagMapper.selectTagsByArticleId - <==      Total: 2
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles/_doc/17] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.h.m.A.countArticlesFavorited - ==>  Preparing: SELECT COUNT(*) FROM article_favorites WHERE article_id = ?
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.h.m.A.countArticlesFavorited - ==> Parameters: 17(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-4] DEBUG c.l.h.m.A.countArticlesFavorited - <==      Total: 1
+2025-08-25 15:41:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE article_id=? AND deleted=0
+2025-08-25 15:41:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - ==> Parameters: 17(Integer)
+2025-08-25 15:41:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectById - <==      Total: 1
+2025-08-25 15:41:16 [http-nio-8090-exec-3] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?search_type=query_then_fetch&typed_keys=true] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:16 [http-nio-8090-exec-3] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_search?search_type=query_then_fetch&typed_keys=true] returned [HTTP/1.1 200 OK]
+2025-08-25 15:41:20 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:41:20 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:41:20 [http-nio-8090-exec-5] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:43:15 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 2 class path changes (0 additions, 0 deletions, 2 modifications)
+2025-08-25 15:43:15 [Thread-14] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-25 15:43:17 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-08-25 15:43:17 [http-nio-8090-Acceptor] ERROR org.apache.tomcat.util.net.Acceptor - Socket accept failed
+java.nio.channels.AsynchronousCloseException: null
+	at java.base/java.nio.channels.spi.AbstractInterruptibleChannel.end(AbstractInterruptibleChannel.java:203) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.end(ServerSocketChannelImpl.java:383) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:407) ~[na:na]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:537) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:72) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:127) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+2025-08-25 15:43:17 [Thread-14] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown initiated...
+2025-08-25 15:43:17 [Thread-14] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-2 - Shutdown completed.
+2025-08-25 15:43:18 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 21.0.8 with PID 11202 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-25 15:43:18 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 7 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:43:18 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:43:18 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:43:18 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 408 ms
+2025-08-25 15:43:18 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Starting...
+2025-08-25 15:43:18 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-3 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4990ea5c
+2025-08-25 15:43:18 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Start completed.
+2025-08-25 15:43:18 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
+2025-08-25 15:43:18 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2025-08-25 15:43:18 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.014s)
+2025-08-25 15:43:18 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
+2025-08-25 15:43:18 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
+2025-08-25 15:43:18 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
+2025-08-25 15:43:18 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:43:18 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
+2025-08-25 15:43:18 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.filter.RememberMeFilter - Filter 'rememberMeFilter' configured for use
+2025-08-25 15:43:18 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-08-25 15:43:18 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
+2025-08-25 15:43:18 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-08-25 15:43:18 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
+2025-08-25 15:43:18 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 0.958 seconds (process running for 3704.806)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:18 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:19 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:19 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:19 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-08-25 15:43:37 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-08-25 15:43:37 [Thread-27] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-25 15:43:39 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-08-25 15:43:39 [http-nio-8090-Acceptor] ERROR org.apache.tomcat.util.net.Acceptor - Socket accept failed
+java.nio.channels.AsynchronousCloseException: null
+	at java.base/java.nio.channels.spi.AbstractInterruptibleChannel.end(AbstractInterruptibleChannel.java:203) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.end(ServerSocketChannelImpl.java:383) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:407) ~[na:na]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:537) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:72) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:127) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+2025-08-25 15:43:39 [Thread-27] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown initiated...
+2025-08-25 15:43:39 [Thread-27] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-3 - Shutdown completed.
+2025-08-25 15:43:39 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 21.0.8 with PID 11202 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:43:39 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-25 15:43:39 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 6 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:43:40 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:43:40 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:43:40 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 345 ms
+2025-08-25 15:43:40 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Starting...
+2025-08-25 15:43:40 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-4 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2c0c3a86
+2025-08-25 15:43:40 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Start completed.
+2025-08-25 15:43:40 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
+2025-08-25 15:43:40 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2025-08-25 15:43:40 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.011s)
+2025-08-25 15:43:40 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
+2025-08-25 15:43:40 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
+2025-08-25 15:43:40 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
+2025-08-25 15:43:40 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:43:40 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
+2025-08-25 15:43:40 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.filter.RememberMeFilter - Filter 'rememberMeFilter' configured for use
+2025-08-25 15:43:40 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-08-25 15:43:40 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
+2025-08-25 15:43:40 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
+2025-08-25 15:43:40 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 0.843 seconds (process running for 3726.417)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:43:40 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:43:40 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:40 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
+2025-08-25 15:43:40 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-08-25 15:44:22 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 23.0.2 with PID 18492 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:44:22 [restartedMain] INFO  com.lumibee.hive.HiveApplication - No active profile set, falling back to 1 default profile: "default"
+2025-08-25 15:44:22 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in /Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/opennlp-tools-2.3.3.jar referenced one or more files that do not exist: file:/Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/slf4j-api-1.7.36.jar
+2025-08-25 15:44:22 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-25 15:44:22 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 80 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:44:23 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:44:23 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:44:23 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 968 ms
+2025-08-25 15:44:23 [restartedMain] ERROR o.s.boot.web.embedded.tomcat.TomcatStarter - Error starting Tomcat context. Exception: org.springframework.beans.factory.UnsatisfiedDependencyException. Message: Error creating bean with name 'rememberMeFilter': Unsatisfied dependency expressed through field 'rememberMeService': Error creating bean with name 'rememberMeService': Unsatisfied dependency expressed through field 'userService': Error creating bean with name 'userServiceImpl': Unsatisfied dependency expressed through field 'userMapper': Error creating bean with name 'userMapper' defined in file [/Users/czar/Java/hive/target/classes/com/lumibee/hive/mapper/UserMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionFactory': Error creating bean with name 'sqlSessionFactory' defined in class path resource [com/baomidou/mybatisplus/autoconfigure/MybatisPlusAutoConfiguration.class]: Unsatisfied dependency expressed through method 'sqlSessionFactory' parameter 0: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Failed to determine suitable jdbc url
+2025-08-25 15:44:23 [restartedMain] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2025-08-25 15:44:23 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server
+2025-08-25 15:44:23 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-08-25 15:44:23 [restartedMain] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
+
+Reason: Failed to determine suitable jdbc url
+
+
+Action:
+
+Consider the following:
+	If you want an embedded database (H2, HSQL or Derby), please put it on the classpath.
+	If you have database settings to be loaded from a particular profile you may need to activate it (no profiles are currently active).
+
+2025-08-25 15:44:56 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-25 15:44:56 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-25 15:44:56 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 23 ms
+2025-08-25 15:44:56 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:44:56 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:44:56 [http-nio-8090-exec-1] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:46:11 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 2 class path changes (0 additions, 0 deletions, 2 modifications)
+2025-08-25 15:46:11 [Thread-38] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-25 15:46:13 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-08-25 15:46:13 [http-nio-8090-Acceptor] ERROR org.apache.tomcat.util.net.Acceptor - Socket accept failed
+java.nio.channels.AsynchronousCloseException: null
+	at java.base/java.nio.channels.spi.AbstractInterruptibleChannel.end(AbstractInterruptibleChannel.java:203) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.end(ServerSocketChannelImpl.java:383) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:407) ~[na:na]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:537) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:72) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:127) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+2025-08-25 15:46:13 [Thread-38] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown initiated...
+2025-08-25 15:46:13 [Thread-38] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-4 - Shutdown completed.
+2025-08-25 15:46:13 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 21.0.8 with PID 11202 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:46:13 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-25 15:46:13 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 7 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:46:14 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:46:14 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:46:14 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 413 ms
+2025-08-25 15:46:14 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Starting...
+2025-08-25 15:46:14 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-5 - Added connection com.mysql.cj.jdbc.ConnectionImpl@53b800aa
+2025-08-25 15:46:14 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Start completed.
+2025-08-25 15:46:14 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
+2025-08-25 15:46:14 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2025-08-25 15:46:14 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.014s)
+2025-08-25 15:46:14 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
+2025-08-25 15:46:14 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
+2025-08-25 15:46:14 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
+2025-08-25 15:46:14 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:46:14 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
+2025-08-25 15:46:14 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:46:14 [restartedMain] DEBUG com.lumibee.hive.filter.RememberMeFilter - Filter 'rememberMeFilter' configured for use
+2025-08-25 15:46:14 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-08-25 15:46:14 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
+2025-08-25 15:46:14 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
+2025-08-25 15:46:14 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-08-25 15:46:15 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
+2025-08-25 15:46:15 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 1.06 seconds (process running for 3880.867)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:46:15 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:46:15 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
+2025-08-25 15:46:15 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
+2025-08-25 15:46:15 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-08-25 15:47:12 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 23.0.2 with PID 19414 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:47:12 [restartedMain] INFO  com.lumibee.hive.HiveApplication - No active profile set, falling back to 1 default profile: "default"
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in /Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/opennlp-tools-2.3.3.jar referenced one or more files that do not exist: file:/Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/slf4j-api-1.7.36.jar
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 148 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 27 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:47:12 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:47:13 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:47:13 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 10 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:47:13 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:47:13 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:47:13 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:47:13 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:47:13 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 1155 ms
+2025-08-25 15:47:13 [restartedMain] ERROR o.s.boot.web.embedded.tomcat.TomcatStarter - Error starting Tomcat context. Exception: org.springframework.beans.factory.UnsatisfiedDependencyException. Message: Error creating bean with name 'rememberMeFilter': Unsatisfied dependency expressed through field 'rememberMeService': Error creating bean with name 'rememberMeService': Unsatisfied dependency expressed through field 'userService': Error creating bean with name 'userServiceImpl': Unsatisfied dependency expressed through field 'userMapper': Error creating bean with name 'userMapper' defined in file [/Users/czar/Java/hive/target/classes/com/lumibee/hive/mapper/UserMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionFactory': Error creating bean with name 'sqlSessionFactory' defined in class path resource [com/baomidou/mybatisplus/autoconfigure/MybatisPlusAutoConfiguration.class]: Unsatisfied dependency expressed through method 'sqlSessionFactory' parameter 0: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Failed to determine suitable jdbc url
+2025-08-25 15:47:13 [restartedMain] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2025-08-25 15:47:13 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server
+2025-08-25 15:47:13 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-08-25 15:47:13 [restartedMain] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
+
+Reason: Failed to determine suitable jdbc url
+
+
+Action:
+
+Consider the following:
+	If you want an embedded database (H2, HSQL or Derby), please put it on the classpath.
+	If you have database settings to be loaded from a particular profile you may need to activate it (no profiles are currently active).
+
+2025-08-25 15:47:46 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-25 15:47:46 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-25 15:47:46 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 16 ms
+2025-08-25 15:48:46 [File Watcher] INFO  o.s.b.d.a.LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener - Restarting due to 3 class path changes (0 additions, 0 deletions, 3 modifications)
+2025-08-25 15:48:46 [Thread-49] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Commencing graceful shutdown. Waiting for active requests to complete
+2025-08-25 15:48:48 [tomcat-shutdown] INFO  o.s.boot.web.embedded.tomcat.GracefulShutdown - Graceful shutdown complete
+2025-08-25 15:48:48 [http-nio-8090-Acceptor] ERROR org.apache.tomcat.util.net.Acceptor - Socket accept failed
+java.nio.channels.AsynchronousCloseException: null
+	at java.base/java.nio.channels.spi.AbstractInterruptibleChannel.end(AbstractInterruptibleChannel.java:203) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.end(ServerSocketChannelImpl.java:383) ~[na:na]
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.accept(ServerSocketChannelImpl.java:407) ~[na:na]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:537) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.NioEndpoint.serverSocketAccept(NioEndpoint.java:72) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at org.apache.tomcat.util.net.Acceptor.run(Acceptor.java:127) ~[tomcat-embed-core-10.1.43.jar:10.1.43]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+2025-08-25 15:48:48 [Thread-49] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown initiated...
+2025-08-25 15:48:48 [Thread-49] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-5 - Shutdown completed.
+2025-08-25 15:48:48 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 21.0.8 with PID 11202 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-25 15:48:48 [restartedMain] DEBUG com.lumibee.hive.HiveApplication - Running with Spring Boot v3.5.4, Spring v6.2.9
+2025-08-25 15:48:48 [restartedMain] INFO  com.lumibee.hive.HiveApplication - The following 1 profile is active: "dev"
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 5 ms. Found 1 Elasticsearch repository interface.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 1 ms. Found 0 Redis repository interfaces.
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-25 15:48:48 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-25 15:48:48 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-25 15:48:48 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 328 ms
+2025-08-25 15:48:48 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Starting...
+2025-08-25 15:48:48 [restartedMain] INFO  com.zaxxer.hikari.pool.HikariPool - HikariPool-6 - Added connection com.mysql.cj.jdbc.ConnectionImpl@431fd340
+2025-08-25 15:48:48 [restartedMain] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-6 - Start completed.
+2025-08-25 15:48:48 [restartedMain] INFO  org.flywaydb.core.FlywayExecutor - Database: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true (MySQL 9.3)
+2025-08-25 15:48:48 [restartedMain] WARN  org.flywaydb.core.internal.database.base.Database - Flyway upgrade recommended: MySQL 9.3 is newer than this version of Flyway and support has not been tested. The latest supported version of MySQL is 8.1.
+2025-08-25 15:48:48 [restartedMain] INFO  org.flywaydb.core.internal.command.DbValidate - Successfully validated 48 migrations (execution time 00:00.014s)
+2025-08-25 15:48:48 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Current version of schema `community`: 48
+2025-08-25 15:48:48 [restartedMain] INFO  org.flywaydb.core.internal.command.DbMigrate - Schema `community` is up to date. No migration necessary.
+2025-08-25 15:48:48 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.Follower".
+2025-08-25 15:48:48 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.Follower ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:48:48 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - Can not find table primary key in Class: "com.lumibee.hive.model.ArticleFavorites".
+2025-08-25 15:48:48 [restartedMain] WARN  c.b.mybatisplus.core.injector.DefaultSqlInjector - class com.lumibee.hive.model.ArticleFavorites ,Not found @TableId annotation, Cannot use Mybatis-Plus 'xxById' Method.
+2025-08-25 15:48:48 [restartedMain] DEBUG com.lumibee.hive.filter.RememberMeFilter - Filter 'rememberMeFilter' configured for use
+2025-08-25 15:48:48 [restartedMain] WARN  c.b.mybatisplus.core.metadata.TableInfoHelper - This primary key of "id" is primitive !不建议如此请使用包装类 in Class: "com.lumibee.hive.model.ArticleLikes"
+2025-08-25 15:48:48 [restartedMain] INFO  o.s.b.d.autoconfigure.OptionalLiveReloadServer - LiveReload server is running on port 35729
+2025-08-25 15:48:49 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [HEAD http://localhost:9200/dev-articles] returned [HTTP/1.1 200 OK]
+2025-08-25 15:48:49 [restartedMain] INFO  o.s.b.actuate.endpoint.web.EndpointLinksResolver - Exposing 7 endpoints beneath base path '/actuator'
+2025-08-25 15:48:49 [restartedMain] WARN  o.s.b.a.t.ThymeleafAutoConfiguration$DefaultTemplateResolverConfiguration - Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2025-08-25 15:48:49 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat started on port 8090 (http) with context path '/'
+2025-08-25 15:48:49 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Started HiveApplication in 0.828 seconds (process running for 4035.105)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==>  Preparing: SELECT article_id,user_id,title,slug,content,excerpt,status,portfolio_id,gmt_create,gmt_modified,view_count,likes,allow_comments,background_url,is_featured,deleted,version FROM articles WHERE deleted=0 AND (deleted = ? AND status = ?) ORDER BY gmt_modified DESC
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - ==> Parameters: 0(Integer), published(String)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.ArticleMapper.selectList - <==      Total: 22
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:48:49 [restartedMain] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:48:49 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/_bulk?refresh=false] returned [HTTP/1.1 200 OK]
+2025-08-25 15:48:49 [restartedMain] DEBUG org.elasticsearch.client.RestClient - request [POST http://localhost:9200/dev-articles/_refresh] returned [HTTP/1.1 200 OK]
+2025-08-25 15:48:49 [restartedMain] INFO  o.s.b.d.a.ConditionEvaluationDeltaLoggingListener - Condition evaluation unchanged
+2025-08-25 15:48:56 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-08-25 15:48:56 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-08-25 15:48:56 [http-nio-8090-exec-1] INFO  org.springframework.web.servlet.DispatcherServlet - Completed initialization in 17 ms
+2025-08-25 15:48:56 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:48:56 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:48:56 [http-nio-8090-exec-3] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:48:58 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:48:58 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:48:58 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:49:08 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:49:08 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: lumibee(String)
+2025-08-25 15:49:08 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:49:08 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:08 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:08 [http-nio-8090-exec-7] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:49:08 [http-nio-8090-exec-9] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:49:08 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:08 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:08 [http-nio-8090-exec-10] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==>  Preparing: SELECT id, name, token, gmt_create, gmt_modified, bio, avatar_url, email, password, github_id, qq_open_id, background_img_url, deleted, version FROM user WHERE name = ? LIMIT 1
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - ==> Parameters: LumiBee(String)
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG com.lumibee.hive.mapper.UserMapper.selectByName - <==      Total: 1
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==>  Preparing: SELECT count(*) from articles where user_id = ? and deleted = 0
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:11 [http-nio-8090-exec-2] DEBUG c.l.h.mapper.ArticleMapper.countArticlesByUserId - <==      Total: 1
+2025-08-25 15:49:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:11 [http-nio-8090-exec-5] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:11 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:11 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:11 [http-nio-8090-exec-6] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==>  Preparing: SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, u.name AS user_name, u.avatar_url FROM articles a LEFT JOIN user u ON a.user_id = u.id WHERE a.deleted = 0 AND a.status = 'published' ORDER BY a.view_count DESC LIMIT ?
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - ==> Parameters: 6(Integer)
+2025-08-25 15:49:14 [http-nio-8090-exec-8] DEBUG c.l.h.mapper.ArticleMapper.selectArticleSummaries - <==      Total: 6
+2025-08-25 15:49:14 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:14 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:14 [http-nio-8090-exec-9] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
+2025-08-25 15:49:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==>  Preparing: SELECT id,name,token,gmt_create,gmt_modified,bio,avatar_url,email,password,github_id,qq_open_id,background_img_url,deleted,version FROM user WHERE id=? AND deleted=0
+2025-08-25 15:49:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - ==> Parameters: 1925216231290916865(Long)
+2025-08-25 15:49:15 [http-nio-8090-exec-3] DEBUG com.lumibee.hive.mapper.UserMapper.selectById - <==      Total: 1
