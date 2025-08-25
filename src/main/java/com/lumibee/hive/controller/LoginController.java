@@ -2,6 +2,10 @@ package com.lumibee.hive.controller;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
+import com.lumibee.hive.service.RememberMeService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +28,9 @@ public class LoginController {
     
     @Autowired
     private AuthenticationManager authenticationManager;
+    
+    @Autowired
+    private RememberMeService rememberMeService;
 
     /**
      * 重定向登录页面到Vue SPA
@@ -39,11 +46,12 @@ public class LoginController {
      * API登录端点，用于处理前端AJAX登录请求
      */
     @PostMapping("/api/login")
-    public ResponseEntity<?> apiLogin(@RequestBody Map<String, String> loginRequest, HttpSession session) {
+    public ResponseEntity<?> apiLogin(@RequestBody Map<String, String> loginRequest, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
         String account = loginRequest.get("account");
         String password = loginRequest.get("password");
+        String rememberMe = loginRequest.get("remember-me");
         
-        System.out.println("接收到登录请求: account=" + account + ", password长度=" + (password != null ? password.length() : 0));
+        System.out.println("接收到登录请求: account=" + account + ", password长度=" + (password != null ? password.length() : 0) + ", rememberMe=" + rememberMe);
         
         Map<String, Object> responseMap = new HashMap<>();
         
@@ -76,6 +84,19 @@ public class LoginController {
             System.out.println("转换为User对象: ID=" + user.getId() + ", Name=" + user.getName());
             
             if (user != null) {
+                // 处理remember-me功能
+                if ("on".equals(rememberMe)) {
+                    System.out.println("启用remember-me功能");
+                    // 使用RememberMeService创建token
+                    String rememberMeToken = rememberMeService.createRememberMeToken(user);
+                    // 设置remember-me cookie
+                    rememberMeService.setRememberMeCookie(response, rememberMeToken);
+                    
+                    // 在session中标记用户选择了remember-me
+                    session.setAttribute("rememberMe", true);
+                    System.out.println("Remember-me token已创建并设置cookie");
+                }
+                
                 // 将用户信息存入会话
                 session.setAttribute("user", user);
                 
@@ -104,6 +125,8 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
+    
+
 
     /**
      * 获取登录页面状态API

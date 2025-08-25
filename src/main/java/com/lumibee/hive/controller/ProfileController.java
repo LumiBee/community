@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
+@CrossOrigin(originPatterns = "*", allowCredentials = "true")
 public class ProfileController {
 
     @Autowired private UserService userService;

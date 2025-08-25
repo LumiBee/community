@@ -25,11 +25,13 @@ import org.springframework.security.web.authentication.rememberme.JdbcTokenRepos
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.UserServiceImpl;
+import com.lumibee.hive.filter.RememberMeFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +50,9 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserServiceImpl customUserServiceImpl;
+    
+    @Autowired
+    private RememberMeFilter rememberMeFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -76,47 +81,27 @@ public class SecurityConfig {
                                                    CustomOAuth2AuthenticationSuccessHandler customOAuth2SuccessHandler) throws Exception {
 
         http
-                .authorizeHttpRequests(authorizeRequests ->
-                                authorizeRequests
-                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
-                                        .requestMatchers(
-                                                "/",              // 首页
-                                                "/login",         // 登录页 (如果单独提供)
-                                                "/signup",        // 注册页
-                                                "/sitemap.xml",  // 网站地图
-                                                "/css/**",        // CSS 文件
-                                                "/js/**",         // JavaScript 文件
-                                                "/img/**",        // 图片文件
-                                                "/error",         // Spring Boot 默认错误页
-                                                "/favicon.ico",   // 网站图标
-                                                "/api/user/dismiss-password-prompt",
-                                                "/article/**",    // 文章浏览
-                                                "/.well-known/**", // WebFinger 协议
-                                                "/uploads/**",
-                                                "/baidu_verify_codeva-wzTpwijk24.html", // 百度站长验证文件
-                                                "/tags/**", // 标签浏览
-                                                "/api/tags/**", // 标签 API
-                                                "/portfolio/**", // 个人作品集
-                                                "/api/portfolio/**", // 个人作品集 API
-                                                "/api/portfolios", // 作品集列表 API
-                                                "/avatars/**", // 头像图片
-                                                "/backgrounds/**", // 背景图片
-                                                "/search", // 搜索页面
-                                                "/api/search/**", // 搜索 API
-                                                "/api/home", // 首页数据 API
-                                                "/api/articles/**", // 文章相关 API
-                                                "/api/article/**", // 单篇文章 API
-                                                "/api/profile/**", // 个人资料 API
-                                                                                        "/api/user/current", // 获取当前用户 API
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
+                        .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                                        "/api/home", // 首页 API
+                                        "/api/tags/**", // 标签 API
+                                        "/api/articles/**", // 文章 API
+                                        "/api/article/**", // 单篇文章 API
+                                        "/api/portfolios", // 作品集 API
+                                        "/api/user/current", // 获取当前用户 API
                                         "/api/signup", // 注册API
                                         "/api/login", // API登录端点
                                         "/api/ai", // AI 相关 API
+                                        "/api/profile/**", // 个人资料 API
                                         "/api/debug/**" // 调试API
                                         ).permitAll() // 以上路径允许所有用户访问
-                                        .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
-                                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
-                                        .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
+                        .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
+                        .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
+                .addFilterBefore(rememberMeFilter, UsernamePasswordAuthenticationFilter.class)
+                .cors(cors -> cors.and()) // 启用CORS支持
                 .formLogin(formLogin ->
                         formLogin
                                 .loginPage("/login") // 登录页的 GET 路径
@@ -137,18 +122,18 @@ public class SecurityConfig {
                                 .logoutUrl("/logout")
                                 .logoutSuccessUrl("/?logout")
                                 .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID", "token")
+                                .deleteCookies("JSESSIONID", "token", "remember-me")
                                 .clearAuthentication(true)
                                 .permitAll()
                 )
-                // 暂时禁用remember-me功能，避免token不匹配问题
-                // .rememberMe(rememberMe ->
-                //         rememberMe
-                //                 .tokenRepository(persistentTokenRepository())
-                //                 .tokenValiditySeconds(604800)
-                //                 .userDetailsService(customUserServiceImpl)
-                //                 .rememberMeParameter("remember-me")
-                // )
+                .rememberMe(rememberMe ->
+                        rememberMe
+                                .tokenRepository(persistentTokenRepository())
+                                .tokenValiditySeconds(604800) // 7天
+                                .userDetailsService(customUserServiceImpl)
+                                .rememberMeParameter("remember-me")
+                                .key("lumiHiveRememberMeKey")
+                )
                 .csrf(csrf ->
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
