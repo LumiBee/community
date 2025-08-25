@@ -3,11 +3,14 @@ import axios from 'axios'
 // 创建axios实例
 const request = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8090', // 后端API地址
-  timeout: 15000, // 请求超时时间
+  timeout: 30000, // 请求超时时间增加到30秒
   withCredentials: true, // 允许携带cookie（用于Spring Security会话）
   headers: {
     'Content-Type': 'application/json;charset=UTF-8'
-  }
+  },
+  // 添加重试配置
+  retry: 3, // 重试次数
+  retryDelay: 1000 // 重试间隔（毫秒）
 })
 
 // 请求拦截器
@@ -48,6 +51,29 @@ request.interceptors.response.use(
   },
   error => {
     console.error('响应错误：', error)
+    
+    // 实现请求重试逻辑
+    const config = error.config;
+    
+    // 如果配置了重试，且未设置重试计数器，则初始化计数器
+    if (config && config.retry && !config._retryCount) {
+      config._retryCount = 0;
+    }
+    
+    // 检查是否可以重试
+    if (config && config.retry && config._retryCount < config.retry) {
+      config._retryCount++;
+      
+      console.log(`请求重试中 (${config._retryCount}/${config.retry}): ${config.url}`);
+      
+      // 创建新的Promise来处理重试延迟
+      return new Promise(resolve => {
+        setTimeout(() => {
+          console.log(`重试请求: ${config.url}`);
+          resolve(axios(config));
+        }, config.retryDelay || 1000);
+      });
+    }
     
     if (error.response) {
       const { status, data } = error.response

@@ -106,6 +106,7 @@ public class SecurityConfig {
                                                 "/api/home", // 首页数据 API
                                                 "/api/articles/**", // 文章相关 API
                                                 "/api/article/**", // 单篇文章 API
+                                                "/api/profile/**", // 个人资料 API
                                                                                         "/api/user/current", // 获取当前用户 API
                                         "/api/signup", // 注册API
                                         "/api/login", // API登录端点
@@ -162,7 +163,9 @@ public class SecurityConfig {
                                         "/api/article/**", // 单篇文章 API
                                         "/api/portfolios", // 作品集 API
                                         "/api/user/current", // 用户信息 API
-                                        "/api/signup" // 注册 API
+                                        "/api/signup", // 注册 API
+                                        "/api/profile/**", // 个人资料 API
+                                        "/api/debug/**" // 调试API
                                 ) // API路径忽略CSRF
                 );
 

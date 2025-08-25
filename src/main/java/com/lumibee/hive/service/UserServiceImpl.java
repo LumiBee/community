@@ -4,8 +4,6 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
-import com.lumibee.hive.mapper.FavoriteMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,38 +26,68 @@ public class UserServiceImpl implements UserService {
     @Autowired private UserMapper userMapper;
     @Autowired private UserFollowingMapper userFollowingMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
+    
+    @Override
+    public UserMapper getUserMapper() {
+        return userMapper;
+    }
 
     @Override
-    @Cacheable(value = "users", key = "#name", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
-        return userMapper.selectByName(name);
+        System.out.println("UserServiceImpl.selectByName: 直接从数据库加载用户: " + name);
+        User user = userMapper.selectByName(name);
+        if (user != null) {
+            System.out.println("UserServiceImpl.selectByName: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
+        }
+        return user;
     }
 
     @Override
-    @Cacheable(value = "usersByEmail", key = "#email", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByEmail(String email) {
-        return userMapper.selectByEmail(email);
+        System.out.println("UserServiceImpl.selectByEmail: 直接从数据库加载用户: " + email);
+        User user = userMapper.selectByEmail(email);
+        if (user != null) {
+            System.out.println("UserServiceImpl.selectByEmail: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
+        }
+        return user;
     }
 
     @Override
-    @Cacheable(value = "usersByGithubId", key = "#githubId", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectByGithubId(String githubId) {
-        return userMapper.selectByGithubId(githubId);
+        System.out.println("UserServiceImpl.selectByGithubId: 直接从数据库加载用户: " + githubId);
+        User user = userMapper.selectByGithubId(githubId);
+        if (user != null) {
+            System.out.println("UserServiceImpl.selectByGithubId: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
+        }
+        return user;
     }
 
     @Override
-    @CacheEvict(value = "users", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#id"),
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "usersByEmail", allEntries = true)
+    })
     @Transactional
     public boolean updatePassword(Long id, String newPassword) {
+        // 先获取完整的用户信息
+        User existingUser = userMapper.selectById(id);
+        if (existingUser == null) {
+            return false;
+        }
+        
+        // 只更新密码和修改时间
         User user = new User();
         user.setId(id);
         user.setPassword(newPassword);
         user.setGmtModified(LocalDateTime.now());
 
+        System.out.println("更新用户密码: ID=" + id + ", 密码长度=" + (newPassword != null ? newPassword.length() : 0));
         int updatedRows = userMapper.updateById(user);
+        System.out.println("密码更新结果: " + (updatedRows > 0 ? "成功" : "失败"));
 
         return updatedRows > 0;
     }
@@ -113,10 +141,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "users", key = "#id", unless = "#result == null")
     @Transactional(readOnly = true)
     public User selectById(Long id) {
-        return userMapper.selectById(id);
+        System.out.println("UserServiceImpl.selectById: 直接从数据库加载用户: " + id);
+        User user = userMapper.selectById(id);
+        if (user != null) {
+            System.out.println("UserServiceImpl.selectById: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
+        }
+        return user;
     }
 
     @Override
@@ -151,10 +183,18 @@ public class UserServiceImpl implements UserService {
             identifier = ((UserDetails) actualPrincipal).getUsername();
             System.out.println("UserService: Identifier from UserDetails (username): " + identifier);
             if (identifier != null) {
+                // 直接从数据库加载用户，绕过缓存
                 currentUser = userMapper.selectByName(identifier);
                 if (currentUser == null) {
                     System.out.println("UserService: User not found by name '" + identifier + "', trying by email.");
                     currentUser = userMapper.selectByEmail(identifier);
+                }
+                
+                // 检查密码是否正确加载
+                if (currentUser != null) {
+                    System.out.println("UserService: 从数据库加载用户成功: ID=" + currentUser.getId() + 
+                                      ", 密码: " + (currentUser.getPassword() != null ? 
+                                                  "已设置(长度=" + currentUser.getPassword().length() + ")" : "未设置"));
                 }
             }
         } else if (actualPrincipal instanceof OAuth2User) {
@@ -191,7 +231,15 @@ public class UserServiceImpl implements UserService {
             identifier = principal.getName(); // java.security.Principal 的 getName()
             if(identifier != null){
                 System.out.println("UserService: Fallback: Identifier from principal.getName(): " + identifier);
+                // 直接从数据库加载用户，绕过缓存
                 currentUser = userMapper.selectByName(identifier);
+                
+                // 检查密码是否正确加载
+                if (currentUser != null) {
+                    System.out.println("UserService: 从数据库加载用户成功: ID=" + currentUser.getId() + 
+                                      ", 密码: " + (currentUser.getPassword() != null ? 
+                                                  "已设置(长度=" + currentUser.getPassword().length() + ")" : "未设置"));
+                }
             }
         }
 

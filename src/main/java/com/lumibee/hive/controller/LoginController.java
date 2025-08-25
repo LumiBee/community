@@ -54,10 +54,13 @@ public class LoginController {
             
             System.out.println("准备认证...");
             
+            System.out.println("准备开始认证过程...");
             // 尝试认证
             Authentication authentication = authenticationManager.authenticate(authToken);
             
             System.out.println("认证成功，设置安全上下文");
+            System.out.println("认证结果: " + authentication);
+            System.out.println("认证主体类型: " + authentication.getPrincipal().getClass().getName());
             
             // 认证成功，设置安全上下文
             SecurityContextHolder.getContext().setAuthentication(authentication);
