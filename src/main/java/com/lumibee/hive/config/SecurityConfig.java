@@ -106,10 +106,11 @@ public class SecurityConfig {
                                                 "/api/home", // 首页数据 API
                                                 "/api/articles/**", // 文章相关 API
                                                 "/api/article/**", // 单篇文章 API
-                                                "/api/user/current", // 获取当前用户 API
-                                                "/api/signup", // 注册API
-                                                "/api/login", // API登录端点
-                                                "/api/ai" // AI 相关 API
+                                                                                        "/api/user/current", // 获取当前用户 API
+                                        "/api/signup", // 注册API
+                                        "/api/login", // API登录端点
+                                        "/api/ai", // AI 相关 API
+                                        "/api/debug/**" // 调试API
                                         ).permitAll() // 以上路径允许所有用户访问
                                         .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
                                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
@@ -139,19 +140,21 @@ public class SecurityConfig {
                                 .clearAuthentication(true)
                                 .permitAll()
                 )
-                .rememberMe(rememberMe ->
-                        rememberMe
-                                .tokenRepository(persistentTokenRepository())
-                                .tokenValiditySeconds(604800)
-                                .userDetailsService(customUserServiceImpl)
-                                .rememberMeParameter("remember-me")
-                )
+                // 暂时禁用remember-me功能，避免token不匹配问题
+                // .rememberMe(rememberMe ->
+                //         rememberMe
+                //                 .tokenRepository(persistentTokenRepository())
+                //                 .tokenValiditySeconds(604800)
+                //                 .userDetailsService(customUserServiceImpl)
+                //                 .rememberMeParameter("remember-me")
+                // )
                 .csrf(csrf ->
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                 .ignoringRequestMatchers(
                                         "/login-process", // 登录处理URL
                                         "/api/login", // API登录端点
+                                        "/api/logout", // API登出端点
                                         "/api/search/**", // 搜索 API
                                         "/api/home", // 首页 API
                                         "/api/tags/**", // 标签 API

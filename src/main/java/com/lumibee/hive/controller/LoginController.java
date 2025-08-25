@@ -42,56 +42,63 @@ public class LoginController {
     public ResponseEntity<?> apiLogin(@RequestBody Map<String, String> loginRequest, HttpSession session) {
         String account = loginRequest.get("account");
         String password = loginRequest.get("password");
-        boolean rememberMe = Boolean.parseBoolean(loginRequest.get("remember-me"));
         
-        Map<String, Object> response = new HashMap<>();
+        System.out.println("接收到登录请求: account=" + account + ", password长度=" + (password != null ? password.length() : 0));
+        
+        Map<String, Object> responseMap = new HashMap<>();
         
         try {
             // 创建认证令牌
             UsernamePasswordAuthenticationToken authToken = 
                 new UsernamePasswordAuthenticationToken(account, password);
             
+            System.out.println("准备认证...");
+            
             // 尝试认证
             Authentication authentication = authenticationManager.authenticate(authToken);
+            
+            System.out.println("认证成功，设置安全上下文");
             
             // 认证成功，设置安全上下文
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
             // 获取用户信息
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String username = userDetails.getUsername();
+            System.out.println("获取到UserDetails: " + userDetails.getClass().getName());
+            System.out.println("UserDetails.getUsername(): " + userDetails.getUsername());
+            System.out.println("UserDetails.getPassword(): " + (userDetails.getPassword() != null ? "已设置" : "未设置"));
             
-            // 查询用户详细信息
-            User user = null;
-            if (username.contains("@")) {
-                user = userService.selectByEmail(username);
-            } else {
-                user = userService.selectByName(username);
-            }
+            // 由于User实现了UserDetails，我们可以直接转换为User对象
+            User user = (User) userDetails;
+            System.out.println("转换为User对象: ID=" + user.getId() + ", Name=" + user.getName());
             
             if (user != null) {
                 // 将用户信息存入会话
                 session.setAttribute("user", user);
                 
                 // 返回用户信息
-                response.put("success", true);
-                response.put("user", user);
-                response.put("message", "登录成功");
+                responseMap.put("success", true);
+                responseMap.put("user", user);
+                responseMap.put("message", "登录成功");
                 
-                return ResponseEntity.ok(response);
+                return ResponseEntity.ok(responseMap);
             } else {
-                response.put("success", false);
-                response.put("message", "登录成功但无法获取用户信息");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+                responseMap.put("success", false);
+                responseMap.put("message", "登录成功但无法获取用户信息");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
             }
         } catch (AuthenticationException e) {
-            response.put("success", false);
-            response.put("message", "用户名或密码错误");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            responseMap.put("success", false);
+            responseMap.put("message", "用户名或密码错误");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
         } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "登录过程中发生错误: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            // 记录详细错误信息
+            System.err.println("Login error: " + e.getMessage());
+            e.printStackTrace();
+            
+            responseMap.put("success", false);
+            responseMap.put("message", "登录过程中发生错误: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
 
@@ -131,6 +138,33 @@ public class LoginController {
         response.put("status", "success");
         
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * API登出端点，用于处理前端AJAX登出请求
+     */
+    @PostMapping("/api/logout")
+    public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 清除安全上下文
+            SecurityContextHolder.clearContext();
+            
+            // 清除会话
+            if (session != null) {
+                session.invalidate();
+            }
+            
+            response.put("success", true);
+            response.put("message", "登出成功");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "登出过程中发生错误: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 
 }

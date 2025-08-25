@@ -45,7 +45,7 @@ export const authAPI = {
    */
   logout() {
     return request({
-      url: '/logout',
+      url: '/api/logout',
       method: 'post'
     })
   },

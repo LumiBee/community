@@ -66,4 +66,38 @@ public class User implements UserDetails, Principal {
         return this.name;
     }
 
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return this.password;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return this.deleted == null || this.deleted == 0;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }
