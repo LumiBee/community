@@ -52,10 +52,11 @@ const routes = [
     meta: { title: '发布文章', requiresAuth: true }
   },
   {
-    path: '/profile',
+    path: '/profile/:name?',
     name: 'Profile',
     component: Profile,
-    meta: { title: '个人中心', requiresAuth: true }
+    meta: { title: '个人中心' },
+    props: true
   },
   {
     path: '/portfolio',

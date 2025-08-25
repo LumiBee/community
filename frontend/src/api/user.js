@@ -6,12 +6,13 @@ import request from './config'
 export const userAPI = {
   /**
    * 获取用户个人资料
+   * @param {string} username - 用户名
    * @param {number} page - 页码，默认1
    * @param {number} size - 每页大小，默认6
    */
-  getProfile(page = 1, size = 6) {
+  getProfile(username, page = 1, size = 6) {
     return request({
-      url: '/api/profile',
+      url: `/api/profile/${username}`,
       method: 'get',
       params: { page, size }
     })

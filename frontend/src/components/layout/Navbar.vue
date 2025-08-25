@@ -14,7 +14,7 @@
           <router-link to="/tags" class="nav-link">标签</router-link>
           <router-link to="/portfolio" class="nav-link">作品集</router-link>
           <router-link to="/favorites" class="nav-link">收藏夹</router-link>
-          <router-link to="/profile" class="nav-link">个人中心</router-link>
+          <router-link :to="`/profile/${authStore.userName}`" class="nav-link">个人中心</router-link>
         </nav>
       </div>
 
@@ -107,7 +107,7 @@
                   </div>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
-                <li><router-link class="dropdown-item" to="/profile"><i class="fas fa-user"></i>个人中心</router-link></li>
+                <li><router-link class="dropdown-item" :to="`/profile/${authStore.userName}`"><i class="fas fa-user"></i>个人中心</router-link></li>
                 <li><router-link class="dropdown-item" to="/drafts"><i class="fas fa-file-alt"></i>草稿箱</router-link></li>
                 <li><router-link class="dropdown-item" to="/messages"><i class="fas fa-envelope"></i>私信</router-link></li>
                 <li><hr class="dropdown-divider" /></li>
@@ -137,7 +137,7 @@
       <router-link to="/tags" class="mobile-nav-link" @click="closeMobileMenu">标签</router-link>
       <router-link to="/portfolio" class="mobile-nav-link" @click="closeMobileMenu">作品集</router-link>
       <router-link to="/favorites" class="mobile-nav-link" @click="closeMobileMenu">收藏夹</router-link>
-      <router-link to="/profile" class="mobile-nav-link" @click="closeMobileMenu">个人中心</router-link>
+      <router-link :to="`/profile/${authStore.userName}`" class="mobile-nav-link" @click="closeMobileMenu">个人中心</router-link>
     </div>
   </nav>
 </template>
