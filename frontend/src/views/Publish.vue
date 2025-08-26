@@ -695,13 +695,14 @@ const confirmPublish = async () => {
     
     const response = await articleAPI.publishArticle(publishData)
     
-    if (response.success) {
+    // 后端直接返回文章对象，不是包含 success 字段的响应
+    if (response && response.articleId) {
       showNotification('文章发布成功！', 'success')
       showPublishModal.value = false
       // 发布成功，跳转到文章页面
       setTimeout(() => {
         router.push(`/article/${response.slug}`)
-      }, 1500)
+      }, 800)
     } else {
       showNotification('发布失败，请重试', 'danger')
     }
