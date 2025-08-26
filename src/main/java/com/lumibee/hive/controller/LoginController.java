@@ -34,6 +34,8 @@ public class LoginController {
     private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
     // JWT过期时间 - 24小时
     private static final long JWT_EXPIRATION = 86400000;
+    // JWT刷新阈值 - 当token剩余时间少于2小时时自动刷新
+    private static final long JWT_REFRESH_THRESHOLD = 7200000; // 2小时
     
     @Autowired
     private UserService userService;
@@ -65,6 +67,66 @@ public class LoginController {
                 .claim("email", user.getEmail())
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+    
+    /**
+     * 验证JWT令牌
+     * @param token JWT令牌
+     * @return 验证结果
+     */
+    private boolean validateJwtToken(String token) {
+        try {
+            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+            Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * 从JWT令牌中获取用户ID
+     * @param token JWT令牌
+     * @return 用户ID
+     */
+    private Long getUserIdFromToken(String token) {
+        try {
+            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+            String userId = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+            return Long.parseLong(userId);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * 检查JWT令牌是否需要刷新
+     * @param token JWT令牌
+     * @return 是否需要刷新
+     */
+    private boolean shouldRefreshToken(String token) {
+        try {
+            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+            Date expiration = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+            
+            long timeUntilExpiry = expiration.getTime() - System.currentTimeMillis();
+            return timeUntilExpiry < JWT_REFRESH_THRESHOLD;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -203,6 +265,73 @@ public class LoginController {
         response.put("status", "success");
         
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Token刷新端点
+     */
+    @PostMapping("/api/auth/refresh")
+    public ResponseEntity<Map<String, Object>> refreshToken(@RequestHeader("Authorization") String authHeader) {
+        Map<String, Object> responseMap = new HashMap<>();
+        
+        try {
+            // 提取token
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                responseMap.put("success", false);
+                responseMap.put("message", "无效的认证头");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
+            }
+            
+            String token = authHeader.substring(7);
+            
+            // 验证token
+            if (!validateJwtToken(token)) {
+                responseMap.put("success", false);
+                responseMap.put("message", "无效的token");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
+            }
+            
+            // 检查是否需要刷新
+            if (!shouldRefreshToken(token)) {
+                responseMap.put("success", false);
+                responseMap.put("message", "token尚未需要刷新");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
+            }
+            
+            // 获取用户ID
+            Long userId = getUserIdFromToken(token);
+            if (userId == null) {
+                responseMap.put("success", false);
+                responseMap.put("message", "无法从token中获取用户信息");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
+            }
+            
+            // 获取用户信息
+            User user = userService.selectById(userId);
+            if (user == null) {
+                responseMap.put("success", false);
+                responseMap.put("message", "用户不存在");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
+            }
+            
+            // 生成新的token
+            String newToken = generateJwtToken(user);
+            
+            responseMap.put("success", true);
+            responseMap.put("message", "token刷新成功");
+            responseMap.put("token", newToken);
+            responseMap.put("user", user);
+            
+            return ResponseEntity.ok(responseMap);
+            
+        } catch (Exception e) {
+            System.err.println("Token刷新过程中发生错误: " + e.getMessage());
+            e.printStackTrace();
+            
+            responseMap.put("success", false);
+            responseMap.put("message", "token刷新失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+        }
     }
 
     /**

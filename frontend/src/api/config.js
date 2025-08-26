@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useAuthStore } from '@/store/auth'
 
 // 创建axios实例
 const request = axios.create({
@@ -35,6 +36,9 @@ request.interceptors.request.use(
         if (user && user.token) {
           config.headers['Authorization'] = `Bearer ${user.token}`
           console.log('添加认证令牌:', user.token.substring(0, 20) + '...')
+        } else if (user && user.id) {
+          // 如果没有token但有用户ID，可能是旧的存储格式，尝试刷新用户信息
+          console.warn('用户信息中没有token，但有用户ID:', user.id)
         } else {
           console.warn('用户信息中没有token:', user)
         }
@@ -61,7 +65,7 @@ request.interceptors.response.use(
     // 直接返回响应数据，不做额外处理
     return response.data
   },
-  error => {
+  async error => {
     console.error('响应错误：', error)
     
     // 实现请求重试逻辑
@@ -97,6 +101,7 @@ request.interceptors.response.use(
         case 401:
           // 未登录或认证过期
           console.error('认证失败：', data)
+          
           // 对于登录请求，我们不重定向，而是在页面上显示错误信息
           if (error.config.url.includes('/login')) {
             return Promise.reject({
@@ -104,6 +109,31 @@ request.interceptors.response.use(
               message: '用户名或密码错误',
               data
             })
+          }
+          
+          // 对于其他请求，尝试刷新token
+          if (!error.config.url.includes('/auth/refresh')) {
+            try {
+              const authStore = useAuthStore()
+              const refreshSuccess = await authStore.refreshToken()
+              
+              if (refreshSuccess) {
+                // 刷新成功，重试原请求
+                console.log('Token刷新成功，重试原请求')
+                const originalRequest = error.config
+                // 更新请求头中的token
+                const storedUser = localStorage.getItem('hive_auth_user')
+                if (storedUser) {
+                  const user = JSON.parse(storedUser)
+                  if (user && user.token) {
+                    originalRequest.headers['Authorization'] = `Bearer ${user.token}`
+                  }
+                }
+                return axios(originalRequest)
+              }
+            } catch (refreshError) {
+              console.error('Token刷新失败:', refreshError)
+            }
           }
           break
         case 403:

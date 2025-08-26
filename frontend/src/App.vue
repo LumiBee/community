@@ -14,7 +14,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, onUnmounted } from 'vue'
 import { useAuthStore } from '@/store/auth'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
@@ -27,6 +27,8 @@ const route = useRoute()
 const isPublishPage = computed(() => {
   return route.path === '/publish'
 })
+
+
 
 onMounted(async () => {
   try {
@@ -56,10 +58,14 @@ onMounted(async () => {
     if (!authStore.isAuthenticated) {
       await authStore.checkAuthStatus()
     }
+    
+
   } catch (error) {
     console.error('检查认证状态失败:', error)
   }
 })
+
+
 </script>
 
 <style>

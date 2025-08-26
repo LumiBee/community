@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { authAPI } from '@/api'
 
 // 本地存储键名
@@ -19,6 +19,36 @@ export const useAuthStore = defineStore('auth', () => {
   const userName = computed(() => user.value?.name || '')
   const userAvatar = computed(() => user.value?.avatarUrl || '')
   
+  // Token自动刷新定时器
+  let tokenRefreshTimer = null
+
+  // 启动token自动刷新
+  const startTokenRefresh = () => {
+    if (tokenRefreshTimer) {
+      clearInterval(tokenRefreshTimer)
+    }
+    
+    // 每30分钟检查一次token是否需要刷新
+    tokenRefreshTimer = setInterval(async () => {
+      if (user.value?.token) {
+        try {
+          console.log('检查token是否需要刷新...')
+          await refreshToken()
+        } catch (error) {
+          console.error('自动刷新token失败:', error)
+        }
+      }
+    }, 30 * 60 * 1000) // 30分钟
+  }
+
+  // 停止token自动刷新
+  const stopTokenRefresh = () => {
+    if (tokenRefreshTimer) {
+      clearInterval(tokenRefreshTimer)
+      tokenRefreshTimer = null
+    }
+  }
+
   // 方法
   const setUser = (userData) => {
     user.value = userData
@@ -27,8 +57,12 @@ export const useAuthStore = defineStore('auth', () => {
     // 将用户信息保存到本地存储，实现页面刷新后的登录状态保持
     if (userData) {
       localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
+      // 启动token自动刷新
+      startTokenRefresh()
     } else {
       localStorage.removeItem(AUTH_USER_KEY)
+      // 停止token自动刷新
+      stopTokenRefresh()
     }
   }
   
@@ -44,6 +78,32 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = loading
   }
   
+  // 刷新token
+  const refreshToken = async () => {
+    if (!user.value || !user.value.token) {
+      return false
+    }
+    
+    try {
+      console.log('尝试刷新token...')
+      const response = await authAPI.refreshToken()
+      
+      if (response && response.success) {
+        // 更新用户信息和token
+        const updatedUser = { ...user.value, ...response.user, token: response.token }
+        setUser(updatedUser)
+        console.log('Token刷新成功')
+        return true
+      } else {
+        console.warn('Token刷新失败:', response?.message)
+        return false
+      }
+    } catch (err) {
+      console.error('Token刷新失败:', err)
+      return false
+    }
+  }
+
   // 检查认证状态
   const checkAuthStatus = async () => {
     // 如果已经在检查中，避免重复调用
@@ -56,13 +116,34 @@ export const useAuthStore = defineStore('auth', () => {
       clearError()
       
       // 检查是否有用户信息在内存中
-      if (user.value) {
-        return true
+      if (user.value && user.value.token) {
+        // 验证token是否有效
+        try {
+          const response = await authAPI.getCurrentUser()
+          if (response) {
+            // 更新用户信息，确保token是最新的
+            setUser({...user.value, ...response})
+            return true
+          }
+        } catch (tokenErr) {
+          console.error('Token验证失败:', tokenErr)
+          // 如果token验证失败，尝试刷新token
+          if (tokenErr.status === 401) {
+            const refreshSuccess = await refreshToken()
+            if (refreshSuccess) {
+              return true
+            }
+          }
+        }
       }
       
       // 尝试从后端获取当前用户信息
       const response = await authAPI.getCurrentUser()
       if (response) {
+        // 确保响应中包含token
+        if (!response.token && user.value && user.value.token) {
+          response.token = user.value.token
+        }
         setUser(response)
         return true
       } else {
@@ -74,8 +155,9 @@ export const useAuthStore = defineStore('auth', () => {
       console.error('检查认证状态失败:', err)
       
       // 如果是401错误，说明用户未登录，这是正常的
-      if (err.response && err.response.status === 401) {
+      if (err.status === 401) {
         user.value = null
+        localStorage.removeItem(AUTH_USER_KEY)
         return false
       }
       
@@ -133,6 +215,8 @@ export const useAuthStore = defineStore('auth', () => {
               sessionStorage.removeItem('temp_session')
               console.log('记住我登录，登录状态将被保留')
             }
+            
+
             
             return true
           } else {
@@ -315,6 +399,9 @@ export const useAuthStore = defineStore('auth', () => {
     clearError,
     setLoading,
     checkAuthStatus,
+    refreshToken,
+    startTokenRefresh,
+    stopTokenRefresh,
     login,
     register,
     logout,

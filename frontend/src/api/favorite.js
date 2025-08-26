@@ -137,5 +137,32 @@ export const favoriteAPI = {
       url: `/api/favorites/remove-all/${articleId}`,
       method: 'delete'
     })
+  },
+  
+  /**
+   * 从所有收藏夹中移除文章
+   * @param {number} articleId - 文章ID
+   */
+  removeFromAllFolders(articleId) {
+    return request({
+      url: `/api/favorites/remove-all/${articleId}`,
+      method: 'delete'
+    })
+  },
+  
+  /**
+   * 创建收藏夹并添加文章
+   * @param {number} articleId - 文章ID
+   * @param {string} favoriteName - 收藏夹名称
+   */
+  createAndAdd(articleId, favoriteName) {
+    return request({
+      url: '/api/favorites/create-and-add',
+      method: 'post',
+      data: {
+        articleId,
+        favoriteName
+      }
+    })
   }
 }

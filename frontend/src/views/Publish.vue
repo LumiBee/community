@@ -702,7 +702,7 @@ const confirmPublish = async () => {
       // 发布成功，跳转到文章页面
       setTimeout(() => {
         router.push(`/article/${response.slug}`)
-      }, 800)
+      }, 200)
     } else {
       showNotification('发布失败，请重试', 'danger')
     }

@@ -36,17 +36,7 @@ public class ArticleController {
 
     @Autowired private UserService userService;
 
-    /**
-     * 重定向文章页面到前端SPA
-     * 由于这是一个Vue.js SPA应用，文章页面应该由前端路由处理
-     */
-    @GetMapping("/article/{slug}")
-    public ResponseEntity<Void> redirectToFrontend(@PathVariable("slug") String slug) {
-        // 重定向到前端首页，让Vue Router处理路由
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/article/" + slug)
-                .build();
-    }
+
 
     @PostMapping("/api/article/{articleId}/like")
     @Operation(summary = "切换文章点赞状态", description = "用户点赞或取消点赞文章")

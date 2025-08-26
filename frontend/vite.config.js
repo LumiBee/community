@@ -4,6 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  appType: 'spa', // 指定为SPA应用，自动处理路由
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),
@@ -12,6 +13,10 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true, // 自动打开浏览器
+    // 处理SPA路由，所有未匹配的路由都返回index.html
+    fs: {
+      allow: ['..']
+    },
     proxy: {
       // API接口代理
       '/api': {
@@ -64,7 +69,7 @@ export default defineConfig({
         secure: false,
       },
       // 内容页面代理（用于SSR内容获取）
-      '/article': {
+      '/api/article': {
         target: 'http://localhost:8090',
         changeOrigin: true,
         secure: false,

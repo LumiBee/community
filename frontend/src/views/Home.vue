@@ -276,7 +276,7 @@
             v-if="tags.length > 0"
             id="tagBubbleContainer"
             class="tag-cloud-container"
-            style="position: relative; height: 500px; margin-bottom: 20px; overflow: hidden;"
+            style="position: relative; height: 700px; margin-bottom: 20px; overflow: hidden;"
           >
             <router-link
               v-for="tag in tags"

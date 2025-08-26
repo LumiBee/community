@@ -71,6 +71,16 @@ export const authAPI = {
   },
 
   /**
+   * 刷新token
+   */
+  refreshToken() {
+    return request({
+      url: '/api/auth/refresh',
+      method: 'post'
+    })
+  },
+
+  /**
    * 忽略密码设置提示
    */
   dismissPasswordPrompt() {

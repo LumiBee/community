@@ -17,6 +17,7 @@ import Search from '@/views/Search.vue'
 import Settings from '@/views/Settings.vue'
 import Drafts from '@/views/Drafts.vue'
 import Messages from '@/views/Messages.vue'
+import TokenTest from '@/views/TokenTest.vue'
 import NotFound from '@/views/error/NotFound.vue'
 
 const routes = [
@@ -115,6 +116,12 @@ const routes = [
     meta: { title: '私信', requiresAuth: true }
   },
   {
+    path: '/token-test',
+    name: 'TokenTest',
+    component: TokenTest,
+    meta: { title: 'Token测试', requiresAuth: true }
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: NotFound,
@@ -173,13 +180,11 @@ router.beforeEach(async (to, from, next) => {
     }
     
     // 认证失败，重定向到登录页
-    if (!isAuthPage) {
-      next({ 
-        name: 'Login', 
-        query: { redirect: to.fullPath } 
-      })
-      return
-    }
+    next({ 
+      name: 'Login', 
+      query: { redirect: to.fullPath } 
+    })
+    return
   }
   
   // 如果是游客页面(登录/注册)，但用户已认证，则重定向到首页

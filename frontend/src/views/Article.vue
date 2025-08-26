@@ -35,11 +35,11 @@
         <!-- 文章内容 -->
         <div class="col-lg-8 position-relative">
           <!-- 左侧快捷按钮栏 -->
-          <div class="article-quick-actions">
-            <div class="quick-action-btn" @click="toggleLike" :class="{ 'active': article.isLiked }" :title="article.isLiked ? '取消点赞' : '点赞'">
-              <i :class="[article.isLiked ? 'fas fa-heart' : 'far fa-heart']"></i>
-              <span class="action-count">{{ article.likes || 0 }}</span>
-            </div>
+                      <div class="article-quick-actions">
+              <div class="quick-action-btn" @click="toggleLike" :class="{ 'active': article.liked }" :title="article.liked ? '取消点赞' : '点赞'">
+                <i :class="[article.liked ? 'fas fa-heart' : 'far fa-heart']"></i>
+                <span class="action-count">{{ article.likes || 0 }}</span>
+              </div>
             <div class="quick-action-btn" @click="toggleFavorite" :class="{ 'active': article.isFavorited }" :title="article.isFavorited ? '取消收藏' : '收藏'">
               <i :class="[article.isFavorited ? 'fas fa-bookmark' : 'far fa-bookmark']"></i>
             </div>
@@ -96,11 +96,11 @@
                 <div class="action-buttons">
                   <button
                     @click="toggleLike"
-                    :class="['btn', article.isLiked ? 'btn-danger' : 'btn-outline-danger']"
+                    :class="['btn', article.liked ? 'btn-danger' : 'btn-outline-danger']"
                     :disabled="!authStore.isAuthenticated"
                   >
-                    <i :class="[article.isLiked ? 'fas fa-heart me-1' : 'far fa-heart me-1']"></i>
-                    {{ article.isLiked ? '已点赞' : '点赞' }} ({{ article.likes || 0 }})
+                    <i :class="[article.liked ? 'fas fa-heart me-1' : 'far fa-heart me-1']"></i>
+                    {{ article.liked ? '已点赞' : '点赞' }} ({{ article.likes || 0 }})
                   </button>
                   
                   <button
@@ -226,7 +226,7 @@
 import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
-import { articleAPI, userAPI } from '@/api'
+import { articleAPI, userAPI, favoriteAPI } from '@/api'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 
@@ -315,35 +315,85 @@ if (article.value?.content) {
 // 点赞功能
 const toggleLike = async () => {
   if (!authStore.isAuthenticated) {
+    // 如果未登录，提示用户登录
+    alert('请先登录后再点赞')
     return
   }
   
   try {
-    const response = await articleAPI.toggleLike(article.value.id)
-    article.value.isLiked = response.data.isLiked
-    article.value.likes = response.data.totalLikes
+    // 确保使用正确的文章ID
+    const response = await articleAPI.toggleLike(article.value.articleId)
+    
+    // 检查响应是否成功
+    if (response) {
+      // 更新文章点赞状态和数量
+      article.value.liked = response.liked
+      article.value.likes = response.likeCount
+      
+      // 添加点赞动画效果
+      const likeButtons = document.querySelectorAll('.quick-action-btn:first-child, .btn-outline-danger, .btn-danger');
+      likeButtons.forEach(button => {
+        if (response.liked) {
+          button.classList.add('like-animation');
+          setTimeout(() => {
+            button.classList.remove('like-animation');
+          }, 1000);
+        }
+      });
+    }
   } catch (error) {
     console.error('点赞失败:', error)
+    // 如果是401错误，可能是token过期，尝试刷新登录状态
+    if (error.status === 401) {
+      // 检查认证状态
+      const isAuthenticated = await authStore.checkAuthStatus()
+      if (!isAuthenticated) {
+        alert('登录已过期，请重新登录')
+      }
+    }
   }
 }
 
 // 收藏功能
 const toggleFavorite = async () => {
   if (!authStore.isAuthenticated) {
+    // 如果未登录，提示用户登录
+    alert('请先登录后再收藏')
     return
   }
   
   try {
-    const response = await articleAPI.toggleFavorite(article.value.id)
-    article.value.isFavorited = response.data.isFavorited
+    // 如果已收藏，则取消收藏
+    if (article.value.isFavorited) {
+      const response = await favoriteAPI.removeFromAllFolders(article.value.articleId)
+      if (response) {
+        article.value.isFavorited = false
+      }
+    } else {
+      // 如果未收藏，则添加到默认收藏夹
+      const response = await favoriteAPI.createAndAdd(article.value.articleId, "默认收藏夹")
+      if (response) {
+        article.value.isFavorited = true
+      }
+    }
   } catch (error) {
-    console.error('收藏失败:', error)
+    console.error('收藏操作失败:', error)
+    // 如果是401错误，可能是token过期，尝试刷新登录状态
+    if (error.status === 401) {
+      // 检查认证状态
+      const isAuthenticated = await authStore.checkAuthStatus()
+      if (!isAuthenticated) {
+        alert('登录已过期，请重新登录')
+      }
+    }
   }
 }
 
 // 关注功能
 const toggleFollow = async () => {
   if (!authStore.isAuthenticated) {
+    // 如果未登录，提示用户登录
+    alert('请先登录后再关注')
     return
   }
   
@@ -352,6 +402,14 @@ const toggleFollow = async () => {
     article.value.isFollowed = response.data.isFollowed
   } catch (error) {
     console.error('关注失败:', error)
+    // 如果是401错误，可能是token过期，尝试刷新登录状态
+    if (error.status === 401) {
+      // 检查认证状态
+      const isAuthenticated = await authStore.checkAuthStatus()
+      if (!isAuthenticated) {
+        alert('登录已过期，请重新登录')
+      }
+    }
   }
 }
 
@@ -949,6 +1007,19 @@ onBeforeUnmount(() => {
 
 .back-to-top i {
   font-size: 1.5rem;
+}
+
+/* 点赞动画效果 */
+@keyframes likeAnimation {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.2); }
+  50% { transform: scale(0.95); }
+  75% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.like-animation {
+  animation: likeAnimation 0.5s ease-in-out;
 }
 
 @media (max-width: 768px) {
