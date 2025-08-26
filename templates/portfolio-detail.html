@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
+    <title th:text="${portfolio.name} + ' - Lumi Hive'">作品集详情 - Lumi Hive</title>
+
+    <link rel="stylesheet" th:href="@{/css/tags.css}"/>
+    <link rel="stylesheet" th:href="@{/css/portfolio-detail.css}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<div class="main-container">
+    <div class="container">
+        <div class="portfolio-header">
+            <img th:src="${portfolio.coverImgUrl != null && !portfolio.coverImgUrl.isEmpty() ? portfolio.coverImgUrl : '/img/default.jpg'}"
+                 alt="作品集封面" class="portfolio-cover">
+            <div class="portfolio-overlay"></div>
+            <div class="portfolio-info">
+                <h1 class="portfolio-title" th:text="${portfolio.name}">作品集标题</h1>
+                <p class="portfolio-description" th:text="${portfolio.description != null ? portfolio.description : '暂无描述'}">作品集描述...</p>
+                <div class="portfolio-meta">
+                    <div class="portfolio-author">
+                        <img th:src="${portfolio.avatarUrl}" alt="作者头像" class="author-avatar">
+                        <span th:text="${portfolio.userName}">作者名</span>
+                    </div>
+                    <div class="portfolio-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="publish-date" th:attr="data-date=${portfolio.gmtModified}">最后修改日期</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="portfolio-content">
+            <div class="section-header">
+                <h2 class="section-title">
+                    文章列表
+                    <small class="text-muted" th:text="'(' + (${portfolio.articles != null ? #lists.size(portfolio.articles) : 0}) + ')'"></small>
+                </h2>
+                <div class="section-actions">
+                    <div class="search-container">
+                        <input type="search" id="articleSearchInput" placeholder="搜索文章...">
+                    </div>
+                    <div class="sort-dropdown dropdown">
+                        <button class="btn dropdown-toggle" type="button" id="sortDropdown" data-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-sort"></i>排序
+                        </button>
+                        <div id="sortOptionsContainer" class="dropdown-menu dropdown-menu-right" aria-labelledby="sortDropdown">
+                            <a class="dropdown-item sort-option" href="#" data-sort="newest">
+                                <i class="fas fa-sort-amount-down"></i> 最新发布
+                            </a>
+                            <a class="dropdown-item sort-option" href="#" data-sort="oldest">
+                                <i class="fas fa-sort-amount-up"></i> 最早发布
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="articleGrid" class="article-grid stagger-children">
+                <div th:if="${portfolio.articles == null || #lists.isEmpty(portfolio.articles)}" class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="empty-title">暂无文章</h3>
+                    <p class="empty-description">这个作品集还没有添加任何文章，敬请期待...</p>
+                </div>
+
+                <a th:if="${portfolio.articles != null}" th:each="article, stat : ${portfolio.articles}" th:href="@{'/article/' + ${article.slug}}"
+                   class="article-card" th:attr="data-date=${article.gmtModified}, data-title=${article.title}, style='--child-index: ' + ${stat.index}">
+                    <div class="card-content">
+                        <h3 class="article-title" th:text="${article.title}">文章标题</h3>
+                        <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要...'}">文章摘要...</p>
+                        <div class="article-meta">
+                            <div class="article-author">
+                                <img th:if="${article.avatarUrl != null && !article.avatarUrl.isEmpty()}"
+                                     th:src="${article.avatarUrl}"
+                                     alt="作者头像"
+                                     class="author-avatar">
+                                <img th:unless="${article.avatarUrl != null && !article.avatarUrl.isEmpty()}"
+                                     src="/img/default01.jpg"
+                                     alt="作者头像"
+                                     class="author-avatar">
+                                <span class="author-name" th:text="${article.userName != null && !article.userName.isEmpty() ? article.userName : '佚名'}">作者名</span>
+                            </div>
+                            <div class="article-date">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span class="publish-date" th:attr="data-date=${article.gmtModified}">发布日期</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+
+<script th:src="@{/js/portfolio-detail.js}" type="text/javascript"></script>
+
+</body>
+</html>

@@ -40,13 +40,23 @@ public class OkHttpService{
 
     // 同步 POST 请求
     public <T, R> R post(String url, T requestBody, Class<R> responseType) throws IOException {
+        return post(url, requestBody, responseType, null);
+    }
+
+    // 同步 POST 请求（带请求头）
+    public <T, R> R post(String url, T requestBody, Class<R> responseType, Headers headers) throws IOException {
         String json = objectMapper.writeValueAsString(requestBody);
         RequestBody body = RequestBody.create(json, MediaType.get("application/json"));
 
-        Request request = new Request.Builder()
+        Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
-                .post(body)
-                .build();
+                .post(body);
+        
+        if (headers != null) {
+            requestBuilder.headers(headers);
+        }
+
+        Request request = requestBuilder.build();
 
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {

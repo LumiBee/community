@@ -4,6 +4,7 @@ import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
 
 import java.security.Principal;
+import java.util.List;
 
 public interface UserService {
     User selectByName(String name);
@@ -13,6 +14,7 @@ public interface UserService {
     int insert(User user);
     int updateById(User user);
     User selectById(Long id);
+    List<User> selectByIds(List<Long> ids);
     User getCurrentUserFromPrincipal(Principal principal);
     boolean isFollowing(Long userId, Long followerId);
     boolean toggleFollow(Long userId, Long followerId);

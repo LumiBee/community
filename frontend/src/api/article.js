@@ -101,7 +101,7 @@ export const articleAPI = {
    */
   publishArticle(articleData) {
     return request({
-      url: '/api/articles',
+      url: '/api/article/publish',
       method: 'post',
       data: articleData
     })

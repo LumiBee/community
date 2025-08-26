@@ -146,12 +146,33 @@ router.beforeEach(async (to, from, next) => {
   // 检查当前路由是否是登录或注册页面
   const isAuthPage = to.name === 'Login' || to.name === 'Signup'
   
-  // 检查是否有token
-  const hasToken = localStorage.getItem('token')
+  // 检查用户是否已认证
+  const isAuthenticated = authStore.isAuthenticated
   
-  // 避免无限重定向循环
-  // 如果是需要认证的页面，但没有token，则重定向到登录页
-  if (to.meta.requiresAuth && !hasToken) {
+  // 如果用户未认证且需要认证的页面，先尝试检查认证状态
+  if (!isAuthenticated && to.meta.requiresAuth) {
+    // 避免重复检查，如果已经在检查中，直接重定向
+    if (authStore.isLoading) {
+      next({ 
+        name: 'Login', 
+        query: { redirect: to.fullPath } 
+      })
+      return
+    }
+    
+    try {
+      // 尝试从后端检查认证状态
+      const authStatus = await authStore.checkAuthStatus()
+      if (authStatus) {
+        // 认证成功，继续导航
+        next()
+        return
+      }
+    } catch (error) {
+      console.error('检查认证状态失败:', error)
+    }
+    
+    // 认证失败，重定向到登录页
     if (!isAuthPage) {
       next({ 
         name: 'Login', 
@@ -161,8 +182,8 @@ router.beforeEach(async (to, from, next) => {
     }
   }
   
-  // 如果是游客页面(登录/注册)，但有token，则重定向到首页
-  if (to.meta.requiresGuest && hasToken) {
+  // 如果是游客页面(登录/注册)，但用户已认证，则重定向到首页
+  if (to.meta.requiresGuest && isAuthenticated) {
     next({ name: 'Home' })
     return
   }

@@ -68,6 +68,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Cacheable(value = "allArticles", key = "'all'")
     @Transactional(readOnly = true)
     public List<ArticleDetailsDTO> selectAll() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -75,11 +76,25 @@ public class ArticleServiceImpl implements ArticleService {
                     .eq("status", Article.ArticleStatus.published)
                     .orderByDesc("gmt_modified");
         List<Article> articles = articleMapper.selectList(queryWrapper);
+        
+        if (articles.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        // 批量查询用户信息，避免N+1查询问题
+        List<Long> userIds = articles.stream()
+                .map(Article::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        
         List<ArticleDetailsDTO> articleDetailsDTOs = new ArrayList<>();
         for (Article article : articles) {
             ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
             BeanUtils.copyProperties(article, articleDetailsDTO);
-            User user = userMapper.selectById(article.getUserId());
+            User user = userMap.get(article.getUserId());
             if (user != null) {
                 articleDetailsDTO.setUserName(user.getName());
             }

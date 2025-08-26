@@ -26,10 +26,21 @@ public class UserController {
     @GetMapping("/current")
     @ResponseBody
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal Principal principal) {
+        System.out.println("=== getCurrentUser 被调用 ===");
+        System.out.println("Principal: " + principal);
+        System.out.println("Principal类型: " + (principal != null ? principal.getClass().getName() : "null"));
+        
+        if (principal != null) {
+            System.out.println("Principal名称: " + principal.getName());
+        }
+        
         User user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
+            System.out.println("用户未找到，返回401");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
+        
+        System.out.println("找到用户: " + user.getName());
         return ResponseEntity.ok(user);
     }
 

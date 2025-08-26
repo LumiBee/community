@@ -1,236 +1,321 @@
 <template>
   <div class="publish-page">
-    <div class="container-fluid" style="max-width: 1200px;">
-      <!-- 页面头部 -->
-      <div class="publish-header">
-        <div class="header-content">
-          <h1 class="page-title">
-            <i class="fas fa-pen-fancy me-3"></i>
-            发布新文章
-          </h1>
-          <p class="page-subtitle">分享您的知识和见解</p>
-        </div>
-        <div class="header-actions">
-          <button 
-            @click="saveDraft" 
-            class="btn btn-outline-secondary me-2"
-            :disabled="isSaving"
-          >
-            <i class="fas fa-save me-1"></i>
-            {{ isSaving ? '保存中...' : '保存草稿' }}
-          </button>
-          <button 
-            @click="previewArticle" 
-            class="btn btn-outline-info me-2"
-            :disabled="!canPreview"
-          >
-            <i class="fas fa-eye me-1"></i>
-            预览
-          </button>
-          <button 
-            @click="publishArticle" 
-            class="btn btn-warning"
-            :disabled="!canPublish || isPublishing"
-          >
-            <i class="fas fa-paper-plane me-1"></i>
-            {{ isPublishing ? '发布中...' : '发布文章' }}
-          </button>
-        </div>
+    <!-- 页面头部 -->
+    <div class="publish-header">
+      <div class="header-content">
+        <h1 class="page-title">
+          <i class="fas fa-pen-fancy me-2"></i>
+          发布新文章
+        </h1>
       </div>
-
-      <!-- 通知区域 -->
-      <div 
-        v-if="notification.show" 
-        class="alert alert-dismissible fade show"
-        :class="`alert-${notification.type}`"
-        role="alert"
-      >
-        <i 
-          :class="notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"
-          class="me-2"
-        ></i>
-        {{ notification.message }}
+      <div class="header-actions">
         <button 
-          type="button" 
-          class="btn-close" 
-          @click="notification.show = false"
-        ></button>
+          @click="saveDraft" 
+          class="btn btn-outline-secondary me-2"
+          :disabled="isSaving"
+        >
+          <i class="fas fa-save me-1"></i>
+          {{ isSaving ? '保存中...' : '保存草稿' }}
+        </button>
+        <button 
+          @click="showPublishModal = true" 
+          class="btn btn-warning"
+          :disabled="!canPublish"
+        >
+          <i class="fas fa-paper-plane me-1"></i>
+          发布文章
+        </button>
       </div>
+    </div>
 
-      <!-- 主要内容区域 -->
-      <div class="publish-content">
-        <div class="row">
-          <!-- 左侧编辑区域 -->
-          <div class="col-lg-8">
-            <div class="edit-section">
-              <!-- 文章标题 -->
-              <div class="form-group mb-4">
-                <label for="articleTitle" class="form-label">
-                  <i class="fas fa-heading me-2"></i>文章标题
-                </label>
-                <input
-                  type="text"
-                  id="articleTitle"
-                  v-model="articleForm.title"
-                  class="form-control form-control-lg"
-                  placeholder="请输入文章标题..."
-                  maxlength="100"
-                />
-                <div class="form-text">
-                  <span :class="{ 'text-danger': articleForm.title.length > 100 }">
-                    {{ articleForm.title.length }}/100
-                  </span>
+    <!-- 通知区域 -->
+    <div 
+      v-if="notification.show" 
+      class="alert alert-dismissible fade show"
+      :class="`alert-${notification.type}`"
+      role="alert"
+    >
+      <i 
+        :class="notification.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"
+        class="me-2"
+      ></i>
+      {{ notification.message }}
+      <button 
+        type="button" 
+        class="btn-close" 
+        @click="notification.show = false"
+      ></button>
+    </div>
+
+    <!-- 主要内容区域 - 左右分栏布局 -->
+    <div class="publish-content">
+      <div class="row g-0">
+        <!-- 左侧编辑区域 -->
+        <div class="col-md-6">
+          <div class="edit-section">
+            <!-- 文章标题 -->
+            <div class="form-group mb-3">
+              <label for="articleTitle" class="form-label">
+                <i class="fas fa-heading me-2"></i>文章标题
+              </label>
+              <input
+                type="text"
+                id="articleTitle"
+                v-model="articleForm.title"
+                class="form-control form-control-lg"
+                placeholder="请输入文章标题..."
+                maxlength="100"
+              />
+            </div>
+
+            <!-- 文章内容 -->
+            <div class="form-group mb-3">
+              <label for="articleContent" class="form-label">
+                <i class="fas fa-edit me-2"></i>文章内容
+              </label>
+              
+              <!-- 工具栏 -->
+              <div class="editor-toolbar-wrapper mb-2">
+                <div class="editor-toolbar">
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('**', '**', '粗体')"
+                    title="粗体"
+                  >
+                    <i class="fas fa-bold"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('*', '*', '斜体')"
+                    title="斜体"
+                  >
+                    <i class="fas fa-italic"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('### ', '', '标题')"
+                    title="标题"
+                  >
+                    <i class="fas fa-heading"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('[', '](url)', '链接')"
+                    title="链接"
+                  >
+                    <i class="fas fa-link"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('![alt](', ')', '图片')"
+                    title="图片"
+                  >
+                    <i class="fas fa-image"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('```\n', '\n```', '代码块')"
+                    title="代码块"
+                  >
+                    <i class="fas fa-code"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('- ', '', '列表项')"
+                    title="列表项"
+                  >
+                    <i class="fas fa-list"></i>
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn btn-sm btn-outline-secondary me-1"
+                    @click="insertMarkdown('> ', '', '引用')"
+                    title="引用"
+                  >
+                    <i class="fas fa-quote-right"></i>
+                  </button>
                 </div>
               </div>
-
-              <!-- 文章摘要 -->
-              <div class="form-group mb-4">
-                <label for="articleExcerpt" class="form-label">
-                  <i class="fas fa-align-left me-2"></i>文章摘要
-                </label>
+              
+              <!-- 编辑器 -->
+              <div class="content-editor-wrapper">
                 <textarea
-                  id="articleExcerpt"
-                  v-model="articleForm.excerpt"
-                  class="form-control"
-                  rows="3"
-                  placeholder="请输入文章摘要..."
-                  maxlength="200"
+                  id="articleContent"
+                  v-model="articleForm.content"
+                  class="form-control content-editor"
+                  placeholder="请输入文章内容，支持Markdown格式..."
+                  @input="updateWordCount"
                 ></textarea>
-                <div class="form-text">
-                  <span :class="{ 'text-danger': articleForm.excerpt.length > 200 }">
-                    {{ articleForm.excerpt.length }}/200
-                  </span>
-                </div>
               </div>
-
-              <!-- 文章内容 -->
-              <div class="form-group mb-4">
-                <label for="articleContent" class="form-label">
-                  <i class="fas fa-edit me-2"></i>文章内容
-                </label>
-                <div class="content-editor-wrapper">
-                  <textarea
-                    id="articleContent"
-                    v-model="articleForm.content"
-                    class="form-control content-editor"
-                    rows="20"
-                    placeholder="请输入文章内容，支持Markdown格式..."
-                    @input="updateWordCount"
-                  ></textarea>
-                  <div class="editor-toolbar">
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('**', '**', '粗体')"
-                      title="粗体"
-                    >
-                      <i class="fas fa-bold"></i>
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('*', '*', '斜体')"
-                      title="斜体"
-                    >
-                      <i class="fas fa-italic"></i>
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('### ', '', '标题')"
-                      title="标题"
-                    >
-                      <i class="fas fa-heading"></i>
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('[', '](url)', '链接')"
-                      title="链接"
-                    >
-                      <i class="fas fa-link"></i>
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('![alt](', ')', '图片')"
-                      title="图片"
-                    >
-                      <i class="fas fa-image"></i>
-                    </button>
-                    <button 
-                      type="button" 
-                      class="btn btn-sm btn-outline-secondary me-1"
-                      @click="insertMarkdown('```\n', '\n```', '代码块')"
-                      title="代码块"
-                    >
-                      <i class="fas fa-code"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="form-text">
-                  <span class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    支持Markdown格式，已输入 {{ wordCount }} 字
-                  </span>
-                </div>
+              <div class="form-text mt-2">
+                <span class="text-muted">
+                  <i class="fas fa-info-circle me-1"></i>
+                  支持Markdown格式，已输入 {{ wordCount }} 字
+                </span>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- 右侧设置区域 -->
-          <div class="col-lg-4">
-            <div class="settings-section">
-              <!-- 封面图片 -->
-              <div class="setting-card mb-4">
-                <h5 class="setting-title">
-                  <i class="fas fa-image me-2"></i>封面图片
-                </h5>
-                <div class="cover-upload">
-                  <div 
-                    class="cover-preview"
-                    :style="{ backgroundImage: `url(${coverPreview})` }"
-                    @click="triggerCoverUpload"
-                  >
-                    <div v-if="!coverPreview" class="cover-placeholder">
-                      <i class="fas fa-camera"></i>
-                      <p>点击上传封面</p>
+        <!-- 右侧实时预览区域 -->
+        <div class="col-md-6">
+          <div class="preview-section">
+            <div class="preview-header">
+              <h5 class="preview-title">
+                <i class="fas fa-eye me-2"></i>实时预览
+              </h5>
+              <div class="preview-actions">
+                <button 
+                  type="button" 
+                  class="btn btn-sm btn-outline-secondary"
+                  @click="togglePreviewMode"
+                  :title="previewMode === 'article' ? '切换到完整预览' : '切换到文章预览'"
+                >
+                  <i :class="previewMode === 'article' ? 'fas fa-expand' : 'fas fa-compress'"></i>
+                  {{ previewMode === 'article' ? '完整预览' : '文章预览' }}
+                </button>
+              </div>
+            </div>
+            <div class="preview-content">
+              <div v-if="previewMode === 'article'" class="article-preview">
+                <h1 class="preview-title-text">{{ articleForm.title || '文章标题' }}</h1>
+                <div v-if="articleForm.excerpt" class="preview-excerpt">
+                  {{ articleForm.excerpt }}
+                </div>
+                <div class="preview-body" v-html="renderedContent"></div>
+              </div>
+              <div v-else class="content-preview">
+                <div class="preview-body" v-html="renderedContent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 隐藏的图片上传输入框 -->
+    <input
+      ref="imageUploadInput"
+      type="file"
+      accept="image/*"
+      class="d-none"
+      @change="handleImageUpload"
+    />
+
+    <!-- 发布设置模态框 -->
+    <div 
+      v-if="showPublishModal" 
+      class="modal fade show" 
+      style="display: block;"
+      tabindex="-1"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">
+              <i class="fas fa-cog me-2"></i>发布设置
+            </h5>
+            <button 
+              type="button" 
+              class="btn-close" 
+              @click="showPublishModal = false"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <!-- 左侧设置 -->
+              <div class="col-md-6">
+                <!-- 文章摘要 -->
+                <div class="setting-card mb-4">
+                  <h6 class="setting-title">
+                    <i class="fas fa-align-left me-2"></i>文章摘要
+                    <span class="text-muted ms-2" style="font-size: 0.9rem; font-weight: normal;">(可选)</span>
+                  </h6>
+                  <div class="form-group mb-0">
+                    <div class="ai-summary-buttons">
+                      <button 
+                        type="button" 
+                        class="btn btn-sm btn-outline-primary"
+                        @click="generateAISummary"
+                        :disabled="!articleForm.content || isGeneratingSummary"
+                        title="使用AI自动生成摘要"
+                      >
+                        <i class="fas fa-magic me-1"></i>
+                        {{ isGeneratingSummary ? '生成中...' : 'AI生成摘要' }}
+                      </button>
+                      <button 
+                        v-if="articleForm.excerpt"
+                        type="button" 
+                        class="btn btn-sm btn-outline-secondary"
+                        @click="clearExcerpt"
+                        title="清空摘要"
+                      >
+                        <i class="fas fa-trash me-1"></i>
+                        清空
+                      </button>
+                    </div>
+                    <textarea
+                      v-model="articleForm.excerpt"
+                      class="form-control"
+                      rows="3"
+                      placeholder="请输入文章摘要...（可选）或点击上方按钮使用AI生成"
+                      maxlength="300"
+                    ></textarea>
+                    <div class="form-text">
+                      <span :class="{ 'text-danger': articleForm.excerpt.length > 300 }">
+                        {{ articleForm.excerpt.length }}/300
+                      </span>
                     </div>
                   </div>
-                  <input
-                    ref="coverInput"
-                    type="file"
-                    accept="image/*"
-                    class="d-none"
-                    @change="handleCoverUpload"
-                  />
-                  <div class="cover-actions mt-2">
-                    <button 
-                      @click="triggerCoverUpload" 
-                      class="btn btn-sm btn-outline-primary me-2"
+                </div>
+
+                <!-- 封面图片 -->
+                <div class="setting-card mb-4">
+                  <h6 class="setting-title">
+                    <i class="fas fa-image me-2"></i>封面图片
+                  </h6>
+                  <div class="cover-upload">
+                    <div 
+                      class="cover-preview"
+                      :style="{ backgroundImage: `url(${coverPreview})` }"
+                      @click="triggerCoverUpload"
                     >
-                      <i class="fas fa-upload me-1"></i>上传
-                    </button>
-                    <button 
-                      v-if="coverPreview" 
-                      @click="removeCover" 
-                      class="btn btn-sm btn-outline-danger"
-                    >
-                      <i class="fas fa-trash me-1"></i>移除
-                    </button>
+                      <div v-if="!coverPreview" class="cover-placeholder">
+                        <i class="fas fa-camera"></i>
+                        <p>点击上传封面</p>
+                      </div>
+                    </div>
+                    <input
+                      ref="coverInput"
+                      type="file"
+                      accept="image/*"
+                      class="d-none"
+                      @change="handleCoverUpload"
+                    />
+                    <div class="cover-actions mt-2">
+                      <button 
+                        v-if="coverPreview" 
+                        @click="removeCover" 
+                        class="btn btn-sm btn-outline-danger"
+                      >
+                        <i class="fas fa-trash me-1"></i>移除
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <!-- 文章设置 -->
-              <div class="setting-card mb-4">
-                <h5 class="setting-title">
-                  <i class="fas fa-cog me-2"></i>文章设置
-                </h5>
-                
                 <!-- 标签 -->
-                <div class="form-group mb-3">
-                  <label class="form-label">标签</label>
+                <div class="setting-card mb-4">
+                  <h6 class="setting-title">
+                    <i class="fas fa-tags me-2"></i>标签
+                  </h6>
                   <div class="tags-input">
                     <div class="tags-container">
                       <span 
@@ -257,10 +342,15 @@
                     />
                   </div>
                 </div>
+              </div>
 
+              <!-- 右侧设置 -->
+              <div class="col-md-6">
                 <!-- 作品集 -->
-                <div class="form-group mb-3">
-                  <label class="form-label">作品集</label>
+                <div class="setting-card mb-4">
+                  <h6 class="setting-title">
+                    <i class="fas fa-briefcase me-2"></i>作品集
+                  </h6>
                   <select v-model="articleForm.portfolioId" class="form-select">
                     <option value="">选择作品集（可选）</option>
                     <option 
@@ -274,8 +364,10 @@
                 </div>
 
                 <!-- 发布设置 -->
-                <div class="form-group mb-3">
-                  <label class="form-label">发布设置</label>
+                <div class="setting-card mb-4">
+                  <h6 class="setting-title">
+                    <i class="fas fa-cog me-2"></i>发布设置
+                  </h6>
                   <div class="form-check">
                     <input
                       type="checkbox"
@@ -288,68 +380,57 @@
                     </label>
                   </div>
                 </div>
-              </div>
 
-              <!-- 发布状态 -->
-              <div class="setting-card">
-                <h5 class="setting-title">
-                  <i class="fas fa-info-circle me-2"></i>发布状态
-                </h5>
-                <div class="status-info">
-                  <div class="status-item">
-                    <span class="status-label">标题：</span>
-                    <span :class="getStatusClass('title')">
-                      {{ getStatusText('title') }}
-                    </span>
-                  </div>
-                  <div class="status-item">
-                    <span class="status-label">内容：</span>
-                    <span :class="getStatusClass('content')">
-                      {{ getStatusText('content') }}
-                    </span>
-                  </div>
-                  <div class="status-item">
-                    <span class="status-label">摘要：</span>
-                    <span :class="getStatusClass('excerpt')">
-                      {{ getStatusText('excerpt') }}
-                    </span>
+                <!-- 发布确认 -->
+                <div class="setting-card">
+                  <h6 class="setting-title">
+                    <i class="fas fa-check-circle me-2"></i>发布确认
+                  </h6>
+                  <div class="publish-confirmation">
+                    <p class="text-muted mb-3">
+                      请确认以下信息无误后点击发布：
+                    </p>
+                    <ul class="confirmation-list">
+                      <li :class="getStatusClass('title')">
+                        <i class="fas fa-check me-2"></i>
+                        标题：{{ articleForm.title || '未填写' }}
+                      </li>
+                      <li :class="getStatusClass('content')">
+                        <i class="fas fa-check me-2"></i>
+                        内容：{{ articleForm.content ? `${wordCount} 字` : '未填写' }}
+                      </li>
+                      <li :class="getStatusClass('excerpt')">
+                        <i class="fas fa-check me-2"></i>
+                        摘要：{{ getStatusText('excerpt') }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 预览模态框 -->
-    <div 
-      v-if="showPreview" 
-      class="modal fade show" 
-      style="display: block;"
-      tabindex="-1"
-    >
-      <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">文章预览</h5>
+          <div class="modal-footer">
             <button 
               type="button" 
-              class="btn-close" 
-              @click="showPreview = false"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <div class="preview-content">
-              <h1>{{ articleForm.title }}</h1>
-              <p class="text-muted">{{ articleForm.excerpt }}</p>
-              <div v-html="renderedContent"></div>
-            </div>
+              class="btn btn-secondary" 
+              @click="showPublishModal = false"
+            >
+              取消
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-warning" 
+              @click="confirmPublish"
+              :disabled="!canPublish || isPublishing"
+            >
+              <i class="fas fa-paper-plane me-1"></i>
+              {{ isPublishing ? '发布中...' : '确认发布' }}
+            </button>
           </div>
         </div>
       </div>
     </div>
-    <div v-if="showPreview" class="modal-backdrop fade show"></div>
+    <div v-if="showPublishModal" class="modal-backdrop fade show"></div>
   </div>
 </template>
 
@@ -357,7 +438,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
-import { articleAPI, portfolioAPI } from '@/api'
+import { articleAPI, portfolioAPI, aiAPI } from '@/api'
 import MarkdownIt from 'markdown-it'
 
 const router = useRouter()
@@ -380,16 +461,18 @@ const newTag = ref('')
 const portfolios = ref([])
 const isSaving = ref(false)
 const isPublishing = ref(false)
-const showPreview = ref(false)
+const isGeneratingSummary = ref(false)
+const showPublishModal = ref(false)
 const wordCount = ref(0)
 const notification = ref({ show: false, message: '', type: 'success' })
 
+// 预览模式
+const previewMode = ref('article') // 'article' 或 'content'
+
 // 计算属性
-const canPreview = computed(() => articleForm.value.title && articleForm.value.content)
 const canPublish = computed(() => {
   return articleForm.value.title.trim() && 
-         articleForm.value.content.trim() && 
-         articleForm.value.excerpt.trim()
+         articleForm.value.content.trim()
 })
 
 const renderedContent = computed(() => {
@@ -400,6 +483,10 @@ const renderedContent = computed(() => {
 const updateWordCount = () => {
   const content = articleForm.value.content || ''
   wordCount.value = content.replace(/\s/g, '').length
+}
+
+const togglePreviewMode = () => {
+  previewMode.value = previewMode.value === 'article' ? 'content' : 'article'
 }
 
 const insertMarkdown = (before, after, description) => {
@@ -419,6 +506,48 @@ const insertMarkdown = (before, after, description) => {
     textarea.focus()
     textarea.setSelectionRange(start + before.length, start + before.length + selectedText.length)
   }, 0)
+}
+
+// 图片上传逻辑
+const imageUploadInput = ref(null)
+const isImageUploading = ref(false)
+
+const handleImageUpload = (event) => {
+  const file = event.target.files[0]
+  if (file && file.type.startsWith('image/')) {
+    isImageUploading.value = true
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      insertImageMarkdown(e.target.result, file.name)
+      isImageUploading.value = false
+    }
+    reader.onerror = () => {
+      isImageUploading.value = false
+      showNotification('图片上传失败，请重试', 'danger')
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+// 插入图片Markdown
+const insertImageMarkdown = (imageData, fileName = '图片') => {
+  const textarea = document.getElementById('articleContent')
+  const start = textarea.selectionStart
+  const imageMarkdown = `![${fileName}](${imageData})`
+  
+  // 在光标位置插入图片Markdown
+  articleForm.value.content = 
+    articleForm.value.content.substring(0, start) + 
+    imageMarkdown + 
+    articleForm.value.content.substring(start)
+  
+  // 设置光标位置到图片后面
+  setTimeout(() => {
+    textarea.focus()
+    textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length)
+  }, 0)
+  
+  showNotification('图片已插入到文章中', 'success')
 }
 
 const triggerCoverUpload = () => {
@@ -460,17 +589,26 @@ const removeTag = (tag) => {
 
 const getStatusClass = (field) => {
   const value = articleForm.value[field]
+  if (field === 'excerpt') {
+    // 摘要字段是可选的，空值不显示错误
+    if (value && value.trim() !== '' && value.length > 300) return 'text-warning'
+    return 'text-success'
+  }
   if (!value || value.trim() === '') return 'text-danger'
   if (field === 'title' && value.length > 100) return 'text-warning'
-  if (field === 'excerpt' && value.length > 200) return 'text-warning'
   return 'text-success'
 }
 
 const getStatusText = (field) => {
   const value = articleForm.value[field]
+  if (field === 'excerpt') {
+    // 摘要字段是可选的
+    if (!value || value.trim() === '') return '未填写（可选）'
+    if (value.length > 300) return '摘要过长'
+    return '已填写'
+  }
   if (!value || value.trim() === '') return '未填写'
   if (field === 'title' && value.length > 100) return '标题过长'
-  if (field === 'excerpt' && value.length > 200) return '摘要过长'
   return '已填写'
 }
 
@@ -504,11 +642,7 @@ const saveDraft = async () => {
   }
 }
 
-const previewArticle = () => {
-  showPreview.value = true
-}
-
-const publishArticle = async () => {
+const confirmPublish = async () => {
   if (!authStore.isAuthenticated) {
     router.push('/login')
     return
@@ -517,9 +651,45 @@ const publishArticle = async () => {
   try {
     isPublishing.value = true
     
+    // 如果用户没有填写摘要，自动调用AI生成摘要
+    let finalExcerpt = articleForm.value.excerpt
+    if (!finalExcerpt || finalExcerpt.trim() === '') {
+      try {
+        showNotification('正在使用AI生成文章摘要...', 'info')
+        
+        // 使用aiAPI模块中的generateSummary方法
+        const plainTextContent = articleForm.value.content.replace(/<\/?[^>]+(>|$)/g, "").trim()
+        
+        try {
+          // 使用导入的aiAPI模块
+          const result = await aiAPI.generateSummary(plainTextContent, 300)
+          
+          if (result && result.summary) {
+            finalExcerpt = result.summary
+            articleForm.value.excerpt = finalExcerpt
+            showNotification('AI摘要生成成功！', 'success')
+          } else {
+            throw new Error('未能获取有效的摘要')
+          }
+        } catch (error) {
+          // 如果AI生成失败，使用内容的前100个字符作为摘要
+          console.warn('发布时AI摘要生成失败，使用内容前100字符作为摘要:', error)
+          finalExcerpt = plainTextContent.substring(0, 100).replace(/[#*`]/g, '') + '...'
+          articleForm.value.excerpt = finalExcerpt
+          showNotification('AI摘要生成失败，已使用文章开头作为摘要', 'warning')
+        }
+      } catch (aiError) {
+        console.warn('AI生成摘要失败，使用默认摘要:', aiError)
+        // AI生成失败时，使用内容的前100个字符作为摘要
+        finalExcerpt = articleForm.value.content.substring(0, 100).replace(/[#*`]/g, '') + '...'
+        articleForm.value.excerpt = finalExcerpt
+      }
+    }
+    
     // 准备发布数据
     const publishData = {
       ...articleForm.value,
+      excerpt: finalExcerpt,
       coverImg: coverPreview.value
     }
     
@@ -527,6 +697,7 @@ const publishArticle = async () => {
     
     if (response.success) {
       showNotification('文章发布成功！', 'success')
+      showPublishModal.value = false
       // 发布成功，跳转到文章页面
       setTimeout(() => {
         router.push(`/article/${response.slug}`)
@@ -551,6 +722,52 @@ const loadPortfolios = async () => {
   }
 }
 
+// AI生成摘要方法 - 参照publish-editor.js的实现
+const generateAISummary = async () => {
+  if (!articleForm.value.content || articleForm.value.content.trim() === '') {
+    showNotification('请先输入文章内容', 'warning')
+    return
+  }
+
+  try {
+    isGeneratingSummary.value = true
+    showNotification('正在使用AI生成摘要...', 'info')
+    
+    console.log('开始调用AI生成摘要，内容长度:', articleForm.value.content.length)
+    
+    // 使用aiAPI模块中的generateSummary方法，而不是直接使用fetch
+    const plainTextContent = articleForm.value.content.replace(/<\/?[^>]+(>|$)/g, "").trim()
+    
+    try {
+      // 使用导入的aiAPI模块
+      const result = await aiAPI.generateSummary(plainTextContent, 300)
+      
+      if (result && result.summary) {
+        articleForm.value.excerpt = result.summary
+        showNotification('AI摘要生成成功！', 'success')
+      } else {
+        throw new Error('未能获取有效的摘要')
+      }
+    } catch (error) {
+      // 如果AI生成失败，使用内容的前100个字符作为摘要
+      console.error('AI摘要生成失败，使用内容前100字符作为摘要:', error)
+      articleForm.value.excerpt = plainTextContent.substring(0, 100).replace(/[#*`]/g, '') + '...'
+      showNotification('AI摘要生成失败，已使用文章开头作为摘要', 'warning')
+    }
+  } catch (error) {
+    console.error('AI生成摘要失败:', error)
+    showNotification('AI生成摘要失败：' + (error.message || '未知错误'), 'danger')
+  } finally {
+    isGeneratingSummary.value = false
+  }
+}
+
+// 清空摘要方法
+const clearExcerpt = () => {
+  articleForm.value.excerpt = ''
+  showNotification('摘要已清空', 'info')
+}
+
 // 组件挂载
 onMounted(() => {
   if (!authStore.isAuthenticated) {
@@ -565,25 +782,31 @@ onMounted(() => {
 <style scoped>
 .publish-page {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  min-height: 100vh;
-  padding: 2rem 0;
+  height: 100vh;
+  padding: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .publish-header {
   background: white;
   border-radius: 16px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  padding: 1rem 2rem;
+  margin-bottom: 1rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  flex-shrink: 0;
 }
 
 .page-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin: 0;
   background: linear-gradient(45deg, #343a40, #495057);
@@ -609,7 +832,8 @@ onMounted(() => {
   border-radius: 12px;
   border: none;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  margin-bottom: 2rem;
+  margin: 0 1rem 1rem 1rem;
+  flex-shrink: 0;
 }
 
 .alert-success {
@@ -630,12 +854,236 @@ onMounted(() => {
 .publish-content {
   background: white;
   border-radius: 16px;
-  padding: 2rem;
+  margin: 0 1rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .edit-section {
-  padding-right: 2rem;
+  padding: 1rem;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.preview-section {
+  height: 100%;
+  border-left: 1px solid #e9ecef;
+  background: #f8f9fa;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.preview-header {
+  background: white;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.preview-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  margin: 0;
+}
+
+.preview-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.preview-content {
+  height: 100%;
+  overflow-y: auto;
+  padding: 1rem;
+  flex: 1;
+  min-height: 700px;
+  max-height: calc(100vh - 200px);
+}
+
+/* 自定义滚动条样式 */
+.content-editor::-webkit-scrollbar,
+.preview-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.content-editor::-webkit-scrollbar-track,
+.preview-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.content-editor::-webkit-scrollbar-thumb,
+.preview-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.content-editor::-webkit-scrollbar-thumb:hover,
+.preview-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 确保预览内容区域在Firefox和其他浏览器中也能正确滚动 */
+.preview-content {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* 确保预览内容区域在内容过多时能够正确滚动 */
+.preview-content .article-preview,
+.preview-content .content-preview {
+  max-height: none;
+  overflow: visible;
+}
+
+.article-preview {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.preview-title-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #343a40;
+  margin-bottom: 1rem;
+  border-bottom: 2px solid #f6d55c;
+  padding-bottom: 0.5rem;
+}
+
+.preview-excerpt {
+  font-size: 1.1rem;
+  color: #6c757d;
+  font-style: italic;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border-left: 4px solid #f6d55c;
+}
+
+.preview-body {
+  line-height: 1.8;
+  color: #495057;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.preview-body h1,
+.preview-body h2,
+.preview-body h3,
+.preview-body h4,
+.preview-body h5,
+.preview-body h6 {
+  color: #343a40;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.preview-body h1 {
+  font-size: 1.8rem;
+  border-bottom: 2px solid #e9ecef;
+  padding-bottom: 0.5rem;
+}
+
+.preview-body h2 {
+  font-size: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.3rem;
+}
+
+.preview-body h3 {
+  font-size: 1.3rem;
+}
+
+.preview-body p {
+  margin-bottom: 1rem;
+}
+
+.preview-body blockquote {
+  border-left: 4px solid #f6d55c;
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  font-style: italic;
+  color: #6c757d;
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.preview-body code {
+  background: #f1f3f4;
+  padding: 0.2rem 0.4rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.preview-body pre {
+  background: #2d3748;
+  color: #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.preview-body pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.preview-body ul,
+.preview-body ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+}
+
+.preview-body li {
+  margin-bottom: 0.5rem;
+}
+
+.preview-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin: 1rem 0;
+}
+
+.preview-body a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.preview-body a:hover {
+  text-decoration: underline;
+}
+
+.content-preview {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .form-label {
@@ -657,54 +1105,142 @@ onMounted(() => {
   box-shadow: 0 0 0 0.2rem rgba(246, 213, 92, 0.25);
 }
 
+.editor-toolbar-wrapper {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.editor-toolbar-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e9ecef, transparent);
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+/* 工具栏按钮样式优化 */
+.editor-toolbar .btn {
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #6c757d;
+}
+
+.editor-toolbar .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-color: #f6d55c;
+  background: #f6d55c;
+  color: white;
+}
+
+.editor-toolbar .btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+/* 编辑器整体容器效果 */
 .content-editor-wrapper {
   position: relative;
+  border: 2px solid #e9ecef;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  overflow: hidden;
+  margin-top: -1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-editor-wrapper:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.content-editor-wrapper:focus-within {
+  border-color: #f6d55c;
+  box-shadow: 0 0 0 0.2rem rgba(246, 213, 92, 0.25);
+}
+
+.editor-toolbar-wrapper:focus-within {
+  border-color: #f6d55c;
 }
 
 .content-editor {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 14px;
   line-height: 1.6;
-  border-radius: 12px;
-  border: 2px solid #e9ecef;
+  border: none;
+  border-radius: 0;
   transition: all 0.3s ease;
-  resize: vertical;
+  resize: none;
+  height: 100%;
+  min-height: 700px;
+  overflow-y: auto;
+  padding: 1rem;
+  background: white;
+  flex: 1;
 }
 
 .content-editor:focus {
-  border-color: #f6d55c;
+  outline: none;
   box-shadow: 0 0 0 0.2rem rgba(246, 213, 92, 0.25);
 }
 
-.editor-toolbar {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: rgba(255,255,255,0.95);
-  border-radius: 8px;
-  padding: 0.5rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-.settings-section {
-  position: sticky;
-  top: 2rem;
-}
-
+/* 模态框样式 */
 .setting-card {
   background: #f8f9fa;
   border-radius: 12px;
   padding: 1.5rem;
   border: 1px solid #e9ecef;
+  margin-bottom: 1rem;
 }
 
 .setting-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
   color: #495057;
   margin-bottom: 1rem;
   display: flex;
   align-items: center;
+}
+
+/* AI摘要生成按钮样式 */
+.ai-summary-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.ai-summary-buttons .btn {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.ai-summary-buttons .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .cover-upload {
@@ -713,7 +1249,7 @@ onMounted(() => {
 
 .cover-preview {
   width: 100%;
-  height: 200px;
+  height: 150px;
   border: 2px dashed #dee2e6;
   border-radius: 12px;
   background-size: cover;
@@ -736,8 +1272,8 @@ onMounted(() => {
 }
 
 .cover-placeholder i {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
   display: block;
 }
 
@@ -777,24 +1313,27 @@ onMounted(() => {
   opacity: 0.8;
 }
 
-.status-info {
-  font-size: 0.9rem;
+.publish-confirmation {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
 }
 
-.status-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
+.confirmation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.confirmation-list li {
   padding: 0.5rem 0;
   border-bottom: 1px solid #e9ecef;
+  display: flex;
+  align-items: center;
 }
 
-.status-item:last-child {
+.confirmation-list li:last-child {
   border-bottom: none;
-}
-
-.status-label {
-  color: #6c757d;
 }
 
 .text-success {
@@ -809,54 +1348,63 @@ onMounted(() => {
   color: #dc3545 !important;
 }
 
-.modal-xl {
-  max-width: 90%;
-}
-
-.preview-content {
-  padding: 2rem;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.preview-content h1 {
-  color: #343a40;
-  margin-bottom: 1rem;
-}
-
 /* 响应式设计 */
 @media (max-width: 992px) {
   .publish-header {
     flex-direction: column;
     text-align: center;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
   
-  .edit-section {
-    padding-right: 0;
-    margin-bottom: 2rem;
+  .publish-content {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
   }
   
-  .settings-section {
-    position: static;
+  .edit-section,
+  .preview-section {
+    height: 100%;
+  }
+  
+  .preview-section {
+    border-left: none;
+    border-top: 1px solid #e9ecef;
   }
 }
 
 @media (max-width: 768px) {
   .publish-page {
-    padding: 1rem 0;
+    padding: 0.5rem 0;
   }
   
-  .publish-header,
-  .publish-content {
+  .publish-header {
     padding: 1rem;
   }
   
   .page-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .header-actions {
     justify-content: center;
+  }
+  
+  .edit-section,
+  .preview-section {
+    padding: 0.75rem;
+  }
+  
+  .preview-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  /* 移动端优化预览区域滚动 */
+  .preview-content {
+    max-height: 60vh;
+    overflow-y: auto;
   }
 }
 </style>

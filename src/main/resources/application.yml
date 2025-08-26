@@ -44,6 +44,13 @@ spring:
       max-file-size: 5MB
       max-request-size: 10MB
       file-size-threshold: 2KB
+    session:
+      timeout: 30m  # 会话超时时间30分钟
+      cookie:
+        http-only: true
+        secure: false  # 开发环境设为false，生产环境应设为true
+        max-age: 1800  # cookie最大存活时间30分钟
+        same-site: lax
 
   ai:
     dashscope:
@@ -123,5 +130,18 @@ qweather:
 
 search-api:
   api-key: "placeholder_search_key"
+
+# Swagger/OpenAPI 配置
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    enabled: true
+  packages-to-scan: com.lumibee.hive.controller
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 

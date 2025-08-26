@@ -16,12 +16,6 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
-    // 从localStorage获取token（如果使用JWT）
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
-    }
-    
     // 添加CSRF token（从cookie中获取）
     const cookies = document.cookie.split(';')
     const xsrfCookie = cookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='))
@@ -31,6 +25,24 @@ request.interceptors.request.use(
       console.log('添加CSRF令牌:', xsrfToken)
     } else {
       console.log('未找到CSRF令牌')
+    }
+    
+    // 从本地存储中获取用户信息，如果存在则添加认证头
+    const storedUser = localStorage.getItem('hive_auth_user')
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser)
+        if (user && user.token) {
+          config.headers['Authorization'] = `Bearer ${user.token}`
+          console.log('添加认证令牌:', user.token.substring(0, 20) + '...')
+        } else {
+          console.warn('用户信息中没有token:', user)
+        }
+      } catch (e) {
+        console.error('解析用户信息失败:', e)
+      }
+    } else {
+      console.warn('本地存储中没有用户信息')
     }
     
     console.log('请求发送：', config.method.toUpperCase(), config.url)
@@ -83,9 +95,8 @@ request.interceptors.response.use(
           console.error('请求参数错误：', data)
           break
         case 401:
-          // 未登录或认证过期，或者用户名密码错误
+          // 未登录或认证过期
           console.error('认证失败：', data)
-          localStorage.removeItem('token')
           // 对于登录请求，我们不重定向，而是在页面上显示错误信息
           if (error.config.url.includes('/login')) {
             return Promise.reject({

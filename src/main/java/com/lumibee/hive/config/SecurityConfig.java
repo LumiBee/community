@@ -26,11 +26,13 @@ import org.springframework.security.web.authentication.rememberme.PersistentToke
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.UserServiceImpl;
+import com.lumibee.hive.filter.JwtAuthenticationFilter;
 import com.lumibee.hive.filter.RememberMeFilter;
 
 import jakarta.servlet.ServletException;
@@ -53,6 +55,9 @@ public class SecurityConfig {
     
     @Autowired
     private RememberMeFilter rememberMeFilter;
+    
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -90,18 +95,25 @@ public class SecurityConfig {
                                         "/api/articles/**", // 文章 API
                                         "/api/article/**", // 单篇文章 API
                                         "/api/portfolios", // 作品集 API
-                                        "/api/user/current", // 获取当前用户 API
                                         "/api/signup", // 注册API
                                         "/api/login", // API登录端点
-                                        "/api/ai", // AI 相关 API
+                                        "/api/ai/**", // AI 相关 API - 允许所有用户访问
                                         "/api/profile/**", // 个人资料 API
                                         "/api/debug/**", // 调试API
-                                        "/login-process" // 登录处理URL
+                                        "/login-process", // 登录处理URL
+                                        "/swagger-ui/**", // Swagger UI 界面
+                                        "/swagger-ui.html", // Swagger UI 主页
+                                        "/api-docs/**", // OpenAPI 文档
+                                        "/v3/api-docs/**", // OpenAPI 3 文档
+                                        "/check-token.html",
+                                        "/debug-auth.html"
                                         ).permitAll() // 以上路径允许所有用户访问
-                        .requestMatchers("/publish", "/api/ai/**","/user/settings","/drafts","/api/article/save-draft").authenticated()
+                        .requestMatchers("/api/user/current").authenticated() // 获取当前用户需要认证
+                        .requestMatchers("/publish", "/user/settings", "/drafts", "/api/article/save-draft").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(rememberMeFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.and()) // 启用CORS支持
                 .formLogin(formLogin ->
@@ -119,12 +131,21 @@ public class SecurityConfig {
                                 .loginPage("/login")
                                 .successHandler(customOAuth2SuccessHandler)
                 )
+                .sessionManagement(session ->
+                        session
+                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                .maximumSessions(1)
+                                .expiredUrl("/login?expired")
+                                .and()
+                                .sessionFixation().migrateSession()
+                                .invalidSessionUrl("/login?invalid")
+                )
                 .logout(logout ->
                         logout
-                                .logoutUrl("/logout")
+                                .logoutUrl("/api/logout") // 改为API登出端点
                                 .logoutSuccessUrl("/?logout")
                                 .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID", "token", "remember-me")
+                                .deleteCookies("JSESSIONID", "remember-me")
                                 .clearAuthentication(true)
                                 .permitAll()
                 )
@@ -152,7 +173,14 @@ public class SecurityConfig {
                                         "/api/user/current", // 用户信息 API
                                         "/api/signup", // 注册 API
                                         "/api/profile/**", // 个人资料 API
-                                        "/api/debug/**" // 调试API
+                                        "/api/ai/**", // AI 相关 API
+                                        "/api/debug/**", // 调试API
+                                        "/swagger-ui/**", // Swagger UI 界面
+                                        "/swagger-ui.html", // Swagger UI 主页
+                                        "/api-docs/**", // OpenAPI 文档
+                                        "/v3/api-docs/**", // OpenAPI 3 文档
+                                        "/check-token.html",
+                                        "/debug-auth.html"
                                 ) // API路径忽略CSRF
                 );
 

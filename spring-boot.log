@@ -1,0 +1,108 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.lumibee:hive:jar:0.0.1-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.alibaba:dashscope-sdk-java:jar -> duplicate declaration of version 2.21.1 @ line 248, column 21
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] --------------------------< com.lumibee:hive >--------------------------
+[INFO] Building hive 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.4:run (default-cli) > test-compile @ hive >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ hive ---
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] Copying 49 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ hive ---
+[INFO] Recompiling the module because of added or removed source files.
+[INFO] Compiling 113 source files with javac [debug parameters release 21] to target/classes
+[WARNING] /Users/czar/Java/hive/src/main/java/com/lumibee/hive/config/RedisConfig.java:[88,19] setObjectMapper(com.fasterxml.jackson.databind.ObjectMapper) in org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer has been deprecated and marked for removal
+[WARNING] /Users/czar/Java/hive/src/main/java/com/lumibee/hive/config/SecurityConfig.java:[116,35] and() in org.springframework.security.config.annotation.SecurityConfigurerAdapter has been deprecated and marked for removal
+[WARNING] /Users/czar/Java/hive/src/main/java/com/lumibee/hive/config/SecurityConfig.java:[137,33] and() in org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.ConcurrencyControlConfigurer has been deprecated and marked for removal
+[INFO] /Users/czar/Java/hive/src/main/java/com/lumibee/hive/service/FavoriteServiceImpl.java: Some input files use or override a deprecated API.
+[INFO] /Users/czar/Java/hive/src/main/java/com/lumibee/hive/service/FavoriteServiceImpl.java: Recompile with -Xlint:deprecation for details.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ hive ---
+[INFO] skip non existing resourceDirectory /Users/czar/Java/hive/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ hive ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 1 source file with javac [debug parameters release 21] to target/test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.5.4:run (default-cli) < test-compile @ hive <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.4:run (default-cli) @ hive ---
+[INFO] Attaching agents: []
+SLF4J(W): Class path contains multiple SLF4J providers.
+SLF4J(W): Found provider [ch.qos.logback.classic.spi.LogbackServiceProvider@880ec60]
+SLF4J(W): Found provider [org.slf4j.simple.SimpleServiceProvider@3f3afe78]
+SLF4J(W): See https://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J(I): Actual provider is of type [ch.qos.logback.classic.spi.LogbackServiceProvider@880ec60]
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.4)
+
+2025-08-26 00:00:41 [restartedMain] INFO  com.lumibee.hive.HiveApplication - Starting HiveApplication using Java 23.0.2 with PID 73693 (/Users/czar/Java/hive/target/classes started by czar in /Users/czar/Java/hive)
+2025-08-26 00:00:41 [restartedMain] INFO  com.lumibee.hive.HiveApplication - No active profile set, falling back to 1 default profile: "default"
+2025-08-26 00:00:41 [restartedMain] INFO  o.s.boot.devtools.restart.ChangeableUrls - The Class-Path manifest attribute in /Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/opennlp-tools-2.3.3.jar referenced one or more files that do not exist: file:/Users/czar/.m2/repository/org/apache/opennlp/opennlp-tools/2.3.3/slf4j-api-1.7.36.jar
+2025-08-26 00:00:41 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-08-26 00:00:41 [restartedMain] INFO  o.s.b.d.env.DevToolsPropertyDefaultsPostProcessor - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Elasticsearch repositories in DEFAULT mode.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 74 ms. Found 1 Elasticsearch repository interface.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Reactive Elasticsearch repositories in DEFAULT mode.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 2 ms. Found 0 Reactive Elasticsearch repository interfaces.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Multiple Spring Data modules found, entering strict repository configuration mode
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.c.RepositoryConfigurationExtensionSupport - Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.lumibee.hive.service.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.d.r.config.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 3 ms. Found 0 Redis repository interfaces.
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.boot.web.embedded.tomcat.TomcatWebServer - Tomcat initialized with port 8090 (http)
+2025-08-26 00:00:42 [restartedMain] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2025-08-26 00:00:42 [restartedMain] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.43]
+2025-08-26 00:00:42 [restartedMain] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 976 ms
+2025-08-26 00:00:42 [restartedMain] ERROR o.s.boot.web.embedded.tomcat.TomcatStarter - Error starting Tomcat context. Exception: org.springframework.beans.factory.UnsatisfiedDependencyException. Message: Error creating bean with name 'jwtAuthenticationFilter': Unsatisfied dependency expressed through field 'userService': Error creating bean with name 'userServiceImpl': Unsatisfied dependency expressed through field 'userMapper': Error creating bean with name 'userMapper' defined in file [/Users/czar/Java/hive/target/classes/com/lumibee/hive/mapper/UserMapper.class]: Unsatisfied dependency expressed through bean property 'sqlSessionFactory': Error creating bean with name 'sqlSessionFactory' defined in class path resource [com/baomidou/mybatisplus/autoconfigure/MybatisPlusAutoConfiguration.class]: Unsatisfied dependency expressed through method 'sqlSessionFactory' parameter 0: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Failed to determine suitable jdbc url
+2025-08-26 00:00:42 [restartedMain] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2025-08-26 00:00:42 [restartedMain] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Unable to start web server
+2025-08-26 00:00:42 [restartedMain] INFO  o.s.b.a.logging.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-08-26 00:00:42 [restartedMain] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
+
+Reason: Failed to determine suitable jdbc url
+
+
+Action:
+
+Consider the following:
+	If you want an embedded database (H2, HSQL or Derby), please put it on the classpath.
+	If you have database settings to be loaded from a particular profile you may need to activate it (no profiles are currently active).
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.518 s
+[INFO] Finished at: 2025-08-26T00:00:42+08:00
+[INFO] ------------------------------------------------------------------------

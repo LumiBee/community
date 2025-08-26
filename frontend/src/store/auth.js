@@ -2,9 +2,15 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '@/api'
 
+// 本地存储键名
+const AUTH_USER_KEY = 'hive_auth_user'
+
 export const useAuthStore = defineStore('auth', () => {
+  // 尝试从本地存储中恢复用户信息
+  const storedUser = localStorage.getItem(AUTH_USER_KEY)
+  
   // 状态
-  const user = ref(null)
+  const user = ref(storedUser ? JSON.parse(storedUser) : null)
   const isLoading = ref(false)
   const error = ref(null)
   
@@ -17,6 +23,13 @@ export const useAuthStore = defineStore('auth', () => {
   const setUser = (userData) => {
     user.value = userData
     error.value = null
+    
+    // 将用户信息保存到本地存储，实现页面刷新后的登录状态保持
+    if (userData) {
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
+    } else {
+      localStorage.removeItem(AUTH_USER_KEY)
+    }
   }
   
   const setError = (errorMessage) => {
@@ -33,31 +46,40 @@ export const useAuthStore = defineStore('auth', () => {
   
   // 检查认证状态
   const checkAuthStatus = async () => {
+    // 如果已经在检查中，避免重复调用
+    if (isLoading.value) {
+      return user.value !== null
+    }
+    
     try {
       setLoading(true)
-      clearError() // 清除之前的错误
+      clearError()
       
-      // 检查是否有token
-      const token = localStorage.getItem('token')
-      if (!token) {
-        user.value = null
-        return false
+      // 检查是否有用户信息在内存中
+      if (user.value) {
+        return true
       }
       
+      // 尝试从后端获取当前用户信息
       const response = await authAPI.getCurrentUser()
       if (response) {
         setUser(response)
         return true
       } else {
-        // 如果响应为空，清除token和用户信息
-        localStorage.removeItem('token')
+        // 如果响应为空，清除用户信息
         user.value = null
         return false
       }
     } catch (err) {
       console.error('检查认证状态失败:', err)
-      // 如果获取用户信息失败，说明未登录或token无效
-      localStorage.removeItem('token')
+      
+      // 如果是401错误，说明用户未登录，这是正常的
+      if (err.response && err.response.status === 401) {
+        user.value = null
+        return false
+      }
+      
+      // 其他错误，清除用户信息
       user.value = null
       return false
     } finally {
@@ -92,13 +114,26 @@ export const useAuthStore = defineStore('auth', () => {
         if (response && response.success) {
           console.log('登录请求成功，获取到用户信息')
           
-          // 登录成功后存储临时token
-          localStorage.setItem('token', 'temp-token')
+          // 清除认证检查标记，确保下次可以正常检查
+          sessionStorage.removeItem('authChecked')
           
-          // 直接使用响应中的用户信息
+          // 直接使用响应中的用户信息，不存储临时token
           if (response.user) {
+            // 保存用户信息到store和localStorage
             setUser(response.user)
             console.log('登录成功，用户信息:', response.user)
+            
+            // 如果不是记住我，则设置会话结束时清除标志
+            if (!credentials.rememberMe) {
+              // 设置sessionStorage标记，表示这是一个临时会话登录
+              sessionStorage.setItem('temp_session', 'true')
+              console.log('临时会话登录，页面关闭后将清除登录状态')
+            } else {
+              // 如果是记住我，则移除临时会话标记
+              sessionStorage.removeItem('temp_session')
+              console.log('记住我登录，登录状态将被保留')
+            }
+            
             return true
           } else {
             console.error('登录成功但未返回用户信息')
@@ -112,9 +147,6 @@ export const useAuthStore = defineStore('auth', () => {
         }
       } catch (loginErr) {
         console.error('登录请求失败:', loginErr)
-        
-        // 登录失败，清除可能存在的token
-        localStorage.removeItem('token')
         
         if (loginErr.status === 401) {
           setError('用户名或密码错误')
@@ -221,13 +253,25 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       setLoading(true)
-      await authAPI.logout()
+      console.log('开始登出...')
+      
+      const response = await authAPI.logout()
+      console.log('登出API响应:', response)
+      
+      if (response && response.success) {
+        console.log('登出成功')
+      } else {
+        console.warn('登出响应异常:', response)
+      }
     } catch (err) {
-      console.error('Logout error:', err)
+      console.error('登出失败:', err)
     } finally {
-      // 清除用户信息和token
-      user.value = null
-      localStorage.removeItem('token')
+      // 无论API调用是否成功，都要清除本地状态
+      console.log('清除本地用户状态')
+      // 使用setUser(null)来清除用户状态和本地存储
+      setUser(null)
+      // 清除认证检查标记
+      sessionStorage.removeItem('authChecked')
       setLoading(false)
     }
   }

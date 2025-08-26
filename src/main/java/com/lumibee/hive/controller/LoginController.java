@@ -3,6 +3,9 @@ package com.lumibee.hive.controller;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.RememberMeService;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,11 +20,20 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 public class LoginController {
+    
+    // JWT密钥 - 实际应用中应该放在配置文件中
+    private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
+    // JWT过期时间 - 24小时
+    private static final long JWT_EXPIRATION = 86400000;
     
     @Autowired
     private UserService userService;
@@ -31,6 +43,29 @@ public class LoginController {
     
     @Autowired
     private RememberMeService rememberMeService;
+    
+    /**
+     * 生成JWT令牌
+     * @param user 用户对象
+     * @return JWT令牌字符串
+     */
+    private String generateJwtToken(User user) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+        
+        // 创建JWT密钥
+        Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+        
+        // 创建JWT令牌
+        return Jwts.builder()
+                .setSubject(user.getId().toString())
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .claim("name", user.getName())
+                .claim("email", user.getEmail())
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
 
     /**
      * 重定向登录页面到Vue SPA
@@ -72,15 +107,20 @@ public class LoginController {
             // 认证成功，设置安全上下文
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-            // 获取用户信息
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            System.out.println("获取到UserDetails: " + userDetails.getClass().getName());
-            System.out.println("UserDetails.getUsername(): " + userDetails.getUsername());
-            System.out.println("UserDetails.getPassword(): " + (userDetails.getPassword() != null ? "已设置" : "未设置"));
-            
-            // 由于User实现了UserDetails，我们可以直接转换为User对象
-            User user = (User) userDetails;
-            System.out.println("转换为User对象: ID=" + user.getId() + ", Name=" + user.getName());
+                            // 获取用户信息
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                System.out.println("获取到UserDetails: " + userDetails.getClass().getName());
+                System.out.println("UserDetails.getUsername(): " + userDetails.getUsername());
+                System.out.println("UserDetails.getPassword(): " + (userDetails.getPassword() != null ? "已设置" : "未设置"));
+                
+                // 由于User实现了UserDetails，我们可以直接转换为User对象
+                User user = (User) userDetails;
+                System.out.println("转换为User对象: ID=" + user.getId() + ", Name=" + user.getName());
+                
+                // 生成JWT令牌并设置到用户对象中
+                String jwtToken = generateJwtToken(user);
+                user.setToken(jwtToken);
+                System.out.println("已生成JWT令牌并设置到用户对象中");
             
             if (user != null) {
                 // 处理remember-me功能
@@ -169,26 +209,50 @@ public class LoginController {
      * API登出端点，用于处理前端AJAX登出请求
      */
     @PostMapping("/api/logout")
-    public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+        Map<String, Object> responseMap = new HashMap<>();
         
         try {
+            System.out.println("开始处理API登出请求");
+            
             // 清除安全上下文
             SecurityContextHolder.clearContext();
+            System.out.println("安全上下文已清除");
             
             // 清除会话
             if (session != null) {
                 session.invalidate();
+                System.out.println("会话已失效");
             }
             
-            response.put("success", true);
-            response.put("message", "登出成功");
+            // 清除所有相关的cookie
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    if ("JSESSIONID".equals(cookie.getName()) || 
+                        "remember-me".equals(cookie.getName()) ||
+                        "XSRF-TOKEN".equals(cookie.getName())) {
+                        cookie.setValue("");
+                        cookie.setPath("/");
+                        cookie.setMaxAge(0);
+                        response.addCookie(cookie);
+                        System.out.println("已清除cookie: " + cookie.getName());
+                    }
+                }
+            }
             
-            return ResponseEntity.ok(response);
+            responseMap.put("success", true);
+            responseMap.put("message", "登出成功");
+            System.out.println("API登出处理完成");
+            
+            return ResponseEntity.ok(responseMap);
         } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "登出过程中发生错误: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+            System.err.println("登出过程中发生错误: " + e.getMessage());
+            e.printStackTrace();
+            
+            responseMap.put("success", false);
+            responseMap.put("message", "登出过程中发生错误: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
 

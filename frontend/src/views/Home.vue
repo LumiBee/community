@@ -579,8 +579,14 @@ const changeSlide = (index) => {
   indicators.forEach(indicator => indicator.classList.remove('active'));
   
   // 激活当前幻灯片和指示器
-  carouselItems[index].classList.add('active');
-  indicators[index].classList.add('active');
+  // 添加安全检查，确保元素存在
+  if (index < carouselItems.length && carouselItems[index]) {
+    carouselItems[index].classList.add('active');
+  }
+  
+  if (index < indicators.length && indicators[index]) {
+    indicators[index].classList.add('active');
+  }
   
   // 更新当前幻灯片索引
   currentSlide.value = index;

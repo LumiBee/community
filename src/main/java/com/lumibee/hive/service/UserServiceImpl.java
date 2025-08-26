@@ -2,6 +2,8 @@ package com.lumibee.hive.service;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +151,15 @@ public class UserServiceImpl implements UserService {
             System.out.println("UserServiceImpl.selectById: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
         }
         return user;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> selectByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return userMapper.selectByIds(ids);
     }
 
     @Override

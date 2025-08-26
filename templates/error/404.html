@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>页面未找到 (404)</title>
+    <link href="/css/main.css" rel="stylesheet"/>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            font-family: sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            margin: 0;
+        }
+        .error-container {
+            max-width: 600px;
+            padding: 20px;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #dc3545; /* 红色作为错误提示 */
+        }
+        .error-message {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .error-description {
+            margin-bottom: 30px;
+            color: #6c757d;
+        }
+        .home-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff; /* 蓝色主操作按钮 */
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .home-link:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-message">哎呀！页面不见了</h1>
+    <p class="error-description">
+        您所寻找的页面可能已被移动、删除，或者它从来就没有存在过。
+        请检查 URL 是否正确，或者尝试返回首页。
+    </p>
+    <a th:href="@{/}" href="/" class="home-link">返回首页</a>
+</div>
+
+</body>
+</html>

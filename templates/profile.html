@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <th:block th:insert="~{fragments/page-head :: common-head-content}"></th:block>
+    <title>个人空间 - LumiHive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <!-- 添加当前用户ID的meta标签，用于前端检测自关注 -->
+    <meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: navbar}"></div>
+
+<!-- 自定义Toast组件 -->
+<div id="customToast" style="display: none; position: fixed; bottom: 30px; right: 30px; background-color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.2); border-radius: 4px; z-index: 9999; min-width: 300px; max-width: 400px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; border-bottom: 1px solid #eee;">
+    <div style="display: flex; align-items: center;">
+      <i id="customToastIcon" class="fas fa-info-circle text-info mr-2"></i>
+      <strong id="customToastTitle">提示</strong>
+    </div>
+      <button style="background: none; border: none; cursor: pointer; font-size: 16px;">&times;</button>
+  </div>
+  <div id="customToastMessage" style="padding: 15px; font-size: 14px;">
+    消息内容
+  </div>
+</div>
+
+<div class="main-content">
+    <div class="container">
+        <!-- 个人信息卡片 -->
+        <div class="profile-header" th:attr="data-user-id=${user.id}">
+            <div class="profile-header" th:attr="data-user-id=${user.id}">
+                <div class="profile-cover">
+                    <img class="profile-cover-img" id="coverImageDisplay"
+                         th:src="@{${user.backgroundImgUrl ?: '/img/bg.jpg'}}"
+                         alt="封面图片">
+
+                    <button class="btn btn-outline-light btn-sm change-cover-btn" th:if="${isOwner}">
+                        <i class="fas"></i> 修改封面
+                    </button>
+                    <input type="file" id="coverImageInput" style="display: none;" accept="image/png, image/jpeg, image/gif, image/jpg">
+                </div>
+            </div>
+            <div class="profile-avatar-wrapper">
+                <img class="profile-avatar" th:src="${user.avatarUrl != null ? user.avatarUrl : 'https://via.placeholder.com/200x200'}" alt="用户头像">
+            </div>
+            <div class="profile-info">
+                <div class="profile-info-top">
+                    <div class="profile-name-wrapper">
+                        <h1 class="profile-name" th:text="${user.name}">用户昵称</h1>
+                        <div class="profile-username" th:text="'@' + ${user.name}">@用户名</div>
+                    </div>
+                    <div class="profile-action-buttons">
+                        <button type="button"
+                                th:id="${'followButton-' + user.id}"
+                                th:class="js-toggle-follow"
+                                th:classappend="${(isFollowed ?: false) ? 'btn btn-secondary btn-sm rounded-pill' : 'btn btn-warning btn-sm rounded-pill'}"
+                                style="min-width: 85px; padding: 6px 16px; border-radius: 50px !important;">
+                            <span th:if="${(isFollowed ?: false)}"><i class="fas fa-user-check"></i> 已关注</span>
+                            <span th:unless="${(isFollowed ?: false)}"><i class="fas fa-user-plus"></i> 关注</span>
+                        </button>
+                        <button class="profile-btn btn-message" th:attr="data-user-id=${user.id}">发消息</button>
+                    </div>
+                </div>
+                <p class="profile-bio" th:text="${user.bio != null ? user.bio : '这个人很懒，还没有填写个人简介...'}">用户个人简介</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${articleCount != null ? articleCount : 0}">42</span>
+                        <span class="stat-label">文章</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${followersCount != null ? followersCount : 0}">128</span>
+                        <span class="stat-label">粉丝</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" th:text="${followingCount != null ? followingCount : 0}">56</span>
+                        <span class="stat-label">关注</span>
+                    </div>
+                </div>
+                <div class="profile-social">
+                    <a href="#" th:if="${user.githubId != null}" class="social-link" title="GitHub"><i class="fab fa-github"></i></a>
+                    <a href="#" th:if="${user.qqOpenId != null}" class="social-link" title="QQ"><i class="fab fa-qq"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 内容导航栏 -->
+        <div class="profile-nav">
+            <ul class="profile-nav-list">
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link active" data-content-type="articles">文章</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="favorites">收藏</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="following">关注</a>
+                </li>
+                <li class="profile-nav-item">
+                    <a href="#" class="profile-nav-link" data-content-type="followers">粉丝</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="row">
+            <!-- 左侧文章列表 -->
+            <div class="col-lg-8">
+                <div class="article-list">
+                    <div class="article-item" th:each="article : ${articles.records}" th:attr="data-article-id=${article.articleId}">
+
+                        <div class="article-content" style="cursor: pointer;"
+                             th:onclick="'window.location.href=\'' + @{'/article/' + ${article.slug}} + '\''">
+
+                            <h3 class="article-title">
+                                <span th:text="${article.title}">标题</span>
+                            </h3>
+                            <p class="article-excerpt" th:text="${article.excerpt != null ? article.excerpt : '暂无摘要'}">摘要</p>
+
+                            <div class="article-meta" style="display: flex; justify-content: space-between; align-items: center;">
+                                <div class="meta-left-content" style="display: flex; align-items: center; gap: 1rem;">
+                                    <span class="article-date">
+                                        <i class="far fa-calendar-alt"></i>
+                                        <span th:text="${#temporals.format(article.gmtModified, 'yyyy-MM-dd')}">时间</span>
+                                    </span>
+                                    <div class="article-stats">
+                                        <span class="article-stat article-views">
+                                            <i class="far fa-eye"></i>
+                                            <span th:text="${article.viewCount != null ? article.viewCount : 0}">0</span>
+                                        </span>
+                                        <span class="article-stat article-likes" th:attr="data-article-id=${article.articleId}" onclick="event.stopPropagation();">
+                                            <i th:class="${article.likes != null ? 'fas fa-heart' : 'far fa-heart'}"></i>
+                                            <span th:text="${article.likes != null ? article.likes : 0}">0</span>
+                                        </span>
+                                        <span class="article-stat article-comments">
+                                            <i class="far fa-comment"></i>
+                                            <span th:text="${article.viewCount != null ? article.viewCount : 0}">0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="article-actions" th:if="${isOwner}" style="display: flex; gap: 0.5rem;">
+                                    <a th:href="@{'/publish?draftId=' + ${article.articleId}}"
+                                       class="btn btn-sm btn-outline-primary"
+                                       onclick="event.stopPropagation();"> <i class="fas fa-edit"></i> 编辑
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-danger btn-delete-article"  th:attr="data-article-id=${article.articleId}">
+                                        <i class="fas fa-trash-alt"></i> 删除
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav th:if="${articles != null and articles.pages > 1L}" aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+
+                        <th:block th:with="currentPage=${articles.current}, totalPages=${articles.pages}, startPage=${T(java.lang.Math).max(1L, currentPage - 2L)}, endPage=${T(java.lang.Math).min(totalPages, currentPage + 2L)}">
+
+                            <li class="page-item" th:classappend="${currentPage == 1L} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${currentPage - 1L}, size=${articles.size})}">上一页</a>
+                            </li>
+
+                            <li class="page-item" th:if="${startPage > 1L}">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=1L, size=${articles.size})}">1</a>
+                            </li>
+                            <li class="page-item disabled" th:if="${startPage > 2L}">
+                                <span class="page-link">...</span>
+                            </li>
+
+                            <li class="page-item" th:each="i : ${#numbers.sequence(startPage, endPage)}" th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${i}, size=${articles.size})}" th:text="${i}"></a>
+                            </li>
+
+                            <li class="page-item disabled" th:if="${endPage < totalPages - 1L}">
+                                <span class="page-link">...</span>
+                            </li>
+                            <li class="page-item" th:if="${endPage < totalPages}">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${totalPages}, size=${articles.size})}" th:text="${totalPages}"></a>
+                            </li>
+
+                            <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/profile/' + ${user.name}(page=${currentPage + 1L}, size=${articles.size})}">下一页</a>
+                            </li>
+
+                        </th:block>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- 右侧侧边栏 -->
+            <div class="col-lg-4">
+                <!-- 关于我 -->
+                <div class="about-me">
+                    <h3 class="about-me-title">关于我</h3>
+                    <div class="about-me-content">
+                        <p th:text="${user.bio != null ? user.bio : '这里是个人介绍，可以添加一些个人经历、专业技能或兴趣爱好等信息。'}">
+                            这个人很懒哦，还没有填写个人简介...
+                        </p>
+                        <ul class="info-list">
+                            <li class="info-item">
+                                <span class="info-label">邮箱:</span>
+                                <span class="info-value" th:text="${user.email != null ? user.email : '未设置'}">example@email.com</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">GitHub:</span>
+                                <span class="info-value" th:text="${user.githubId != null ? '已绑定' : '未绑定'}">已绑定</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">QQ:</span>
+                                <span class="info-value" th:text="${user.qqOpenId != null ? '已绑定' : '未绑定'}">已绑定</span>
+                            </li>
+                            <li class="info-item">
+                                <span class="info-label">加入时间:</span>
+                                <span class="info-value" th:text="${user.gmtCreate != null ? #temporals.format(user.gmtCreate, 'yyyy年MM月dd日') : '未知'}">2022年3月15日</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 技能展示 -->
+                    <div class="skills">
+                        <h4 class="about-me-title">技能</h4>
+                        <div class="skill-item" th:each="skill : ${skills}" th:if="${skills != null && !skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label" th:text="${skill.name}">Java</span>
+                                <span class="skill-percent" th:text="${skill.proficiency + '%'}">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" th:style="'width:' + ${skill.proficiency + '%'}"></div>
+                            </div>
+                        </div>
+                        <!-- 示例技能（实际应用中应通过Thymeleaf循环渲染） -->
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Java</span>
+                                <span class="skill-percent">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 90%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Spring Boot</span>
+                                <span class="skill-percent">85%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">JavaScript</span>
+                                <span class="skill-percent">75%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">Vue.js</span>
+                                <span class="skill-percent">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item" th:if="${skills == null || skills.isEmpty()}">
+                            <div class="skill-name">
+                                <span class="skill-label">MySQL</span>
+                                <span class="skill-percent">80%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 热门标签 -->
+                <div class="popular-tags">
+                    <h3 class="popular-tags-title">热门标签</h3>
+                    <div class="tags-cloud">
+                        <a href="#" th:href="@{'/tag/' + ${tag.id}}" class="tag" th:each="tag : ${tags}" th:text="${tag.name}" th:if="${tags != null && !tags.isEmpty()}">Java</a>
+                        <!-- 示例标签（实际应用中应通过Thymeleaf循环渲染） -->
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Java</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Spring Boot</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">微服务</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Docker</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Kubernetes</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">前端开发</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Vue.js</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">React</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">数据库</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">MySQL</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">Redis</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">设计模式</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">算法</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">云计算</a>
+                        <a href="#" class="tag" th:if="${tags == null || tags.isEmpty()}">DevOps</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: page-footer}"></div>
+
+<!-- CSRF Token -->
+<meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+<meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+
+<script th:src="@{/js/vendor/jquery.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/popper.min.js}" type="text/javascript"></script>
+<script th:src="@{/js/vendor/bootstrap.min.js}" type="text/javascript"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+<script th:src="@{/js/profile.js}" type="module"></script>
+
+</body>
+</html>

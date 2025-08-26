@@ -1,6 +1,7 @@
 package com.lumibee.hive.service;
 
 import com.lumibee.hive.dto.DeepSeekDto.*;
+import okhttp3.Headers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -25,10 +26,18 @@ public class OkHttpAiService {
     public String generateSummary(String textContent, int maxLength) {
         try {
             DeepSeekRequest request = createRequest(textContent, maxLength);
+            
+            // 创建包含API密钥的请求头
+            Headers headers = new Headers.Builder()
+                    .add("Authorization", "Bearer " + deepseekApiKey)
+                    .add("Content-Type", "application/json")
+                    .build();
+            
             DeepSeekResponse response = okHttpService.post(
                     DEEPSEEK_API_URL,
                     request,
-                    DeepSeekResponse.class
+                    DeepSeekResponse.class,
+                    headers
             );
             return extractSummary(response);
         } catch (Exception e) {
@@ -40,7 +49,7 @@ public class OkHttpAiService {
     private DeepSeekRequest createRequest(String textContent, int maxLength) {
         DeepSeekMessage message = new DeepSeekMessage();
         message.setRole("user");
-        message.setContent("请为一下文本生成一个不多于 " + maxLength + " 字的摘要：\n" + textContent + "。输出的内容应该只包含摘要内容，而没有其他任何多余的信息！");
+        message.setContent("请为一下文本生成一个不多于 " + maxLength + " 字的摘要：\n" + textContent + "。输出的内容应该只包含摘要内容，而没有其他任何多余的信息！如果文本过短，请直接返回原文。");
 
         DeepSeekRequest request = new DeepSeekRequest();
         request.setModel("deepseek-chat");

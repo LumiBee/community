@@ -67,14 +67,22 @@
             </div>
           </div>
 
-          <div class="form-check d-flex justify-content-end mb-3">
-            <input
-              type="checkbox"
-              class="form-check-input"
-              id="remember-me"
-              v-model="loginForm.rememberMe"
-            />
-            <label class="form-check-label" for="remember-me">记住我</label>
+          <div class="form-check d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex align-items-center">
+              <input
+                type="checkbox"
+                class="form-check-input me-2"
+                id="remember-me"
+                v-model="loginForm.rememberMe"
+              />
+              <label class="form-check-label" for="remember-me">记住我</label>
+            </div>
+            <div class="remember-me-tip">
+              <i class="fas fa-info-circle text-muted me-1"></i>
+              <small class="text-muted">
+                不勾选刷新后退出登录
+              </small>
+            </div>
           </div>
 
           <button type="submit" class="btn btn-warning w-100" :disabled="isLoading">
@@ -443,5 +451,26 @@ onMounted(() => {
   .btn-outline-danger {
     margin: 0;
   }
+  
+  .remember-me-tip {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+}
+
+/* 记住我提示样式 */
+.remember-me-tip {
+  max-width: 200px;
+  line-height: 1.4;
+}
+
+.remember-me-tip i {
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.remember-me-tip small {
+  font-size: 0.75rem;
+  line-height: 1.3;
 }
 </style>
