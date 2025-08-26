@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import ToastPlugin from './plugins/toast'
 
 // 导入样式
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -19,6 +20,7 @@ const pinia = createPinia()
 
 app.use(pinia)
 app.use(router)
+app.use(ToastPlugin)
 
 // 初始化AOS动画库
 AOS.init({

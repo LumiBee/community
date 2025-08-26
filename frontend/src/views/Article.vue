@@ -8,18 +8,91 @@
       <div class="hero-overlay"></div>
       <div class="container-fluid" style="max-width: 1400px; position: relative; z-index: 2;">
         <div class="article-hero-content">
+          <!-- 文章标题 -->
           <h1 class="article-hero-title">{{ article.title }}</h1>
+          
+          <!-- 文章标签和作品集信息 -->
+          <div class="hero-tags-portfolio" v-if="article.tags && article.tags.length > 0 || article.portfolio">
+            <!-- 标签 -->
+            <div class="hero-tags" v-if="article.tags && article.tags.length > 0">
+              <div class="tags-container">
+                <router-link
+                  v-for="tag in article.tags"
+                  :key="tag.tagId"
+                  :to="`/tags#${tag.name}`"
+                  class="hero-tag"
+                >
+                  <i class="fas fa-tag"></i>
+                  {{ tag.name }}
+                </router-link>
+              </div>
+            </div>
+            
+            <!-- 作品集 -->
+            <div class="hero-portfolio" v-if="article.portfolio">
+              <router-link
+                :to="`/portfolio/${article.portfolio.id}`"
+                class="portfolio-link"
+              >
+                <i class="fas fa-book-open"></i>
+                <span>{{ article.portfolio.name }}</span>
+              </router-link>
+            </div>
+          </div>
+          
+          <!-- 文章基本信息 -->
           <div class="article-hero-meta">
-            <div class="d-flex align-items-center">
-              <img :src="article.avatarUrl || '/img/default01.jpg'" alt="作者头像" class="hero-avatar me-2">
-              <span class="hero-author">{{ article.userName || '匿名' }}</span>
-              <span class="hero-date mx-2">·</span>
-              <span class="hero-date">{{ formatDate(article.gmtCreate) }}</span>
+            <div class="meta-left">
+              <div class="author-info">
+                <img :src="article.avatarUrl || '/img/default01.jpg'" alt="作者头像" class="hero-avatar">
+                <div class="author-details">
+                  <span class="hero-author">{{ article.userName || '匿名' }}</span>
+                  <span class="hero-date">{{ formatDate(article.gmtCreate) }}</span>
+                </div>
+              </div>
             </div>
-            <div class="article-hero-stats">
-              <span class="hero-stat me-3"><i class="fas fa-eye me-1"></i>{{ article.viewCount || 0 }}</span>
-              <span class="hero-stat"><i class="fas fa-heart me-1"></i>{{ article.likes || 0 }}</span>
+            <div class="meta-right">
+              <div class="article-stats">
+                <span class="hero-stat">
+                  <i class="fas fa-eye"></i>
+                  <span class="stat-number">{{ article.viewCount || 0 }}</span>
+                </span>
+                <span class="hero-stat">
+                  <i class="fas fa-heart"></i>
+                  <span class="stat-number">{{ article.likes || 0 }}</span>
+                </span>
+              </div>
             </div>
+          </div>
+          
+          <!-- 作者详细信息 -->
+          <div class="hero-author-details">
+            <div class="author-bio-hero">{{ article.userBio || '这个用户很懒，什么都没有留下...' }}</div>
+            <div class="author-stats-hero">
+              <span class="stat-item-hero">
+                <i class="fas fa-file-alt"></i>
+                <span class="stat-number">{{ article.userArticleCount || 0 }}</span>
+                <span class="stat-label">文章</span>
+              </span>
+              <span class="stat-item-hero">
+                <i class="fas fa-users"></i>
+                <span class="stat-number">{{ article.userFollowersCount || 0 }}</span>
+                <span class="stat-label">粉丝</span>
+              </span>
+              <span class="stat-item-hero">
+                <i class="fas fa-user-plus"></i>
+                <span class="stat-number">{{ article.userFollowingCount || 0 }}</span>
+                <span class="stat-label">关注</span>
+              </span>
+            </div>
+            <button
+              v-if="authStore.isAuthenticated && article.userId !== authStore.user?.id"
+              @click="toggleFollow"
+              :class="['btn btn-sm follow-btn', article.isFollowed ? 'btn-secondary' : 'btn-warning']"
+            >
+              <i class="fas fa-user-plus me-1"></i>
+              {{ article.isFollowed ? '已关注' : '关注' }}
+            </button>
           </div>
         </div>
       </div>
@@ -127,45 +200,7 @@
         <!-- 侧边栏 -->
         <div class="col-lg-4">
           <div class="sidebar-sticky">
-            <!-- 作者信息 -->
-            <div class="author-card card mb-4 shadow-sm border-0" data-aos="fade-left">
-              <div class="card-body text-center">
-                <img
-                  :src="article.avatarUrl || '/img/default01.jpg'"
-                  alt="作者头像"
-                  class="author-avatar-large mb-3"
-                />
-                <h5 class="author-name">{{ article.userName || '匿名' }}</h5>
-                <p class="author-bio text-muted">{{ article.userBio || '这个用户很懒，什么都没有留下...' }}</p>
-                
-                <div class="author-stats mb-3">
-                  <div class="row text-center">
-                    <div class="col-4">
-                      <div class="stat-number">{{ article.userArticleCount || 0 }}</div>
-                      <div class="stat-label">文章</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="stat-number">{{ article.userFollowersCount || 0 }}</div>
-                      <div class="stat-label">粉丝</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="stat-number">{{ article.userFollowingCount || 0 }}</div>
-                      <div class="stat-label">关注</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <button
-                  v-if="authStore.isAuthenticated && article.userId !== authStore.user?.id"
-                  @click="toggleFollow"
-                  :class="['btn', article.isFollowed ? 'btn-secondary' : 'btn-warning']"
-                >
-                  {{ article.isFollowed ? '已关注' : '关注' }}
-                </button>
-              </div>
-            </div>
-            
-            <!-- 文章目录 -->
+            <!-- 文章目录 - 移到最上面 -->
             <div v-if="tableOfContents.length > 0" class="toc-card card mb-4 shadow-sm border-0" data-aos="fade-left">
               <div class="card-header bg-white py-2">
                 <h6 class="mb-0"><i class="fas fa-list-ul me-2"></i>文章目录</h6>
@@ -182,6 +217,8 @@
                 </nav>
               </div>
             </div>
+            
+
             
             <!-- 相关文章 -->
             <div v-if="relatedArticles.length > 0" class="related-articles card shadow-sm border-0" data-aos="fade-left" data-aos-delay="200">
@@ -219,19 +256,29 @@
         <router-link to="/" class="btn btn-warning">返回首页</router-link>
       </div>
     </div>
+    
+    <!-- 收藏选择模态框 -->
+    <FavoriteModal
+      :visible="showFavoriteModal"
+      :article-id="article?.articleId"
+      @close="closeFavoriteModal"
+      @success="handleFavoriteSuccess"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick, getCurrentInstance } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { articleAPI, userAPI, favoriteAPI } from '@/api'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
+import FavoriteModal from '@/components/FavoriteModal.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
+const { proxy } = getCurrentInstance()
 
 // 响应式数据
 const loading = ref(true)
@@ -240,6 +287,7 @@ const relatedArticles = ref([])
 const renderedContent = ref('')
 const tableOfContents = ref([])
 const showBackToTop = ref(false)
+const showFavoriteModal = ref(false)
 
   // 获取文章数据
   const loadArticle = async () => {
@@ -316,7 +364,12 @@ if (article.value?.content) {
 const toggleLike = async () => {
   if (!authStore.isAuthenticated) {
     // 如果未登录，提示用户登录
-    alert('请先登录后再点赞')
+    if (window.$toast) {
+      window.$toast.warning('请先登录后再点赞')
+    } else {
+      console.error('Toast not available')
+      alert('请先登录后再点赞')
+    }
     return
   }
   
@@ -329,6 +382,15 @@ const toggleLike = async () => {
       // 更新文章点赞状态和数量
       article.value.liked = response.liked
       article.value.likes = response.likeCount
+      
+      // 显示点赞状态提示
+      if (window.$toast) {
+        if (response.liked) {
+          window.$toast.success('点赞成功！')
+        } else {
+          window.$toast.info('已取消点赞')
+        }
+      }
       
       // 添加点赞动画效果
       const likeButtons = document.querySelectorAll('.quick-action-btn:first-child, .btn-outline-danger, .btn-danger');
@@ -348,7 +410,17 @@ const toggleLike = async () => {
       // 检查认证状态
       const isAuthenticated = await authStore.checkAuthStatus()
       if (!isAuthenticated) {
-        alert('登录已过期，请重新登录')
+        if (window.$toast) {
+          window.$toast.error('登录已过期，请重新登录')
+        } else {
+          alert('登录已过期，请重新登录')
+        }
+      }
+    } else {
+      if (window.$toast) {
+        window.$toast.error('点赞失败，请稍后重试')
+      } else {
+        alert('点赞失败，请稍后重试')
       }
     }
   }
@@ -358,48 +430,82 @@ const toggleLike = async () => {
 const toggleFavorite = async () => {
   if (!authStore.isAuthenticated) {
     // 如果未登录，提示用户登录
-    alert('请先登录后再收藏')
+    if (window.$toast) {
+      window.$toast.warning('请先登录后再收藏')
+    } else {
+      alert('请先登录后再收藏')
+    }
     return
   }
   
-  try {
-    // 如果已收藏，则取消收藏
-    if (article.value.isFavorited) {
+  // 如果已收藏，则取消收藏
+  if (article.value.isFavorited) {
+    try {
       const response = await favoriteAPI.removeFromAllFolders(article.value.articleId)
       if (response) {
         article.value.isFavorited = false
+        if (window.$toast) {
+          window.$toast.info('已取消收藏')
+        }
       }
-    } else {
-      // 如果未收藏，则添加到默认收藏夹
-      const response = await favoriteAPI.createAndAdd(article.value.articleId, "默认收藏夹")
-      if (response) {
-        article.value.isFavorited = true
+    } catch (error) {
+      console.error('取消收藏失败:', error)
+      if (window.$toast) {
+        window.$toast.error('取消收藏失败，请稍后重试')
+      } else {
+        alert('取消收藏失败，请稍后重试')
       }
     }
-  } catch (error) {
-    console.error('收藏操作失败:', error)
-    // 如果是401错误，可能是token过期，尝试刷新登录状态
-    if (error.status === 401) {
-      // 检查认证状态
-      const isAuthenticated = await authStore.checkAuthStatus()
-      if (!isAuthenticated) {
-        alert('登录已过期，请重新登录')
-      }
+  } else {
+    // 如果未收藏，显示收藏选择模态框
+    showFavoriteModal.value = true
+  }
+}
+
+// 处理收藏成功
+const handleFavoriteSuccess = (result) => {
+  article.value.isFavorited = true
+  showFavoriteModal.value = false
+
+  // 显示成功提示
+  if (window.$toast) {
+    if (result.type === 'add') {
+      window.$toast.success('文章已添加到收藏夹')
+    } else if (result.type === 'create') {
+      window.$toast.success(`文章已添加到新创建的收藏夹"${result.folderName}"`)
     }
   }
+}
+
+// 关闭收藏模态框
+const closeFavoriteModal = () => {
+  showFavoriteModal.value = false
 }
 
 // 关注功能
 const toggleFollow = async () => {
   if (!authStore.isAuthenticated) {
     // 如果未登录，提示用户登录
-    alert('请先登录后再关注')
+    if (window.$toast) {
+      window.$toast.warning('请先登录后再关注')
+    } else {
+      alert('请先登录后再关注')
+    }
     return
   }
   
   try {
     const response = await userAPI.toggleFollow(article.value.userId)
     article.value.isFollowed = response.data.isFollowed
+    
+    // 显示关注状态提示
+    if (window.$toast) {
+      if (response.data.isFollowed) {
+        window.$toast.success('关注成功！')
+      } else {
+        window.$toast.info('已取消关注')
+      }
+    }
   } catch (error) {
     console.error('关注失败:', error)
     // 如果是401错误，可能是token过期，尝试刷新登录状态
@@ -407,7 +513,17 @@ const toggleFollow = async () => {
       // 检查认证状态
       const isAuthenticated = await authStore.checkAuthStatus()
       if (!isAuthenticated) {
-        alert('登录已过期，请重新登录')
+        if (window.$toast) {
+          window.$toast.error('登录已过期，请重新登录')
+        } else {
+          alert('登录已过期，请重新登录')
+        }
+      }
+    } else {
+      if (window.$toast) {
+        window.$toast.error('关注失败，请稍后重试')
+      } else {
+        alert('关注失败，请稍后重试')
       }
     }
   }
@@ -420,13 +536,35 @@ const shareArticle = () => {
       title: article.value.title,
       text: article.value.excerpt,
       url: window.location.href
+    }).then(() => {
+      if (window.$toast) {
+        window.$toast.success('分享成功！')
+      }
+    }).catch((error) => {
+      if (error.name !== 'AbortError') {
+        if (window.$toast) {
+          window.$toast.error('分享失败，请重试')
+        }
+      }
     })
   } else {
     // 复制链接到剪贴板
     navigator.clipboard.writeText(window.location.href)
-    alert('链接已复制到剪贴板')
+      .then(() => {
+        if (window.$toast) {
+          window.$toast.success('链接已复制到剪贴板')
+        }
+      })
+      .catch(() => {
+        if (window.$toast) {
+          window.$toast.error('复制失败，请手动复制链接')
+        }
+      })
   }
 }
+
+
+
 
 // 滚动到评论区
 const scrollToComments = () => {
@@ -605,10 +743,11 @@ onBeforeUnmount(() => {
 .article-hero {
   background-color: #2d3748;
   background-image: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
-  padding: 4rem 0;
+  padding: 2.5rem 0 2rem;
   margin-bottom: 2rem;
   position: relative;
   overflow: hidden;
+  color: white;
 }
 
 .hero-overlay {
@@ -619,7 +758,7 @@ onBeforeUnmount(() => {
   bottom: 0;
   background: url('/img/bg.jpg') center center;
   background-size: cover;
-  opacity: 0.15;
+  opacity: 0.1;
   z-index: 1;
 }
 
@@ -627,54 +766,233 @@ onBeforeUnmount(() => {
   max-width: 900px;
   margin: 0 auto;
   padding: 0 1rem;
+  position: relative;
+  z-index: 2;
 }
 
 .article-hero-title {
-  color: white;
-  font-size: 2.8rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  line-height: 1.3;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 2.4rem;
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+  line-height: 1.2;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background: linear-gradient(45deg, #ffffff, #f8fafc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
+/* 标签和作品集样式 */
+.hero-tags-portfolio {
+  margin-bottom: 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.hero-tags {
+  display: flex;
+  align-items: center;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: white;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.hero-tag:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  text-decoration: none;
+}
+
+.hero-tag i {
+  font-size: 0.8rem;
+  color: #f6d55c;
+}
+
+.hero-portfolio {
+  display: flex;
+  align-items: center;
+}
+
+.portfolio-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(246, 213, 92, 0.25);
+  border: 1px solid rgba(246, 213, 92, 0.4);
+  border-radius: 4px;
+  color: #f6d55c;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.portfolio-link:hover {
+  background: rgba(246, 213, 92, 0.3);
+  color: #f6d55c;
+  text-decoration: none;
+}
+
+.portfolio-link i {
+  font-size: 0.9rem;
+}
+
+/* 文章基本信息样式 */
 .article-hero-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  color: rgba(255,255,255,0.9);
-  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.meta-left {
+  display: flex;
+  align-items: center;
+}
+
+.author-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .hero-avatar {
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255,255,255,0.3);
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.author-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .hero-author {
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
 }
 
 .hero-date {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
 }
 
-.article-hero-stats {
+.meta-right {
   display: flex;
   align-items: center;
+}
+
+.article-stats {
+  display: flex;
+  gap: 1.5rem;
 }
 
 .hero-stat {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-/* 文章目录样式 */
+.hero-stat i {
+  color: #f6d55c;
+  font-size: 1rem;
+}
+
+.stat-number {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+/* Hero区域作者详细信息样式 */
+.hero-author-details {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.author-bio-hero {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-style: italic;
+}
+
+.author-stats-hero {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.stat-item-hero {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.9rem;
+}
+
+.stat-item-hero i {
+  color: #f6d55c;
+  font-size: 1rem;
+}
+
+.stat-item-hero .stat-number {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.stat-item-hero .stat-label {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.85rem;
+}
+
+.follow-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+}
+
+/* 文章目录样式 - 更紧凑的设计 */
 .article-toc {
-  /* 移除高度限制和滚动条 */
   width: 100%;
 }
 
@@ -686,23 +1004,22 @@ onBeforeUnmount(() => {
 
 .toc-item {
   padding: 0;
-  margin: 0 0 0.3rem 0;
-  line-height: 1.4;
+  margin: 0 0 0.15rem 0; /* 减少项目间距 */
+  line-height: 1.3; /* 更紧凑的行高 */
 }
 
 .toc-link {
   display: block;
-  padding: 0.5rem 1rem;
+  padding: 0.35rem 0.75rem; /* 减少内边距 */
   color: #4a5568;
   text-decoration: none;
   border-left: 2px solid transparent;
   transition: all 0.2s ease;
-  font-size: 0.9rem;
-  /* 允许文本换行显示 */
+  font-size: 0.85rem; /* 稍微减小字体 */
   white-space: normal;
   word-break: break-word;
-  line-height: 1.5;
-  margin-bottom: 0.2rem;
+  line-height: 1.4; /* 更紧凑的行高 */
+  margin-bottom: 0.1rem; /* 减少底部间距 */
   border-radius: 0 4px 4px 0;
 }
 
@@ -719,35 +1036,37 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
-/* 目录层级缩进 */
+/* 目录层级缩进 - 更紧凑 */
 .toc-level-1 {
   font-weight: 600;
 }
 
 .toc-level-2 {
-  padding-left: 0.4rem;
+  padding-left: 0.3rem; /* 减少缩进 */
 }
 
 .toc-level-3 {
-  padding-left: 0.8rem;
+  padding-left: 0.6rem; /* 减少缩进 */
 }
 
 .toc-level-4 {
-  padding-left: 1.2rem;
+  padding-left: 0.9rem; /* 减少缩进 */
 }
 
 .toc-level-5, .toc-level-6 {
-  padding-left: 1.6rem;
-  font-size: 0.85em;
+  padding-left: 1.2rem; /* 减少缩进 */
+  font-size: 0.8em; /* 更小的字体 */
 }
 
 .toc-card .card-header {
   border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 0.75rem 1rem; /* 减少头部内边距 */
 }
 
 .toc-card .card-header h6 {
   color: #4a5568;
-  font-size: 0.95rem;
+  font-size: 0.9rem; /* 稍微减小标题字体 */
+  margin: 0;
 }
 
 /* 文章标题移到hero区域 */
@@ -892,7 +1211,7 @@ onBeforeUnmount(() => {
 
 .sidebar-sticky {
   position: sticky;
-  top: 100px;
+  top: 20px; /* 减少顶部距离，让目录更早显示 */
 }
 
 /* 左侧快捷按钮样式 */
@@ -1023,6 +1342,48 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 768px) {
+  .article-hero {
+    padding: 2rem 0 1.5rem;
+  }
+  
+  .article-hero-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+  
+  .hero-tags-portfolio {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .article-hero-meta {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .meta-left, .meta-right {
+    width: 100%;
+  }
+  
+  .article-stats {
+    justify-content: flex-start;
+    gap: 1rem;
+  }
+  
+  .hero-author-details {
+    padding: 1.5rem;
+  }
+  
+  .author-stats-hero {
+    gap: 1rem;
+  }
+  
+  .stat-item-hero {
+    padding: 0.5rem 0.75rem;
+  }
+  
   .article-title {
     font-size: 2rem;
   }

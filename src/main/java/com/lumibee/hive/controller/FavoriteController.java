@@ -103,6 +103,23 @@ public class FavoriteController {
         return ResponseEntity.ok(result);
     }
 
+    @PutMapping("/update-folder/{favoriteId}")
+    public ResponseEntity<Map<String, Object>> updateFolder(@PathVariable("favoriteId") Integer favoriteId,
+                                                           @RequestBody FavoriteRequestDTO request,
+                                                           @AuthenticationPrincipal Principal principal) {
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+        
+        if (request.getFavoriteName() == null || request.getFavoriteName().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "收藏夹名称不能为空"));
+        }
+        
+        Map<String, Object> result = favoriteService.updateFavoriteFolder(currentUser.getId(), favoriteId, request.getFavoriteName());
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/details/{favoriteId}")
     public ResponseEntity<FavoriteDetailsDTO> getFavoriteDetails(@PathVariable("favoriteId") Long favoriteId) {
         FavoriteDetailsDTO favoriteDetails = favoriteService.selectFavoritesById(favoriteId);

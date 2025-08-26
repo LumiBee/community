@@ -23,9 +23,16 @@ request.interceptors.request.use(
     if (xsrfCookie) {
       const xsrfToken = xsrfCookie.split('=')[1]
       config.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
-      console.log('添加CSRF令牌:', xsrfToken)
+      
+      // 对于POST、PUT、DELETE请求，确保设置了CSRF token
+      if (['post', 'put', 'delete'].includes(config.method.toLowerCase())) {
+        console.log(`添加CSRF令牌到${config.method.toUpperCase()}请求:`, xsrfToken)
+      }
     } else {
-      console.log('未找到CSRF令牌')
+      // 对于POST、PUT、DELETE请求，如果没有CSRF token，尝试从服务器获取
+      if (['post', 'put', 'delete'].includes(config.method.toLowerCase())) {
+        console.warn(`未找到CSRF令牌，${config.method.toUpperCase()}请求可能会被拒绝`)
+      }
     }
     
     // 从本地存储中获取用户信息，如果存在则添加认证头
@@ -138,6 +145,28 @@ request.interceptors.response.use(
           break
         case 403:
           console.error('权限不足：', data)
+          
+          // 对于403错误，可能是CSRF令牌问题，尝试刷新CSRF令牌并重试
+          if (!error.config.url.includes('/auth/refresh') && !error.config._skipRetry) {
+            try {
+              // 尝试重新获取CSRF令牌
+              const cookies = document.cookie.split(';')
+              const xsrfCookie = cookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='))
+              
+              if (xsrfCookie) {
+                const xsrfToken = xsrfCookie.split('=')[1]
+                const originalRequest = error.config
+                originalRequest.headers = originalRequest.headers || {}
+                originalRequest.headers['X-XSRF-TOKEN'] = decodeURIComponent(xsrfToken)
+                console.log('更新CSRF令牌并重试请求:', xsrfToken)
+                // 标记请求已重试，避免无限循环
+                originalRequest._skipRetry = true
+                return axios(originalRequest)
+              }
+            } catch (csrfError) {
+              console.error('CSRF令牌刷新失败:', csrfError)
+            }
+          }
           break
         case 404:
           console.error('请求的资源不存在：', data)

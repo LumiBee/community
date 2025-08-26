@@ -117,12 +117,19 @@ export const useAuthStore = defineStore('auth', () => {
       
       // 检查是否有用户信息在内存中
       if (user.value && user.value.token) {
+        console.log('检查现有token:', user.value.token.substring(0, 20) + '...')
         // 验证token是否有效
         try {
           const response = await authAPI.getCurrentUser()
           if (response) {
             // 更新用户信息，确保token是最新的
-            setUser({...user.value, ...response})
+            const updatedUser = {
+              ...user.value,
+              ...response,
+              token: response.token || user.value.token // 保持现有token或使用新的
+            }
+            setUser(updatedUser)
+            console.log('Token验证成功，用户信息已更新')
             return true
           }
         } catch (tokenErr) {
@@ -141,10 +148,12 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authAPI.getCurrentUser()
       if (response) {
         // 确保响应中包含token
-        if (!response.token && user.value && user.value.token) {
-          response.token = user.value.token
+        const userData = {
+          ...response,
+          token: response.token || (user.value ? user.value.token : null)
         }
-        setUser(response)
+        setUser(userData)
+        console.log('从后端获取用户信息成功:', userData)
         return true
       } else {
         // 如果响应为空，清除用户信息
@@ -201,9 +210,16 @@ export const useAuthStore = defineStore('auth', () => {
           
           // 直接使用响应中的用户信息，不存储临时token
           if (response.user) {
+            // 确保用户信息包含token
+            const userData = {
+              ...response.user,
+              token: response.user.token || response.token // 兼容不同的响应格式
+            }
+            
             // 保存用户信息到store和localStorage
-            setUser(response.user)
-            console.log('登录成功，用户信息:', response.user)
+            setUser(userData)
+            console.log('登录成功，用户信息:', userData)
+            console.log('JWT Token:', userData.token ? userData.token.substring(0, 20) + '...' : '未找到')
             
             // 如果不是记住我，则设置会话结束时清除标志
             if (!credentials.rememberMe) {
@@ -215,8 +231,6 @@ export const useAuthStore = defineStore('auth', () => {
               sessionStorage.removeItem('temp_session')
               console.log('记住我登录，登录状态将被保留')
             }
-            
-
             
             return true
           } else {

@@ -10,6 +10,9 @@
     
     <!-- 页脚 - 在发布文章页面不显示 -->
     <Footer v-if="!isPublishPage" />
+    
+    <!-- Toast提示框 -->
+    <Toast />
   </div>
 </template>
 
@@ -19,6 +22,7 @@ import { useAuthStore } from '@/store/auth'
 import { useRoute } from 'vue-router'
 import Navbar from '@/components/layout/Navbar.vue'
 import Footer from '@/components/layout/Footer.vue'
+import Toast from '@/components/Toast.vue'
 
 const authStore = useAuthStore()
 const route = useRoute()

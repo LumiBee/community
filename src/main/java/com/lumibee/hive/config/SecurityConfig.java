@@ -175,6 +175,7 @@ public class SecurityConfig {
                                         "/api/profile/**", // 个人资料 API
                                         "/api/ai/**", // AI 相关 API
                                         "/api/debug/**", // 调试API
+                                        "/api/favorites/**", // 收藏相关 API
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档

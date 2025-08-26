@@ -17,7 +17,6 @@ import Search from '@/views/Search.vue'
 import Settings from '@/views/Settings.vue'
 import Drafts from '@/views/Drafts.vue'
 import Messages from '@/views/Messages.vue'
-import TokenTest from '@/views/TokenTest.vue'
 import NotFound from '@/views/error/NotFound.vue'
 
 const routes = [
@@ -114,12 +113,6 @@ const routes = [
     name: 'Messages',
     component: Messages,
     meta: { title: '私信', requiresAuth: true }
-  },
-  {
-    path: '/token-test',
-    name: 'TokenTest',
-    component: TokenTest,
-    meta: { title: 'Token测试', requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',

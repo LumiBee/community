@@ -226,4 +226,41 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         return result;
     }
+
+    @Override
+    @Transactional
+    public Map<String, Object> updateFavoriteFolder(Long userId, Integer favoriteId, String newName) {
+        Map<String, Object> result = new HashMap<>();
+        
+        if (newName == null || newName.trim().isEmpty()) {
+            result.put("success", false);
+            result.put("message", "收藏夹名称不能为空");
+            return result;
+        }
+        
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            result.put("success", false);
+            result.put("message", "用户不存在");
+            return result;
+        }
+
+        Favorites favorite = favoriteMapper.selectById(favoriteId);
+        if (favorite == null || !favorite.getUserId().equals(userId)) {
+            result.put("success", false);
+            result.put("message", "收藏夹不存在或不属于当前用户");
+            return result;
+        }
+
+        // 更新收藏夹名称
+        favorite.setName(newName.trim());
+        favorite.setGmtModified(LocalDateTime.now());
+        favoriteMapper.updateById(favorite);
+
+        result.put("success", true);
+        result.put("message", "收藏夹名称已成功更新");
+        result.put("favorite", favorite);
+
+        return result;
+    }
 }
