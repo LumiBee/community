@@ -110,16 +110,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Cacheable(value = "isFavorited", key = "#id + '-' + #articleId")
     @Transactional(readOnly = true)
     public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
         if (id == null || articleId == null) {
             // 如果用户ID或文章ID无效，直接返回false
+            System.out.println("isFavoritedByCurrentUser: 参数无效 - userId=" + id + ", articleId=" + articleId);
             return false;
         }
 
+        System.out.println("isFavoritedByCurrentUser: 查询收藏状态 - userId=" + id + ", articleId=" + articleId);
         Integer result = articleFavoritesMapper.selectIfFavoriteExists(id, articleId);
-        return result == 1; // 返回 true 如果存在收藏关系
+        System.out.println("isFavoritedByCurrentUser: 查询结果=" + result);
+        boolean isFavorited = result != null && result > 0;
+        System.out.println("isFavoritedByCurrentUser: 最终结果=" + isFavorited);
+        return isFavorited; // 返回 true 如果存在收藏关系
     }
 
     @Override

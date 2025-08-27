@@ -36,8 +36,12 @@ build/
 .gz
 .env
 .zip
+.claude
+.mvn
 
 uploads/
 
 application-dev.yml
 application-prod.yml
+
+logs/

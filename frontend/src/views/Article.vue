@@ -305,6 +305,16 @@ const showFavoriteModal = ref(false)
       
       article.value = response
       
+      
+      // 确保收藏状态正确设置
+      if (article.value) {
+        // 确保布尔值字段正确设置
+        article.value.isFavorited = Boolean(article.value.favorited)
+        article.value.liked = Boolean(article.value.liked)
+        article.value.isFollowed = Boolean(article.value.followed)
+
+      }
+      
       // 渲染Markdown内容
 if (article.value?.content) {
   // 配置marked渲染器，为标题添加ID
@@ -470,7 +480,19 @@ const handleFavoriteSuccess = (result) => {
   // 显示成功提示
   if (window.$toast) {
     if (result.type === 'add') {
-      window.$toast.success('文章已添加到收藏夹')
+      if (result.folderCount > 1) {
+        if (result.alreadyFavoritedCount > 0) {
+          window.$toast.success(`文章已添加到 ${result.folderCount} 个收藏夹（其中 ${result.alreadyFavoritedCount} 个已存在）`)
+        } else {
+          window.$toast.success(`文章已添加到 ${result.folderCount} 个收藏夹`)
+        }
+      } else {
+        if (result.alreadyFavoritedCount > 0) {
+          window.$toast.info('文章已在收藏夹中')
+        } else {
+          window.$toast.success('文章已添加到收藏夹')
+        }
+      }
     } else if (result.type === 'create') {
       window.$toast.success(`文章已添加到新创建的收藏夹"${result.folderName}"`)
     }

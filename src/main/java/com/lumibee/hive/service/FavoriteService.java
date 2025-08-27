@@ -16,4 +16,5 @@ public interface FavoriteService {
     Map<String, Object> removeAllArticlesFromFavorite(Long userId, Integer articleId);
     Map<String, Object> removeFolderFromFavorite(Long userId, Integer favoriteId);
     Map<String, Object> updateFavoriteFolder(Long userId, Integer favoriteId, String newName);
+    Map<String, Object> removeArticleFromFavorite(Long id, Integer articledId, Long favoriteId);
 }

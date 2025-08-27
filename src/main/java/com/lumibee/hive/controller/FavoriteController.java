@@ -7,6 +7,7 @@ import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.FavoriteService;
 import com.lumibee.hive.service.UserService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,6 +19,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/favorites")
+@Tag(name = "收藏管理", description = "收藏相关的 API 接口")
 public class FavoriteController {
 
     @Autowired private FavoriteService favoriteService;
@@ -88,6 +90,19 @@ public class FavoriteController {
         }
 
         Map<String, Object> result = favoriteService.removeAllArticlesFromFavorite(currentUser.getId(), articleId);
+        return ResponseEntity.ok(result);
+    }
+
+    @DeleteMapping("/remove-from-folder/{articledId}/{favoriteId}")
+    public ResponseEntity<Map<String, Object>> removeFromFolder(@PathVariable("articledId") Integer articledId,
+                                                                @PathVariable("favoriteId") Long favoriteId,
+                                                                @AuthenticationPrincipal Principal principal) {
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Map<String, Object> result = favoriteService.removeArticleFromFavorite(currentUser.getId(), articledId, favoriteId);
         return ResponseEntity.ok(result);
     }
 

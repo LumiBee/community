@@ -13,6 +13,8 @@ import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +27,6 @@ public class FavoriteServiceImpl implements FavoriteService {
 
     @Autowired private FavoriteMapper favoriteMapper;
     @Autowired private UserMapper userMapper;
-    @Autowired private ArticleMapper articleMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
 
     @Override
@@ -109,8 +110,6 @@ public class FavoriteServiceImpl implements FavoriteService {
         return favoriteDetailsDTO;
     }
 
-
-
     @Override
     @Transactional(readOnly = true)
     public List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId) {
@@ -143,8 +142,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         }
 
         QueryWrapper<ArticleFavorites> queryWrapper = new QueryWrapper<> ();
-        queryWrapper.eq("user_id", userId)
-                    .eq("article_id", articleId)
+        queryWrapper.eq("article_id", articleId)
                     .eq("favorite_id", favoriteId);
         ArticleFavorites existingArticleFavorite = articleFavoritesMapper.selectOne(queryWrapper);
         if (existingArticleFavorite != null) {
@@ -260,6 +258,26 @@ public class FavoriteServiceImpl implements FavoriteService {
         result.put("success", true);
         result.put("message", "收藏夹名称已成功更新");
         result.put("favorite", favorite);
+
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> removeArticleFromFavorite(Long userId, Integer articledId, Long favoriteId) {
+        Map<String, Object> result = new HashMap<>();
+
+        Integer deleted = articleFavoritesMapper.deleteByArticleIdAndFavoriteId(articledId, favoriteId, userId);
+
+        if (deleted > 0) {
+            result.put("success", true);
+            result.put("message", "已成功从该收藏夹中移除文章");
+        } else {
+            result.put("success", false);
+            result.put("message", "未找到对应的收藏记录或移除失败");
+        }
+
+        result.put("isFavorited", false);
 
         return result;
     }

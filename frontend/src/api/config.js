@@ -42,7 +42,6 @@ request.interceptors.request.use(
         const user = JSON.parse(storedUser)
         if (user && user.token) {
           config.headers['Authorization'] = `Bearer ${user.token}`
-          console.log('添加认证令牌:', user.token.substring(0, 20) + '...')
         } else if (user && user.id) {
           // 如果没有token但有用户ID，可能是旧的存储格式，尝试刷新用户信息
           console.warn('用户信息中没有token，但有用户ID:', user.id)
@@ -56,7 +55,6 @@ request.interceptors.request.use(
       console.warn('本地存储中没有用户信息')
     }
     
-    console.log('请求发送：', config.method.toUpperCase(), config.url)
     return config
   },
   error => {
@@ -68,7 +66,6 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
   response => {
-    console.log('响应接收：', response.status, response.config.url, response.data)
     // 直接返回响应数据，不做额外处理
     return response.data
   },

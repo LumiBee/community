@@ -21,12 +21,10 @@ public interface ArticleFavoritesMapper extends BaseMapper<ArticleFavorites> {
     Integer selectIfFavoriteExists(@Param("userId") Long userId, @Param("articleId") Integer articleId);
     @Select("SELECT COUNT(*) FROM article_favorites WHERE article_id = #{articleId}")
     int countArticlesFavorited(@Param("articleId") Integer articleId);
-    @Delete("DELETE af FROM article_favorites af " +
-            "JOIN favorites f ON af.favorite_id = f.id " +
-            "WHERE f.user_id = #{userId} AND af.article_id = #{articleId}")
+    @Delete("DELETE FROM article_favorites WHERE user_id = #{userId} AND article_id = #{articleId}")
     Integer deleteByArticleId(@Param("articleId") Integer articleId,@Param("userId") Long userId);
-    @Select("SELECT af.article_id from article_favorites af " +
-            "JOIN favorites f ON af.favorite_id = f.id " +
-            "WHERE f.user_id = #{userId} AND af.article_id = #{articleId}")
+    @Delete("DELETE FROM article_favorites WHERE user_id = #{userId} AND favorite_id = #{favoriteId} AND article_id = #{articleId}")
+    Integer deleteByArticleIdAndFavoriteId(@Param("articleId") Integer articleId, @Param("favoriteId") Long favoriteId, @Param("userId") Long userId);
+    @Select("SELECT favorite_id FROM article_favorites WHERE user_id = #{userId} AND article_id = #{articleId}")
     List<Long> selectFavoriteIdsByArticleIdAndUserId(@Param("articleId") Integer articleId, @Param("userId") Long userId);
 }

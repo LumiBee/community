@@ -14,13 +14,13 @@
         </div>
         
         <div class="modal-body">
-          <p class="modal-subtitle">选择一个收藏夹或创建新的收藏夹</p>
+          <p class="modal-subtitle">选择一个或多个收藏夹，或创建新的收藏夹</p>
           
           <!-- 现有收藏夹列表 -->
           <div class="existing-folders">
             <h6 class="section-title">
               <i class="fas fa-folder-open"></i>
-              我的收藏夹
+              我的收藏夹 (可多选)
             </h6>
             
             <div class="folder-list" v-if="folders.length > 0">
@@ -28,13 +28,13 @@
                 v-for="folder in folders"
                 :key="folder.id"
                 class="folder-item"
-                :class="{ 'active': selectedFolderId === folder.id }"
-                @click="selectFolder(folder)"
+                :class="{ 'active': selectedFolderIds.includes(folder.id) }"
+                @click="toggleFolder(folder)"
               >
                 <i class="fas fa-folder folder-icon"></i>
                 <span class="folder-name">{{ folder.name }}</span>
                 <span class="folder-count">{{ folder.articleCount || 0 }}</span>
-                <i class="fas fa-check check-icon" v-if="selectedFolderId === folder.id"></i>
+                <i class="fas fa-check check-icon" v-if="selectedFolderIds.includes(folder.id)"></i>
               </div>
             </div>
             
@@ -87,8 +87,8 @@
           <button
             type="button"
             class="btn-confirm"
-            @click="addToSelectedFolder"
-            :disabled="!selectedFolderId && !newFolderName.trim()"
+            @click="addToSelectedFolders"
+            :disabled="selectedFolderIds.length === 0 && !newFolderName.trim()"
           >
             <i class="fas fa-bookmark"></i>
             <span>收藏</span>
@@ -118,7 +118,7 @@ const emit = defineEmits(['close', 'success'])
 
 // 响应式数据
 const folders = ref([])
-const selectedFolderId = ref(null)
+const selectedFolderIds = ref([]) // 改为数组支持多选
 const newFolderName = ref('')
 const loading = ref(false)
 
@@ -135,7 +135,7 @@ const loadFolders = async () => {
     loading.value = true
     const response = await favoriteAPI.getFavoriteFolders()
     folders.value = response || []
-    selectedFolderId.value = null
+    selectedFolderIds.value = []
     newFolderName.value = ''
   } catch (error) {
     console.error('加载收藏夹失败:', error)
@@ -144,23 +144,55 @@ const loadFolders = async () => {
   }
 }
 
-// 选择收藏夹
-const selectFolder = (folder) => {
-  selectedFolderId.value = folder.id
+// 切换收藏夹选择状态
+const toggleFolder = (folder) => {
+  const index = selectedFolderIds.value.indexOf(folder.id)
+  if (index > -1) {
+    selectedFolderIds.value.splice(index, 1) // 取消选择
+  } else {
+    selectedFolderIds.value.push(folder.id) // 添加选择
+  }
   newFolderName.value = '' // 清空新收藏夹名称
 }
 
 // 添加到选中的收藏夹
-const addToSelectedFolder = async () => {
-  if (!selectedFolderId.value) {
+const addToSelectedFolders = async () => {
+  if (selectedFolderIds.value.length === 0) {
     return
   }
   
   try {
     loading.value = true
-    await favoriteAPI.addToFolder(selectedFolderId.value, props.articleId)
-    emit('success', { type: 'add', folderId: selectedFolderId.value })
-    closeModal()
+    let successCount = 0
+    let alreadyFavoritedCount = 0
+    
+    // 批量添加到选中的收藏夹
+    for (const folderId of selectedFolderIds.value) {
+      try {
+        const response = await favoriteAPI.addToFolder(folderId, props.articleId)
+        if (response && response.success) {
+          successCount++
+        } else if (response && response.favorited) {
+          // 文章已经在收藏夹中，也算成功
+          successCount++
+          alreadyFavoritedCount++
+        }
+      } catch (error) {
+        console.error(`添加到收藏夹 ${folderId} 失败:`, error)
+      }
+    }
+    
+    if (successCount > 0) {
+      emit('success', { 
+        type: 'add', 
+        folderIds: selectedFolderIds.value,
+        folderCount: successCount,
+        alreadyFavoritedCount: alreadyFavoritedCount
+      })
+      closeModal()
+    } else {
+      alert('添加到收藏夹失败，请稍后重试')
+    }
   } catch (error) {
     console.error('添加到收藏夹失败:', error)
     alert('添加到收藏夹失败，请稍后重试')
@@ -177,9 +209,13 @@ const createAndAdd = async () => {
   
   try {
     loading.value = true
-    await favoriteAPI.createAndAdd(props.articleId, newFolderName.value.trim())
-    emit('success', { type: 'create', folderName: newFolderName.value.trim() })
-    closeModal()
+    const response = await favoriteAPI.createAndAdd(props.articleId, newFolderName.value.trim())
+    if (response && response.success) {
+      emit('success', { type: 'create', folderName: newFolderName.value.trim() })
+      closeModal()
+    } else {
+      alert('创建收藏夹失败，请稍后重试')
+    }
   } catch (error) {
     console.error('创建收藏夹失败:', error)
     alert('创建收藏夹失败，请稍后重试')
