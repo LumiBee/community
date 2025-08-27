@@ -16,17 +16,11 @@
       <div class="cover-overlay"></div>
       <div class="cover-pattern"></div>
       <div class="container position-relative h-100">
-        <!-- 切换背景按钮 -->
-        <div class="cover-switch-btn">
-          <button class="btn btn-light btn-modern btn-transparent">
-            <i class="fas fa-image me-2"></i> 切换背景
-          </button>
-        </div>
-        
-        <!-- 如果是页面所有者，显示更新封面按钮 -->
+        <!-- 如果是页面所有者，显示更换封面按钮 -->
         <div v-if="isOwner" class="cover-edit-btn">
-          <label for="coverUpload" class="btn btn-light btn-modern">
-            <i class="fas fa-camera me-2"></i> 更换封面
+          <label for="coverUpload" class="btn btn-light btn-modern" :class="{ 'uploading': isLoading }">
+            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+            <span class="ms-2">{{ isLoading ? '上传中...' : '更换封面' }}</span>
           </label>
           <input 
             type="file" 
@@ -34,6 +28,7 @@
             class="d-none" 
             accept="image/*"
             @change="handleCoverUpload"
+            :disabled="isLoading"
           >
         </div>
       </div>
@@ -236,6 +231,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { request } from '@/api'
 import { ensureBigIntAsString, debugId } from '@/utils/bigint-helper'
+import { toasts } from '@/plugins/toast'
 
 const route = useRoute()
 const router = useRouter()
@@ -365,11 +361,29 @@ const handleCoverUpload = async (event) => {
   const file = event.target.files[0]
   if (!file) return
   
+  // 验证文件类型
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    window.$toast?.error('请选择有效的图片文件（JPG、PNG、GIF、WebP）')
+    event.target.value = ''
+    return
+  }
+  
+  // 验证文件大小（5MB）
+  const maxSize = 5 * 1024 * 1024
+  if (file.size > maxSize) {
+    window.$toast?.error('图片文件大小不能超过5MB')
+    event.target.value = ''
+    return
+  }
+  
   const formData = new FormData()
   formData.append('coverImageFile', file)
   
   try {
     isLoading.value = true
+    console.log('开始上传封面图片...')
+    
     const response = await request({
       url: '/update-cover',
       method: 'post',
@@ -379,12 +393,27 @@ const handleCoverUpload = async (event) => {
       }
     })
     
-    if (response.success) {
+    console.log('上传响应:', response)
+    
+    if (response && response.success) {
       // 更新封面图片
       profileData.value.user.backgroundImgUrl = response.newImageUrl
+      console.log('封面图片更新成功:', response.newImageUrl)
+      window.$toast?.success('封面图片更新成功！')
+    } else {
+      console.error('上传失败，响应:', response)
+      window.$toast?.error(response?.message || '上传失败，请稍后重试')
     }
   } catch (error) {
     console.error('上传封面失败:', error)
+    if (error.response) {
+      console.error('错误响应:', error.response.data)
+      window.$toast?.error(error.response.data?.message || '上传失败，请稍后重试')
+    } else if (error.request) {
+      window.$toast?.error('网络连接失败，请检查网络连接')
+    } else {
+      window.$toast?.error('上传失败，请稍后重试')
+    }
   } finally {
     isLoading.value = false
     // 清空文件输入，允许再次选择同一文件
@@ -483,34 +512,7 @@ onMounted(() => {
   z-index: 1;
 }
 
-/* 切换背景按钮 */
-.cover-switch-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  z-index: 10;
-  opacity: 0.9;
-  transition: all 0.3s ease;
-}
 
-.cover-switch-btn .btn-transparent {
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
-  border-radius: 50px;
-  padding: 8px 16px;
-  font-weight: 600;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  transition: all 0.3s ease;
-}
-
-.cover-switch-btn .btn-transparent:hover {
-  background: rgba(255,255,255,0.3);
-  border-color: rgba(255,255,255,0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
-}
 
 .cover-title {
   position: absolute;
@@ -567,7 +569,7 @@ onMounted(() => {
 
 .cover-edit-btn {
   position: absolute;
-  bottom: 20px;
+  top: 20px;
   right: 20px;
   z-index: 10;
   opacity: 0.9;
@@ -579,13 +581,22 @@ onMounted(() => {
   padding: 10px 20px;
   font-weight: 600;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.95);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .cover-edit-btn:hover {
   transform: translateY(-3px);
+}
+
+.cover-edit-btn .btn-modern.uploading {
+  background: rgba(255,255,255,0.8);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.cover-edit-btn .btn-modern.uploading:hover {
+  transform: none;
 }
 
 /* 个人资料容器 */

@@ -33,13 +33,14 @@ public class IndexController {
     @Autowired private UserService userService;
 
     /**
-     * 重定向到Vue SPA
+     * 根路径处理 - 返回简单的成功响应
      */
     @GetMapping("/")
-    public ResponseEntity<Void> redirectToSPA() {
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/")
-                .build();
+    public ResponseEntity<Map<String, Object>> rootPath() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "LumiHive API Server");
+        response.put("status", "running");
+        return ResponseEntity.ok(response);
     }
 
     /**

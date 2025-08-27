@@ -144,7 +144,7 @@ public class SecurityConfig {
                 .logout(logout ->
                         logout
                                 .logoutUrl("/api/logout") // 改为API登出端点
-                                .logoutSuccessUrl("/?logout")
+                                .logoutSuccessUrl("/") // 简化重定向URL
                                 .invalidateHttpSession(true)
                                 .deleteCookies("JSESSIONID", "remember-me")
                                 .clearAuthentication(true)
@@ -178,6 +178,7 @@ public class SecurityConfig {
                                         "/api/debug/**", // 调试API
                                         "/api/user/debug/**", // 用户调试API
                                         "/api/favorites/**", // 收藏相关 API
+                                        "/update-cover", // 更新封面图片API
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档

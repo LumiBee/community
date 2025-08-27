@@ -146,40 +146,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/debug/test-json-serialization")
-    public ResponseEntity<Map<String, Object>> testJsonSerialization() {
-        Map<String, Object> response = new HashMap<>();
-        
-        // 创建一个包含大整数ID的测试对象
-        User testUser = new User();
-        testUser.setId(1925216231290916865L);
-        testUser.setName("TestUser");
-        testUser.setEmail("test@example.com");
-        
-        response.put("testUser", testUser);
-        response.put("testUserId", testUser.getId());
-        response.put("testUserIdType", testUser.getId().getClass().getName());
-        response.put("testUserIdAsString", testUser.getId().toString());
-        
-        // 测试Jackson序列化
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String json = objectMapper.writeValueAsString(testUser);
-            response.put("jsonSerialization", json);
-            
-            // 测试反序列化
-            User deserializedUser = objectMapper.readValue(json, User.class);
-            response.put("deserializedUserId", deserializedUser.getId());
-            response.put("deserializedUserIdType", deserializedUser.getId().getClass().getName());
-            response.put("serializationWorks", testUser.getId().equals(deserializedUser.getId()));
-            
-        } catch (Exception e) {
-            response.put("serializationError", e.getMessage());
-        }
-        
-        return ResponseEntity.ok(response);
-    }
-
     /**
      * 检查当前用户是否关注了指定用户
      */
@@ -202,43 +168,6 @@ public class UserController {
         response.put("success", true);
         response.put("isFollowing", isFollowing);
         
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/debug/test-following-status")
-    public ResponseEntity<Map<String, Object>> testFollowingStatus(@AuthenticationPrincipal Principal principal) {
-        Map<String, Object> response = new HashMap<>();
-        
-        User currentUser = userService.getCurrentUserFromPrincipal(principal);
-        if (currentUser == null) {
-            response.put("success", false);
-            response.put("error", "用户未登录");
-            return ResponseEntity.ok(response);
-        }
-        
-        // 测试关注状态检查
-        Long currentUserId = currentUser.getId();
-        Long authorId = 1925216231290916865L; // 作者ID
-        
-        response.put("currentUserId", currentUserId);
-        response.put("authorId", authorId);
-        response.put("currentUserIdType", currentUserId.getClass().getName());
-        response.put("authorIdType", authorId.getClass().getName());
-        
-        // 检查关注状态
-        boolean isFollowing = userService.isFollowing(currentUserId, authorId);
-        response.put("isFollowing", isFollowing);
-        
-        // 检查数据库中的关注关系
-        try {
-            Integer dbResult = userService.getUserFollowingMapper().isFollowing(authorId, currentUserId);
-            response.put("dbQueryResult", dbResult);
-            response.put("dbQueryParams", "user_id=" + authorId + ", follower_id=" + currentUserId);
-        } catch (Exception e) {
-            response.put("dbQueryError", e.getMessage());
-        }
-        
-        response.put("success", true);
         return ResponseEntity.ok(response);
     }
 }
