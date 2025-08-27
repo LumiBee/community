@@ -100,6 +100,7 @@ public class SecurityConfig {
                                         "/api/ai/**", // AI 相关 API - 允许所有用户访问
                                         "/api/profile/**", // 个人资料 API
                                         "/api/debug/**", // 调试API
+                                        "/api/user/debug/**", // 用户调试API
                                         "/login-process", // 登录处理URL
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
@@ -170,11 +171,12 @@ public class SecurityConfig {
                                         "/api/articles/**", // 文章 API
                                         "/api/article/**", // 单篇文章 API
                                         "/api/portfolios", // 作品集 API
-                                        "/api/user/current", // 用户信息 API
+                                        "/api/user/**", // 用户相关 API（包括关注功能）
                                         "/api/signup", // 注册 API
                                         "/api/profile/**", // 个人资料 API
                                         "/api/ai/**", // AI 相关 API
                                         "/api/debug/**", // 调试API
+                                        "/api/user/debug/**", // 用户调试API
                                         "/api/favorites/**", // 收藏相关 API
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页

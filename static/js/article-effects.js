@@ -289,8 +289,12 @@ function updateFollowButtonUI(buttonElement, isFollowing) {
 }
 
 async function toggleFollow(userId, buttonElement) {
+    // 确保用户ID作为字符串处理，避免JavaScript大整数精度丢失
+    const userIdStr = String(userId);
+    console.log('关注操作 - 目标用户ID (字符串):', userIdStr);
+    
     const currentUserId = document.querySelector('meta[name="current-user-id"]')?.getAttribute("content");
-    if (currentUserId && currentUserId === String(userId)) {
+    if (currentUserId && currentUserId === userIdStr) {
         showToast('不能关注自己喵，试试关注其他作者吧！', 'warning');
         return;
     }

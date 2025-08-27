@@ -189,15 +189,43 @@ p {
     }
   }
   
-  &.btn-outline-warning {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
+  &.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+    box-shadow: var(--shadow-xs);
     
     &:hover,
     &:focus {
-      background: var(--primary-color);
-      border-color: var(--primary-color);
+      color: #fff;
+      background-color: #c82333;
+      border-color: #bd2130;
+      transform: translateY(-2px);
+      box-shadow: var(--shadow);
+    }
+  }
+  
+  &.btn-outline-warning {
+    border-color: #e6a700;
+    color: #e6a700;
+    
+    &:hover,
+    &:focus {
+      background: #e6a700;
+      border-color: #e6a700;
       color: #212529;
+    }
+  }
+  
+  &.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+    
+    &:hover,
+    &:focus {
+      background: #dc3545;
+      border-color: #dc3545;
+      color: #fff;
     }
   }
   

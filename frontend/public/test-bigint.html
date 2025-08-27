@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大整数ID测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>大整数ID处理测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 基本测试</h2>
+        <p>测试JavaScript处理大整数ID的精度问题</p>
+        <button onclick="testBasicBigInt()">运行基本测试</button>
+        <div id="basic-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. JSON序列化测试</h2>
+        <p>测试JSON.stringify和JSON.parse对大整数的影响</p>
+        <button onclick="testJsonSerialization()">运行JSON测试</button>
+        <div id="json-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. localStorage测试</h2>
+        <p>测试localStorage存储和读取大整数ID</p>
+        <button onclick="testLocalStorage()">运行localStorage测试</button>
+        <div id="localStorage-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 实际用户ID测试</h2>
+        <p>使用实际的用户ID进行测试</p>
+        <button onclick="testRealUserId()">运行实际ID测试</button>
+        <div id="real-user-result" class="result"></div>
+    </div>
+
+    <script>
+        // 大整数ID处理工具函数
+        function ensureBigIntAsString(id) {
+            if (id === null || id === undefined) {
+                return null;
+            }
+            
+            if (typeof id === 'string') {
+                return id;
+            }
+            
+            if (typeof id === 'number') {
+                return id.toString();
+            }
+            
+            return String(id);
+        }
+
+        function safeJsonParse(jsonString) {
+            try {
+                return JSON.parse(jsonString, (key, value) => {
+                    if (key === 'id' || key === 'userId' || key === 'followerId' || key === 'targetUserId') {
+                        return ensureBigIntAsString(value);
+                    }
+                    return value;
+                });
+            } catch (error) {
+                console.error('JSON解析失败:', error);
+                return null;
+            }
+        }
+
+        function safeJsonStringify(obj) {
+            try {
+                return JSON.stringify(obj, (key, value) => {
+                    if (key === 'id' || key === 'userId' || key === 'followerId' || key === 'targetUserId') {
+                        return ensureBigIntAsString(value);
+                    }
+                    return value;
+                });
+            } catch (error) {
+                console.error('JSON序列化失败:', error);
+                return null;
+            }
+        }
+
+        function debugId(id, label = 'ID') {
+            const stringId = ensureBigIntAsString(id);
+            const isBig = Number(id) > Number.MAX_SAFE_INTEGER;
+            
+            return {
+                原始值: id,
+                类型: typeof id,
+                字符串形式: stringId,
+                是否为大整数: isBig,
+                数值形式: Number(id),
+                安全整数范围: Number.MAX_SAFE_INTEGER
+            };
+        }
+
+        // 测试函数
+        function testBasicBigInt() {
+            const resultDiv = document.getElementById('basic-result');
+            const realId = 1925216231290916865;
+            
+            let html = '<h3>基本大整数测试结果：</h3>';
+            
+            // 测试直接处理
+            const directResult = debugId(realId, '直接处理');
+            html += `<p><strong>直接处理：</strong></p>`;
+            html += `<pre>${JSON.stringify(directResult, null, 2)}</pre>`;
+            
+            // 测试字符串转换
+            const stringResult = debugId(realId.toString(), '字符串转换');
+            html += `<p><strong>字符串转换：</strong></p>`;
+            html += `<pre>${JSON.stringify(stringResult, null, 2)}</pre>`;
+            
+            // 测试数值转换
+            const numResult = debugId(Number(realId), '数值转换');
+            html += `<p><strong>数值转换：</strong></p>`;
+            html += `<pre>${JSON.stringify(numResult, null, 2)}</pre>`;
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function testJsonSerialization() {
+            const resultDiv = document.getElementById('json-result');
+            const userData = {
+                id: 1925216231290916865,
+                name: 'LumiBee',
+                email: 'test@example.com'
+            };
+            
+            let html = '<h3>JSON序列化测试结果：</h3>';
+            
+            // 普通JSON处理
+            const normalJson = JSON.stringify(userData);
+            const normalParsed = JSON.parse(normalJson);
+            html += `<p><strong>普通JSON处理：</strong></p>`;
+            html += `<p>序列化后：${normalJson}</p>`;
+            html += `<p>解析后ID：${normalParsed.id} (类型: ${typeof normalParsed.id})</p>`;
+            
+            // 安全JSON处理
+            const safeJson = safeJsonStringify(userData);
+            const safeParsed = safeJsonParse(safeJson);
+            html += `<p><strong>安全JSON处理：</strong></p>`;
+            html += `<p>序列化后：${safeJson}</p>`;
+            html += `<p>解析后ID：${safeParsed.id} (类型: ${typeof safeParsed.id})</p>`;
+            
+            // 比较结果
+            const originalId = userData.id.toString();
+            const normalId = normalParsed.id.toString();
+            const safeId = safeParsed.id;
+            
+            html += `<p><strong>结果比较：</strong></p>`;
+            html += `<p>原始ID：${originalId}</p>`;
+            html += `<p>普通处理：${normalId} <span class="${normalId === originalId ? 'success' : 'error'}">${normalId === originalId ? '✓ 正确' : '✗ 错误'}</span></p>`;
+            html += `<p>安全处理：${safeId} <span class="${safeId === originalId ? 'success' : 'error'}">${safeId === originalId ? '✓ 正确' : '✗ 错误'}</span></p>`;
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function testLocalStorage() {
+            const resultDiv = document.getElementById('localStorage-result');
+            const userData = {
+                id: 1925216231290916865,
+                name: 'LumiBee',
+                email: 'test@example.com'
+            };
+            
+            let html = '<h3>localStorage测试结果：</h3>';
+            
+            // 普通localStorage处理
+            localStorage.setItem('test_user_normal', JSON.stringify(userData));
+            const normalStored = JSON.parse(localStorage.getItem('test_user_normal'));
+            html += `<p><strong>普通localStorage处理：</strong></p>`;
+            html += `<p>存储后ID：${normalStored.id} (类型: ${typeof normalStored.id})</p>`;
+            
+            // 安全localStorage处理
+            localStorage.setItem('test_user_safe', safeJsonStringify(userData));
+            const safeStored = safeJsonParse(localStorage.getItem('test_user_safe'));
+            html += `<p><strong>安全localStorage处理：</strong></p>`;
+            html += `<p>存储后ID：${safeStored.id} (类型: ${typeof safeStored.id})</p>`;
+            
+            // 比较结果
+            const originalId = userData.id.toString();
+            const normalId = normalStored.id.toString();
+            const safeId = safeStored.id;
+            
+            html += `<p><strong>结果比较：</strong></p>`;
+            html += `<p>原始ID：${originalId}</p>`;
+            html += `<p>普通处理：${normalId} <span class="${normalId === originalId ? 'success' : 'error'}">${normalId === originalId ? '✓ 正确' : '✗ 错误'}</span></p>`;
+            html += `<p>安全处理：${safeId} <span class="${safeId === originalId ? 'success' : 'error'}">${safeId === originalId ? '✓ 正确' : '✗ 错误'}</span></p>`;
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function testRealUserId() {
+            const resultDiv = document.getElementById('real-user-result');
+            
+            let html = '<h3>实际用户ID测试结果：</h3>';
+            
+            // 测试从localStorage获取用户信息
+            const storedUser = localStorage.getItem('hive_auth_user');
+            if (storedUser) {
+                try {
+                    const userData = JSON.parse(storedUser);
+                    html += `<p><strong>当前存储的用户信息：</strong></p>`;
+                    html += `<p>用户ID：${userData.id} (类型: ${typeof userData.id})</p>`;
+                    html += `<p>用户名：${userData.name}</p>`;
+                    
+                    // 使用安全方法重新解析
+                    const safeUserData = safeJsonParse(storedUser);
+                    html += `<p><strong>安全解析后的用户信息：</strong></p>`;
+                    html += `<p>用户ID：${safeUserData.id} (类型: ${typeof safeUserData.id})</p>`;
+                    html += `<p>用户名：${safeUserData.name}</p>`;
+                    
+                    // 比较结果
+                    const originalId = userData.id.toString();
+                    const safeId = safeUserData.id;
+                    
+                    html += `<p><strong>ID比较：</strong></p>`;
+                    html += `<p>原始解析：${originalId}</p>`;
+                    html += `<p>安全解析：${safeId} <span class="${safeId === originalId ? 'success' : 'error'}">${safeId === originalId ? '✓ 一致' : '✗ 不一致'}</span></p>`;
+                    
+                } catch (e) {
+                    html += `<p class="error">解析用户信息失败：${e.message}</p>`;
+                }
+            } else {
+                html += `<p>localStorage中没有找到用户信息</p>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

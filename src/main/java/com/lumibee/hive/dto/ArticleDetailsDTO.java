@@ -26,6 +26,10 @@ public class ArticleDetailsDTO {
     private Long userId;
     private String userName;
     private String avatarUrl;
+    private String userBio;
+    private Integer userArticleCount;
+    private Integer userFollowersCount;
+    private Integer userFollowingCount;
     private PortfolioDTO portfolio;
     private List<TagDTO> tags;
 

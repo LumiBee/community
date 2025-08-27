@@ -24,11 +24,23 @@
             <div class="articles-header">
               <h3 class="section-title">文章列表</h3>
               <div class="sort-controls">
-                <select v-model="sortBy" @change="handleSortChange" class="sort-select">
-                  <option value="latest">最新发布</option>
-                  <option value="popular">最受欢迎</option>
-                  <option value="views">浏览最多</option>
-                </select>
+                <div class="custom-select" @click="toggleDropdown" ref="selectContainer">
+                  <div class="select-display">
+                    <span class="select-text">{{ getSortText(sortBy) }}</span>
+                    <i class="fas fa-chevron-down select-arrow" :class="{ 'rotated': isDropdownOpen }"></i>
+                  </div>
+                  <div class="select-dropdown" v-show="isDropdownOpen">
+                    <div 
+                      v-for="option in sortOptions" 
+                      :key="option.value"
+                      class="select-option"
+                      :class="{ 'selected': sortBy === option.value }"
+                      @click.stop="selectOption(option.value)"
+                    >
+                      {{ option.label }}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -161,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { tagAPI, articleAPI } from '@/api'
 
@@ -174,12 +186,20 @@ const articles = ref([])
 const relatedTags = ref([])
 const popularArticles = ref([])
 const sortBy = ref('latest')
+const isDropdownOpen = ref(false)
 const pagination = ref({
   current: 1,
   size: 10,
   totalPages: 1,
   total: 0
 })
+
+// 排序选项
+const sortOptions = [
+  { value: 'latest', label: '最新发布' },
+  { value: 'popular', label: '最受欢迎' },
+  { value: 'views', label: '浏览最多' }
+]
 
 // 计算属性
 const tagName = computed(() => route.params.tagName)
@@ -305,6 +325,22 @@ const handleSortChange = () => {
   loadArticles(1)
 }
 
+const toggleDropdown = (event) => {
+  event.stopPropagation()
+  isDropdownOpen.value = !isDropdownOpen.value
+}
+
+const selectOption = (value) => {
+  sortBy.value = value
+  isDropdownOpen.value = false
+  handleSortChange()
+}
+
+const getSortText = (value) => {
+  const option = sortOptions.find(opt => opt.value === value)
+  return option ? option.label : '最新发布'
+}
+
 const changePage = (page) => {
   if (page >= 1 && page <= pagination.value.totalPages && page !== pagination.value.current) {
     loadArticles(page)
@@ -344,7 +380,22 @@ onMounted(() => {
   loadArticles()
   loadRelatedTags()
   loadPopularArticles()
+  
+  // 添加点击外部关闭下拉框的监听器
+  document.addEventListener('click', handleClickOutside)
 })
+
+// 组件卸载时移除监听器
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
+
+const handleClickOutside = (event) => {
+  const selectContainer = document.querySelector('.custom-select')
+  if (selectContainer && !selectContainer.contains(event.target)) {
+    isDropdownOpen.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -432,21 +483,96 @@ onMounted(() => {
   border-radius: 1px;
 }
 
-.sort-controls .sort-select {
-  padding: 0.5rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  background-color: white;
-  color: #666;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.sort-controls {
+  position: relative;
 }
 
-.sort-select:focus {
-  outline: none;
+/* 自定义下拉框样式 */
+.custom-select {
+  position: relative;
+  min-width: 140px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.select-display {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: white;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.custom-select:hover .select-display {
   border-color: #ffc107;
-  box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+  box-shadow: 0 4px 8px rgba(255, 193, 7, 0.15);
+  transform: translateY(-1px);
+}
+
+.select-text {
+  flex: 1;
+}
+
+.select-arrow {
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.select-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+.select-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 2px solid #ffc107;
+  border-top: none;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  margin-top: -2px;
+  overflow: hidden;
+}
+
+.select-option {
+  padding: 0.8rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #333;
+  background-color: white;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.select-option:last-child {
+  border-bottom: none;
+}
+
+.select-option:hover {
+  background-color: #fff8e1;
+  color: #333;
+}
+
+.select-option.selected {
+  background-color: #ffc107;
+  color: #333;
+  font-weight: 600;
+}
+
+.select-option.selected:hover {
+  background-color: #ffb300;
 }
 
 /* ===== Articles Grid ===== */
@@ -465,7 +591,7 @@ onMounted(() => {
 .article-content {
   background-color: white;
   border-radius: 10px;
-  padding: 1.25rem;
+  padding: 1rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   border: 1px solid #eaeaea;
   transition: all 0.2s ease;
@@ -481,7 +607,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   gap: 1rem;
 }
 
@@ -507,8 +633,8 @@ onMounted(() => {
 .article-excerpt {
   color: #666;
   line-height: 1.6;
-  margin-bottom: 1rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -519,8 +645,8 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 0.75rem;
-  border-top: 1px solid #f0f0f0;
+  padding-top: 0.5rem;
+  border-top: none !important;
 }
 
 .author-info {
@@ -535,6 +661,8 @@ onMounted(() => {
   border-radius: 50%;
   object-fit: cover;
 }
+
+
 
 .author-avatar-fallback {
   width: 24px;

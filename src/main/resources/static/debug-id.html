@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID调试工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .debug-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .test-button {
+            background-color: #28a745;
+        }
+        .test-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>ID调试工具</h1>
+    
+    <div class="debug-section">
+        <h2>1. 直接测试大整数ID</h2>
+        <button onclick="testDirectId()" class="test-button">测试直接ID处理</button>
+        <div id="direct-result" class="result"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>2. 测试API调用</h2>
+        <button onclick="testApiCall()" class="test-button">测试API调用</button>
+        <div id="api-result" class="result"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>3. 测试localStorage</h2>
+        <button onclick="testLocalStorage()" class="test-button">测试localStorage</button>
+        <div id="storage-result" class="result"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>4. 模拟关注操作</h2>
+        <button onclick="simulateFollow()" class="test-button">模拟关注操作</button>
+        <div id="follow-result" class="result"></div>
+    </div>
+
+    <script>
+        // 测试直接ID处理
+        function testDirectId() {
+            const resultDiv = document.getElementById('direct-result');
+            const realId = 1925216231290916865;
+            
+            let html = '<h3>直接ID处理测试结果：</h3>';
+            
+            // 测试不同的处理方式
+            const tests = [
+                { name: '原始数字', value: realId },
+                { name: 'toString()', value: realId.toString() },
+                { name: 'String()', value: String(realId) },
+                { name: 'Number()', value: Number(realId) },
+                { name: 'parseInt()', value: parseInt(realId.toString()) }
+            ];
+            
+            tests.forEach(test => {
+                const isCorrect = test.value.toString() === '1925216231290916865';
+                html += `<p><strong>${test.name}:</strong> ${test.value} (类型: ${typeof test.value}) <span class="${isCorrect ? 'success' : 'error'}">${isCorrect ? '✓' : '✗'}</span></p>`;
+            });
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // 测试API调用
+        async function testApiCall() {
+            const resultDiv = document.getElementById('api-result');
+            const testId = '1925216231290916865';
+            
+            let html = '<h3>API调用测试结果：</h3>';
+            
+            try {
+                const response = await fetch(`/api/user/debug/test-id/${testId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                html += `<p><strong>请求ID:</strong> ${testId}</p>`;
+                html += `<p><strong>响应状态:</strong> ${response.status}</p>`;
+                html += `<p><strong>接收到的ID:</strong> ${data.receivedUserId}</p>`;
+                html += `<p><strong>ID类型:</strong> ${data.userIdType}</p>`;
+                html += `<p><strong>用户是否找到:</strong> ${data.userFound ? '是' : '否'}</p>`;
+                
+                if (data.userFound) {
+                    html += `<p><strong>用户名:</strong> ${data.userName}</p>`;
+                }
+                
+                const isCorrect = data.receivedUserId.toString() === testId;
+                html += `<p><strong>ID匹配:</strong> <span class="${isCorrect ? 'success' : 'error'}">${isCorrect ? '✓ 正确' : '✗ 错误'}</span></p>`;
+                
+            } catch (error) {
+                html += `<p class="error">API调用失败: ${error.message}</p>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // 测试localStorage
+        function testLocalStorage() {
+            const resultDiv = document.getElementById('storage-result');
+            
+            let html = '<h3>localStorage测试结果：</h3>';
+            
+            // 创建测试数据
+            const testUser = {
+                id: 1925216231290916865,
+                name: 'TestUser',
+                email: 'test@example.com'
+            };
+            
+            // 测试普通存储
+            localStorage.setItem('test_user_normal', JSON.stringify(testUser));
+            const normalStored = JSON.parse(localStorage.getItem('test_user_normal'));
+            
+            // 测试安全存储
+            const safeJson = JSON.stringify(testUser, (key, value) => {
+                if (key === 'id') {
+                    return value.toString();
+                }
+                return value;
+            });
+            localStorage.setItem('test_user_safe', safeJson);
+            const safeStored = JSON.parse(localStorage.getItem('test_user_safe'), (key, value) => {
+                if (key === 'id') {
+                    return value.toString();
+                }
+                return value;
+            });
+            
+            html += `<p><strong>原始ID:</strong> ${testUser.id}</p>`;
+            html += `<p><strong>普通存储后ID:</strong> ${normalStored.id} (类型: ${typeof normalStored.id}) <span class="${normalStored.id.toString() === testUser.id.toString() ? 'success' : 'error'}">${normalStored.id.toString() === testUser.id.toString() ? '✓' : '✗'}</span></p>`;
+            html += `<p><strong>安全存储后ID:</strong> ${safeStored.id} (类型: ${typeof safeStored.id}) <span class="${safeStored.id === testUser.id.toString() ? 'success' : 'error'}">${safeStored.id === testUser.id.toString() ? '✓' : '✗'}</span></p>`;
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        // 模拟关注操作
+        async function simulateFollow() {
+            const resultDiv = document.getElementById('follow-result');
+            const testId = '1925216231290916865';
+            
+            let html = '<h3>模拟关注操作测试结果：</h3>';
+            
+            try {
+                // 获取CSRF token
+                const cookies = document.cookie.split(';');
+                const xsrfCookie = cookies.find(cookie => cookie.trim().startsWith('XSRF-TOKEN='));
+                let csrfToken = '';
+                let csrfHeader = '';
+                
+                if (xsrfCookie) {
+                    csrfToken = decodeURIComponent(xsrfCookie.split('=')[1]);
+                    csrfHeader = 'X-XSRF-TOKEN';
+                }
+                
+                html += `<p><strong>CSRF Token:</strong> ${csrfToken ? '已获取' : '未获取'}</p>`;
+                
+                // 模拟关注请求
+                const response = await fetch(`/api/user/${testId}/follow`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(csrfToken && { [csrfHeader]: csrfToken })
+                    }
+                });
+                
+                html += `<p><strong>请求URL:</strong> /api/user/${testId}/follow</p>`;
+                html += `<p><strong>响应状态:</strong> ${response.status}</p>`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    html += `<p><strong>响应数据:</strong></p>`;
+                    html += `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const errorText = await response.text();
+                    html += `<p class="error">错误响应: ${errorText}</p>`;
+                }
+                
+            } catch (error) {
+                html += `<p class="error">模拟关注操作失败: ${error.message}</p>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

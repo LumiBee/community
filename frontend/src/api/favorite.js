@@ -96,6 +96,18 @@ export const favoriteAPI = {
   },
 
   /**
+   * 从指定收藏夹中移除文章
+   * @param {number} articleId - 文章ID
+   * @param {number} folderId - 收藏夹ID
+   */
+  removeFromFolder(articleId, folderId) {
+    return request({
+      url: `/api/favorites/remove-from-folder/${articleId}/${folderId}`,
+      method: 'delete'
+    })
+  },
+
+  /**
    * 删除收藏夹
    * @param {number} folderId - 收藏夹ID
    */

@@ -134,7 +134,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Cacheable(value = "articleDetails", key = "#slug")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
@@ -154,8 +153,25 @@ public class ArticleServiceImpl implements ArticleService {
             ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
             BeanUtils.copyProperties(article, articleDetailsDTO);
             if (user != null) {
+                articleDetailsDTO.setUserId(user.getId());
                 articleDetailsDTO.setUserName(user.getName());
                 articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
+                
+                // 获取用户的统计数据
+                Integer userArticleCount = articleMapper.countArticlesByUserId(user.getId());
+                Integer userFollowersCount = userService.countFansByUserId(user.getId());
+                Integer userFollowingCount = userService.countFollowingByUserId(user.getId());
+                
+                System.out.println("文章详情页 - 用户统计: userId=" + user.getId() + 
+                    ", 文章数=" + userArticleCount + 
+                    ", 粉丝数=" + userFollowersCount + 
+                    ", 关注数=" + userFollowingCount + 
+                    ", 个人简介=" + user.getBio());
+                
+                articleDetailsDTO.setUserArticleCount(userArticleCount);
+                articleDetailsDTO.setUserFollowersCount(userFollowersCount);
+                articleDetailsDTO.setUserFollowingCount(userFollowingCount);
+                articleDetailsDTO.setUserBio(user.getBio());
             }
             if (portfolio != null) {
                 articleDetailsDTO.setPortfolio(convertToPortfolioDTO(portfolio));

@@ -44,7 +44,9 @@
           <div class="article-hero-meta">
             <div class="meta-left">
               <div class="author-info">
-                <img :src="article.avatarUrl || '/img/default01.jpg'" alt="作者头像" class="hero-avatar">
+                <router-link :to="`/profile/${article.userName}`" class="hero-avatar-link">
+                  <img :src="article.avatarUrl || '/img/default01.jpg'" alt="作者头像" class="hero-avatar">
+                </router-link>
                 <div class="author-details">
                   <span class="hero-author">{{ article.userName || '匿名' }}</span>
                   <span class="hero-date">{{ formatDate(article.gmtCreate) }}</span>
@@ -52,16 +54,14 @@
               </div>
             </div>
             <div class="meta-right">
-              <div class="article-stats">
-                <span class="hero-stat">
-                  <i class="fas fa-eye"></i>
-                  <span class="stat-number">{{ article.viewCount || 0 }}</span>
-                </span>
-                <span class="hero-stat">
-                  <i class="fas fa-heart"></i>
-                  <span class="stat-number">{{ article.likes || 0 }}</span>
-                </span>
-              </div>
+              <button
+                v-if="authStore.isAuthenticated && article.userId !== authStore.user?.id"
+                @click="toggleFollow"
+                :class="['btn btn-sm follow-btn', article.isFollowed ? 'btn-secondary' : 'btn-warning']"
+              >
+                <i class="fas fa-user-plus me-1"></i>
+                {{ article.isFollowed ? '已关注' : '关注' }}
+              </button>
             </div>
           </div>
           
@@ -85,14 +85,6 @@
                 <span class="stat-label">关注</span>
               </span>
             </div>
-            <button
-              v-if="authStore.isAuthenticated && article.userId !== authStore.user?.id"
-              @click="toggleFollow"
-              :class="['btn btn-sm follow-btn', article.isFollowed ? 'btn-secondary' : 'btn-warning']"
-            >
-              <i class="fas fa-user-plus me-1"></i>
-              {{ article.isFollowed ? '已关注' : '关注' }}
-            </button>
           </div>
         </div>
       </div>
@@ -129,11 +121,13 @@
               
               <div class="article-meta d-flex align-items-center justify-content-between">
                 <div class="author-info d-flex align-items-center">
-                  <img
-                    :src="article.avatarUrl || '/img/default01.jpg'"
-                    alt="作者头像"
-                    class="author-avatar me-3"
-                  />
+                  <router-link :to="`/profile/${article.userName}`" class="author-avatar-link">
+                    <img
+                      :src="article.avatarUrl || '/img/default01.jpg'"
+                      alt="作者头像"
+                      class="author-avatar me-3"
+                    />
+                  </router-link>
                   <div>
                     <div class="author-name">{{ article.userName || '匿名' }}</div>
                     <div class="publish-time text-muted small">
@@ -275,6 +269,7 @@ import { articleAPI, userAPI, favoriteAPI } from '@/api'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import FavoriteModal from '@/components/FavoriteModal.vue'
+import { ensureBigIntAsString, debugId } from '@/utils/bigint-helper'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -305,6 +300,12 @@ const showFavoriteModal = ref(false)
       
       article.value = response
       
+      console.log('文章数据:', {
+        articleId: article.value?.articleId,
+        userId: article.value?.userId,
+        userName: article.value?.userName,
+        title: article.value?.title
+      })
       
       // 确保收藏状态正确设置
       if (article.value) {
@@ -312,7 +313,24 @@ const showFavoriteModal = ref(false)
         article.value.isFavorited = Boolean(article.value.favorited)
         article.value.liked = Boolean(article.value.liked)
         article.value.isFollowed = Boolean(article.value.followed)
+        
+        console.log('文章关注状态:', {
+          followed: article.value.followed,
+          isFollowed: article.value.isFollowed,
+          userId: article.value.userId,
+          currentUserId: authStore.user?.id
+        })
 
+        // 如果用户已登录且不是自己的文章，检查关注状态
+        if (authStore.isAuthenticated && article.value.userId !== authStore.user?.id) {
+          try {
+            const followStatus = await userAPI.isFollowing(article.value.userId)
+            article.value.isFollowed = Boolean(followStatus.isFollowing)
+          } catch (error) {
+            console.error('检查关注状态失败:', error)
+            // 如果检查失败，保持原有状态
+          }
+        }
       }
       
       // 渲染Markdown内容
@@ -517,15 +535,30 @@ const toggleFollow = async () => {
   }
   
   try {
-    const response = await userAPI.toggleFollow(article.value.userId)
-    article.value.isFollowed = response.data.isFollowed
+    // 确保用户ID作为字符串处理，避免JavaScript大整数精度丢失
+    const userIdStr = ensureBigIntAsString(article.value.userId);
+    debugId(article.value.userId, '文章作者ID');
+    console.log('关注操作 - 文章作者ID (字符串):', userIdStr, '类型:', typeof userIdStr)
+    const response = await userAPI.toggleFollow(userIdStr)
+    console.log('关注响应:', response)
     
-    // 显示关注状态提示
-    if (window.$toast) {
-      if (response.data.isFollowed) {
-        window.$toast.success('关注成功！')
-      } else {
-        window.$toast.info('已取消关注')
+    // 检查响应格式 - 响应数据直接是对象，不是包装在 response.data 中
+    if (response && response.isFollowing !== undefined) {
+      // 后端返回的是 isFollowing，我们需要更新为 isFollowed
+      article.value.isFollowed = response.isFollowing
+      
+      // 显示关注状态提示
+      if (window.$toast) {
+        if (response.isFollowing) {
+          window.$toast.success(response.message || '关注成功！')
+        } else {
+          window.$toast.info(response.message || '已取消关注')
+        }
+      }
+    } else {
+      console.error('响应格式错误:', response)
+      if (window.$toast) {
+        window.$toast.error('关注操作失败，请重试')
       }
     }
   } catch (error) {
@@ -900,6 +933,15 @@ onBeforeUnmount(() => {
   gap: 1rem;
 }
 
+.hero-avatar-link {
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.hero-avatar-link:hover {
+  transform: scale(1.05);
+}
+
 .hero-avatar {
   width: 48px;
   height: 48px;
@@ -907,6 +949,12 @@ onBeforeUnmount(() => {
   object-fit: cover;
   border: 3px solid rgba(255, 255, 255, 0.3);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.hero-avatar-link:hover .hero-avatar {
+  border-color: rgba(246, 213, 92, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .author-details {
@@ -1098,6 +1146,16 @@ onBeforeUnmount(() => {
   height: 48px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.author-avatar-link {
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.author-avatar-link:hover {
+  transform: scale(1.05);
 }
 
 .author-avatar-large {
@@ -1380,13 +1438,24 @@ onBeforeUnmount(() => {
   }
   
   .article-hero-meta {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1rem;
     padding: 1rem;
+    align-items: center;
   }
   
-  .meta-left, .meta-right {
-    width: 100%;
+  .meta-left {
+    flex: 1;
+  }
+  
+  .meta-right {
+    flex-shrink: 0;
+  }
+  
+  .author-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
   
   .article-stats {
@@ -1438,7 +1507,26 @@ onBeforeUnmount(() => {
   .quick-action-btn {
     width: 40px;
     height: 40px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
     box-shadow: none;
+  }
+  
+  .hero-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .hero-author {
+    font-size: 1rem;
+  }
+  
+  .hero-date {
+    font-size: 0.8rem;
+  }
+  
+  .follow-btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
   }
   
   .back-to-top {
@@ -1446,6 +1534,39 @@ onBeforeUnmount(() => {
     right: 1rem;
     width: 40px;
     height: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .article-hero-meta {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .author-info {
+    gap: 0.5rem;
+  }
+  
+  .hero-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .hero-author {
+    font-size: 0.9rem;
+  }
+  
+  .hero-date {
+    font-size: 0.75rem;
+  }
+  
+  .follow-btn {
+    padding: 0.2rem 0.4rem;
+    font-size: 0.75rem;
+  }
+  
+  .follow-btn i {
+    font-size: 0.7rem;
   }
 }
 </style>

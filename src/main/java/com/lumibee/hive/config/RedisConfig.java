@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -83,6 +85,14 @@ public class RedisConfig {
         mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 支持Java 8 的时间类型序列化
         mapper.registerModule(new JavaTimeModule());
+        
+        // 创建自定义模块来处理大整数
+        SimpleModule bigIntModule = new SimpleModule();
+        // 将Long类型序列化为字符串，避免JavaScript精度丢失
+        bigIntModule.addSerializer(Long.class, new ToStringSerializer());
+        bigIntModule.addSerializer(Long.TYPE, new ToStringSerializer());
+        mapper.registerModule(bigIntModule);
+        
         // 指定序列化输入的类型，类必须是非final修饰的，final修饰的类，比如String,Integer等会跑出异常
         mapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
         serializer.setObjectMapper(mapper);

@@ -121,11 +121,13 @@
                       </div>
                     </div>
                     
-                    <div class="card-content">
-                      <div class="card-author">
-                        <img :src="favorite.avatarUrl || '/img/default.jpg'" alt="作者头像" class="author-avatar">
-                        <span class="author-name">{{ favorite.userName || '未知作者' }}</span>
-                      </div>
+                                         <div class="card-content">
+                       <div class="card-author">
+                         <router-link :to="`/profile/${favorite.userName}`" class="author-avatar-link">
+                           <img :src="favorite.avatarUrl || '/img/default.jpg'" alt="作者头像" class="author-avatar">
+                         </router-link>
+                         <span class="author-name">{{ favorite.userName || '未知作者' }}</span>
+                       </div>
                       
                       <div class="card-excerpt">
                         {{ favorite.excerpt || '暂无描述' }}
@@ -218,46 +220,29 @@
       </div>
     </div>
     
-    <!-- 删除确认弹窗 -->
-    <div class="modal fade" id="deleteFolderModal" tabindex="-1" aria-hidden="true" ref="deleteFolderModal">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content modern-modal">
-          <div class="modern-header">
-            <div class="header-icon" style="background: linear-gradient(135deg, #ff7675, #d63031);">
-              <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="header-content">
-              <h5 class="modal-title">删除收藏夹</h5>
-              <p class="modal-subtitle">此操作不可恢复，请确认</p>
-            </div>
-            <button type="button" class="modern-close" data-bs-dismiss="modal" aria-label="Close">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="modern-body">
-            <p>您确定要删除收藏夹 <strong>{{ folderToDelete?.name }}</strong> 吗？</p>
-            <p class="text-danger">注意：删除后，该收藏夹中的所有收藏内容将无法恢复。</p>
-            <div class="d-flex justify-content-end mt-4">
-              <button 
-                type="button" 
-                class="btn btn-secondary me-2" 
-                data-bs-dismiss="modal"
-              >
-                取消
-              </button>
-              <button 
-                type="button" 
-                class="btn btn-danger"
-                @click="deleteFolder"
-              >
-                <i class="fas fa-trash-alt me-1"></i>
-                确认删除
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- 删除收藏夹确认弹窗 -->
+    <ConfirmDeleteModal
+      :visible="showDeleteFolderModal"
+      title="删除收藏夹"
+      :message="`您确定要删除收藏夹「${folderToDelete?.name}」吗？`"
+      warning-message="删除后，该收藏夹中的所有收藏内容将无法恢复。"
+      confirm-text="确认删除"
+      @confirm="deleteFolder"
+      @cancel="closeDeleteFolderModal"
+      @close="closeDeleteFolderModal"
+    />
+
+    <!-- 删除文章确认弹窗 -->
+    <ConfirmDeleteModal
+      :visible="showDeleteArticleModal"
+      title="移除收藏"
+      :message="`您确定要从当前收藏夹中移除「${articleToDelete?.title}」吗？`"
+      warning-message="此操作无法撤销！"
+      confirm-text="确认移除"
+      @confirm="confirmRemoveArticle"
+      @cancel="closeDeleteArticleModal"
+      @close="closeDeleteArticleModal"
+    />
   </div>
 </template>
 
@@ -266,6 +251,7 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { favoriteAPI } from '@/api/favorite'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 
 // 路由和状态管理
 const router = useRouter()
@@ -285,6 +271,9 @@ const isEditing = ref(false)
 const newFolderName = ref('')
 const editingFolderId = ref(null)
 const folderToDelete = ref(null)
+const showDeleteFolderModal = ref(false)
+const showDeleteArticleModal = ref(false)
+const articleToDelete = ref(null)
 
 // 计算属性
 const pageTitle = computed(() => {
@@ -501,8 +490,7 @@ const editFolder = (folder) => {
 const confirmDeleteFolder = (folder) => {
   console.log('确认删除收藏夹:', folder)
   folderToDelete.value = folder
-  const modal = new bootstrap.Modal(document.getElementById('deleteFolderModal'))
-  modal.show()
+  showDeleteFolderModal.value = true
 }
 
 const deleteFolder = async () => {
@@ -525,9 +513,6 @@ const deleteFolder = async () => {
       }
     }
     
-    const modal = bootstrap.Modal.getInstance(document.getElementById('deleteFolderModal'))
-    modal.hide()
-    
     if (window.$toast) {
       window.$toast.success(`收藏夹 "${folderToDelete.value.name}" 已成功删除`)
     }
@@ -536,7 +521,14 @@ const deleteFolder = async () => {
     if (window.$toast) {
       window.$toast.error('删除收藏夹失败，请稍后重试')
     }
+  } finally {
+    closeDeleteFolderModal()
   }
+}
+
+const closeDeleteFolderModal = () => {
+  showDeleteFolderModal.value = false
+  folderToDelete.value = null
 }
 
 const createOrUpdateFolder = async () => {
@@ -595,9 +587,15 @@ const createOrUpdateFolder = async () => {
   }
 }
 
-const removeFromFavorites = async (favorite) => {
+const removeFromFavorites = (favorite) => {
+  articleToDelete.value = favorite
+  showDeleteArticleModal.value = true
+}
+
+const confirmRemoveArticle = async () => {
   try {
-    await favoriteAPI.removeFromAllFolders(favorite.articleId)
+    // 只从当前收藏夹中移除文章
+    await favoriteAPI.removeFromFolder(articleToDelete.value.articleId, activeFolder.value)
     
     // 重新加载当前收藏夹的文章
     if (activeFolder.value) {
@@ -605,14 +603,21 @@ const removeFromFavorites = async (favorite) => {
     }
     
     if (window.$toast) {
-      window.$toast.success('文章已从收藏夹中移除')
+      window.$toast.success('文章已从当前收藏夹中移除')
     }
   } catch (error) {
     console.error('移除收藏失败:', error)
     if (window.$toast) {
       window.$toast.error('移除失败，请稍后重试')
     }
+  } finally {
+    closeDeleteArticleModal()
   }
+}
+
+const closeDeleteArticleModal = () => {
+  showDeleteArticleModal.value = false
+  articleToDelete.value = null
 }
 
 const initBookAnimation = () => {
@@ -1122,13 +1127,22 @@ const initBookAnimation = () => {
   border-radius: 50%;
   object-fit: cover;
   margin-right: 0.75rem;
-  border: 2px solid #f1f3f4;
 }
 
 .author-name {
   font-size: 0.9rem;
   color: #6c757d;
   font-weight: 500;
+}
+
+.author-avatar-link {
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.author-avatar-link:hover {
+  transform: scale(1.05);
 }
 
 .card-excerpt {

@@ -371,14 +371,12 @@ body {
   height: 36px;
   border-radius: 50%;
   margin-right: 0.75rem;
-  border: 2px solid #e2e8f0;
   transition: transform 0.3s ease;
   object-fit: cover;
 }
 
 .article-card:hover .author-avatar {
   transform: scale(1.1);
-  border-color: #ffda58;
 }
 
 .author-info {

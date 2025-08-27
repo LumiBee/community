@@ -139,15 +139,17 @@
                     </div>
                     <div class="mt-3 d-flex justify-content-between align-items-center w-100 article-meta">
                       <div class="d-flex align-items-center author-info">
-                        <img
-                          v-if="article.avatarUrl"
-                          :src="article.avatarUrl"
-                          alt="作者头像"
-                          class="author-avatar"
-                        />
-                        <div class="author-avatar" v-else>
-                          {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
-                        </div>
+                        <router-link :to="`/profile/${article.userName}`" class="author-avatar-link">
+                          <img
+                            v-if="article.avatarUrl"
+                            :src="article.avatarUrl"
+                            alt="作者头像"
+                            class="author-avatar"
+                          />
+                          <div class="author-avatar" v-else>
+                            {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
+                          </div>
+                        </router-link>
                         <small class="text-muted">{{ article.userName || '佚名' }}</small>
                         <small class="text-muted ms-2">
                           {{ formatTime(article.gmtModified) }}
@@ -757,6 +759,16 @@ onBeforeUnmount(() => {
   font-size: 14px;
   box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
   transition: transform 0.3s ease;
+}
+
+.author-avatar-link {
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.author-avatar-link:hover {
+  transform: scale(1.05);
 }
 
 .article-link:hover .author-avatar {

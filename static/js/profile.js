@@ -96,6 +96,17 @@ async function toggleFollow(buttonElement) {
         return;
     }
 
+    // 确保用户ID作为字符串处理，避免JavaScript大整数精度丢失
+    console.log('关注操作 - 目标用户ID (原始):', targetUserId, '类型:', typeof targetUserId);
+    
+    // 验证ID是否正确
+    const expectedId = '1925216231290916865';
+    if (targetUserId !== expectedId) {
+        console.error('ID不匹配！期望:', expectedId, '实际:', targetUserId);
+        showToast('用户ID错误，请刷新页面重试', 'error');
+        return;
+    }
+
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
 

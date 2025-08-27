@@ -6,7 +6,7 @@
 	<meta name="article-id" th:if="${article != null}" th:content="${article.articleId}"/>
 	<link href="/css/article.css" rel="stylesheet"/>
 
-	<meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#authentication.principal.id}"/>
+	    <meta name="current-user-id" th:if="${#authentication != null && #authentication.principal instanceof T(com.lumibee.hive.model.User)}" th:content="${#strings.toString(#authentication.principal.id)}"/>
 </head>
 <body>
 <!-- 导航栏 -->
@@ -80,10 +80,10 @@
 							</small>
 							<div>
 								<button type="button"
-										th:id="${'followButton-' + article.userId}"
+										th:id="${'followButton-' + #strings.toString(article.userId)}"
 										th:class="js-toggle-follow"
 										th:classappend="${article.isFollowed} ? 'btn btn-secondary btn-sm' : 'btn btn-outline-primary btn-sm'"
-										th:attr="data-user-id=${article.userId}">
+										th:attr="data-user-id=${#strings.toString(article.userId)}">
 									<span th:if="${article.isFollowed}"><i class="fas fa-user-check"></i> 已关注</span>
 									<span th:unless="${article.isFollowed}"><i class="fas fa-user-plus"></i> 关注</span>
 								</button>

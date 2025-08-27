@@ -26,11 +26,13 @@
             <p class="portfolio-description">{{ portfolio.description || '暂无描述' }}</p>
             <div class="portfolio-meta">
               <div class="portfolio-author">
-                <img 
-                  :src="portfolio.avatarUrl || '/img/default.jpg'" 
-                  alt="作者头像" 
-                  class="author-avatar"
-                />
+                <router-link :to="`/profile/${portfolio.userName}`" class="author-avatar-link">
+                  <img 
+                    :src="portfolio.avatarUrl || '/img/default.jpg'" 
+                    alt="作者头像" 
+                    class="author-avatar"
+                  />
+                </router-link>
                 <span>{{ portfolio.userName || '未知作者' }}</span>
               </div>
               <div class="portfolio-date">
@@ -384,6 +386,24 @@ onMounted(() => {
   color: #64748b;
   font-size: 1.1rem;
   margin-bottom: 2rem;
+}
+
+/* ===== 头像样式 ===== */
+.author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.author-avatar-link {
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.author-avatar-link:hover {
+  transform: scale(1.05);
 }
 
 /* ===== 动画效果 ===== */

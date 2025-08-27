@@ -35,6 +35,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserFollowingMapper getUserFollowingMapper() {
+        return userFollowingMapper;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public User selectByName(String name) {
         System.out.println("UserServiceImpl.selectByName: 直接从数据库加载用户: " + name);
@@ -103,10 +108,16 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         
-        // userId是当前用户ID，followerId是作者ID
-        // 检查当前用户(userId)是否关注了作者(followerId)
-        Integer result = userFollowingMapper.isFollowing(userId, followerId);
-        return result == 1; // 返回 true 如果存在关注关系
+        // userId是当前用户ID（关注者），followerId是作者ID（被关注者）
+        // 在数据库中：user_id=被关注者，follower_id=关注者
+        // 所以查询时：user_id=followerId（作者），follower_id=userId（当前用户）
+        System.out.println("isFollowing - 检查关注状态: 当前用户ID=" + userId + ", 作者ID=" + followerId);
+        System.out.println("isFollowing - 数据库查询: user_id=" + followerId + ", follower_id=" + userId);
+        Integer result = userFollowingMapper.isFollowing(followerId, userId);
+        System.out.println("isFollowing - 查询结果: " + result);
+        boolean isFollowing = result == 1;
+        System.out.println("isFollowing - 最终结果: " + isFollowing);
+        return isFollowing; // 返回 true 如果存在关注关系
     }
 
     @Override
@@ -268,21 +279,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "users", key = "#userId"),
             @CacheEvict(value = "users", key = "#followerId"),
-            @CacheEvict(value = "isFollowing", key = "#userId + '-' + #followerId"),
-            @CacheEvict(value = "followingCount", key = "#userId"),
-            @CacheEvict(value = "fansCount", key = "#followerId")
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "isFollowing", key = "#followerId + '-' + #userId"),
+            @CacheEvict(value = "followingCount", key = "#followerId"),
+            @CacheEvict(value = "fansCount", key = "#userId")
     })
     @Transactional
-    public boolean toggleFollow(Long userId, Long followerId) {
-        // 这里userId是当前用户，followerId是要关注的作者
-        if (userId == null || followerId == null || userId.equals(followerId)) {
+    public boolean toggleFollow(Long followerId, Long userId) {
+        // 这里followerId是当前用户（关注者），userId是要关注的作者（被关注者）
+        if (followerId == null || userId == null || followerId.equals(userId)) {
             // 用户不能关注自己，或者参数无效
             return false;
         }
         
+        System.out.println("toggleFollow - 关注者ID: " + followerId + ", 被关注者ID: " + userId);
+        
         // 检查当前用户是否已经关注了作者
+        // 在following表中：user_id=被关注者，follower_id=关注者
         boolean isCurrentlyFollowing = userFollowingMapper.isFollowing(userId, followerId) == 1;
 
         if (isCurrentlyFollowing) {

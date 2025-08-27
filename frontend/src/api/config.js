@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/auth'
+import { getSafeUserFromStorage, debugId } from '@/utils/bigint-helper'
 
 // 创建axios实例
 const request = axios.create({
@@ -36,17 +37,17 @@ request.interceptors.request.use(
     }
     
     // 从本地存储中获取用户信息，如果存在则添加认证头
-    const storedUser = localStorage.getItem('hive_auth_user')
+    const storedUser = getSafeUserFromStorage()
     if (storedUser) {
       try {
-        const user = JSON.parse(storedUser)
-        if (user && user.token) {
-          config.headers['Authorization'] = `Bearer ${user.token}`
-        } else if (user && user.id) {
+        if (storedUser && storedUser.token) {
+          config.headers['Authorization'] = `Bearer ${storedUser.token}`
+        } else if (storedUser && storedUser.id) {
           // 如果没有token但有用户ID，可能是旧的存储格式，尝试刷新用户信息
-          console.warn('用户信息中没有token，但有用户ID:', user.id)
+          console.warn('用户信息中没有token，但有用户ID:', storedUser.id)
+          debugId(storedUser.id, 'API请求中的用户ID')
         } else {
-          console.warn('用户信息中没有token:', user)
+          console.warn('用户信息中没有token:', storedUser)
         }
       } catch (e) {
         console.error('解析用户信息失败:', e)

@@ -235,6 +235,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { request } from '@/api'
+import { ensureBigIntAsString, debugId } from '@/utils/bigint-helper'
 
 const route = useRoute()
 const router = useRouter()
@@ -327,17 +328,30 @@ const toggleFollow = async () => {
   
   try {
     isLoading.value = true
-    await request({
-      url: `/api/user/${profileData.value.user.id}/follow`,
+    // 确保用户ID作为字符串处理，避免JavaScript大整数精度丢失
+    const userIdStr = ensureBigIntAsString(profileData.value.user.id);
+    debugId(profileData.value.user.id, '目标用户ID');
+    console.log('关注操作 - 目标用户ID (字符串):', userIdStr);
+    const response = await request({
+      url: `/api/user/${userIdStr}/follow`,
       method: 'post'
     })
-    // 更新关注状态
-    profileData.value.isFollowed = !profileData.value.isFollowed
-    // 更新粉丝数
-    if (profileData.value.isFollowed) {
-      profileData.value.followersCount++
+    
+    console.log('关注响应:', response)
+    
+    // 检查响应格式并更新关注状态 - 响应数据直接是对象
+    if (response && response.isFollowing !== undefined) {
+      // 后端返回的是 isFollowing，我们需要更新为 isFollowed
+      profileData.value.isFollowed = response.isFollowing
+      
+      // 更新粉丝数
+      if (response.isFollowing) {
+        profileData.value.followersCount++
+      } else {
+        profileData.value.followersCount--
+      }
     } else {
-      profileData.value.followersCount--
+      console.error('响应格式错误:', response)
     }
   } catch (error) {
     console.error('关注操作失败:', error)

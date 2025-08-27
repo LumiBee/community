@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>清理localStorage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .action-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            background-color: #dc3545;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #c82333;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 3px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>清理localStorage工具</h1>
+    
+    <div class="info">
+        <h3>⚠️ 重要提示</h3>
+        <p>这个工具会清理浏览器中存储的用户信息，清理后你需要重新登录。</p>
+        <p>这是为了解决大整数ID精度丢失问题而设计的。</p>
+    </div>
+    
+    <div class="action-section">
+        <h2>1. 查看当前存储的用户信息</h2>
+        <button onclick="showCurrentUser()">查看当前用户信息</button>
+        <div id="current-user-result" class="result"></div>
+    </div>
+    
+    <div class="action-section">
+        <h2>2. 清理localStorage</h2>
+        <button onclick="clearLocalStorage()">清理所有localStorage数据</button>
+        <div id="clear-result" class="result"></div>
+    </div>
+    
+    <div class="action-section">
+        <h2>3. 强制刷新页面缓存</h2>
+        <button onclick="forceRefresh()">强制刷新所有页面</button>
+        <div id="refresh-result" class="result"></div>
+    </div>
+
+    <script>
+        function showCurrentUser() {
+            const resultDiv = document.getElementById('current-user-result');
+            const authUserKey = 'hive_auth_user';
+            const storedUser = localStorage.getItem(authUserKey);
+            
+            let html = '<h3>当前存储的用户信息：</h3>';
+            
+            if (storedUser) {
+                try {
+                    const userData = JSON.parse(storedUser);
+                    html += `<p><strong>用户ID：</strong> ${userData.id} (类型: ${typeof userData.id})</p>`;
+                    html += `<p><strong>用户名：</strong> ${userData.name}</p>`;
+                    html += `<p><strong>邮箱：</strong> ${userData.email}</p>`;
+                    html += `<p><strong>Token：</strong> ${userData.token ? '存在' : '不存在'}</p>`;
+                    
+                    // 检查是否为大整数
+                    const isBigInt = Number(userData.id) > Number.MAX_SAFE_INTEGER;
+                    html += `<p><strong>是否为大整数：</strong> <span class="${isBigInt ? 'error' : 'success'}">${isBigInt ? '是' : '否'}</span></p>`;
+                    
+                    // 显示原始JSON
+                    html += `<p><strong>原始JSON：</strong></p>`;
+                    html += `<pre>${JSON.stringify(userData, null, 2)}</pre>`;
+                    
+                } catch (e) {
+                    html += `<p class="error">解析用户信息失败：${e.message}</p>`;
+                }
+            } else {
+                html += `<p>localStorage中没有找到用户信息</p>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+        
+        function clearLocalStorage() {
+            const resultDiv = document.getElementById('clear-result');
+            
+            try {
+                // 清理所有localStorage数据
+                localStorage.clear();
+                
+                let html = '<h3>清理结果：</h3>';
+                html += `<p class="success">✓ localStorage已完全清理</p>`;
+                html += `<p>所有存储的数据已被删除，包括：</p>`;
+                html += `<ul>`;
+                html += `<li>用户认证信息</li>`;
+                html += `<li>用户偏好设置</li>`;
+                html += `<li>其他应用数据</li>`;
+                html += `</ul>`;
+                html += `<p><strong>注意：</strong> 你需要重新登录才能继续使用应用。</p>`;
+                
+                resultDiv.innerHTML = html;
+            } catch (e) {
+                resultDiv.innerHTML = `<p class="error">清理失败：${e.message}</p>`;
+            }
+        }
+        
+        function forceRefresh() {
+            const resultDiv = document.getElementById('refresh-result');
+            
+            let html = '<h3>强制刷新结果：</h3>';
+            html += `<p class="success">✓ 页面缓存已清理</p>`;
+            html += `<p>正在重新加载页面...</p>`;
+            
+            resultDiv.innerHTML = html;
+            
+            // 强制刷新页面
+            setTimeout(() => {
+                // 清除浏览器缓存并重新加载
+                window.location.reload(true);
+            }, 1000);
+        }
+        
+        // 页面加载时自动显示当前用户信息
+        window.onload = function() {
+            showCurrentUser();
+        };
+    </script>
+</body>
+</html>

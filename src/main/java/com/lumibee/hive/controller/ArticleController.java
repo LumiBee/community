@@ -36,8 +36,6 @@ public class ArticleController {
 
     @Autowired private UserService userService;
 
-
-
     @PostMapping("/api/article/{articleId}/like")
     @Operation(summary = "切换文章点赞状态", description = "用户点赞或取消点赞文章")
     @ApiResponses(value = {

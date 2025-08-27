@@ -1,16 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 import { authAPI } from '@/api'
+import { getSafeUserFromStorage, setSafeUserToStorage, debugId } from '@/utils/bigint-helper'
 
 // 本地存储键名
 const AUTH_USER_KEY = 'hive_auth_user'
 
 export const useAuthStore = defineStore('auth', () => {
-  // 尝试从本地存储中恢复用户信息
-  const storedUser = localStorage.getItem(AUTH_USER_KEY)
+  // 尝试从本地存储中恢复用户信息，使用安全的JSON解析
+  const storedUser = getSafeUserFromStorage(AUTH_USER_KEY)
   
   // 状态
-  const user = ref(storedUser ? JSON.parse(storedUser) : null)
+  const user = ref(storedUser)
   const isLoading = ref(false)
   const error = ref(null)
   
@@ -51,12 +52,17 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 方法
   const setUser = (userData) => {
+    // 调试用户ID
+    if (userData && userData.id) {
+      debugId(userData.id, '用户ID');
+    }
+    
     user.value = userData
     error.value = null
     
     // 将用户信息保存到本地存储，实现页面刷新后的登录状态保持
     if (userData) {
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(userData))
+      setSafeUserToStorage(userData, AUTH_USER_KEY)
       // 启动token自动刷新
       startTokenRefresh()
     } else {

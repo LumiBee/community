@@ -76,15 +76,17 @@
                     </span>
                   </div>
                   <div class="author-info">
-                    <img
-                      v-if="portfolio.avatarUrl"
-                      :src="portfolio.avatarUrl"
-                      alt="作者头像"
-                      class="author-avatar"
-                    />
-                    <div class="author-avatar-fallback" v-else>
-                      {{ (portfolio.userName || '佚名').charAt(0).toUpperCase() }}
-                    </div>
+                    <router-link :to="`/profile/${portfolio.userName}`" class="author-avatar-link">
+                      <img
+                        v-if="portfolio.avatarUrl"
+                        :src="portfolio.avatarUrl"
+                        alt="作者头像"
+                        class="author-avatar"
+                      />
+                      <div class="author-avatar-fallback" v-else>
+                        {{ (portfolio.userName || '佚名').charAt(0).toUpperCase() }}
+                      </div>
+                    </router-link>
                     <span class="author-name">{{ portfolio.userName || '佚名' }}</span>
                   </div>
                 </div>
@@ -447,6 +449,16 @@ onMounted(() => {
   height: 24px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+.author-avatar-link {
+  text-decoration: none;
+  transition: transform 0.2s ease;
+  display: inline-block;
+}
+
+.author-avatar-link:hover {
+  transform: scale(1.05);
 }
 
 .author-avatar-fallback {
