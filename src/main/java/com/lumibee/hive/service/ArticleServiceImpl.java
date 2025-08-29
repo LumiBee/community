@@ -15,6 +15,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -362,7 +363,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Cacheable("featuredArticles")
+    @Cacheable(value = "featuredArticles", key = "'all'")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> selectFeaturedArticles() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -375,14 +376,89 @@ public class ArticleServiceImpl implements ArticleService {
         if (featuredArticles.isEmpty()) {
             return new ArrayList<>(); // 如果没有精选文章，返回空列表
         }
+        
+        // 获取所有用户ID
+        List<Long> userIds = featuredArticles.stream()
+                .map(Article::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // 批量获取用户信息
+        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+        
         List<ArticleExcerptDTO> articleExcerptDTOS = new ArrayList<>();
         for (Article article : featuredArticles) {
             ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
             BeanUtils.copyProperties(article, articleDTO);
+            
+            // 设置用户信息
+            User user = userMap.get(article.getUserId());
+            if (user != null) {
+                articleDTO.setUserName(user.getName());
+                articleDTO.setAvatarUrl(user.getAvatarUrl());
+            }
+            
             articleExcerptDTOS.add(articleDTO);
         }
 
         return articleExcerptDTOS;
+    }
+
+    /**
+     * 设置文章精选状态
+     */
+    @CacheEvict(value = "featuredArticles", key = "'all'")
+    @Transactional
+    public void setArticleFeatured(Integer articleId, boolean isFeatured) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new RuntimeException("文章不存在");
+        }
+        
+        article.setFeatured(isFeatured);
+        article.setGmtModified(LocalDateTime.now());
+        articleMapper.updateById(article);
+        
+        // 清除相关缓存
+        if (article.getSlug() != null) {
+            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+        }
+    }
+
+    /**
+     * 批量设置文章精选状态
+     */
+    @CacheEvict(value = "featuredArticles", key = "'all'")
+    @Transactional
+    public void batchSetArticleFeatured(List<Integer> articleIds, boolean isFeatured) {
+        if (articleIds == null || articleIds.isEmpty()) {
+            return;
+        }
+        
+        for (Integer articleId : articleIds) {
+            Article article = articleMapper.selectById(articleId);
+            if (article != null) {
+                article.setFeatured(isFeatured);
+                article.setGmtModified(LocalDateTime.now());
+                articleMapper.updateById(article);
+                
+                // 清除相关缓存
+                if (article.getSlug() != null) {
+                    Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+                }
+            }
+        }
+    }
+
+    /**
+     * 定时清除精选文章缓存（每10分钟执行一次）
+     */
+    @CacheEvict(value = "featuredArticles", key = "'all'")
+    @Scheduled(fixedRate = 600000) // 10分钟 = 600000毫秒
+    public void scheduledClearFeaturedArticlesCache() {
+        // 这个方法只是用来清除缓存，不需要实现
+        // 定时任务会自动清除精选文章缓存，确保数据新鲜度
     }
 
     @Override
@@ -546,10 +622,15 @@ public class ArticleServiceImpl implements ArticleService {
             @CacheEvict(value = "featuredArticles", allEntries = true)
     })
     @Transactional
-    public ArticleDetailsDTO deleteArticleById(Integer articleId) {
+    public ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在");
+        }
+        
+        // 验证用户权限：只有文章作者才能删除文章
+        if (!article.getUserId().equals(userId)) {
+            throw new RuntimeException("无权限删除此文章");
         }
 
         if (article.getSlug() != null) {

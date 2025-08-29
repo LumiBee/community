@@ -7,18 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
@@ -27,6 +21,12 @@ import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @Tag(name = "文章管理", description = "文章相关的 API 接口")
@@ -126,6 +126,19 @@ public class ArticleController {
             article.setFavorited(false);
         }
 
+        return ResponseEntity.ok(article);
+    }
+
+    /**
+     * 根据ID获取文章详情API
+     */
+    @GetMapping("/api/article/id/{articleId}")
+    @ResponseBody
+    public ResponseEntity<ArticleDetailsDTO> getArticleById(@PathVariable("articleId") Integer articleId) {
+        ArticleDetailsDTO article = articleService.getArticleByIdSimple(articleId);
+        if (article == null) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(article);
     }
 

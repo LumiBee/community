@@ -124,7 +124,6 @@ const loadTags = async () => {
   try {
     loading.value = true
     const response = await tagAPI.getAllTags()
-    console.log('获取到的标签数据:', response)
     
     if (response && Array.isArray(response)) {
       // 确保每个标签有必要的属性
@@ -136,7 +135,6 @@ const loadTags = async () => {
         description: tag.description || '',
         createdAt: tag.gmtCreate || tag.createdAt || new Date().toISOString()
       }))
-      console.log('处理后的标签数据:', tags.value)
     } else {
       console.error('服务器返回的数据格式不正确:', response)
       tags.value = []

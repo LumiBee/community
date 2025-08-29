@@ -1,5 +1,21 @@
 package com.lumibee.hive.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lumibee.hive.config.SlugGenerator;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
@@ -9,18 +25,6 @@ import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.User;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
@@ -33,6 +37,13 @@ public class PortfolioServiceImpl implements PortfolioService {
     @CacheEvict(value = "allPortfolios", allEntries = true)
     @Transactional
     public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId) {
+        return selectOrCreatePortfolio(portfolioName, userId, "Portfolio for " + portfolioName);
+    }
+
+    @Override
+    @CacheEvict(value = "allPortfolios", allEntries = true)
+    @Transactional
+    public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId, String description) {
         if (portfolioName == null || portfolioName.isEmpty()) {
             return null; // 如果传入的portfolioName为空，直接返回null
         }
@@ -49,7 +60,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             portfolio.setGmtCreate(LocalDateTime.now());
             portfolio.setGmtModified(LocalDateTime.now());
             portfolio.setSlug(SlugGenerator.generateSlug(portfolioName));
-            portfolio.setDescription("Portfolio for " + portfolioName);
+            portfolio.setDescription(description != null ? description : "Portfolio for " + portfolioName);
             portfolio.setUserId(userId);
             portfolioMapper.insert(portfolio);
         }
@@ -61,11 +72,20 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Cacheable(value = "allPortfolios")
     @Transactional(readOnly = true)
     public List<PortfolioDetailsDTO> selectAllPortfolios() {
+        System.out.println("=== 开始获取所有作品集 ===");
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("deleted", 0).orderByDesc("gmt_modified");
         List<Portfolio> portfolios = portfolioMapper.selectList(queryWrapper);
+        
+        System.out.println("从数据库查询到的作品集数量: " + (portfolios != null ? portfolios.size() : 0));
+        if (portfolios != null) {
+            for (Portfolio p : portfolios) {
+                System.out.println("作品集: ID=" + p.getId() + ", name=" + p.getName() + ", userId=" + p.getUserId());
+            }
+        }
 
         if (portfolios == null || portfolios.isEmpty()) {
+            System.out.println("没有找到作品集，返回空列表");
             return List.of();
         }
 

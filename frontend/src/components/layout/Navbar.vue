@@ -48,14 +48,23 @@
               @click="showSearchResults = false"
             >
               <div class="search-result-avatar">
-                <img v-if="article.avatarUrl" :src="article.avatarUrl" alt="作者头像" />
+                                    <img v-if="article.avatarUrl" :src="getAuthorAvatarUrl(article.avatarUrl)" alt="作者头像" />
                 <span v-else>{{ (article.userName || '匿名').charAt(0).toUpperCase() }}</span>
               </div>
               <div class="search-result-content">
                 <div class="search-result-title">{{ article.title }}</div>
                 <div class="search-result-meta">
-                  <span>{{ article.userName || '匿名用户' }}</span>
-                  <span>👁 {{ article.viewCount || 0 }} • ❤️ {{ article.likes || 0 }}</span>
+                  <span class="author-name">{{ article.userName || '匿名用户' }}</span>
+                  <div class="stats">
+                    <span class="stat-item">
+                      <i class="fas fa-eye"></i>
+                      <span class="stat-value">{{ formatNumber(article.viewCount || 0) }}</span>
+                    </span>
+                    <span class="stat-item">
+                      <i class="fas fa-heart"></i>
+                      <span class="stat-value">{{ formatNumber(article.likes || 0) }}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
             </router-link>
@@ -94,7 +103,7 @@
                 :aria-expanded="userDropdownOpen"
               >
                 <img
-                  :src="authStore.userAvatar || '/img/default01.jpg'"
+                  :src="getAvatarUrl(authStore.userAvatar)"
                   alt="用户头像"
                   class="user-avatar"
                 />
@@ -102,7 +111,7 @@
               <ul class="dropdown-menu dropdown-menu-end" :class="{ 'show': userDropdownOpen }">
                 <li class="dropdown-header">
                   <div class="user-info">
-                    <img :src="authStore.userAvatar || '/img/default01.jpg'" alt="用户头像" />
+                    <img :src="getAvatarUrl(authStore.userAvatar)" alt="用户头像" />
                     <strong>{{ authStore.userName || '用户' }}</strong>
                   </div>
                 </li>
@@ -147,6 +156,7 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { articleAPI } from '@/api'
+import { getAvatarUrl } from '@/utils/avatar-helper'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -234,6 +244,18 @@ const toggleUserDropdown = () => {
 const closeUserDropdown = () => {
   userDropdownOpen.value = false
 }
+
+// 数字格式化方法
+const formatNumber = (num) => {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M'
+  } else if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K'
+  }
+  return num.toString()
+}
+
+// 使用全局工具函数，移除本地定义
 
 // 点击外部隐藏搜索结果和移动端菜单
 const handleClickOutside = (event) => {
@@ -505,38 +527,40 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   margin-top: 0.5rem;
   overflow: hidden;
-  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideDown 0.2s ease-out;
   z-index: 1000;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 .search-result-item {
   display: flex;
   align-items: center;
-  padding: 1rem;
+  padding: 0.875rem 1rem;
   text-decoration: none;
   color: inherit;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease;
   border-bottom: 1px solid #f8f9fa;
 }
 
 .search-result-item:hover {
-  background: #f8f9fa;
-  transform: translateX(4px);
+  background: #f1f3f4;
+  transform: translateX(1px);
+  box-shadow: inset 2px 0 0 #6c757d;
 }
 
 .search-result-item:last-child {
@@ -544,17 +568,19 @@ onUnmounted(() => {
 }
 
 .search-result-avatar {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
+  background: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
+  color: #6c757d;
+  font-weight: 500;
+  font-size: 0.75rem;
   margin-right: 0.75rem;
   flex-shrink: 0;
+  border: 1px solid #e9ecef;
 }
 
 .search-result-avatar img {
@@ -570,26 +596,60 @@ onUnmounted(() => {
 }
 
 .search-result-title {
-  font-weight: 600;
+  font-weight: 500;
   color: #2c3e50;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.875rem;
+  line-height: 1.3;
 }
 
 .search-result-meta {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: #6c757d;
   display: flex;
+  align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
+}
+
+.author-name {
+  font-weight: 500;
+  color: #495057;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffc107;
+}
+
+.stat-item i {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
+
+.stat-value {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #ffc107;
 }
 
 .search-status {
   padding: 1rem;
   text-align: center;
   color: #6c757d;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 /* 用户操作区域 */
@@ -1080,6 +1140,53 @@ onUnmounted(() => {
   .user-avatar {
     width: 36px;
     height: 36px;
+  }
+  
+  .search-results {
+    border-radius: 6px;
+    margin-top: 0.25rem;
+  }
+  
+  .search-result-item {
+    padding: 0.75rem;
+  }
+  
+  .search-result-item:hover {
+    background: #f1f3f4;
+    transform: translateX(0);
+    box-shadow: inset 1px 0 0 #6c757d;
+  }
+  
+  .search-result-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 0.7rem;
+    margin-right: 0.5rem;
+  }
+  
+  .search-result-title {
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .search-result-meta {
+    font-size: 0.7rem;
+  }
+  
+  .stats {
+    gap: 0.5rem;
+  }
+  
+  .stat-item {
+    gap: 0.2rem;
+  }
+  
+  .stat-item i {
+    font-size: 0.65rem;
+  }
+  
+  .stat-value {
+    font-size: 0.65rem;
   }
   
   .mobile-menu {

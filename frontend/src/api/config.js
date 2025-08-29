@@ -38,6 +38,7 @@ request.interceptors.request.use(
     
     // 从本地存储中获取用户信息，如果存在则添加认证头
     const storedUser = getSafeUserFromStorage()
+    
     if (storedUser) {
       try {
         if (storedUser && storedUser.token) {

@@ -68,7 +68,7 @@
                     <div class="author-info">
                       <img
                         v-if="article.avatarUrl"
-                        :src="article.avatarUrl"
+                        :src="getAuthorAvatarUrl(article.avatarUrl)"
                         alt="作者头像"
                         class="author-avatar"
                       />
@@ -176,6 +176,7 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { tagAPI, articleAPI } from '@/api'
+import { getAuthorAvatarUrl } from '@/utils/avatar-helper'
 
 const route = useRoute()
 const router = useRouter()

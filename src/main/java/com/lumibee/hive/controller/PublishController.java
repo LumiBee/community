@@ -115,7 +115,8 @@ public class PublishController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         
-        ArticleDetailsDTO deletedArticle = articleService.deleteArticleById(articleId);
+        Long userId = user.getId();
+        ArticleDetailsDTO deletedArticle = articleService.deleteArticleById(articleId, userId);
 
         if (deletedArticle != null) {
             return ResponseEntity.ok(deletedArticle);

@@ -24,6 +24,8 @@ public class ImgServiceImpl implements ImgService {
     
     @Autowired private UserService userService;
     
+    @Autowired private CacheService cacheService;
+    
     @Value("${avatar.max.size}") // 默认2MB
     private long maxAvatarSize;
     
@@ -68,6 +70,15 @@ public class ImgServiceImpl implements ImgService {
         user.setGmtModified(LocalDateTime.now());
         userService.updateById(user);
         
+        // 自动清理相关缓存
+        try {
+            cacheService.clearUserArticleCaches(userId);
+            System.out.println("ImgService: 用户头像更新后，已自动清理相关缓存");
+        } catch (Exception e) {
+            System.err.println("ImgService: 清理缓存失败: " + e.getMessage());
+            // 缓存清理失败不影响头像上传的成功
+        }
+        
         return avatarUrl;
     }
     
@@ -87,6 +98,13 @@ public class ImgServiceImpl implements ImgService {
 
     @Override
     public String uploadCover(Long userId, MultipartFile coverImageFile) throws IOException{
+        // 调试信息
+        System.out.println("ImgService.uploadCover 被调用:");
+        System.out.println("用户ID: " + userId);
+        System.out.println("文件名: " + coverImageFile.getOriginalFilename());
+        System.out.println("文件大小: " + coverImageFile.getSize() + " 字节");
+        System.out.println("内容类型: " + coverImageFile.getContentType());
+        
         // 验证参数
         if (userId == null || coverImageFile == null || coverImageFile.isEmpty()) {
             throw new IllegalArgumentException("Invalid user ID or cover image file");
@@ -154,7 +172,7 @@ public class ImgServiceImpl implements ImgService {
     }
 
     private void deleteBackgroundImg(User user) {
-        if (user == null || !StringUtils.hasText(user.getAvatarUrl())) {
+        if (user == null || !StringUtils.hasText(user.getBackgroundImgUrl())) {
             return;
         }
 

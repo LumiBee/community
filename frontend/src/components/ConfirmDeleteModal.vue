@@ -1,6 +1,6 @@
 <template>
   <div v-if="visible" class="confirm-delete-overlay" @click="handleOverlayClick">
-    <div class="confirm-delete-modal" @click.stop>
+    <div class="confirm-delete-modal" :style="modalPosition" @click.stop>
       <!-- 头部 -->
       <div class="modal-header">
         <div class="warning-icon">
@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue'
+import { defineProps, defineEmits, computed, watch } from 'vue'
 
 const props = defineProps({
   visible: {
@@ -55,10 +55,55 @@ const props = defineProps({
   confirmText: {
     type: String,
     default: '确认删除'
+  },
+  positionIndex: {
+    type: Number,
+    default: 0
   }
 })
 
 const emit = defineEmits(['confirm', 'cancel', 'close'])
+
+// 根据位置索引计算弹窗位置
+const modalPosition = computed(() => {
+  if (!props.visible) {
+    return {}
+  }
+
+  // 获取视口尺寸
+  const viewportWidth = window.innerWidth
+  const isMobile = viewportWidth < 768
+
+  // 根据屏幕尺寸调整位置
+  if (isMobile) {
+    // 移动端：居中显示
+    const positions = [
+      { top: '25%', left: '50%' },
+      { top: '35%', left: '50%' },
+      { top: '45%', left: '50%' },
+      { top: '55%', left: '50%' },
+      { top: '65%', left: '50%' },
+      { top: '75%', left: '50%' }
+    ]
+    const index = Math.min(props.positionIndex, positions.length - 1)
+    return positions[index]
+  } else {
+    // 桌面端：2列布局，每个位置对应不同的弹窗位置
+    const positions = [
+      // 第一行：位置0和1
+      { top: '25%', left: '30%' },
+      { top: '25%', left: '70%' },
+      // 第二行：位置2和3
+      { top: '50%', left: '30%' },
+      { top: '50%', left: '70%' },
+      // 第三行：位置4和5
+      { top: '75%', left: '30%' },
+      { top: '75%', left: '70%' }
+    ]
+    const index = Math.min(props.positionIndex, positions.length - 1)
+    return positions[index]
+  }
+})
 
 const handleConfirm = () => {
   emit('confirm')
@@ -67,6 +112,17 @@ const handleConfirm = () => {
 const handleCancel = () => {
   emit('cancel')
 }
+
+// 监听弹窗显示状态，控制页面滚动
+watch(() => props.visible, (newVisible) => {
+  if (newVisible) {
+    // 弹窗显示时禁用页面滚动
+    document.body.style.overflow = 'hidden'
+  } else {
+    // 弹窗隐藏时恢复页面滚动
+    document.body.style.overflow = ''
+  }
+})
 
 const handleOverlayClick = () => {
   emit('close')
@@ -82,30 +138,30 @@ const handleOverlayClick = () => {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(2px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 1050;
-  padding: 1rem;
+  pointer-events: auto;
 }
 
 .confirm-delete-modal {
+  position: absolute;
   background: white;
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   max-width: 400px;
   width: 100%;
-  animation: modalSlideIn 0.3s ease-out;
+  transform: translate(-50%, -50%);
+  animation: modalSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
 }
 
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(-10px);
+    transform: translate(-50%, -50%) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: scale(1) translateY(0);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 

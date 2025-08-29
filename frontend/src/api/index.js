@@ -11,6 +11,7 @@ export { portfolioAPI } from './portfolio'
 export { tagAPI } from './tag'
 export { favoriteAPI } from './favorite'
 export { aiAPI } from './ai'
+export { cacheAPI } from './cache'
 
 // 导入所有API模块
 import { authAPI } from './auth'
@@ -20,6 +21,7 @@ import { portfolioAPI } from './portfolio'
 import { tagAPI } from './tag'
 import { favoriteAPI } from './favorite'
 import { aiAPI } from './ai'
+import { cacheAPI } from './cache'
 
 // 默认导出所有API（用于统一导入）
 export default {
@@ -29,5 +31,6 @@ export default {
   portfolio: portfolioAPI,
   tag: tagAPI,
   favorite: favoriteAPI,
-  ai: aiAPI
+  ai: aiAPI,
+  cache: cacheAPI
 }

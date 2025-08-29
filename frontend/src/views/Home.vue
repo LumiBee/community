@@ -32,7 +32,7 @@
                   <div class="carousel-meta">
                     <div class="carousel-author">
                       <img 
-                        :src="article.avatarUrl || '/img/default01.jpg'" 
+                        :src="getAuthorAvatarUrl(article.avatarUrl)" 
                         :alt="article.userName || '匿名'"
                         class="carousel-author-avatar"
                       />
@@ -142,7 +142,7 @@
                         <router-link :to="`/profile/${article.userName}`" class="author-avatar-link">
                           <img
                             v-if="article.avatarUrl"
-                            :src="article.avatarUrl"
+                            :src="getAuthorAvatarUrl(article.avatarUrl)"
                             alt="作者头像"
                             class="author-avatar"
                           />
@@ -244,7 +244,7 @@
                     <span class="d-flex align-items-center">
                       <img
                         v-if="article.avatarUrl"
-                        :src="article.avatarUrl"
+                        :src="getAuthorAvatarUrl(article.avatarUrl)"
                         alt="作者头像"
                         style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px; object-fit: cover;"
                       />
@@ -309,6 +309,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { articleAPI, tagAPI } from '@/api'
+import { getAuthorAvatarUrl } from '@/utils/avatar-helper'
 
 const router = useRouter()
 

@@ -1,11 +1,18 @@
 package com.lumibee.hive.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import org.apache.ibatis.annotations.*;
-
 import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.model.Article;
 
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
@@ -70,14 +77,20 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<ArticleExcerptDTO> getArticlesByTagId(@Param("tagId") Integer tagId);
     @Select("SELECT count(*) from articles where user_id = #{id} and deleted = 0")
     Integer countArticlesByUserId(@Param("id")Long id);
-    @Select("SELECT a.article_id, a.title, a.excerpt, a.slug " +
+    @Select("SELECT a.article_id, a.title, a.excerpt, a.slug, a.user_id, a.gmt_modified, " +
+            "u.name AS user_name, u.avatar_url " +
             "FROM articles a " +
+            "LEFT JOIN user u ON a.user_id = u.id " +
             "WHERE a.title = #{title} AND a.status = 'published' ")
     @Results({
             @Result(property = "articleId", column = "article_id"),
             @Result(property = "title", column = "title"),
             @Result(property = "slug", column = "slug"),
             @Result(property = "excerpt", column = "excerpt"),
+            @Result(property = "userId", column = "user_id"),
+            @Result(property = "gmtModified", column = "gmt_modified"),
+            @Result(property = "userName", column = "user_name"),
+            @Result(property = "avatarUrl", column = "avatar_url")
     })
     List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
     @Select("SELECT slug, gmt_modified from articles WHERE status = 'published' AND deleted = 0")

@@ -1,15 +1,11 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.UserService;
-import com.lumibee.hive.service.RememberMeService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,13 +15,24 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.RememberMeService;
+import com.lumibee.hive.service.UserService;
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 public class LoginController {
@@ -34,8 +41,8 @@ public class LoginController {
     private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
     // JWT过期时间 - 24小时
     private static final long JWT_EXPIRATION = 86400000;
-    // JWT刷新阈值 - 当token剩余时间少于2小时时自动刷新
-    private static final long JWT_REFRESH_THRESHOLD = 7200000; // 2小时
+    // JWT刷新阈值 - 当token剩余时间少于30分钟时自动刷新
+    private static final long JWT_REFRESH_THRESHOLD = 1800000; // 30分钟
     
     @Autowired
     private UserService userService;
@@ -126,6 +133,28 @@ public class LoginController {
             return timeUntilExpiry < JWT_REFRESH_THRESHOLD;
         } catch (Exception e) {
             return false;
+        }
+    }
+    
+    /**
+     * 获取JWT令牌剩余时间（分钟）
+     * @param token JWT令牌
+     * @return 剩余时间（分钟）
+     */
+    private long getRemainingTimeInMinutes(String token) {
+        try {
+            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
+            Date expiration = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+            
+            long timeUntilExpiry = expiration.getTime() - System.currentTimeMillis();
+            return Math.max(0, timeUntilExpiry / 60000); // 转换为分钟
+        } catch (Exception e) {
+            return -1; // 错误时返回-1
         }
     }
 
@@ -293,8 +322,12 @@ public class LoginController {
             
             // 检查是否需要刷新
             if (!shouldRefreshToken(token)) {
+                // 获取剩余时间信息
+                long remainingTime = getRemainingTimeInMinutes(token);
                 responseMap.put("success", false);
-                responseMap.put("message", "token尚未需要刷新");
+                responseMap.put("message", "token尚未需要刷新，剩余时间充足");
+                responseMap.put("remainingTimeMinutes", remainingTime);
+                responseMap.put("refreshThresholdMinutes", JWT_REFRESH_THRESHOLD / 60000);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
             }
             

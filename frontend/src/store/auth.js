@@ -33,7 +33,6 @@ export const useAuthStore = defineStore('auth', () => {
     tokenRefreshTimer = setInterval(async () => {
       if (user.value?.token) {
         try {
-          console.log('检查token是否需要刷新...')
           await refreshToken()
         } catch (error) {
           console.error('自动刷新token失败:', error)
@@ -91,17 +90,21 @@ export const useAuthStore = defineStore('auth', () => {
     }
     
     try {
-      console.log('尝试刷新token...')
       const response = await authAPI.refreshToken()
       
       if (response && response.success) {
         // 更新用户信息和token
         const updatedUser = { ...user.value, ...response.user, token: response.token }
         setUser(updatedUser)
-        console.log('Token刷新成功')
         return true
       } else {
-        console.warn('Token刷新失败:', response?.message)
+        // 检查是否是"不需要刷新"的情况
+        if (response?.remainingTimeMinutes !== undefined && response?.remainingTimeMinutes > 0) {
+          // 这种情况不算失败，返回true
+          return true
+        }
+        
+        console.warn('Token刷新失败:', response?.message || '响应格式不正确')
         return false
       }
     } catch (err) {
@@ -123,7 +126,6 @@ export const useAuthStore = defineStore('auth', () => {
       
       // 检查是否有用户信息在内存中
       if (user.value && user.value.token) {
-        console.log('检查现有token:', user.value.token.substring(0, 20) + '...')
         // 验证token是否有效
         try {
           const response = await authAPI.getCurrentUser()
@@ -135,7 +137,6 @@ export const useAuthStore = defineStore('auth', () => {
               token: response.token || user.value.token // 保持现有token或使用新的
             }
             setUser(updatedUser)
-            console.log('Token验证成功，用户信息已更新')
             return true
           }
         } catch (tokenErr) {
@@ -159,7 +160,6 @@ export const useAuthStore = defineStore('auth', () => {
           token: response.token || (user.value ? user.value.token : null)
         }
         setUser(userData)
-        console.log('从后端获取用户信息成功:', userData)
         return true
       } else {
         // 如果响应为空，清除用户信息
@@ -197,19 +197,12 @@ export const useAuthStore = defineStore('auth', () => {
         'remember-me': credentials.rememberMe ? 'on' : ''
       }
       
-      console.log('发送登录请求，数据:', {
-        account: credentials.account,
-        passwordLength: credentials.password?.length,
-        rememberMe: credentials.rememberMe
-      })
-      
       try {
         // 尝试登录
         const response = await authAPI.login(loginData)
         
         // 检查响应
         if (response && response.success) {
-          console.log('登录请求成功，获取到用户信息')
           
           // 清除认证检查标记，确保下次可以正常检查
           sessionStorage.removeItem('authChecked')
@@ -224,8 +217,6 @@ export const useAuthStore = defineStore('auth', () => {
             
             // 保存用户信息到store和localStorage
             setUser(userData)
-            console.log('登录成功，用户信息:', userData)
-            console.log('JWT Token:', userData.token ? userData.token.substring(0, 20) + '...' : '未找到')
             
             // 如果不是记住我，则设置会话结束时清除标志
             if (!credentials.rememberMe) {
@@ -274,12 +265,6 @@ export const useAuthStore = defineStore('auth', () => {
       setLoading(true)
       clearError()
       
-      console.log('开始注册请求，数据:', {
-        username: signupData.username,
-        email: signupData.email,
-        passwordLength: signupData.password?.length
-      })
-      
       // 使用API模块中的register方法
       const response = await authAPI.register({
         username: signupData.username,
@@ -287,8 +272,7 @@ export const useAuthStore = defineStore('auth', () => {
         password: signupData.password,
         confirmPassword: signupData.confirmPassword
       })
-      
-      console.log('注册响应:', response)
+
       
       if (response && response.success) {
         return true
@@ -357,21 +341,13 @@ export const useAuthStore = defineStore('auth', () => {
   const logout = async () => {
     try {
       setLoading(true)
-      console.log('开始登出...')
       
       const response = await authAPI.logout()
-      console.log('登出API响应:', response)
-      
-      if (response && response.success) {
-        console.log('登出成功')
-      } else {
-        console.warn('登出响应异常:', response)
-      }
+
     } catch (err) {
       console.error('登出失败:', err)
     } finally {
       // 无论API调用是否成功，都要清除本地状态
-      console.log('清除本地用户状态')
       // 使用setUser(null)来清除用户状态和本地存储
       setUser(null)
       // 清除认证检查标记
@@ -386,11 +362,10 @@ export const useAuthStore = defineStore('auth', () => {
       setLoading(true)
       clearError()
       
-      // 这里需要使用userAPI，但我们目前使用authAPI
-      // 如果有专门的userAPI，应该使用userAPI.updateProfile
-      const response = await authAPI.getCurrentUser() // 临时使用，实际应该是更新API
-      if (response) {
-        setUser({...response, ...profileData})
+      // 直接更新本地用户信息，不调用API
+      if (user.value) {
+        const updatedUser = { ...user.value, ...profileData }
+        setUser(updatedUser)
       }
       return true
     } catch (err) {

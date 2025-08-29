@@ -33,7 +33,7 @@
               >
                 <i class="fas fa-folder folder-icon"></i>
                 <span class="folder-name">{{ folder.name }}</span>
-                <span class="folder-count">{{ folder.articleCount || 0 }}</span>
+                <span class="folder-count">{{ folder.articlesCount || 0 }}</span>
                 <i class="fas fa-check check-icon" v-if="selectedFolderIds.includes(folder.id)"></i>
               </div>
             </div>

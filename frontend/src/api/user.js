@@ -32,12 +32,25 @@ export const userAPI = {
   /**
    * 更新用户资料
    * @param {Object} userData - 用户数据
+   * @param {string} userData.userName - 用户名
+   * @param {string} userData.email - 邮箱
+   * @param {string} userData.bio - 个人简介
    */
   updateProfile(userData) {
+    const params = new URLSearchParams()
+    params.append('userName', userData.userName)
+    params.append('email', userData.email)
+    if (userData.bio) {
+      params.append('bio', userData.bio)
+    }
+    
     return request({
       url: '/api/user/profile',
       method: 'put',
-      data: userData
+      data: params,
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
   },
 
@@ -135,6 +148,16 @@ export const userAPI = {
   isFollowing(userId) {
     return request({
       url: `/api/user/${userId}/is-following`,
+      method: 'get'
+    })
+  },
+
+  /**
+   * 获取当前用户信息
+   */
+  getCurrentUser() {
+    return request({
+      url: '/api/user/current',
       method: 'get'
     })
   }

@@ -195,11 +195,11 @@
       cursor: pointer;
       
       &:hover {
-        background: var(--gradient-warm);
-        color: var(--white);
+        background: #f1f3f4;
+        color: var(--text-primary);
         text-decoration: none;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(232, 202, 15, 0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
       
       &:last-child {

@@ -13,13 +13,26 @@
     
     <!-- 顶部封面区域 -->
     <div class="profile-cover" :style="coverStyle">
+      <!-- 骨架屏 -->
+      <div v-if="isLoading" class="cover-skeleton"></div>
+      
+      <!-- 预加载封面图片 -->
+      <img 
+        v-if="profileData.user?.backgroundImgUrl" 
+        :src="profileData.user.backgroundImgUrl" 
+        :alt="`${profileData.user?.name || '用户'}的封面图片`"
+        class="cover-image-preload"
+        @load="onCoverImageLoad"
+        @error="onCoverImageError"
+      />
+      
       <div class="cover-overlay"></div>
       <div class="cover-pattern"></div>
       <div class="container position-relative h-100">
         <!-- 如果是页面所有者，显示更换封面按钮 -->
         <div v-if="isOwner" class="cover-edit-btn">
           <label for="coverUpload" class="btn btn-light btn-modern" :class="{ 'uploading': isLoading }">
-            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-camera'"></i>
+            <i class="fas" :class="isLoading ? 'fa-spinner fa-spin' : 'fa-crop'"></i>
             <span class="ms-2">{{ isLoading ? '上传中...' : '更换封面' }}</span>
           </label>
           <input 
@@ -61,18 +74,34 @@
             </div>
             
             <div v-else class="row">
-              <div v-for="(article, index) in articles" :key="article.id" class="col-md-6 mb-4">
+              <div v-for="(article, index) in articles" :key="article.id || article.articleId" class="col-md-6 mb-4">
                 <div class="article-card modern-article" :style="{animationDelay: index * 0.1 + 's'}">
                   <div class="article-card-inner">
                     <div class="article-badge">文章</div>
                     <router-link :to="`/article/${article.slug}`">
-                      <div class="article-cover" :style="`background-image: url(${article.coverImg || '/img/default.jpg'})`">
+                      <div class="article-cover">
+                        <!-- 文章封面骨架屏 -->
+                        <div v-if="!article.coverImgLoaded" class="article-cover-skeleton"></div>
+                        <!-- 文章封面图片 -->
+                        <img 
+                          v-if="article.coverImg" 
+                          :src="article.coverImg" 
+                          :alt="`${article.title}的封面图片`"
+                          class="article-cover-image"
+                          loading="lazy"
+                          @load="onArticleCoverLoad(article)"
+                          @error="onArticleCoverError(article)"
+                        />
+                        <!-- 默认封面 -->
+                        <img 
+                          v-else 
+                          src="/img/default.jpg" 
+                          :alt="`${article.title}的默认封面`"
+                          class="article-cover-image"
+                          loading="lazy"
+                          @load="onArticleCoverLoad(article)"
+                        />
                         <div class="article-cover-overlay"></div>
-                        <div class="article-cover-content">
-                          <div class="article-cover-icon">
-                            <i class="fas fa-external-link-alt"></i>
-                          </div>
-                        </div>
                       </div>
                     </router-link>
                     <div class="article-content">
@@ -80,19 +109,39 @@
                         {{ article.title }}
                       </router-link>
                       <p class="article-excerpt">{{ article.excerpt }}</p>
+                      
+                      <!-- 文章操作按钮 - 仅页面所有者可见 -->
+                      <div v-if="isOwner" class="article-actions">
+                        <router-link 
+                          :to="`/publish?edit=${article.id || article.articleId}`" 
+                          class="action-btn edit-btn"
+                          title="编辑文章"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </router-link>
+                        <button 
+                          @click="confirmDeleteArticle(article, index)" 
+                          class="action-btn delete-btn"
+                          title="删除文章"
+                        >
+                          <i class="fas fa-trash"></i>
+                        </button>
+                      </div>
+                      
                       <div class="article-meta modern-meta">
                         <span class="article-date">
-                          <i class="far fa-calendar-alt"></i> {{ formatDate(article.gmtCreate) }}
+                          <i class="far fa-calendar-alt"></i> {{ formatDate(article.gmtCreate || article.gmtModified || article.gmt_create || article.gmt_modified) }}
+                          <!-- 临时调试信息 -->
+                          <small v-if="!article.gmtCreate && !article.gmtModified && !article.gmt_create && !article.gmt_modified" style="color: red; font-size: 0.7rem;">
+                            (无日期数据)
+                          </small>
                         </span>
                         <div class="article-stats">
                           <span class="stat-item" title="阅读量">
                             <i class="far fa-eye"></i> {{ article.viewCount || 0 }}
                           </span>
-                          <span class="stat-item" title="评论数">
-                            <i class="far fa-comment"></i> {{ article.commentCount || 0 }}
-                          </span>
                           <span class="stat-item" title="点赞数">
-                            <i class="far fa-heart"></i> {{ article.likeCount || 0 }}
+                            <i class="far fa-heart"></i> {{ article.likes || 0 }}
                           </span>
                         </div>
                       </div>
@@ -110,7 +159,21 @@
                 >
                   <i class="fas fa-chevron-left"></i> 上一页
                 </button>
-                <span class="page-info">第 {{ currentPage }} 页</span>
+                
+                <!-- 页码按钮 -->
+                <div class="page-numbers">
+                  <button 
+                    v-for="page in visiblePages" 
+                    :key="page"
+                    @click="goToPage(page)"
+                    class="page-number-btn"
+                    :class="{ active: page === currentPage, disabled: page === '...' }"
+                    :disabled="page === '...'"
+                  >
+                    {{ page }}
+                  </button>
+                </div>
+                
                 <button 
                   @click="loadNextPage" 
                   :disabled="!hasNextPage"
@@ -130,7 +193,25 @@
             <div class="avatar-container">
               <div class="avatar-wrapper">
                 <div class="avatar-ring"></div>
-                <img :src="userAvatar" alt="用户头像" class="profile-avatar">
+                <!-- 头像骨架屏 -->
+                <div v-if="isLoading" class="avatar-skeleton"></div>
+                <!-- 预加载头像 -->
+                <img 
+                  v-if="profileData.user?.avatarUrl" 
+                  :src="getAvatarUrl(profileData.user.avatarUrl)" 
+                  :alt="`${profileData.user?.name || '用户'}的头像`" 
+                  class="profile-avatar"
+                  @load="onAvatarLoad"
+                  @error="onAvatarError"
+                />
+                <!-- 默认头像 -->
+                <img 
+                  v-else 
+                  src="/img/default01.jpg" 
+                  alt="默认头像" 
+                  class="profile-avatar"
+                  @load="onAvatarLoad"
+                />
                 <div class="avatar-status" v-if="isOwner">
                   <div class="status-dot"></div>
                 </div>
@@ -199,7 +280,7 @@
                 <div class="date-icon">
                   <i class="far fa-calendar-alt"></i>
                 </div>
-                <span>加入于 {{ formatDate(profileData.user?.gmtCreate) }}</span>
+                <span>加入于 {{ formatDate(profileData.user?.gmtCreate || profileData.user?.gmtModified || profileData.user?.gmt_create || profileData.user?.gmt_modified) }}</span>
               </div>
               
               <!-- 社交链接 -->
@@ -222,6 +303,27 @@
         </div>
       </div>
     </div>
+    
+    <!-- 图片裁剪组件 -->
+    <SimpleImageCropper
+      :visible="showCropper"
+      :image-src="selectedImage"
+      @close="closeCropper"
+      @crop="handleCropComplete"
+    />
+    
+    <!-- 删除文章确认弹窗 -->
+    <ConfirmDeleteModal
+      :visible="showDeleteModal"
+      title="删除文章"
+      :message="`您确定要删除文章「${articleToDelete?.title}」吗？`"
+      warning-message="删除后，该文章将无法恢复。"
+      confirm-text="确认删除"
+      :position-index="deleteModalPositionIndex"
+      @confirm="deleteArticle"
+      @cancel="closeDeleteModal"
+      @close="closeDeleteModal"
+    />
   </div>
 </template>
 
@@ -230,8 +332,12 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { request } from '@/api'
+import { articleAPI } from '@/api/article'
 import { ensureBigIntAsString, debugId } from '@/utils/bigint-helper'
 import { toasts } from '@/plugins/toast'
+import SimpleImageCropper from '@/components/SimpleImageCropper.vue'
+import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
+import { getAvatarUrl } from '@/utils/avatar-helper'
 
 const route = useRoute()
 const router = useRouter()
@@ -244,6 +350,16 @@ const currentPage = ref(1)
 const pageSize = ref(6)
 const username = ref('')
 const errorMessage = ref('') // 添加错误信息
+
+// 图片裁剪相关
+const showCropper = ref(false)
+const selectedImage = ref(null)
+const croppedImageData = ref(null)
+
+// 删除相关
+const showDeleteModal = ref(false)
+const articleToDelete = ref(null)
+const deleteModalPositionIndex = ref(0)
 const isOwner = computed(() => profileData.value.isOwner)
 const articles = computed(() => profileData.value.articles?.records || [])
 const hasNextPage = computed(() => {
@@ -251,18 +367,89 @@ const hasNextPage = computed(() => {
   return currentPage.value < profileData.value.articles.pages
 })
 
+// 计算可见的页码
+const visiblePages = computed(() => {
+  if (!profileData.value.articles || profileData.value.articles.pages <= 1) {
+    return []
+  }
+  
+  const totalPages = profileData.value.articles.pages
+  const current = currentPage.value
+  const pages = []
+  
+  // 如果总页数小于等于7，显示所有页码
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i)
+    }
+    return pages
+  }
+  
+  // 如果总页数大于7，显示部分页码
+  if (current <= 4) {
+    // 当前页在前4页，显示前5页 + ... + 最后一页
+    for (let i = 1; i <= 5; i++) {
+      pages.push(i)
+    }
+    pages.push('...')
+    pages.push(totalPages)
+  } else if (current >= totalPages - 3) {
+    // 当前页在后4页，显示第一页 + ... + 后5页
+    pages.push(1)
+    pages.push('...')
+    for (let i = totalPages - 4; i <= totalPages; i++) {
+      pages.push(i)
+    }
+  } else {
+    // 当前页在中间，显示第一页 + ... + 当前页前后各2页 + ... + 最后一页
+    pages.push(1)
+    pages.push('...')
+    for (let i = current - 2; i <= current + 2; i++) {
+      pages.push(i)
+    }
+    pages.push('...')
+    pages.push(totalPages)
+  }
+  
+  return pages
+})
+
+// 图片加载状态
+const coverImageLoaded = ref(false)
+const avatarLoaded = ref(false)
+
 // 计算封面样式
 const coverStyle = computed(() => {
   const coverUrl = profileData.value.user?.backgroundImgUrl || '/img/bg.jpg'
   return {
-    backgroundImage: `url(${coverUrl})`
+    backgroundImage: coverImageLoaded.value ? `url(${coverUrl})` : 'none'
   }
 })
 
-// 计算用户头像
-const userAvatar = computed(() => {
-  return profileData.value.user?.avatarUrl || '/img/default01.jpg'
-})
+// 图片加载处理函数
+const onCoverImageLoad = () => {
+  coverImageLoaded.value = true
+}
+
+const onCoverImageError = () => {
+  coverImageLoaded.value = true // 即使加载失败也要隐藏骨架屏
+}
+
+const onAvatarLoad = () => {
+  avatarLoaded.value = true
+}
+
+const onAvatarError = () => {
+  avatarLoaded.value = true // 即使加载失败也要隐藏骨架屏
+}
+
+const onArticleCoverLoad = (article) => {
+  article.coverImgLoaded = true
+}
+
+const onArticleCoverError = (article) => {
+  article.coverImgLoaded = true // 即使加载失败也要隐藏骨架屏
+}
 
 // 监听路由参数变化
 watch(() => route.params.name, (newName) => {
@@ -274,28 +461,62 @@ watch(() => route.params.name, (newName) => {
 
 // 格式化日期
 const formatDate = (dateString) => {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  return date.toLocaleDateString('zh-CN', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  })
+  if (!dateString) return '未知日期'
+  
+  try {
+    let date
+    
+    // 处理不同的日期格式
+    if (typeof dateString === 'string') {
+      // 如果是字符串，尝试解析
+      date = new Date(dateString)
+    } else if (dateString instanceof Date) {
+      // 如果已经是Date对象
+      date = dateString
+    } else if (typeof dateString === 'number') {
+      // 如果是时间戳
+      date = new Date(dateString)
+    } else {
+      return '日期格式错误'
+    }
+    
+    if (isNaN(date.getTime())) {
+      return '日期无效'
+    }
+    
+    return date.toLocaleDateString('zh-CN', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    })
+  } catch (error) {
+    console.error('日期格式化错误:', error, '输入:', dateString)
+    return '日期错误'
+  }
 }
 
 // 获取个人资料数据
 const fetchProfileData = async () => {
   isLoading.value = true
+  coverImageLoaded.value = false
+  avatarLoaded.value = false
+  
   try {
-    console.log(`正在获取用户 ${username.value} 的个人资料数据...`)
     const response = await request({
       url: `/api/profile/${username.value}`,
       method: 'get',
       params: { page: currentPage.value, size: pageSize.value },
       timeout: 30000 // 增加超时时间到30秒
     })
+    
+    // 为文章添加加载状态
+    if (response.articles?.records) {
+      response.articles.records.forEach(article => {
+        article.coverImgLoaded = false
+      })
+    }
+    
     profileData.value = response
-    console.log('成功获取个人资料数据:', response)
   } catch (error) {
     console.error('获取个人资料失败:', error)
     // 显示更详细的错误信息
@@ -327,13 +548,11 @@ const toggleFollow = async () => {
     // 确保用户ID作为字符串处理，避免JavaScript大整数精度丢失
     const userIdStr = ensureBigIntAsString(profileData.value.user.id);
     debugId(profileData.value.user.id, '目标用户ID');
-    console.log('关注操作 - 目标用户ID (字符串):', userIdStr);
     const response = await request({
       url: `/api/user/${userIdStr}/follow`,
       method: 'post'
     })
-    
-    console.log('关注响应:', response)
+
     
     // 检查响应格式并更新关注状态 - 响应数据直接是对象
     if (response && response.isFollowing !== undefined) {
@@ -356,8 +575,8 @@ const toggleFollow = async () => {
   }
 }
 
-// 上传封面图片
-const handleCoverUpload = async (event) => {
+// 处理图片选择
+const handleCoverUpload = (event) => {
   const file = event.target.files[0]
   if (!file) return
   
@@ -377,12 +596,33 @@ const handleCoverUpload = async (event) => {
     return
   }
   
-  const formData = new FormData()
-  formData.append('coverImageFile', file)
+  // 创建图片URL并显示裁剪界面
+  const imageUrl = URL.createObjectURL(file)
+  selectedImage.value = imageUrl
+  showCropper.value = true
   
+  // 清空文件输入，允许再次选择同一文件
+  event.target.value = ''
+}
+
+// 处理裁剪完成
+const handleCropComplete = async (croppedData) => {
   try {
     isLoading.value = true
-    console.log('开始上传封面图片...')
+    
+    // 将base64数据转换为Blob
+    const base64Data = croppedData.split(',')[1]
+    const byteCharacters = atob(base64Data)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: 'image/jpeg' })
+    
+    // 创建FormData
+    const formData = new FormData()
+    formData.append('coverImageFile', blob, 'cropped-cover.jpg')
     
     const response = await request({
       url: '/update-cover',
@@ -392,13 +632,11 @@ const handleCoverUpload = async (event) => {
         'Content-Type': 'multipart/form-data'
       }
     })
-    
-    console.log('上传响应:', response)
+
     
     if (response && response.success) {
       // 更新封面图片
       profileData.value.user.backgroundImgUrl = response.newImageUrl
-      console.log('封面图片更新成功:', response.newImageUrl)
       window.$toast?.success('封面图片更新成功！')
     } else {
       console.error('上传失败，响应:', response)
@@ -416,9 +654,14 @@ const handleCoverUpload = async (event) => {
     }
   } finally {
     isLoading.value = false
-    // 清空文件输入，允许再次选择同一文件
-    event.target.value = ''
   }
+}
+
+// 关闭裁剪界面
+const closeCropper = () => {
+  showCropper.value = false
+  selectedImage.value = null
+  croppedImageData.value = null
 }
 
 // 加载上一页
@@ -437,8 +680,94 @@ const loadNextPage = () => {
   }
 }
 
+// 跳转到指定页面
+const goToPage = (page) => {
+  if (page === '...' || page === currentPage.value) return
+  
+  const totalPages = profileData.value.articles?.pages || 1
+  if (page >= 1 && page <= totalPages) {
+    currentPage.value = page
+    fetchProfileData()
+  }
+}
+
+// 确认删除文章
+const confirmDeleteArticle = (article, index) => {
+  articleToDelete.value = article
+  deleteModalPositionIndex.value = index
+  showDeleteModal.value = true
+}
+
+// 删除文章
+const deleteArticle = async () => {
+  if (!articleToDelete.value) {
+    window.$toast?.error('删除失败：文章信息丢失')
+    return
+  }
+  
+  // 检查文章ID，支持多种字段名
+  const articleId = articleToDelete.value.id || articleToDelete.value.articleId
+  if (!articleId) {
+    window.$toast?.error('删除失败：文章ID无效')
+    return
+  }
+  
+  // 保存文章信息，防止在异步操作中被修改
+  const articleTitle = articleToDelete.value.title
+  
+  // 立即关闭弹窗，防止重复点击
+  showDeleteModal.value = false
+  
+  try {
+    isLoading.value = true
+    await articleAPI.deleteArticle(articleId)
+    
+    // 显示成功消息
+    window.$toast?.success(`文章「${articleTitle}」删除成功！`)
+    
+    // 延迟一下再刷新页面，让用户看到成功消息
+    setTimeout(() => {
+      window.location.reload()
+    }, 1000)
+  } catch (error) {
+    console.error('删除文章失败:', error)
+    window.$toast?.error('删除文章失败，请稍后重试')
+  } finally {
+    isLoading.value = false
+    // 清理状态
+    articleToDelete.value = null
+    deleteModalPositionIndex.value = 0
+  }
+}
+
+// 关闭删除确认弹窗
+const closeDeleteModal = () => {
+  showDeleteModal.value = false
+  articleToDelete.value = null
+  deleteModalPositionIndex.value = 0
+}
+
+
+
+// 预加载关键图片资源
+const preloadCriticalImages = () => {
+  const criticalImages = [
+    '/img/bg.jpg',
+    '/img/default01.jpg',
+    '/img/default.jpg'
+  ]
+  
+  criticalImages.forEach(src => {
+    const img = new Image()
+    img.src = src
+  })
+}
+
 // 组件挂载时获取数据
 onMounted(() => {
+  // 预加载关键图片
+  preloadCriticalImages()
+  
   // 从路由参数中获取用户名
   if (route.params.name) {
     username.value = route.params.name
@@ -461,6 +790,8 @@ onMounted(() => {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
   position: relative;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .profile-page::before {
@@ -478,14 +809,55 @@ onMounted(() => {
 
 /* 封面区域样式 */
 .profile-cover {
-  height: 300px;
+  width: 95vw;
+  max-width: 1400px;
+  margin: 0 auto 60px auto;
   background-size: cover;
   background-position: center;
   position: relative;
-  margin-bottom: 80px;
-  transition: all 0.5s ease;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  aspect-ratio: 4/1;
+  height: auto;
+  border-radius: 30px;
+  box-shadow: 
+    0 20px 40px rgba(0,0,0,0.1),
+    0 8px 16px rgba(0,0,0,0.06);
+}
+
+/* 封面骨架屏 */
+.cover-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  z-index: 1;
+}
+
+/* 预加载封面图片 */
+.cover-image-preload {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.cover-image-preload[src] {
+  opacity: 1;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
 
 .cover-overlay {
@@ -494,8 +866,13 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
-  backdrop-filter: blur(1px);
+  background: linear-gradient(
+    135deg, 
+    rgba(0,0,0,0.2) 0%, 
+    rgba(0,0,0,0.4) 50%,
+    rgba(0,0,0,0.6) 100%
+  );
+  backdrop-filter: blur(2px);
 }
 
 .cover-pattern {
@@ -505,11 +882,18 @@ onMounted(() => {
   right: 0;
   bottom: 0;
   background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 1px, transparent 1px),
-    radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 1px, transparent 1px);
-  background-size: 50px 50px;
-  opacity: 0.1;
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.15) 2px, transparent 2px),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(45deg, transparent 40%, rgba(255,255,255,0.05) 50%, transparent 60%);
+  background-size: 60px 60px, 40px 40px, 100% 100%;
+  opacity: 0.3;
   z-index: 1;
+  animation: patternFloat 20s ease-in-out infinite;
+}
+
+@keyframes patternFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(1deg); }
 }
 
 
@@ -569,20 +953,25 @@ onMounted(() => {
 
 .cover-edit-btn {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 30px;
+  right: 30px;
   z-index: 10;
-  opacity: 0.9;
-  transition: all 0.3s ease;
+  opacity: 0.95;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cover-edit-btn .btn-modern {
-  border-radius: 50px;
-  padding: 10px 20px;
+  border-radius: 25px;
+  padding: 12px 24px;
   font-weight: 600;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  background: rgba(255,255,255,0.7);
-  border: 1px solid rgba(255,255,255,0.3);
+  font-size: 0.9rem;
+  box-shadow: 
+    0 8px 25px rgba(0,0,0,0.15),
+    0 4px 10px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(255,255,255,0.4);
+  backdrop-filter: blur(10px);
+  letter-spacing: 0.5px;
 }
 
 .cover-edit-btn:hover {
@@ -602,8 +991,11 @@ onMounted(() => {
 /* 个人资料容器 */
 .profile-container {
   position: relative;
-  margin-top: -80px;
+  margin-top: -40px;
   padding-bottom: 50px;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* 用户信息卡片 */
@@ -656,7 +1048,7 @@ onMounted(() => {
 }
 
 .avatar-container {
-  margin-top: -80px;
+  margin-top: -70px;
   margin-bottom: 20px;
   display: flex;
   justify-content: center;
@@ -692,6 +1084,18 @@ onMounted(() => {
     transform: scale(0.9);
     opacity: 0.7;
   }
+}
+
+/* 头像骨架屏 */
+.avatar-skeleton {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 5px solid white;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .profile-avatar {
@@ -1101,6 +1505,32 @@ onMounted(() => {
   overflow: hidden;
 }
 
+/* 文章封面骨架屏 */
+.article-cover-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  z-index: 1;
+}
+
+/* 文章封面图片 */
+.article-cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.article-cover-image[src] {
+  opacity: 1;
+}
+
 .modern-article .article-cover {
   height: 180px;
 }
@@ -1122,32 +1552,6 @@ onMounted(() => {
 
 .article-card:hover .article-cover-overlay {
   opacity: 1;
-}
-
-.article-cover-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(0,0,0,0.5);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.article-card:hover .article-cover-content {
-  opacity: 1;
-}
-
-.article-cover-icon {
-  font-size: 2.5rem;
-  color: white;
-  opacity: 0.8;
-  animation: pulseIcon 2s infinite;
 }
 
 .article-content {
@@ -1179,7 +1583,7 @@ onMounted(() => {
 .article-excerpt {
   color: #6c757d;
   font-size: 0.95rem;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   flex-grow: 1;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -1191,21 +1595,34 @@ onMounted(() => {
 .article-meta {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.85rem;
   color: #868e96;
   padding-top: 15px;
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(0,0,0,0.08);
   animation: fadeIn 1.8s ease;
+  margin-top: 15px;
+  position: relative;
+  z-index: 2;
 }
 
 .modern-meta .article-date {
   display: flex;
   align-items: center;
   gap: 5px;
+  color: #495057;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
+  background: rgba(246, 213, 92, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(246, 213, 92, 0.2);
 }
 
 .modern-meta .article-date i {
   font-size: 0.8rem;
+  color: #f6d55c;
 }
 
 .article-stats {
@@ -1226,6 +1643,83 @@ onMounted(() => {
 .article-stats .stat-item i {
   margin-right: 4px;
 }
+
+/* 文章操作按钮样式 */
+.article-actions {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  margin: 12px 0;
+  border-radius: 8px;
+  position: relative;
+  justify-content: flex-end;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  border: none;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #6c757d;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.action-btn:focus {
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.edit-btn {
+  color: #007bff;
+}
+
+.edit-btn:hover {
+  background: #007bff;
+  color: white;
+}
+
+.delete-btn {
+  color: #dc3545;
+}
+
+.delete-btn:hover {
+  background: #dc3545;
+  color: white;
+}
+
+.action-btn i {
+  font-size: 0.9rem;
+  transition: transform 0.2s ease;
+}
+
+.action-btn:hover i {
+  transform: scale(1.1);
+}
+
+
 
 @keyframes fadeInUp {
   from {
@@ -1350,14 +1844,68 @@ onMounted(() => {
   border-radius: 50px;
 }
 
+/* 页码按钮样式 */
+.page-numbers {
+  display: flex;
+  gap: 5px;
+  margin: 0 10px;
+}
+
+.page-number-btn {
+  padding: 8px 12px;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  background-color: white;
+  color: #495057;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  min-width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.page-number-btn:hover:not(:disabled) {
+  background-color: #f6d55c;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(246, 213, 92, 0.3);
+}
+
+.page-number-btn.active {
+  background-color: #f6d55c;
+  color: white;
+  box-shadow: 0 4px 12px rgba(246, 213, 92, 0.4);
+}
+
+.page-number-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  color: #6c757d;
+}
+
+.page-number-btn.disabled:hover {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
 /* 响应式调整 */
 @media (max-width: 992px) {
   .profile-container {
-    margin-top: -60px;
+    margin-top: -35px;
   }
   
   .avatar-container {
-    margin-top: -60px;
+    margin-top: -55px;
+  }
+  
+  .avatar-skeleton {
+    width: 120px;
+    height: 120px;
   }
   
   .profile-avatar {
@@ -1372,16 +1920,23 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .profile-cover {
-    height: 220px;
-    margin-bottom: 60px;
+    width: 92vw;
+    aspect-ratio: 2.8/1;
+    margin-bottom: 50px;
+    border-radius: 20px;
   }
   
   .profile-container {
-    margin-top: -50px;
+    margin-top: -30px;
   }
   
   .avatar-container {
-    margin-top: -50px;
+    margin-top: -45px;
+  }
+  
+  .avatar-skeleton {
+    width: 100px;
+    height: 100px;
   }
   
   .profile-avatar {
@@ -1404,11 +1959,19 @@ onMounted(() => {
 
 @media (max-width: 576px) {
   .profile-cover {
-    height: 180px;
+    width: 90vw;
+    aspect-ratio: 2.5/1;
+    /* 保持合适比例，高度自动调整 */
+    border-radius: 15px;
   }
   
   .avatar-container {
-    margin-top: -40px;
+    margin-top: -25px;
+  }
+  
+  .avatar-skeleton {
+    width: 80px;
+    height: 80px;
   }
   
   .profile-avatar {
@@ -1424,6 +1987,39 @@ onMounted(() => {
   .profile-bio::before,
   .profile-bio::after {
     display: none;
+  }
+  
+  /* 小屏幕上的按钮样式调整 */
+  .article-actions {
+    flex-direction: row;
+    gap: 6px;
+    padding: 6px 8px;
+    justify-content: flex-end;
+  }
+  
+  .action-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+  }
+  
+  /* 小屏幕上的分页样式调整 */
+  .pagination-container {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .page-numbers {
+    order: 2;
+    width: 100%;
+    justify-content: center;
+    margin: 10px 0;
+  }
+  
+  .page-number-btn {
+    min-width: 35px;
+    height: 35px;
+    font-size: 0.85rem;
   }
 }
 </style>

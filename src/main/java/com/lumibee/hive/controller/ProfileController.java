@@ -1,22 +1,28 @@
 package com.lumibee.hive.controller;
 
+import java.io.IOException;
+import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
@@ -48,6 +54,12 @@ public class ProfileController {
             response.put("message", "背景图片不能为空");
             return ResponseEntity.badRequest().body(response);
         }
+
+        // 调试信息
+        System.out.println("收到封面图片上传请求:");
+        System.out.println("文件名: " + coverImageFile.getOriginalFilename());
+        System.out.println("文件大小: " + coverImageFile.getSize() + " 字节");
+        System.out.println("内容类型: " + coverImageFile.getContentType());
 
         try {
             String newImageUrl = imgService.uploadCover(currentUser.getId(), coverImageFile);

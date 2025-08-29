@@ -45,7 +45,7 @@
             <div class="meta-left">
               <div class="author-info">
                 <router-link :to="`/profile/${article.userName}`" class="hero-avatar-link">
-                  <img :src="article.avatarUrl || '/img/default01.jpg'" alt="作者头像" class="hero-avatar">
+                  <img :src="getAuthorAvatarUrl(article.avatarUrl)" alt="作者头像" class="hero-avatar">
                 </router-link>
                 <div class="author-details">
                   <span class="hero-author">{{ article.userName || '匿名' }}</span>
@@ -123,7 +123,7 @@
                 <div class="author-info d-flex align-items-center">
                   <router-link :to="`/profile/${article.userName}`" class="author-avatar-link">
                     <img
-                      :src="article.avatarUrl || '/img/default01.jpg'"
+                      :src="getAuthorAvatarUrl(article.avatarUrl)"
                       alt="作者头像"
                       class="author-avatar me-3"
                     />
@@ -270,6 +270,7 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import FavoriteModal from '@/components/FavoriteModal.vue'
 import { ensureBigIntAsString, debugId } from '@/utils/bigint-helper'
+import { getAuthorAvatarUrl } from '@/utils/avatar-helper'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -299,13 +300,7 @@ const showFavoriteModal = ref(false)
       }
       
       article.value = response
-      
-      console.log('文章数据:', {
-        articleId: article.value?.articleId,
-        userId: article.value?.userId,
-        userName: article.value?.userName,
-        title: article.value?.title
-      })
+
       
       // 确保收藏状态正确设置
       if (article.value) {
@@ -313,13 +308,7 @@ const showFavoriteModal = ref(false)
         article.value.isFavorited = Boolean(article.value.favorited)
         article.value.liked = Boolean(article.value.liked)
         article.value.isFollowed = Boolean(article.value.followed)
-        
-        console.log('文章关注状态:', {
-          followed: article.value.followed,
-          isFollowed: article.value.isFollowed,
-          userId: article.value.userId,
-          currentUserId: authStore.user?.id
-        })
+
 
         // 如果用户已登录且不是自己的文章，检查关注状态
         if (authStore.isAuthenticated && article.value.userId !== authStore.user?.id) {

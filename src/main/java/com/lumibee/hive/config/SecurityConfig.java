@@ -94,7 +94,7 @@ public class SecurityConfig {
                                         "/api/tags/**", // 标签 API
                                         "/api/articles/**", // 文章 API
                                         "/api/article/**", // 单篇文章 API
-                                        "/api/portfolios", // 作品集 API
+                                        "/api/portfolios", // 作品集 API (GET)
                                         "/api/signup", // 注册API
                                         "/api/login", // API登录端点
                                         "/api/ai/**", // AI 相关 API - 允许所有用户访问
@@ -109,8 +109,10 @@ public class SecurityConfig {
                                         "/check-token.html",
                                         "/debug-auth.html"
                                         ).permitAll() // 以上路径允许所有用户访问
+                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集需要认证
                         .requestMatchers("/api/user/current").authenticated() // 获取当前用户需要认证
-                        .requestMatchers("/publish", "/user/settings", "/drafts", "/api/article/save-draft").authenticated()
+                        .requestMatchers("/api/auth/refresh").authenticated() // Token刷新接口需要认证
+                        .requestMatchers("/publish", "/drafts", "/api/article/save-draft").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
@@ -165,12 +167,14 @@ public class SecurityConfig {
                                         "/login-process", // 登录处理URL
                                         "/api/login", // API登录端点
                                         "/api/logout", // API登出端点
+                                        "/api/auth/refresh", // Token刷新接口
                                         "/api/search/**", // 搜索 API
                                         "/api/home", // 首页 API
                                         "/api/tags/**", // 标签 API
                                         "/api/articles/**", // 文章 API
                                         "/api/article/**", // 单篇文章 API
                                         "/api/portfolios", // 作品集 API
+                                        "/api/portfolio", // 作品集 API (POST)
                                         "/api/user/**", // 用户相关 API（包括关注功能）
                                         "/api/signup", // 注册 API
                                         "/api/profile/**", // 个人资料 API

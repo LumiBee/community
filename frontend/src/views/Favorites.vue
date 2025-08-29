@@ -124,7 +124,7 @@
                                          <div class="card-content">
                        <div class="card-author">
                          <router-link :to="`/profile/${favorite.userName}`" class="author-avatar-link">
-                           <img :src="favorite.avatarUrl || '/img/default.jpg'" alt="作者头像" class="author-avatar">
+                           <img :src="getAuthorAvatarUrl(favorite.avatarUrl)" alt="作者头像" class="author-avatar">
                          </router-link>
                          <span class="author-name">{{ favorite.userName || '未知作者' }}</span>
                        </div>
@@ -252,6 +252,7 @@ import { favoriteAPI } from '@/api/favorite'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
+import { getAuthorAvatarUrl } from '@/utils/avatar-helper'
 
 // 路由和状态管理
 const router = useRouter()
@@ -333,36 +334,24 @@ watch(showCreateFolderModal, (newVal) => {
 onMounted(async () => {
   loading.value = true
   try {
-    console.log('开始加载收藏夹页面...')
-    console.log('当前认证状态:', authStore.isAuthenticated)
-    console.log('当前用户:', authStore.user)
-    console.log('本地存储中的用户信息:', localStorage.getItem('hive_auth_user'))
     
     // 检查认证状态
     if (!authStore.isAuthenticated) {
-      console.log('用户未认证，尝试检查认证状态...')
       const authResult = await authStore.checkAuthStatus()
-      console.log('认证状态检查结果:', authResult)
-      console.log('认证状态检查后:', authStore.isAuthenticated)
-      console.log('认证状态检查后的用户:', authStore.user)
       
       if (!authResult) {
-        console.log('用户未认证，重定向到登录页面')
         router.push({ name: 'Login', query: { redirect: '/favorites' } })
         return
       }
     }
     
     await loadFavoriteFolders()
-    console.log('收藏夹加载完成')
     
     // 如果有收藏夹，自动选择第一个
     if (favoriteFolders.value.length > 0) {
-      console.log('自动选择第一个收藏夹:', favoriteFolders.value[0].id)
       await selectFolder(favoriteFolders.value[0].id)
     }
-    
-    console.log('收藏夹页面初始化完成')
+
   } catch (error) {
     console.error('初始化收藏夹页面失败:', error)
     if (window.$toast) {
@@ -377,11 +366,7 @@ onMounted(async () => {
 // 方法
 const loadFavoriteFolders = async () => {
   try {
-    console.log('调用 getFavoriteFolders API...')
     const response = await favoriteAPI.getFavoriteFolders()
-    console.log('API响应:', response)
-    console.log('响应类型:', typeof response)
-    console.log('响应是否为数组:', Array.isArray(response))
     
     if (Array.isArray(response)) {
       favoriteFolders.value = response
@@ -391,8 +376,7 @@ const loadFavoriteFolders = async () => {
       favoriteFolders.value = []
       console.warn('API响应格式不符合预期:', response)
     }
-    
-    console.log('收藏夹数据:', favoriteFolders.value)
+
   } catch (error) {
     console.error('加载收藏夹失败:', error)
     console.error('错误详情:', {
@@ -415,16 +399,13 @@ const loadFavorites = async () => {
     
     // 获取选中收藏夹的详细信息
     const response = await favoriteAPI.getFavoriteFolderById(activeFolder.value)
-    console.log('收藏夹详细信息:', response)
     
     if (response && response.articles) {
       favorites.value = response.articles
       filteredFavorites.value = response.articles
-      console.log('收藏夹文章数据:', favorites.value)
     } else {
       favorites.value = []
       filteredFavorites.value = []
-      console.log('收藏夹中没有文章')
     }
   } catch (error) {
     console.error('加载收藏夹文章失败:', error)
@@ -480,7 +461,6 @@ const formatDate = (dateString) => {
 }
 
 const editFolder = (folder) => {
-  console.log('编辑收藏夹:', folder)
   isEditing.value = true
   editingFolderId.value = folder.id
   newFolderName.value = folder.name
@@ -488,7 +468,6 @@ const editFolder = (folder) => {
 }
 
 const confirmDeleteFolder = (folder) => {
-  console.log('确认删除收藏夹:', folder)
   folderToDelete.value = folder
   showDeleteFolderModal.value = true
 }

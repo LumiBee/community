@@ -35,6 +35,23 @@ export const articleAPI = {
   },
 
   /**
+   * 根据ID获取文章详情
+   * @param {number} articleId - 文章ID
+   */
+  getArticleById(articleId) {
+    return request({
+      url: `/api/article/id/${articleId}`,
+      method: 'get'
+    }).catch(error => {
+      console.error(`获取文章失败 [${articleId}]:`, error)
+      if (error.status === 404) {
+        return { status: 404 }
+      }
+      throw error
+    })
+  },
+
+  /**
    * 获取热门文章
    * @param {number} limit - 限制数量，默认6
    */
@@ -114,7 +131,7 @@ export const articleAPI = {
    */
   updateArticle(articleId, articleData) {
     return request({
-      url: `/api/articles/${articleId}`,
+      url: `/api/article/${articleId}/edit`,
       method: 'put',
       data: articleData
     })
@@ -126,7 +143,7 @@ export const articleAPI = {
    */
   deleteArticle(articleId) {
     return request({
-      url: `/api/articles/${articleId}`,
+      url: `/api/article/delete/${articleId}`,
       method: 'delete'
     })
   },

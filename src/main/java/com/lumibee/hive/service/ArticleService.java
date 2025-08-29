@@ -29,9 +29,11 @@ public interface ArticleService {
     Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
     ArticleDetailsDTO selectDraftById(Integer articleId);
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
-    ArticleDetailsDTO deleteArticleById(Integer articleId);
+    ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId);
     List<ArticleDetailsDTO> selectAll();
     List<ArticleDocument> selectArticles(String query);
     List<ArticleDocument> selectRelatedArticles(ArticleDetailsDTO currentArticle, int limit);
     int getFavoriteCount(Integer articleId);
+    void setArticleFeatured(Integer articleId, boolean isFeatured);
+    void batchSetArticleFeatured(List<Integer> articleIds, boolean isFeatured);
 }

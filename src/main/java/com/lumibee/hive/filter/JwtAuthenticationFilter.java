@@ -1,15 +1,9 @@
 package com.lumibee.hive.filter;
 
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.UserService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,9 +12,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
+import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.UserService;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * JWT认证过滤器
@@ -41,6 +43,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             // 记录请求信息
             System.out.println("JwtAuthenticationFilter 处理请求: " + request.getMethod() + " " + request.getRequestURI());
+            
+            // 检查是否是作品集创建请求
+            if (request.getMethod().equals("POST") && request.getRequestURI().equals("/api/portfolio")) {
+                System.out.println("=== 检测到作品集创建请求 ===");
+                System.out.println("请求头信息:");
+                java.util.Enumeration<String> headerNames = request.getHeaderNames();
+                while (headerNames.hasMoreElements()) {
+                    String headerName = headerNames.nextElement();
+                    System.out.println(headerName + ": " + request.getHeader(headerName));
+                }
+            }
             
             // 从请求头中获取JWT令牌
             String jwt = getJwtFromRequest(request);

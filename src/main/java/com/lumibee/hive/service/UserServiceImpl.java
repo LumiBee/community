@@ -100,6 +100,56 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "users", key = "#userId"),
+            @CacheEvict(value = "users", allEntries = true),
+            @CacheEvict(value = "usersByEmail", allEntries = true)
+    })
+    @Transactional
+    public User updateProfile(Long userId, String userName, String email, String bio) {
+        // 先获取完整的用户信息
+        User existingUser = userMapper.selectById(userId);
+        if (existingUser == null) {
+            throw new IllegalArgumentException("用户不存在");
+        }
+        
+        // 检查用户名是否已被其他用户使用
+        if (!userName.equals(existingUser.getName())) {
+            User userWithSameName = userMapper.selectByName(userName);
+            if (userWithSameName != null && !userWithSameName.getId().equals(userId)) {
+                throw new IllegalArgumentException("用户名已被使用");
+            }
+        }
+        
+        // 检查邮箱是否已被其他用户使用
+        if (!email.equals(existingUser.getEmail())) {
+            User userWithSameEmail = userMapper.selectByEmail(email);
+            if (userWithSameEmail != null && !userWithSameEmail.getId().equals(userId)) {
+                throw new IllegalArgumentException("邮箱已被使用");
+            }
+        }
+        
+        // 更新用户信息
+        User user = new User();
+        user.setId(userId);
+        user.setName(userName);
+        user.setEmail(email);
+        user.setBio(bio);
+        user.setGmtModified(LocalDateTime.now());
+
+        System.out.println("更新用户资料: ID=" + userId + ", 用户名=" + userName + ", 邮箱=" + email);
+        int updatedRows = userMapper.updateById(user);
+        System.out.println("资料更新结果: " + (updatedRows > 0 ? "成功" : "失败"));
+
+        if (updatedRows > 0) {
+            // 返回更新后的完整用户信息
+            return userMapper.selectById(userId);
+        } else {
+            throw new RuntimeException("更新用户资料失败");
+        }
+    }
+
+    @Override
     @Cacheable(value = "isFollowing", key = "#userId + '-' + #followerId")
     @Transactional(readOnly = true)
     public boolean isFollowing(Long userId, Long followerId) {

@@ -1,8 +1,5 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.agent.BeeManus;
-import com.lumibee.hive.agent.JavaApp;
-import jakarta.annotation.Resource;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.http.codec.ServerSentEvent;
@@ -10,10 +7,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+
+import com.lumibee.hive.agent.BeeManus;
+import com.lumibee.hive.agent.JavaApp;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.Resource;
 import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/ai")
+@Tag(name = "AI agent 服务", description = "AI agent 相关的 API 接口")
 public class AiAgentController {
 
     @Resource

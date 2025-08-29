@@ -126,15 +126,6 @@ export function isBigInt(id) {
 export function debugId(id, label = 'ID') {
   const stringId = ensureBigIntAsString(id);
   const isBig = isBigInt(id);
-  
-  console.log(`${label} 调试信息:`, {
-    原始值: id,
-    类型: typeof id,
-    字符串形式: stringId,
-    是否为大整数: isBig,
-    数值形式: Number(id),
-    安全整数范围: Number.MAX_SAFE_INTEGER
-  });
-  
+
   return stringId;
 }

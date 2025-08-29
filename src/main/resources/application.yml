@@ -73,7 +73,7 @@ file:
   upload:
     dir: ./uploads  # 文件上传目录 - 项目目录下
   base:
-    url: /uploads/  # 访问URL前缀
+    url: http://localhost:8090/uploads/  # 访问URL前缀 - 包含完整后端地址
 
 # 头像配置
 avatar:

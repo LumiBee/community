@@ -79,7 +79,7 @@
                     <router-link :to="`/profile/${portfolio.userName}`" class="author-avatar-link">
                       <img
                         v-if="portfolio.avatarUrl"
-                        :src="portfolio.avatarUrl"
+                        :src="getAuthorAvatarUrl(portfolio.avatarUrl)"
                         alt="作者头像"
                         class="author-avatar"
                       />
@@ -113,6 +113,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { portfolioAPI } from '@/api'
+import { getAuthorAvatarUrl } from '@/utils/avatar-helper'
 
 const router = useRouter()
 
@@ -141,7 +142,6 @@ const loadPortfolios = async () => {
     error.value = null
     
     const response = await portfolioAPI.getAllPortfolios()
-    console.log('获取到的作品集数据:', response)
     
     if (response && Array.isArray(response)) {
       // 确保每个作品集有必要的属性
@@ -155,7 +155,6 @@ const loadPortfolios = async () => {
         userName: portfolio.userName || '佚名',
         avatarUrl: portfolio.avatarUrl || null
       }))
-      console.log('处理后的作品集数据:', portfolios.value)
     } else {
       console.error('服务器返回的数据格式不正确:', response)
       portfolios.value = []
