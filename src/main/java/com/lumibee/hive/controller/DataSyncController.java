@@ -1,21 +1,25 @@
 package com.lumibee.hive.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleRepository;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Component
+@Tag(name = "数据同步", description = "数据同步组件，在应用启动时自动同步数据到Elasticsearch")
 public class DataSyncController implements CommandLineRunner {
 
     @Autowired private ArticleRepository articleRepository;

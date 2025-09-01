@@ -1,23 +1,34 @@
 package com.lumibee.hive.controller;
 
-import com.lumibee.hive.dto.SignupDTO;
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.UserService;
-import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.lumibee.hive.dto.SignupDTO;
+import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.UserService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 
 @RestController
+@Tag(name = "注册管理", description = "注册相关的 API 接口")
 public class SignupController {
 
     @Autowired
@@ -31,6 +42,10 @@ public class SignupController {
      * 不再使用重定向，避免CORS预检请求被重定向
      */
     @GetMapping("/signup")
+    @Operation(summary = "获取注册页面", description = "处理注册页面请求")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "页面获取成功")
+    })
     public ResponseEntity<String> handleSignupPage() {
         // 返回一个简单的响应，前端路由会处理实际的页面渲染
         return ResponseEntity.ok().body("{}");
@@ -40,8 +55,14 @@ public class SignupController {
      * 处理用户注册API
      */
     @PostMapping("/api/signup")
-    public ResponseEntity<Map<String, Object>> processSignup(@Valid @RequestBody SignupDTO signupDTO,
-                                                            BindingResult bindingResult) {
+    @Operation(summary = "用户注册", description = "处理新用户注册请求")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "注册成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误或用户已存在")
+    })
+    public ResponseEntity<Map<String, Object>> processSignup(
+            @Parameter(description = "注册信息") @Valid @RequestBody SignupDTO signupDTO,
+            @Parameter(description = "验证结果") BindingResult bindingResult) {
 
         Map<String, Object> response = new HashMap<>();
         Map<String, String> errors = new HashMap<>();
@@ -103,5 +124,4 @@ public class SignupController {
         
         return ResponseEntity.ok(response);
     }
-
 }

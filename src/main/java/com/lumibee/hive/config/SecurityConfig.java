@@ -105,9 +105,7 @@ public class SecurityConfig {
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档
-                                        "/v3/api-docs/**", // OpenAPI 3 文档
-                                        "/check-token.html",
-                                        "/debug-auth.html"
+                                        "/v3/api-docs/**" // OpenAPI 3 文档
                                         ).permitAll() // 以上路径允许所有用户访问
                         .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集需要认证
                         .requestMatchers("/api/user/current").authenticated() // 获取当前用户需要认证
@@ -186,9 +184,7 @@ public class SecurityConfig {
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档
-                                        "/v3/api-docs/**", // OpenAPI 3 文档
-                                        "/check-token.html",
-                                        "/debug-auth.html"
+                                        "/v3/api-docs/**" // OpenAPI 3 文档
                                 ) // API路径忽略CSRF
                 );
 

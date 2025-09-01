@@ -21,7 +21,14 @@ import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.PortfolioService;
 import com.lumibee.hive.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
+@Tag(name = "作品集管理", description = "作品集相关的 API 接口")
 public class PortfolioController {
 
     @Autowired private PortfolioMapper portfolioMapper;
@@ -36,7 +43,12 @@ public class PortfolioController {
      * 重定向作品集详情页到Vue SPA
      */
     @GetMapping("/portfolio/{id}")
-    public ResponseEntity<Void> redirectToPortfolioDetailSPA(@PathVariable("id") Integer id) {
+    @Operation(summary = "重定向到作品集详情页", description = "重定向到Vue SPA的作品集详情页面")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "重定向成功")
+    })
+    public ResponseEntity<Void> redirectToPortfolioDetailSPA(
+            @Parameter(description = "作品集ID") @PathVariable("id") Integer id) {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", "/portfolio/" + id)
                 .build();
@@ -46,7 +58,14 @@ public class PortfolioController {
      * 获取单个作品集详情API
      */
     @GetMapping("/api/portfolio/{id}")
-    public ResponseEntity<PortfolioDetailsDTO> getPortfolioById(@PathVariable("id") Integer id) {
+    @Operation(summary = "获取作品集详情", description = "根据ID获取指定作品集的详细信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "404", description = "作品集不存在")
+    })
+    public ResponseEntity<PortfolioDetailsDTO> getPortfolioById(
+            @Parameter(description = "作品集ID") @PathVariable("id") Integer id) {
         if (id == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -63,6 +82,10 @@ public class PortfolioController {
      * 获取所有作品集API
      */
     @GetMapping("/api/portfolios")
+    @Operation(summary = "获取所有作品集", description = "获取系统中所有作品集的列表")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功")
+    })
     public ResponseEntity<List<PortfolioDetailsDTO>> getAllPortfolios() {
         System.out.println("=== 获取所有作品集API被调用 ===");
         List<PortfolioDetailsDTO> allPortfolios = portfolioService.selectAllPortfolios();
@@ -79,8 +102,15 @@ public class PortfolioController {
      * 创建作品集API
      */
     @PostMapping("/api/portfolio")
-    public ResponseEntity<Portfolio> createPortfolio(@RequestBody PortfolioCreateRequest request, 
-                                                   @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "创建作品集", description = "创建新的作品集")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "创建成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
+    public ResponseEntity<Portfolio> createPortfolio(
+            @Parameter(description = "作品集创建请求") @RequestBody PortfolioCreateRequest request, 
+            @AuthenticationPrincipal Principal principal) {
         System.out.println("=== 创建作品集API被调用 ===");
         System.out.println("Principal: " + principal);
         System.out.println("Request: " + request);

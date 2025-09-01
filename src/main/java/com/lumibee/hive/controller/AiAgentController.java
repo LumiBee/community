@@ -11,6 +11,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.lumibee.hive.agent.BeeManus;
 import com.lumibee.hive.agent.JavaApp;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import reactor.core.publisher.Flux;
@@ -30,12 +34,24 @@ public class AiAgentController {
     private ChatModel dashscopeChatModel;
 
     @GetMapping("/java_guider/chat/sync")
-    public String doChatWithJavaGuider(String message, String conversationId) {
+    @Operation(summary = "Java指导同步对话", description = "与Java指导AI进行同步对话")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "对话成功")
+    })
+    public String doChatWithJavaGuider(
+            @Parameter(description = "对话消息") String message, 
+            @Parameter(description = "会话ID") String conversationId) {
         return javaApp.doChatWithRag(message, conversationId);
     }
 
     @GetMapping("/java_guider/chat/async")
-    public Flux<ServerSentEvent<String>> doChatWithJavaGuiderSSE(String message, String conversationId) {
+    @Operation(summary = "Java指导异步对话", description = "与Java指导AI进行异步流式对话")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "对话成功")
+    })
+    public Flux<ServerSentEvent<String>> doChatWithJavaGuiderSSE(
+            @Parameter(description = "对话消息") String message, 
+            @Parameter(description = "会话ID") String conversationId) {
         return javaApp.doChatWithStream(message, conversationId)
                 .map(chunk -> ServerSentEvent.<String>builder()
                         .data(chunk)
@@ -43,7 +59,13 @@ public class AiAgentController {
     }
 
     @GetMapping("/java_guider/chat/sse/emitter")
-    public SseEmitter doChatWithSseEmitter(String message, String conversationId) {
+    @Operation(summary = "Java指导SSE对话", description = "与Java指导AI进行SSE流式对话")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "对话成功")
+    })
+    public SseEmitter doChatWithSseEmitter(
+            @Parameter(description = "对话消息") String message, 
+            @Parameter(description = "会话ID") String conversationId) {
         SseEmitter emitter = new SseEmitter(18000L); // 设置超时时间为 3 分钟
         // 获取 Flux 数据流并直接订阅
         javaApp.doChatWithStream(message, conversationId)
@@ -65,7 +87,12 @@ public class AiAgentController {
     }
 
     @GetMapping("/manus/chat")
-    public SseEmitter doChatWithManus(String message) {
+    @Operation(summary = "Manus对话", description = "与Manus AI进行对话")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "对话成功")
+    })
+    public SseEmitter doChatWithManus(
+            @Parameter(description = "对话消息") String message) {
         BeeManus beeManus = new BeeManus(allTools, dashscopeChatModel);
         return beeManus.runStream(message);
     }

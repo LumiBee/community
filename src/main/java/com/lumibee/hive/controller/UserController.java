@@ -26,8 +26,15 @@ import com.lumibee.hive.service.CacheService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/user")
+@Tag(name = "用户管理", description = "用户，关注，更新资料相关的 API 接口")
 public class UserController {
 
     @Autowired private UserService userService;
@@ -39,6 +46,11 @@ public class UserController {
      */
     @GetMapping("/current")
     @ResponseBody
+    @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
     public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal Principal principal) {
 
         User user = userService.getCurrentUserFromPrincipal(principal);
@@ -52,8 +64,15 @@ public class UserController {
     }
 
     @PostMapping("/{userId}/follow")
-    public ResponseEntity<Map<String, Object>> toggleFollow(@PathVariable("userId") Long userId,
-                                                            @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "切换关注状态", description = "关注或取消关注指定用户")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "操作成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
+    public ResponseEntity<Map<String, Object>> toggleFollow(
+            @Parameter(description = "要关注的用户ID") @PathVariable("userId") Long userId,
+            @AuthenticationPrincipal Principal principal) {
 
         System.out.println("=== toggleFollow 被调用 ===");
         System.out.println("接收到的用户ID (Long): " + userId);
@@ -107,6 +126,10 @@ public class UserController {
     }
 
     @GetMapping("/debug/users")
+    @Operation(summary = "调试用户列表", description = "获取所有用户的基本信息（调试用）")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功")
+    })
     public ResponseEntity<Map<String, Object>> debugUsers() {
         Map<String, Object> response = new HashMap<>();
         
@@ -135,34 +158,18 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/debug/test-id/{userId}")
-    public ResponseEntity<Map<String, Object>> testUserId(@PathVariable("userId") Long userId) {
-        Map<String, Object> response = new HashMap<>();
-        
-        response.put("success", true);
-        response.put("receivedUserId", userId);
-        response.put("userIdType", userId != null ? userId.getClass().getName() : "null");
-        response.put("userIdAsString", String.valueOf(userId));
-        
-        // 尝试查找用户
-        User user = userService.selectById(userId);
-        if (user != null) {
-            response.put("userFound", true);
-            response.put("userName", user.getName());
-            response.put("userEmail", user.getEmail());
-        } else {
-            response.put("userFound", false);
-        }
-        
-        return ResponseEntity.ok(response);
-    }
-
     /**
      * 检查当前用户是否关注了指定用户
      */
     @GetMapping("/{userId}/is-following")
-    public ResponseEntity<Map<String, Object>> isFollowing(@PathVariable("userId") Long userId,
-                                                          @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "检查用户是否关注", description = "检查当前用户是否关注了指定用户")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "检查成功"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
+    public ResponseEntity<Map<String, Object>> isFollowing(
+            @Parameter(description = "要检查的用户ID") @PathVariable("userId") Long userId,
+            @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
         
         // 获取当前用户
@@ -186,8 +193,15 @@ public class UserController {
      * 上传头像
      */
     @PostMapping("/avatar")
-    public ResponseEntity<Map<String, Object>> uploadAvatar(@RequestParam("avatar") MultipartFile avatarFile,
-                                                           @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "上传头像", description = "上传用户头像")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "上传成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
+    public ResponseEntity<Map<String, Object>> uploadAvatar(
+            @Parameter(description = "头像文件") @RequestParam("avatar") MultipartFile avatarFile,
+            @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
         
         try {
@@ -265,10 +279,16 @@ public class UserController {
      * 更新用户资料
      */
     @PutMapping("/profile")
+    @Operation(summary = "更新用户资料", description = "更新当前用户的用户名、邮箱或个人简介")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "资料更新成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
+    })
     public ResponseEntity<Map<String, Object>> updateProfile(
-            @RequestParam("userName") String userName,
-            @RequestParam("email") String email,
-            @RequestParam(value = "bio", required = false) String bio,
+            @Parameter(description = "新的用户名") @RequestParam("userName") String userName,
+            @Parameter(description = "新的邮箱") @RequestParam("email") String email,
+            @Parameter(description = "新的个人简介", required = false) @RequestParam(value = "bio", required = false) String bio,
             @AuthenticationPrincipal Principal principal) {
         
         Map<String, Object> response = new HashMap<>();

@@ -78,6 +78,10 @@ public class ArticleController {
      */
     @GetMapping("/api/articles/featured")
     @ResponseBody
+    @Operation(summary = "获取精选文章", description = "获取系统精选的文章列表")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功")
+    })
     public ResponseEntity<List<ArticleExcerptDTO>> getFeaturedArticles() {
         List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
         return ResponseEntity.ok(featuredArticles);
@@ -88,8 +92,14 @@ public class ArticleController {
      */
     @GetMapping("/api/article/{slug}")
     @ResponseBody
-    public ResponseEntity<ArticleDetailsDTO> getArticleBySlugAPI(@PathVariable("slug") String slug,
-                                                                 @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "通过slug获取文章详情", description = "根据文章的slug获取完整的文章详情信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "文章不存在")
+    })
+    public ResponseEntity<ArticleDetailsDTO> getArticleBySlugAPI(
+            @Parameter(description = "文章slug") @PathVariable("slug") String slug,
+            @AuthenticationPrincipal Principal principal) {
         // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
         
@@ -134,7 +144,13 @@ public class ArticleController {
      */
     @GetMapping("/api/article/id/{articleId}")
     @ResponseBody
-    public ResponseEntity<ArticleDetailsDTO> getArticleById(@PathVariable("articleId") Integer articleId) {
+    @Operation(summary = "根据ID获取文章详情", description = "根据文章ID获取文章详情信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "文章不存在")
+    })
+    public ResponseEntity<ArticleDetailsDTO> getArticleById(
+            @Parameter(description = "文章ID") @PathVariable("articleId") Integer articleId) {
         ArticleDetailsDTO article = articleService.getArticleByIdSimple(articleId);
         if (article == null) {
             return ResponseEntity.notFound().build();
@@ -147,7 +163,13 @@ public class ArticleController {
      */
     @GetMapping("/api/article/{articleId}/related")
     @ResponseBody
-    public ResponseEntity<List<ArticleDocument>> getRelatedArticles(@PathVariable("articleId") Integer articleId) {
+    @Operation(summary = "获取相关文章", description = "根据文章ID获取相关的文章推荐")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "原文章不存在")
+    })
+    public ResponseEntity<List<ArticleDocument>> getRelatedArticles(
+            @Parameter(description = "文章ID") @PathVariable("articleId") Integer articleId) {
         
         // 通过articleId获取文章详情，然后获取相关文章
         ArticleDetailsDTO article = articleService.getArticleByIdSimple(articleId);

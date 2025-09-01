@@ -24,8 +24,15 @@ import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @CrossOrigin(originPatterns = "*", allowCredentials = "true")
+@Tag(name = "个人中心管理", description = "个人中心相关的 API 接口")
 public class ProfileController {
 
     @Autowired private UserService userService;
@@ -36,8 +43,16 @@ public class ProfileController {
      * 更新用户封面图片API
      */
     @PostMapping("/update-cover")
-    public ResponseEntity<Map<String, Object>> updateUserCover(@RequestParam("coverImageFile") MultipartFile coverImageFile,
-                                                              @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "更新用户封面图片", description = "上传并更新用户的背景封面图片")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "更新成功"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误"),
+        @ApiResponse(responseCode = "401", description = "用户未认证"),
+        @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    })
+    public ResponseEntity<Map<String, Object>> updateUserCover(
+            @Parameter(description = "封面图片文件") @RequestParam("coverImageFile") MultipartFile coverImageFile,
+            @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
         
         // 检查用户是否登录
@@ -82,7 +97,12 @@ public class ProfileController {
      * 重定向用户资料页到Vue SPA
      */
     @GetMapping("/profile/{name}")
-    public ResponseEntity<Void> redirectToUserProfileSPA(@PathVariable("name") String name) {
+    @Operation(summary = "重定向到用户资料页", description = "重定向到Vue SPA的用户资料页面")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "302", description = "重定向成功")
+    })
+    public ResponseEntity<Void> redirectToUserProfileSPA(
+            @Parameter(description = "用户名") @PathVariable("name") String name) {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .header("Location", "/profile/" + name)
                 .build();
@@ -92,10 +112,17 @@ public class ProfileController {
      * 获取用户资料数据API
      */
     @GetMapping("/api/profile/{name}")
-    public ResponseEntity<Map<String, Object>> getUserProfileData(@PathVariable("name") String name,
-                                                                  @RequestParam(name = "page", defaultValue = "1") long pageNum,
-                                                                  @RequestParam(name = "size", defaultValue = "6") long pageSize,
-                                                                  @AuthenticationPrincipal Principal principal) {
+    @Operation(summary = "获取用户资料数据", description = "根据用户名获取用户的详细资料信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "用户不存在"),
+        @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    })
+    public ResponseEntity<Map<String, Object>> getUserProfileData(
+            @Parameter(description = "用户名") @PathVariable("name") String name,
+            @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
+            @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "6") long pageSize,
+            @AuthenticationPrincipal Principal principal) {
         System.out.println("获取用户资料: " + name + ", 页码: " + pageNum + ", 大小: " + pageSize);
         
         try {

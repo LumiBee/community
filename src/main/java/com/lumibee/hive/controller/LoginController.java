@@ -29,12 +29,18 @@ import com.lumibee.hive.service.UserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @RestController
+@Tag(name = "登录管理", description = "登录相关的 API 接口")
 public class LoginController {
     
     // JWT密钥 - 实际应用中应该放在配置文件中
@@ -162,6 +168,10 @@ public class LoginController {
      * 重定向登录页面到Vue SPA
      */
     @GetMapping("/login")
+    @Operation(summary = "重定向到登录页面", description = "重定向到Vue SPA的登录页面")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "重定向成功")
+    })
     public ResponseEntity<Void> redirectToLoginSPA() {
         // 直接返回成功状态，让前端Vue路由处理
         return ResponseEntity.ok().build();
@@ -171,7 +181,17 @@ public class LoginController {
      * API登录端点，用于处理前端AJAX登录请求
      */
     @PostMapping("/api/login")
-    public ResponseEntity<?> apiLogin(@RequestBody Map<String, String> loginRequest, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+    @Operation(summary = "用户登录", description = "处理用户登录请求，支持记住我功能")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "登录成功"),
+        @ApiResponse(responseCode = "401", description = "登录失败，用户名或密码错误"),
+        @ApiResponse(responseCode = "400", description = "请求参数错误")
+    })
+    public ResponseEntity<?> apiLogin(
+            @Parameter(description = "登录请求参数") @RequestBody Map<String, String> loginRequest, 
+            HttpSession session, 
+            HttpServletRequest request, 
+            HttpServletResponse response) {
         String account = loginRequest.get("account");
         String password = loginRequest.get("password");
         String rememberMe = loginRequest.get("remember-me");
@@ -255,7 +275,6 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
-    
 
 
     /**
@@ -371,6 +390,7 @@ public class LoginController {
      * API登出端点，用于处理前端AJAX登出请求
      */
     @PostMapping("/api/logout")
+    @Operation(summary = "登出状态", description = "切换为登出状态")
     public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();
         
