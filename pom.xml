@@ -130,14 +130,6 @@
             <version>8.3.0</version>
         </dependency>
         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
-        </dependency>
-        <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
@@ -321,27 +313,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <configuration>
-                    <url>${flyway.url}</url>
-                    <user>${flyway.user}</user>
-                    <password>${flyway.password}</password>
-                    <locations>
-                        <location>classpath:db/migration</location>
-                    </locations>
-                    <baselineOnMigrate>true</baselineOnMigrate>
-                    <baselineVersion>1.0.0</baselineVersion>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.mysql</groupId>
-                        <artifactId>mysql-connector-j</artifactId>
-                        <version>8.0.33</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
+
         </plugins>
     </build>
 

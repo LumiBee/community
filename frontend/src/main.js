@@ -1,32 +1,27 @@
 import { createApp } from 'vue'
-import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
-import ToastPlugin from './plugins/toast'
-
-// 导入样式
+import store from './store'
 import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 import '@fortawesome/fontawesome-free/css/all.min.css'
-import 'aos/dist/aos.css'
 import './assets/styles/main.scss'
-import './assets/styles/components.scss'
 
-// 导入JavaScript库
-import 'bootstrap/dist/js/bootstrap.bundle.min.js'
-import AOS from 'aos'
+// 导入性能优化工具
+import { initImageOptimization } from '@/utils/imageOptimizer'
+import { initResourcePreloading } from '@/utils/resourcePreloader'
+import { initPerformanceMonitoring, initVisibilityPerformanceMonitoring, initUnloadPerformanceMonitoring } from '@/utils/performanceMonitor'
+
+// 初始化性能优化
+initImageOptimization()
+initResourcePreloading()
+initPerformanceMonitoring()
+initVisibilityPerformanceMonitoring()
+initUnloadPerformanceMonitoring()
 
 const app = createApp(App)
-const pinia = createPinia()
 
-app.use(pinia)
+app.use(store)
 app.use(router)
-app.use(ToastPlugin)
-
-// 初始化AOS动画库
-AOS.init({
-  duration: 800,
-  once: true,
-  offset: 100
-})
 
 app.mount('#app')

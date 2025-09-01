@@ -15,7 +15,7 @@
               <!-- 特色文章 -->
               <div 
                 v-for="(article, index) in featuredArticles" 
-                :key="article.id"
+                :key="article.articleId"
                 :class="['modern-carousel-item', { active: index === 0 }]"
                 @click="$router.push(`/article/${article.slug}`)"
               >
@@ -124,12 +124,12 @@
           <div v-if="articles.length > 0">
                           <router-link
                 v-for="article in articles"
-                :key="article.id"
+                :key="article.articleId"
                 :to="`/article/${article.slug}`"
                 class="article-link"
-                style="display: block; text-decoration: none; color: inherit;"
+                style="display: block; text-decoration: none; color: inherit; opacity: 1 !important; visibility: visible !important;"
               >
-                <div class="card mb-4 box-shadow article-card" data-aos="fade-up">
+                <div class="card mb-4 box-shadow article-card" style="opacity: 1 !important; visibility: visible !important; position: static !important; display: block !important;">
                   <div class="card-body d-flex flex-column">
                     <div>
                       <h2 class="mb-1 h4 font-weight-bold article-title">
@@ -228,7 +228,7 @@
           <ol class="list-unstyled" v-if="popularArticles.length > 0">
             <li
               v-for="(article, index) in popularArticles"
-              :key="article.id"
+              :key="article.articleId"
               class="pb-3 pt-3 border-bottom"
               data-aos="fade-left"
               :data-aos-delay="index * 100"
@@ -240,27 +240,27 @@
                       {{ article.title }}
                     </router-link>
                   </h6>
-                  <small class="text-muted d-flex align-items-center w-100 pt-2" style="justify-content: space-between;">
+                  <small class="text-muted d-flex align-items-center w-100 pt-0" style="justify-content: space-between;">
                     <span class="d-flex align-items-center">
                       <img
                         v-if="article.avatarUrl"
                         :src="getAuthorAvatarUrl(article.avatarUrl)"
                         alt="作者头像"
-                        style="width: 20px; height: 20px; border-radius: 50%; margin-right: 5px; object-fit: cover;"
+                        style="width: 18px; height: 18px; border-radius: 50%; margin-right: 4px; object-fit: cover;"
                       />
-                      <small class="text-muted" style="font-size: 13px;">{{ article.userName || '佚名' }}</small>
+                      <small class="text-muted" style="font-size: 12px;">{{ article.userName || '佚名' }}</small>
                     </span>
-                    <span style="display: inline-flex; align-items: center; gap: 0.75rem;" class="ms-auto">
+                    <span style="display: inline-flex; align-items: center; gap: 0.5rem;" class="ms-auto">
                       <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-eye" style="color: #ffc107; font-size: 0.875rem;"></i>
+                        <i class="fas fa-eye" style="color: #ffc107; font-size: 0.8rem;"></i>
                         <small>{{ article.viewCount || 0 }}</small>
                       </span>
                       <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-heart" style="color: #ffc107; font-size: 0.875rem;"></i>
+                        <i class="fas fa-heart" style="color: #ffc107; font-size: 0.8rem;"></i>
                         <small>{{ article.likes || 0 }}</small>
                       </span>
                       <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-comment" style="color: #ffc107; font-size: 0.875rem;"></i>
+                        <i class="fas fa-comment" style="color: #ffc107; font-size: 0.8rem;"></i>
                         <small>{{ article.commentCount || 0 }}</small>
                       </span>
                     </span>
@@ -346,7 +346,18 @@ const loadHomeData = async (page = 1) => {
     const homeRes = await articleAPI.getHomeArticles(page, pagination.value.size)
     
     // 处理首页数据
+    console.log('🔍 检查数据结构:', {
+      hasArticles: !!homeRes.articles,
+      articlesType: typeof homeRes.articles,
+      articlesKeys: homeRes.articles ? Object.keys(homeRes.articles) : 'N/A',
+      hasRecords: !!(homeRes.articles && homeRes.articles.records),
+      recordsType: homeRes.articles?.records ? typeof homeRes.articles.records : 'N/A',
+      recordsLength: homeRes.articles?.records?.length || 'N/A'
+    })
+    
     if (homeRes.articles && homeRes.articles.records) {
+      console.log('📝 文章数据:', homeRes.articles.records)
+      console.log('📝 文章数量:', homeRes.articles.records.length)
       articles.value = homeRes.articles.records
       pagination.value = {
         current: homeRes.articles.current,
@@ -354,6 +365,16 @@ const loadHomeData = async (page = 1) => {
         totalPages: homeRes.articles.pages,
         total: homeRes.articles.total
       }
+      console.log('📄 更新后的分页信息:', pagination.value)
+    } else {
+      console.warn('⚠️ API响应中没有找到文章数据:', homeRes)
+      console.warn('⚠️ 详细检查:', {
+        articles: homeRes.articles,
+        records: homeRes.articles?.records,
+        condition1: !!homeRes.articles,
+        condition2: !!(homeRes.articles && homeRes.articles.records)
+      })
+      articles.value = []
     }
     
     // 处理其他数据
@@ -725,8 +746,8 @@ onBeforeUnmount(() => {
 .article-title {
   color: #2c3e50;
   font-weight: 700;
-  line-height: 1.4;
-  margin-bottom: 0.75rem;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
   transition: color 0.3s ease;
 }
 
@@ -736,8 +757,9 @@ onBeforeUnmount(() => {
 
 .article-excerpt {
   color: #64748b;
-  line-height: 1.7;
-  font-size: 0.95rem;
+  line-height: 1.5;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
 }
 
 .author-info {
@@ -777,9 +799,9 @@ onBeforeUnmount(() => {
 }
 
 .article-meta {
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   border-top: 1px solid #f1f5f9;
-  margin-top: 1rem;
+  margin-top: 0.75rem;
 }
 
 .article-stats {
@@ -945,7 +967,7 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.modern-carousel-item {
+.modern-carousel .modern-carousel-item {
   position: absolute;
   top: 0;
   left: 0;
@@ -959,7 +981,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
 }
 
-.modern-carousel-item.active {
+.modern-carousel .modern-carousel-item.active {
   opacity: 1;
   visibility: visible;
   z-index: 2;
@@ -981,7 +1003,7 @@ onBeforeUnmount(() => {
   transition: transform 8s ease;
 }
 
-.modern-carousel-item.active .carousel-image {
+.modern-carousel .modern-carousel-item.active .carousel-image {
   transform: scale(1.05);
 }
 
@@ -1370,11 +1392,11 @@ onBeforeUnmount(() => {
 
 /* 热门阅读列表 */
 .list-unstyled li {
-  padding: 1.25rem 0;
+  padding: 0.75rem 0;
   border-bottom: 1px solid #f1f5f9;
   transition: all 0.3s ease;
   border-radius: 0.75rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
   position: relative;
 }
 
@@ -1388,8 +1410,8 @@ onBeforeUnmount(() => {
 .list-unstyled li h6 a {
   color: #2c3e50;
   font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  line-height: 1.2;
   transition: color 0.3s ease;
 }
 

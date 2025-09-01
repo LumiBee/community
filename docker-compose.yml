@@ -5,16 +5,17 @@ services:
     container_name: mysql-db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-cgqlbh114514}
       MYSQL_DATABASE: community
     ports:
       - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./docker/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     networks:
       - hive-net
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-cgqlbh114514}"]
       interval: 10s
       timeout: 5s
       retries: 10

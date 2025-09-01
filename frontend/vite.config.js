@@ -1,9 +1,13 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
+import { splitVendorChunkPlugin } from 'vite'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    splitVendorChunkPlugin()
+  ],
   appType: 'spa', // 指定为SPA应用，自动处理路由
   resolve: {
     alias: {
@@ -83,15 +87,46 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: false, // 生产环境关闭sourcemap
+    minify: 'terser', // 使用terser进行更彻底的压缩
+    terserOptions: {
+      compress: {
+        drop_console: true, // 移除console.log
+        drop_debugger: true, // 移除debugger
+        pure_funcs: ['console.log', 'console.info', 'console.debug'] // 移除特定函数调用
+      }
+    },
     rollupOptions: {
       output: {
+        // 更智能的代码分割
         manualChunks: {
-          vendor: ['vue', 'vue-router', 'pinia'],
-          bootstrap: ['bootstrap', 'bootstrap-vue-next'],
-          utils: ['axios', 'marked', 'dompurify']
-        }
+          // Vue核心库
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          // UI框架
+          'bootstrap-vendor': ['bootstrap', 'bootstrap-vue-next'],
+          // 工具库
+          'utils-vendor': ['axios', 'dompurify'],
+          // 图标库
+          'icons-vendor': ['@fortawesome/fontawesome-free'],
+          // 其他第三方库
+          'other-vendor': ['marked', 'highlight.js']
+        },
+        // 文件名优化
+        chunkFileNames: 'assets/js/[name]-[hash].js',
+        entryFileNames: 'assets/js/[name]-[hash].js',
+        assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
-    }
+    },
+    // 启用CSS代码分割
+    cssCodeSplit: true,
+    // 设置块大小警告限制
+    chunkSizeWarningLimit: 1000,
+    // 启用压缩
+    reportCompressedSize: true
+  },
+  // 预构建优化
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'pinia', 'axios', 'bootstrap', 'bootstrap-vue-next'],
+    exclude: ['@fortawesome/fontawesome-free'] // 排除大体积的图标库
   }
 })

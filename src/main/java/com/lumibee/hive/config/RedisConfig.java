@@ -55,6 +55,24 @@ public class RedisConfig {
                         .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                         .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
                         .disableCachingNullValues())
+                .withCacheConfiguration("tagDetails", 
+                    RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofHours(2))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
+                        .disableCachingNullValues()) // 保持不允许null值
+                .withCacheConfiguration("homepageArticles", 
+                    RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(15))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
+                        .disableCachingNullValues())
+                .withCacheConfiguration("profileArticles", 
+                    RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(15))
+                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
+                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
+                        .disableCachingNullValues())
                 .build();
     }
 

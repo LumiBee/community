@@ -41,6 +41,7 @@ public class User implements UserDetails, Principal {
     private String githubId;
     private String qqOpenId;
     private String backgroundImgUrl;
+    private UserRole role;
 
     @TableLogic
     @TableField(fill = FieldFill.INSERT)
@@ -53,6 +54,12 @@ public class User implements UserDetails, Principal {
     }
     public boolean isQQOpenAuthUser() {
         return this.qqOpenId != null;
+    }
+
+    public enum UserRole {
+        regular,
+        vip,
+        admin
     }
 
     @Override

@@ -328,7 +328,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
 import { request } from '@/api'
@@ -338,6 +338,8 @@ import { toasts } from '@/plugins/toast'
 import SimpleImageCropper from '@/components/SimpleImageCropper.vue'
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue'
 import { getAvatarUrl } from '@/utils/avatar-helper'
+import { userAPI } from '@/api/user'
+import { preloadCriticalImages, preloadLCPImage, getOptimizedImageUrl, ImageLoader } from '@/utils/imageOptimizer'
 
 const route = useRoute()
 const router = useRouter()
@@ -444,18 +446,27 @@ const onAvatarError = () => {
 }
 
 const onArticleCoverLoad = (article) => {
-  article.coverImgLoaded = true
+  // 使用 requestAnimationFrame 优化DOM更新
+  requestAnimationFrame(() => {
+    article.coverImgLoaded = true
+  })
 }
 
 const onArticleCoverError = (article) => {
-  article.coverImgLoaded = true // 即使加载失败也要隐藏骨架屏
+  // 使用 requestAnimationFrame 优化DOM更新
+  requestAnimationFrame(() => {
+    article.coverImgLoaded = true // 即使加载失败也要隐藏骨架屏
+  })
 }
 
 // 监听路由参数变化
 watch(() => route.params.name, (newName) => {
   if (newName) {
     username.value = newName
-    fetchProfileData()
+    // 使用 nextTick 优化DOM更新
+    nextTick(() => {
+      fetchProfileData()
+    })
   }
 })
 
@@ -509,11 +520,12 @@ const fetchProfileData = async () => {
       timeout: 30000 // 增加超时时间到30秒
     })
     
-    // 为文章添加加载状态
+    // 为文章添加加载状态，使用批量更新优化性能
     if (response.articles?.records) {
-      response.articles.records.forEach(article => {
-        article.coverImgLoaded = false
-      })
+      const articles = response.articles.records
+      for (let i = 0; i < articles.length; i++) {
+        articles[i].coverImgLoaded = false
+      }
     }
     
     profileData.value = response
@@ -668,7 +680,10 @@ const closeCropper = () => {
 const loadPreviousPage = () => {
   if (currentPage.value > 1) {
     currentPage.value--
-    fetchProfileData()
+    // 使用 nextTick 优化DOM更新
+    nextTick(() => {
+      fetchProfileData()
+    })
   }
 }
 
@@ -676,7 +691,10 @@ const loadPreviousPage = () => {
 const loadNextPage = () => {
   if (hasNextPage.value) {
     currentPage.value++
-    fetchProfileData()
+    // 使用 nextTick 优化DOM更新
+    nextTick(() => {
+      fetchProfileData()
+    })
   }
 }
 
@@ -687,7 +705,10 @@ const goToPage = (page) => {
   const totalPages = profileData.value.articles?.pages || 1
   if (page >= 1 && page <= totalPages) {
     currentPage.value = page
-    fetchProfileData()
+    // 使用 nextTick 优化DOM更新
+    nextTick(() => {
+      fetchProfileData()
+    })
   }
 }
 
@@ -747,36 +768,60 @@ const closeDeleteModal = () => {
   deleteModalPositionIndex.value = 0
 }
 
-
-
 // 预加载关键图片资源
-const preloadCriticalImages = () => {
+const preloadProfileImages = () => {
   const criticalImages = [
     '/img/bg.jpg',
     '/img/default01.jpg',
     '/img/default.jpg'
   ]
   
-  criticalImages.forEach(src => {
-    const img = new Image()
-    img.src = src
-  })
+  // 使用 Intersection Observer 优化图片预加载
+  if ('IntersectionObserver' in window) {
+    const imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target
+          img.src = img.dataset.src
+          imageObserver.unobserve(img)
+        }
+      })
+    })
+    
+    criticalImages.forEach(src => {
+      const img = new Image()
+      img.dataset.src = src
+      imageObserver.observe(img)
+    })
+  } else {
+    // 降级处理
+    criticalImages.forEach(src => {
+      const img = new Image()
+      img.src = src
+    })
+  }
 }
 
 // 组件挂载时获取数据
 onMounted(() => {
   // 预加载关键图片
-  preloadCriticalImages()
+  preloadProfileImages()
   
   // 从路由参数中获取用户名
   if (route.params.name) {
     username.value = route.params.name
-    fetchProfileData()
+    // 使用 nextTick 优化DOM更新
+    nextTick(() => {
+      fetchProfileData()
+    })
   } else {
     // 如果没有指定用户名，则获取当前登录用户的资料
     if (authStore.isAuthenticated) {
       username.value = authStore.userName
-      fetchProfileData()
+      // 使用 nextTick 优化DOM更新
+      nextTick(() => {
+        fetchProfileData()
+      })
     } else {
       router.push({ name: 'Login', query: { redirect: route.fullPath } })
     }
@@ -790,8 +835,7 @@ onMounted(() => {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
   position: relative;
-  will-change: transform;
-  transform: translateZ(0);
+  /* 移除 will-change 和 transform，减少重绘开销 */
 }
 
 .profile-page::before {
@@ -888,12 +932,7 @@ onMounted(() => {
   background-size: 60px 60px, 40px 40px, 100% 100%;
   opacity: 0.3;
   z-index: 1;
-  animation: patternFloat 20s ease-in-out infinite;
-}
-
-@keyframes patternFloat {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(1deg); }
+  /* 移除复杂的浮动动画，减少性能消耗 */
 }
 
 
@@ -934,7 +973,7 @@ onMounted(() => {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px); /* 减少移动距离 */
   }
   to {
     opacity: 1;
@@ -957,7 +996,8 @@ onMounted(() => {
   right: 30px;
   z-index: 10;
   opacity: 0.95;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
 }
 
 .cover-edit-btn .btn-modern {
@@ -970,12 +1010,12 @@ onMounted(() => {
     0 4px 10px rgba(0,0,0,0.1);
   background: rgba(255,255,255,0.9);
   border: 1px solid rgba(255,255,255,0.4);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px); /* 减少模糊效果 */
   letter-spacing: 0.5px;
 }
 
 .cover-edit-btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px); /* 减少悬停移动距离 */
 }
 
 .cover-edit-btn .btn-modern.uploading {
@@ -1006,13 +1046,14 @@ onMounted(() => {
   padding: 25px;
   text-align: center;
   margin-bottom: 30px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* 简化过渡效果 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   border: 1px solid rgba(0,0,0,0.05);
   position: relative;
 }
 
 .profile-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-3px); /* 减少悬停移动距离 */
   box-shadow: 0 15px 35px rgba(0,0,0,0.1);
 }
 
@@ -1033,7 +1074,8 @@ onMounted(() => {
   border-radius: 16px;
   z-index: -1;
   opacity: 0.5;
-  animation: glow 3s infinite alternate;
+  /* 简化发光动画，减少性能消耗 */
+  animation: glow 4s infinite alternate;
 }
 
 @keyframes glow {
@@ -1042,7 +1084,7 @@ onMounted(() => {
     opacity: 0.5;
   }
   to {
-    transform: scale(1.1);
+    transform: scale(1.05); /* 减少缩放幅度 */
     opacity: 0.7;
   }
 }
@@ -1068,20 +1110,21 @@ onMounted(() => {
   border: 2px solid rgba(246, 213, 92, 0.5);
   border-radius: 50%;
   z-index: -1;
-  animation: pulseRing 3s infinite;
+  /* 简化脉冲动画，减少性能消耗 */
+  animation: pulseRing 4s infinite;
 }
 
 @keyframes pulseRing {
   0% {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0.7;
   }
   50% {
-    transform: scale(1.1);
+    transform: scale(1.05);
     opacity: 1;
   }
   100% {
-    transform: scale(0.9);
+    transform: scale(0.95);
     opacity: 0.7;
   }
 }
@@ -1105,12 +1148,14 @@ onMounted(() => {
   border: 5px solid white;
   object-fit: cover;
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-  transition: all 0.4s ease;
-  animation: float 3s infinite ease-in-out;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
+  /* 简化浮动动画，减少性能消耗 */
+  animation: float 4s infinite ease-in-out;
 }
 
 .avatar-wrapper:hover .profile-avatar {
-  transform: scale(1.05);
+  transform: scale(1.02); /* 减少悬停缩放 */
   border-color: rgba(246, 213, 92, 0.8);
 }
 
@@ -1119,7 +1164,7 @@ onMounted(() => {
     transform: translateY(0px);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-5px); /* 减少浮动距离 */
   }
 }
 
@@ -1133,7 +1178,8 @@ onMounted(() => {
   background-color: #4CAF50;
   border: 3px solid white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  animation: pulse 2s infinite;
+  /* 简化脉冲动画，减少性能消耗 */
+  animation: pulse 3s infinite;
 }
 
 .avatar-status .status-dot {
@@ -1141,12 +1187,12 @@ onMounted(() => {
   height: 100%;
   border-radius: 50%;
   background-color: #4CAF50;
-  animation: pulse 2s infinite;
+  animation: pulse 3s infinite;
 }
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+  70% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); } /* 减少阴影扩散 */
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
@@ -1178,7 +1224,8 @@ onMounted(() => {
   border-radius: 50px;
   padding: 10px 25px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
   background: linear-gradient(45deg, #f6d55c, #f3a712);
   border: none;
@@ -1186,7 +1233,7 @@ onMounted(() => {
 }
 
 .modern-btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px); /* 减少悬停移动距离 */
   box-shadow: 0 6px 15px rgba(246, 213, 92, 0.3);
   background: linear-gradient(45deg, #f3a712, #f6d55c);
   color: white;
@@ -1241,12 +1288,13 @@ onMounted(() => {
   font-size: 1.5rem;
   color: #f6d55c;
   margin-bottom: 5px;
-  animation: pulseIcon 2s infinite;
+  /* 简化图标动画，减少性能消耗 */
+  animation: pulseIcon 3s infinite;
 }
 
 @keyframes pulseIcon {
   0% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.05); } /* 减少缩放幅度 */
   100% { transform: scale(1); }
 }
 
@@ -1346,7 +1394,8 @@ onMounted(() => {
   background-color: #f8f9fa;
   color: #6c757d;
   text-decoration: none;
-  transition: all 0.3s ease;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
   border: 1px solid rgba(0,0,0,0.05);
   position: relative;
 }
@@ -1354,7 +1403,7 @@ onMounted(() => {
 .modern-social .social-link:hover {
   background-color: #f6d55c;
   color: white;
-  transform: translateY(-3px);
+  transform: translateY(-2px); /* 减少悬停移动距离 */
   box-shadow: 0 5px 15px rgba(246, 213, 92, 0.3);
 }
 
@@ -1409,12 +1458,13 @@ onMounted(() => {
   position: absolute;
   top: 0;
   left: 0;
-  animation: bounce 2s infinite ease-in-out;
+  /* 简化加载动画，减少性能消耗 */
+  animation: bounce 2.5s infinite ease-in-out;
 }
 
-.modern-loading .spinner-ring:nth-child(1) { animation-delay: -1.5s; }
-.modern-loading .spinner-ring:nth-child(2) { animation-delay: -1.0s; }
-.modern-loading .spinner-ring:nth-child(3) { animation-delay: -0.5s; }
+.modern-loading .spinner-ring:nth-child(1) { animation-delay: -1.8s; }
+.modern-loading .spinner-ring:nth-child(2) { animation-delay: -1.2s; }
+.modern-loading .spinner-ring:nth-child(3) { animation-delay: -0.6s; }
 
 @keyframes bounce {
   0%, 100% { transform: scale(0.0); }
@@ -1431,30 +1481,33 @@ onMounted(() => {
   flex-direction: column;
   border: 1px solid rgba(0,0,0,0.03);
   position: relative;
-  animation: fadeInUp 0.6s ease forwards;
+  /* 简化文章卡片动画，减少性能消耗 */
+  animation: fadeInUp 0.4s ease forwards;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(15px); /* 减少移动距离 */
 }
 
 .modern-article {
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   border: 1px solid rgba(0,0,0,0.03);
   box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* 简化过渡效果 */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .modern-article:hover {
-  transform: translateY(-8px);
+  transform: translateY(-5px); /* 减少悬停移动距离 */
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 .article-card-inner {
   height: 100%;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
 }
 
 .article-card:hover .article-card-inner {
-  transform: translateY(-8px);
+  transform: translateY(-5px); /* 减少悬停移动距离 */
 }
 
 .article-card:before {
@@ -1467,7 +1520,8 @@ onMounted(() => {
   background: linear-gradient(90deg, #f6d55c, #f3a712);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.4s ease;
+  /* 简化过渡效果 */
+  transition: transform 0.3s ease;
   z-index: 1;
 }
 
@@ -1487,12 +1541,13 @@ onMounted(() => {
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   z-index: 2;
-  animation: pulseBadge 2s infinite;
+  /* 简化徽章动画，减少性能消耗 */
+  animation: pulseBadge 3s infinite;
 }
 
 @keyframes pulseBadge {
   0% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 1; } /* 减少缩放幅度 */
   100% { transform: scale(1); opacity: 0.8; }
 }
 
@@ -1500,7 +1555,8 @@ onMounted(() => {
   height: 180px;
   background-size: cover;
   background-position: center;
-  transition: all 0.5s ease;
+  /* 简化过渡效果 */
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
 }
@@ -1547,7 +1603,7 @@ onMounted(() => {
 }
 
 .article-card:hover .article-cover {
-  height: 200px;
+  height: 190px; /* 减少悬停时的高度变化 */
 }
 
 .article-card:hover .article-cover-overlay {
@@ -1572,7 +1628,7 @@ onMounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  transition: color 0.3s ease;
+  transition: color 0.2s ease;
   line-height: 1.4;
 }
 
@@ -1660,7 +1716,8 @@ onMounted(() => {
   height: 36px;
   border-radius: 8px;
   font-size: 0.85rem;
-  transition: all 0.2s ease;
+  /* 简化过渡效果 */
+  transition: all 0.15s ease;
   border: none;
   background: white;
   display: flex;
@@ -1712,11 +1769,11 @@ onMounted(() => {
 
 .action-btn i {
   font-size: 0.9rem;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .action-btn:hover i {
-  transform: scale(1.1);
+  transform: scale(1.05); /* 减少悬停缩放 */
 }
 
 
@@ -1724,7 +1781,7 @@ onMounted(() => {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px); /* 减少移动距离 */
   }
   to {
     opacity: 1;
@@ -1765,12 +1822,13 @@ onMounted(() => {
   font-size: 5rem;
   color: rgba(246, 213, 92, 0.2);
   margin-bottom: 20px;
-  animation: pulse 2s infinite ease-in-out;
+  /* 简化脉冲动画，减少性能消耗 */
+  animation: pulse 3s infinite ease-in-out;
 }
 
 @keyframes pulse {
   0% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 1; } /* 减少缩放幅度 */
   100% { transform: scale(1); opacity: 0.7; }
 }
 
@@ -1794,11 +1852,12 @@ onMounted(() => {
   font-weight: 600;
   border-radius: 50px;
   box-shadow: 0 5px 15px rgba(246, 213, 92, 0.3);
-  transition: all 0.3s ease;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
 }
 
 .empty-state .btn:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px); /* 减少悬停移动距离 */
   box-shadow: 0 8px 20px rgba(246, 213, 92, 0.4);
 }
 
@@ -1816,7 +1875,8 @@ onMounted(() => {
   padding: 8px 20px;
   border-radius: 50px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
   border: none;
   background-color: white;
   color: #495057;
@@ -1827,7 +1887,7 @@ onMounted(() => {
 .modern-pagination .pagination-btn:hover:not(:disabled) {
   background-color: #f6d55c;
   color: white;
-  transform: translateY(-2px);
+  transform: translateY(-1px); /* 减少悬停移动距离 */
   box-shadow: 0 6px 15px rgba(246, 213, 92, 0.3);
 }
 
@@ -1855,7 +1915,8 @@ onMounted(() => {
   padding: 8px 12px;
   border-radius: 50px;
   font-weight: 600;
-  transition: all 0.3s ease;
+  /* 简化过渡效果 */
+  transition: all 0.2s ease;
   border: none;
   background-color: white;
   color: #495057;
@@ -1871,7 +1932,7 @@ onMounted(() => {
 .page-number-btn:hover:not(:disabled) {
   background-color: #f6d55c;
   color: white;
-  transform: translateY(-2px);
+  transform: translateY(-1px); /* 减少悬停移动距离 */
   box-shadow: 0 4px 12px rgba(246, 213, 92, 0.3);
 }
 
@@ -2021,5 +2082,83 @@ onMounted(() => {
     height: 35px;
     font-size: 0.85rem;
   }
+}
+
+/* 性能优化：减少重绘和重排 */
+.profile-page * {
+  /* 启用硬件加速，减少CPU负担 */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+  /* 减少重绘 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* 滚动优化 */
+.profile-page {
+  /* 启用平滑滚动 */
+  scroll-behavior: smooth;
+  /* 减少滚动时的重绘 */
+  -webkit-overflow-scrolling: touch;
+  /* 优化渲染性能 */
+  will-change: scroll-position;
+  /* 启用GPU加速 */
+  transform: translateZ(0);
+}
+
+/* 图片优化 */
+.profile-cover img,
+.profile-avatar,
+.article-cover-image {
+  /* 启用GPU加速 */
+  transform: translateZ(0);
+  /* 优化图片渲染 */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  /* 防止图片闪烁 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* 骨架屏优化 */
+.cover-skeleton,
+.avatar-skeleton,
+.article-cover-skeleton {
+  /* 使用CSS动画而不是JavaScript */
+  animation: skeleton-loading 2s infinite;
+  /* 优化动画性能 */
+  will-change: background-position;
+}
+
+/* 减少不必要的动画 */
+@media (prefers-reduced-motion: reduce) {
+  .profile-page * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 关键路径优化 */
+.profile-cover,
+.profile-avatar,
+.article-cover {
+  /* 优先渲染关键元素 */
+  contain: layout style paint;
+  /* 优化重排 */
+  transform: translateZ(0);
+}
+
+/* 字体优化 */
+.profile-name,
+.profile-username,
+.article-title {
+  /* 防止字体闪烁 */
+  font-display: swap;
+  /* 优化字体渲染 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 启用连字 */
+  font-feature-settings: "liga", "kern";
 }
 </style>

@@ -1,5 +1,40 @@
 server:
   port: 8090
+  # 启用压缩 - 优先使用Brotli
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json,application/xml+rss,application/atom+xml,image/svg+xml,font/woff,font/woff2,application/font-woff,application/font-woff2
+    min-response-size: 512 # 降低压缩阈值
+    # 启用Brotli压缩
+    brotli:
+      enabled: true
+      quality: 11 # 最高压缩质量
+    # Gzip作为备选
+    gzip:
+      enabled: true
+      level: 9 # 最高压缩级别
+  # 性能优化
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    max-connections: 8192
+    accept-count: 100
+    # 启用HTTP/2
+    http2:
+      enabled: true
+    # 优化缓冲区
+    max-http-form-post-size: 2MB
+    max-swallow-size: 2MB
+  # 静态资源缓存 - 更激进的缓存策略
+  static:
+    cache:
+      enabled: true
+      max-age: 31536000 # 1年
+      # 启用条件请求
+      etag: true
+      # 启用Last-Modified
+      last-modified: true
 
 spring:
   datasource:

@@ -95,4 +95,20 @@ public interface ArticleMapper extends BaseMapper<Article> {
     List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
     @Select("SELECT slug, gmt_modified from articles WHERE status = 'published' AND deleted = 0")
     List<ArticleExcerptDTO> selectSitemapDetails();
+    
+    @Select("${sql}")
+    @Results({
+            @Result(property = "articleId", column = "article_id"),
+            @Result(property = "userId", column = "user_id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "slug", column = "slug"),
+            @Result(property = "excerpt", column = "excerpt"),
+            @Result(property = "viewCount", column = "view_count"),
+            @Result(property = "likes", column = "likes"),
+            @Result(property = "gmtModified", column = "gmt_modified"),
+            @Result(property = "backgroundUrl", column = "background_url"),
+            @Result(property = "userName", column = "user_name"),
+            @Result(property = "avatarUrl", column = "avatar_url")
+    })
+    List<ArticleExcerptDTO> selectArticleExcerptsForPage(@Param("sql") String sql);
 }

@@ -1,11 +1,18 @@
 import { showToast } from "./common-utils.js";
 
-jQuery( document ).ready(function() {
-
-    $(window).scroll(function(){
-        $('.topnav').toggleClass('scrollednav py-0', $(this).scrollTop() > 50);
+// 使用原生JavaScript替代jQuery
+document.addEventListener('DOMContentLoaded', function() {
+    // 滚动导航栏效果
+    window.addEventListener('scroll', function() {
+        const topnav = document.querySelector('.topnav');
+        if (topnav) {
+            if (window.scrollY > 50) {
+                topnav.classList.add('scrollednav', 'py-0');
+            } else {
+                topnav.classList.remove('scrollednav', 'py-0');
+            }
+        }
     });
-
 });
 
 document.addEventListener('DOMContentLoaded', function () {

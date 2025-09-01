@@ -1,23 +1,28 @@
 package com.lumibee.hive.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.dto.TagDTO;
-import com.lumibee.hive.mapper.TagMapper;
-import com.lumibee.hive.model.Tag;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.dto.TagDTO;
+import com.lumibee.hive.mapper.TagMapper;
+import com.lumibee.hive.model.Tag;
 
 @Service
 public class TagServiceImpl implements TagService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TagServiceImpl.class);
 
     @Autowired private TagMapper tagMapper;
 
@@ -85,10 +90,19 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Cacheable("allTags")
+    @Cacheable(value = "allTags", unless = "#result == null or #result.isEmpty()")
     @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
-        return tagMapper.selectAllTags();
+        try {
+            List<TagDTO> result = tagMapper.selectAllTags();
+            if (result == null) {
+                logger.warn("selectAllTags returned null");
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Error occurred while selecting all tags", e);
+            return null;
+        }
     }
 
     @Override
@@ -98,10 +112,25 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Cacheable(value = "tagDetails", key = "#slug")
+    @Cacheable(value = "tagDetails", key = "#slug", unless = "#result == null")
     @Transactional(readOnly = true)
     public TagDTO selectTagBySlug(String slug) {
-        return tagMapper.selectBySlug(slug);
+        // 参数验证
+        if (slug == null || slug.trim().isEmpty()) {
+            logger.warn("selectTagBySlug called with null or empty slug");
+            return null;
+        }
+        
+        try {
+            TagDTO result = tagMapper.selectBySlug(slug.trim());
+            if (result == null) {
+                logger.debug("No tag found for slug: {}", slug);
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Error occurred while selecting tag by slug: {}", slug, e);
+            return null;
+        }
     }
 
 }

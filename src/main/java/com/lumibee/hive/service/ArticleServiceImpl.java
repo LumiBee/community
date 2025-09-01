@@ -495,40 +495,31 @@ public class ArticleServiceImpl implements ArticleService {
 
     @NotNull
     private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
-        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
-        List<Article> articleList = articlePage.getRecords();
-
-        if (articleList.isEmpty()) {
-            return new Page<>(pageNum, pageSize, 0);
-        }
-
-        List<Long> userIds = articleList.stream()
-                .map(Article::getUserId)
-                .distinct()
-                .collect(Collectors.toList());
-
-        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-
-        List<ArticleExcerptDTO> articleDTOList = articleList.stream().map(article -> {
-            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
-            BeanUtils.copyProperties(article, articleDTO);
-            User user = userMap.get(article.getUserId());
-            if (user != null) {
-                articleDTO.setUserName(user.getName());
-                articleDTO.setAvatarUrl(user.getAvatarUrl());
-            }
-            return articleDTO;
-        }).collect(Collectors.toList());
-
-        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(
-                articlePage.getCurrent(),
-                articlePage.getSize(),
-                articlePage.getTotal()
-        );
-
+        // 使用自定义查询来确保返回所有必要的字段
+        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(pageNum, pageSize);
+        
+        // 构建自定义查询SQL
+        String sql = "SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.gmt_modified, " +
+                    "a.view_count, a.likes, a.background_url, " +
+                    "u.name AS user_name, u.avatar_url " +
+                    "FROM articles a " +
+                    "LEFT JOIN user u ON a.user_id = u.id " +
+                    "WHERE a.deleted = 0 AND a.status = 'published' " +
+                    "ORDER BY a.gmt_modified DESC " +
+                    "LIMIT " + ((pageNum - 1) * pageSize) + ", " + pageSize;
+        
+        // 执行查询
+        List<ArticleExcerptDTO> articleDTOList = articleMapper.selectArticleExcerptsForPage(sql);
+        
+        // 获取总数
+        Long total = articleMapper.selectCount(queryWrapper);
+        
+        // 设置分页信息
         articleDTOPage.setRecords(articleDTOList);
-
+        articleDTOPage.setTotal(total);
+        articleDTOPage.setCurrent(pageNum);
+        articleDTOPage.setSize(pageSize);
+        
         return articleDTOPage;
     }
 
