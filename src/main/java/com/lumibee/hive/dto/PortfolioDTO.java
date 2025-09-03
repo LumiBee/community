@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PortfolioDTO {
-    private Integer portfolioId;
+    private Integer id;
     private String name;
     private String slug;
 

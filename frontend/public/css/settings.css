@@ -16,9 +16,10 @@ body {
   transition: padding-top 0.3s ease; /* 平滑过渡效果 */
 }
 
-.main-content {
+/* 只在设置页面应用main-content样式 */
+.settings-page .main-content {
   flex: 1 0 auto;
-  padding: 1rem 0; /* 减少移动端上下边距 */
+  padding: 0 0 1rem 0; /* 上边距为0，减少移动端下边距 */
   transition: transform 0.3s ease; /* 平滑过渡效果 */
 }
 

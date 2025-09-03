@@ -117,12 +117,40 @@ export const articleAPI = {
    * 发布文章
    * @param {Object} articleData - 文章数据
    */
-  publishArticle(articleData) {
-    return request({
+  async publishArticle(articleData) {
+    console.log('API调用: publishArticle', articleData)
+    
+    // 检查token是否需要刷新（只有在即将过期时才刷新）
+    const authStore = useAuthStore()
+    if (authStore.user?.token) {
+      try {
+        // 只有在token即将过期时才尝试刷新
+        const shouldRefresh = await authStore.shouldRefreshToken()
+        if (shouldRefresh) {
+          console.log('token即将过期，尝试刷新...')
+          const refreshSuccess = await authStore.refreshToken()
+          if (!refreshSuccess) {
+            console.warn('token刷新失败，但继续尝试发布文章')
+            // 不抛出错误，继续尝试发布文章
+          } else {
+            console.log('token刷新成功')
+          }
+        }
+      } catch (refreshError) {
+        console.warn('token刷新失败，但继续尝试发布文章:', refreshError)
+        // 不抛出错误，继续尝试发布文章
+      }
+    }
+    
+    // 调用API
+    const response = await request({
       url: '/article/publish',
       method: 'post',
       data: articleData
-    })
+    });
+    
+    console.log('发布文章API响应:', response);
+    return response;
   },
 
   /**
@@ -130,12 +158,40 @@ export const articleAPI = {
    * @param {number} articleId - 文章ID
    * @param {Object} articleData - 文章数据
    */
-  updateArticle(articleId, articleData) {
-    return request({
+  async updateArticle(articleId, articleData) {
+    console.log('API调用: updateArticle', articleId, articleData)
+    
+    // 检查token是否需要刷新（只有在即将过期时才刷新）
+    const authStore = useAuthStore()
+    if (authStore.user?.token) {
+      try {
+        // 只有在token即将过期时才尝试刷新
+        const shouldRefresh = await authStore.shouldRefreshToken()
+        if (shouldRefresh) {
+          console.log('token即将过期，尝试刷新...')
+          const refreshSuccess = await authStore.refreshToken()
+          if (!refreshSuccess) {
+            console.warn('token刷新失败，但继续尝试更新文章')
+            // 不抛出错误，继续尝试更新文章
+          } else {
+            console.log('token刷新成功')
+          }
+        }
+      } catch (refreshError) {
+        console.warn('token刷新失败，但继续尝试更新文章:', refreshError)
+        // 不抛出错误，继续尝试更新文章
+      }
+    }
+    
+    // 调用API
+    const response = await request({
       url: `/article/${articleId}/edit`,
       method: 'put',
       data: articleData
-    })
+    });
+    
+    console.log('更新文章API响应:', response);
+    return response;
   },
 
   /**
@@ -185,15 +241,15 @@ export const articleAPI = {
           console.log('token即将过期，尝试刷新...')
           const refreshSuccess = await authStore.refreshToken()
           if (!refreshSuccess) {
-            console.warn('token刷新失败，可能需要重新登录')
-            throw new Error('登录状态已过期，请重新登录后再保存草稿')
+            console.warn('token刷新失败，但继续尝试保存草稿')
+            // 不抛出错误，继续尝试保存草稿
+          } else {
+            console.log('token刷新成功')
           }
-          console.log('token刷新成功')
         }
       } catch (refreshError) {
-        console.warn('token刷新失败:', refreshError)
-        // 如果token刷新失败，直接返回错误，不继续执行
-        throw new Error('Token刷新失败，无法保存草稿')
+        console.warn('token刷新失败，但继续尝试保存草稿:', refreshError)
+        // 不抛出错误，继续尝试保存草稿
       }
     }
     

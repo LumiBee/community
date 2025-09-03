@@ -537,16 +537,26 @@ const formatDate = (dateString) => {
 }
 
 // 获取个人资料数据
-const fetchProfileData = async () => {
+const fetchProfileData = async (forceRefresh = false) => {
   isLoading.value = true
   coverImageLoaded.value = false
   avatarLoaded.value = false
   
   try {
+    const params = { 
+      page: currentPage.value, 
+      size: pageSize.value 
+    }
+    
+    // 如果需要强制刷新，添加时间戳参数破坏缓存
+    if (forceRefresh) {
+      params._t = Date.now()
+    }
+    
     const response = await request({
       url: `/profile/${username.value}`,
       method: 'get',
-      params: { page: currentPage.value, size: pageSize.value },
+      params,
       timeout: 30000 // 增加超时时间到30秒
     })
     
@@ -775,10 +785,15 @@ const deleteArticle = async () => {
     // 显示成功消息
     window.$toast?.success(`文章「${articleTitle}」删除成功！`)
     
-    // 延迟一下再刷新页面，让用户看到成功消息
-    setTimeout(() => {
-      window.location.reload()
-    }, 1000)
+    // 检查当前页是否还有文章，如果没有则回到上一页
+    const currentArticles = profileData.value.articles?.records || []
+    if (currentArticles.length === 1 && currentPage.value > 1) {
+      // 如果当前页只有一篇文章且不是第一页，则回到上一页
+      currentPage.value--
+    }
+    
+    // 强制刷新数据，破坏缓存
+    await fetchProfileData(true)
   } catch (error) {
     console.error('删除文章失败:', error)
     window.$toast?.error('删除文章失败，请稍后重试')

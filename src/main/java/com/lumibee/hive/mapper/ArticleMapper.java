@@ -26,17 +26,17 @@ public interface ArticleMapper extends BaseMapper<Article> {
     Integer countLikes(@Param("articleId") Integer articleId);
     @Update("UPDATE articles SET view_count = view_count + 1 WHERE article_id = #{articleId}")
     void incrementViewCount(@Param("articleId") Integer articleId);
-    @Select("SELECT article_id, title, slug, excerpt, view_count, likes, a.gmt_modified, user_id, u.name AS userName, u.avatar_url " + // 按需选择字段
+    @Select("SELECT article_id, title, slug, excerpt, view_count, likes, a.gmt_modified, a.user_id, u.name AS userName, u.avatar_url " + // 按需选择字段
             "FROM articles a " +
-            "LEFT JOIN user u ON u.id = user_id " +
-            "WHERE portfolio_id = #{portfolioId} AND status = 'published' " +
-            "ORDER BY gmt_modified DESC")
+            "LEFT JOIN user u ON u.id = a.user_id " +
+            "WHERE a.portfolio_id = #{portfolioId} AND a.status = 'published' AND a.deleted = 0 " +
+            "ORDER BY a.gmt_modified DESC")
     List<ArticleExcerptDTO> selectArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT article_id, title, slug, excerpt, view_count, likes, gmt_modified from articles " +
             "WHERE user_id = #{id} AND deleted = 0 AND status = 'published' " +
             "ORDER BY gmt_modified DESC")
     List<ArticleExcerptDTO> getArticlesByUserId(@Param("id") Long id);
-    @Select("SELECT COUNT(*) FROM articles WHERE portfolio_id = #{portfolioId}")
+    @Select("SELECT COUNT(*) FROM articles WHERE portfolio_id = #{portfolioId} AND status = 'published' AND deleted = 0")
     Integer countArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT a.article_id, a.user_id, a.title, a.excerpt, a.slug, a.view_count, a.likes, a.gmt_modified, " +
             "u.name AS user_name, u.avatar_url " +

@@ -81,7 +81,7 @@ onMounted(async () => {
 
 .main-content {
   flex: 1;
-  padding-top: 80px; /* 为固定导航栏留出空间 */
+  padding-top: 0; /* 移除顶部间距，让轮播图紧贴导航栏 */
 }
 
 /* 全局样式重置 */

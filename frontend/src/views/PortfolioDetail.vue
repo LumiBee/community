@@ -343,9 +343,7 @@ watch(() => route.params.id, (newId) => {
 
 // 生命周期
 onMounted(() => {
-  if (portfolioId.value && portfolioId.value !== 'undefined') {
-    loadPortfolioDetails()
-  }
+  // 注意：不需要在这里再次调用loadPortfolioDetails，因为watch已经设置了immediate: true
   
   // 添加点击外部关闭下拉框的监听器
   document.addEventListener('click', handleClickOutside)
@@ -767,6 +765,11 @@ const handleClickOutside = (event) => {
   min-width: 140px;
   cursor: pointer;
   user-select: none;
+  /* 重置Bootstrap可能的影响 */
+  margin: 0;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .select-display {
@@ -782,6 +785,9 @@ const handleClickOutside = (event) => {
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  /* 确保没有双重边框 */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .custom-select:hover .select-display {

@@ -95,6 +95,7 @@ public class SecurityConfig {
                                         "/articles/**", // 文章 API
                                         "/article/**", // 单篇文章 API
                                         "/portfolios", // 作品集 API (GET)
+                                        "/portfolio/**", // 作品集详情 API (GET)
                                         "/signup", // 注册API
                                         "/login", // API登录端点
                                         "/ai/**", // AI 相关 API - 允许所有用户访问
@@ -172,7 +173,7 @@ public class SecurityConfig {
                                         "/articles/**", // 文章 API
                                         "/article/**", // 单篇文章 API
                                         "/portfolios", // 作品集 API
-                                        "/portfolio", // 作品集 API (POST)
+                                        "/portfolio/**", // 作品集详情 API
                                         "/user/**", // 用户相关 API（包括关注功能）
                                         "/signup", // 注册 API
                                         "/profile/**", // 个人资料 API

@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.model.Tag;
+import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.TagService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,9 @@ public class TagController {
 
     @Autowired
     private TagService tagService;
+    
+    @Autowired
+    private ArticleService articleService;
 
     @GetMapping
     @Operation(summary = "获取所有标签", description = "获取系统中所有可用的标签")
@@ -37,7 +42,7 @@ public class TagController {
     }
 
     @GetMapping("/{slug}")
-    @Operation(summary = "根据slug获取标签", description = "根据标签slug获取标签信息")
+    @Operation(summary = "根据slug获取标签信息", description = "根据标签slug获取标签信息")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功"),
         @ApiResponse(responseCode = "404", description = "标签不存在")
@@ -50,6 +55,26 @@ public class TagController {
         }
         return ResponseEntity.ok(tag);
     }
+    
+    @GetMapping("/{tagSlug}/articles")
+    @Operation(summary = "根据标签slug获取文章列表", description = "根据标签slug获取该标签下的所有文章")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "标签不存在")
+    })
+    public ResponseEntity<List<ArticleExcerptDTO>> getArticlesByTagSlug(
+            @Parameter(description = "标签slug") @PathVariable String tagSlug) {
+        // 首先根据slug查找标签
+        TagDTO tag = tagService.selectTagBySlug(tagSlug);
+        if (tag == null) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        // 然后根据标签ID获取文章列表
+        List<ArticleExcerptDTO> articles = articleService.getArticlesByTagId(tag.getTagId());
+        return ResponseEntity.ok(articles);
+    }
+    
 
     @GetMapping("/article/{articleId}")
     @Operation(summary = "获取文章标签", description = "根据文章ID获取该文章的所有标签")

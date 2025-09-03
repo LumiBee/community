@@ -61,16 +61,7 @@
                   <i class="fas fa-tags"></i> {{ draft.tags.join(', ') }}
                 </span>
               </div>
-              <div class="compact-stats">
-                <span class="compact-stat-item" @click.stop="editDraft(draft.articleId)">
-                  <i class="fas fa-pen"></i>
-                  <span>继续编辑</span>
-                </span>
-                <span class="compact-stat-item" @click.stop="publishDraft(draft.articleId)">
-                  <i class="fas fa-paper-plane"></i>
-                  <span>发布</span>
-                </span>
-              </div>
+              <!-- 移除了多余的按钮 -->
             </div>
           </div>
         </li>
@@ -144,12 +135,21 @@ const loadDrafts = async () => {
   try {
     loading.value = true
     const response = await articleAPI.getDrafts()
+    console.log('草稿列表API响应:', response)
     
     // 检查响应数据结构
     if (response && response.records) {
       drafts.value = response.records
+      console.log('草稿列表数据:', drafts.value)
+      if (drafts.value.length > 0) {
+        console.log('第一个草稿的数据结构:', drafts.value[0])
+      }
     } else if (response && response.data && response.data.records) {
       drafts.value = response.data.records
+      console.log('草稿列表数据:', drafts.value)
+      if (drafts.value.length > 0) {
+        console.log('第一个草稿的数据结构:', drafts.value[0])
+      }
     } else {
       drafts.value = []
     }
@@ -163,6 +163,7 @@ const loadDrafts = async () => {
 
 // 编辑草稿
 const editDraft = (draftId) => {
+  console.log('点击编辑草稿，ID:', draftId)
   router.push(`/publish?draft=${draftId}`)
 }
 
@@ -355,41 +356,7 @@ onMounted(() => {
   opacity: 0.8;
 }
 
-.compact-stats {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.compact-stat-item {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  font-size: 1rem;
-  color: #64748b;
-  margin-left: 10px;
-  padding: 0.3rem 0.6rem;
-  border-radius: 20px;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.compact-stat-item i {
-  color: #ffc107;
-  font-size: 0.95rem;
-  opacity: 0.9;
-}
-
-.compact-stat-item:hover {
-  color: #ffc107;
-  background-color: rgba(255, 193, 7, 0.1);
-  box-shadow: 0 2px 4px rgba(255, 193, 7, 0.1);
-}
-
-.compact-stat-item:hover i {
-  opacity: 1;
-  transform: scale(1.1);
-}
+/* 移除了不再使用的按钮样式 */
 
 /* 空状态样式 */
 .empty-state {
@@ -467,9 +434,6 @@ onMounted(() => {
     gap: 1rem;
   }
   
-  .compact-stats {
-    width: 100%;
-    justify-content: flex-end;
-  }
+  /* 移除了不再使用的按钮样式 */
 }
 </style>

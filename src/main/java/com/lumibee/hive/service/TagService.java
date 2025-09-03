@@ -1,10 +1,10 @@
 package com.lumibee.hive.service;
 
-import com.lumibee.hive.dto.TagDTO;
-import com.lumibee.hive.model.Tag;
-
 import java.util.List;
 import java.util.Set;
+
+import com.lumibee.hive.dto.TagDTO;
+import com.lumibee.hive.model.Tag;
 
 public interface TagService {
 
@@ -15,4 +15,5 @@ public interface TagService {
     List<TagDTO> selectAllTags();
     void insertTagArticleRelation(Integer articleId, Integer tagId);
     TagDTO selectTagBySlug(String slug);
+    TagDTO selectTagByName(String name);
 }

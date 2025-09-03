@@ -19,7 +19,7 @@
                 <router-link
                   v-for="tag in article.tags"
                   :key="tag.tagId"
-                  :to="`/tags#${tag.name}`"
+                  :to="`/tags/${tag.slug}`"
                   class="hero-tag"
                 >
                   <i class="fas fa-tag"></i>
@@ -33,6 +33,7 @@
               <router-link
                 :to="`/portfolio/${article.portfolio.id}`"
                 class="portfolio-link"
+                @click="console.log('作品集链接点击:', article.portfolio)"
               >
                 <i class="fas fa-book-open"></i>
                 <span>{{ article.portfolio.name }}</span>
@@ -301,6 +302,9 @@ const showFavoriteModal = ref(false)
       }
       
       article.value = response
+      console.log('文章数据加载完成:', article.value)
+      console.log('作品集信息:', article.value?.portfolio)
+      console.log('标签信息:', article.value?.tags)
 
       
       // 确保收藏状态正确设置

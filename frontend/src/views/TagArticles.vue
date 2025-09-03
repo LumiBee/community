@@ -50,47 +50,55 @@
               <p>正在加载文章...</p>
             </div>
 
-            <!-- Articles Grid -->
-            <div v-else-if="articles.length > 0" class="articles-grid">
-              <router-link
+            <!-- Articles List -->
+            <ol v-else-if="articles.length > 0" class="list-unstyled compact-article-list">
+              <li
                 v-for="article in articles"
                 :key="article.id"
-                :to="`/article/${article.slug}`"
-                class="article-card"
+                class="compact-article-item"
+                @click="$router.push(`/article/${article.slug}`)"
               >
-                <div class="article-content">
-                  <div class="article-header">
-                    <h4 class="article-title">{{ article.title }}</h4>
-                    <span class="article-date">{{ formatDate(article.gmtModified) }}</span>
-                  </div>
-                  <p class="article-excerpt">{{ article.excerpt }}</p>
-                  <div class="article-footer">
-                    <div class="author-info">
-                      <img
-                        v-if="article.avatarUrl"
-                        :src="getAuthorAvatarUrl(article.avatarUrl)"
-                        alt="作者头像"
-                        class="author-avatar"
-                      />
-                      <div class="author-avatar-fallback" v-else>
-                        {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
-                      </div>
-                      <span class="author-name">{{ article.userName || '佚名' }}</span>
+                <div class="compact-article-content">
+                  <h6 class="compact-article-title">
+                    <span class="text-dark">
+                      {{ article.title }}
+                    </span>
+                  </h6>
+                  <p class="compact-article-excerpt">{{ article.excerpt }}</p>
+                  <div class="compact-article-meta">
+                    <div class="compact-author-info">
+                      <router-link 
+                        :to="`/profile/${article.userName}`" 
+                        class="author-avatar-link"
+                        @click.stop
+                      >
+                        <img
+                          v-if="article.avatarUrl"
+                          :src="getAuthorAvatarUrl(article.avatarUrl)"
+                          alt="作者头像"
+                          class="compact-author-avatar"
+                        />
+                        <div class="compact-author-avatar" v-else>
+                          {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
+                        </div>
+                      </router-link>
+                      <span class="compact-author-name">{{ article.userName || '佚名' }}</span>
+                      <span class="compact-time">{{ formatTime(article.gmtModified) }}</span>
                     </div>
-                    <div class="article-stats">
-                      <span class="stat-item">
+                    <div class="compact-stats">
+                      <span class="compact-stat-item">
                         <i class="fas fa-eye"></i>
-                        {{ article.viewCount || 0 }}
+                        <span>{{ article.viewCount || 0 }}</span>
                       </span>
-                      <span class="stat-item">
+                      <span class="compact-stat-item">
                         <i class="fas fa-heart"></i>
-                        {{ article.likes || 0 }}
+                        <span>{{ article.likes || 0 }}</span>
                       </span>
                     </div>
                   </div>
                 </div>
-              </router-link>
-            </div>
+              </li>
+            </ol>
 
             <!-- Empty State -->
             <div v-else class="empty-state">
@@ -223,8 +231,7 @@ const loadArticles = async (page = 1) => {
   try {
     loading.value = true
     // 使用encodeURIComponent确保标签名中的特殊字符被正确编码
-    const response = await tagAPI.getArticlesByTagName(tagName.value, page, pagination.value.size)
-    console.log('获取到的标签文章数据:', response)
+    const response = await tagAPI.getArticlesByTagSlug(tagName.value, page, pagination.value.size)
     
     if (response && Array.isArray(response)) {
       articles.value = response.map(article => ({
@@ -239,7 +246,6 @@ const loadArticles = async (page = 1) => {
         userName: article.userName || article.author || '佚名',
         avatarUrl: article.avatarUrl || null
       }))
-      console.log('处理后的文章数据:', articles.value)
       
       pagination.value = {
         current: page,
@@ -274,7 +280,6 @@ const loadArticles = async (page = 1) => {
 const loadRelatedTags = async () => {
   try {
     const response = await tagAPI.getAllTags()
-    console.log('获取到的相关标签数据:', response)
     
     if (response && Array.isArray(response)) {
       relatedTags.value = response
@@ -300,7 +305,6 @@ const loadRelatedTags = async () => {
 const loadPopularArticles = async () => {
   try {
     const response = await articleAPI.getPopularArticles(5)
-    console.log('获取到的热门文章数据:', response)
     
     if (response && Array.isArray(response)) {
       popularArticles.value = response.map(article => ({
@@ -349,18 +353,21 @@ const changePage = (page) => {
   }
 }
 
-const formatDate = (dateString) => {
-  if (!dateString) return '未知日期'
-  const date = new Date(dateString)
+const formatTime = (dateString) => {
+  if (!dateString) return '日期未知'
+  
   const now = new Date()
+  const date = new Date(dateString)
   const diff = now - date
   
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
   const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  if (days === 0) return '今天'
-  if (days === 1) return '昨天'
-  if (days < 7) return `${days} 天前`
   
-  return date.toLocaleDateString('zh-CN')
+  if (days > 0) return `${days} 天前`
+  if (hours > 0) return `${hours} 小时前`
+  if (minutes > 0) return `${minutes} 分钟前`
+  return '刚刚'
 }
 
 const getTagColorClass = (tag) => {
@@ -494,6 +501,11 @@ const handleClickOutside = (event) => {
   min-width: 140px;
   cursor: pointer;
   user-select: none;
+  /* 重置Bootstrap可能的影响 */
+  margin: 0;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .select-display {
@@ -509,6 +521,9 @@ const handleClickOutside = (event) => {
   font-weight: 500;
   transition: all 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  /* 确保没有双重边框 */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .custom-select:hover .select-display {
@@ -576,130 +591,157 @@ const handleClickOutside = (event) => {
   background-color: #ffb300;
 }
 
-/* ===== Articles Grid ===== */
-.articles-grid {
-  display: grid;
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-}
-
-.article-card {
-  text-decoration: none;
-  color: inherit;
-  transition: transform 0.2s ease;
-}
-
-.article-content {
-  background-color: white;
-  border-radius: 10px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  border: 1px solid #eaeaea;
-  transition: all 0.2s ease;
-}
-
-.article-card:hover .article-content {
-  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-  border-color: #ffc107;
-  transform: translateY(-3px);
-}
-
-.article-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.5rem;
-  gap: 1rem;
-}
-
-.article-title {
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: #333;
+/* ===== Compact Articles List ===== */
+.compact-article-list {
   margin: 0;
-  line-height: 1.4;
-  flex: 1;
+  padding: 0;
 }
 
-.article-card:hover .article-title {
+.compact-article-item {
+  padding: 1.5rem;
+  border: 1px solid #eaedf1;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
+  position: relative;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.compact-article-item:last-child {
+  border-bottom: none;
+}
+
+.compact-article-item:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 252, 240, 1) 100%);
+  transform: translateY(-5px);
+  border-color: rgba(255, 193, 7, 0.2);
+  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.1);
+}
+
+.compact-article-content {
+  width: 100%;
+}
+
+.compact-article-title {
+  margin: 0 0 0.8rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-article-title span {
+  color: #2c3e50;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.compact-article-item:hover .compact-article-title span {
   color: #ffc107;
 }
 
-.article-date {
-  font-size: 0.85rem;
-  color: #888;
-  white-space: nowrap;
-}
-
-.article-excerpt {
-  color: #666;
+.compact-article-excerpt {
+  color: #64748b;
+  font-size: 1.15rem;
   line-height: 1.6;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
+  margin: 0.8rem 0 1.2rem 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.article-footer {
+.compact-article-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 0.5rem;
-  border-top: none !important;
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
 }
 
-.author-info {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.author-avatar {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-
-
-.author-avatar-fallback {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background-color: #ffc107;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.author-name {
-  font-size: 0.85rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.article-stats {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.stat-item {
+.compact-author-info {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  color: #888;
-  font-size: 0.85rem;
 }
 
-.stat-item i {
+.compact-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 193, 7, 0.2);
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background-color: #ffc107;
+}
+
+.compact-author-name {
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.compact-time {
+  font-size: 0.9rem;
+  color: #9ca3af;
+  margin-left: 0.5rem;
+}
+
+.compact-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.compact-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1rem;
+  color: #64748b;
+  margin-left: 10px;
+  background-color: transparent;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.compact-stat-item i {
   color: #ffc107;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.compact-article-item:hover .compact-stat-item i {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.compact-article-item:hover .compact-stat-item {
+  color: #ffc107;
+  background-color: transparent;
 }
 
 /* ===== Sidebar ===== */

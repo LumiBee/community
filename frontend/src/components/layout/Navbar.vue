@@ -828,21 +828,34 @@ onUnmounted(() => {
   display: none;
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background: white;
   z-index: 1000;
   backdrop-filter: blur(20px);
-  animation: dropdownSlide 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: dropdownFade 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-@keyframes dropdownSlide {
+/* 添加箭头 */
+.dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid white;
+}
+
+@keyframes dropdownFade {
   from {
     opacity: 0;
-    transform: translateY(-10px) scale(0.95);
+    transform: translateX(-50%) translateY(-10px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateX(-50%) translateY(0) scale(1);
   }
 }
 

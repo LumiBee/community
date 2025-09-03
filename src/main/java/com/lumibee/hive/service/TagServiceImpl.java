@@ -133,4 +133,26 @@ public class TagServiceImpl implements TagService {
         }
     }
 
+    @Override
+    @Cacheable(value = "tagDetails", key = "#name", unless = "#result == null")
+    @Transactional(readOnly = true)
+    public TagDTO selectTagByName(String name) {
+        // 参数验证
+        if (name == null || name.trim().isEmpty()) {
+            logger.warn("selectTagByName called with null or empty name");
+            return null;
+        }
+        
+        try {
+            TagDTO result = tagMapper.selectByName(name.trim());
+            if (result == null) {
+                logger.debug("No tag found for name: {}", name);
+            }
+            return result;
+        } catch (Exception e) {
+            logger.error("Error occurred while selecting tag by name: {}", name, e);
+            return null;
+        }
+    }
+
 }

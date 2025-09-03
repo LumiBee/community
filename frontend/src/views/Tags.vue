@@ -34,7 +34,7 @@
             <router-link
               v-for="tag in popularTags"
               :key="tag.id"
-              :to="{ name: 'TagArticles', params: { tagName: tag.name } }"
+              :to="{ name: 'TagArticles', params: { tagName: tag.slug } }"
               class="popular-tag"
               :class="getTagColorClass(tag)"
             >
@@ -51,7 +51,7 @@
             <router-link
               v-for="tag in filteredTags"
               :key="tag.id"
-              :to="{ name: 'TagArticles', params: { tagName: tag.name } }"
+              :to="{ name: 'TagArticles', params: { tagName: tag.slug } }"
               class="tag-card"
               @click="selectTag(tag)"
             >

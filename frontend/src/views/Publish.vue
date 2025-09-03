@@ -8,11 +8,33 @@
         <input
           type="text"
           v-model="articleForm.title"
+          @input="handleTitleChange"
           class="header-title-input"
           placeholder="请输入文章标题..."
           maxlength="100"
         />
         <div class="title-actions">
+          <!-- 自动保存状态提示 -->
+          <div v-if="autoSaveStatus" class="auto-save-status me-3">
+            <i 
+              class="fas me-1" 
+              :class="{
+                'fa-spinner fa-spin': autoSaveStatus === '正在自动保存...',
+                'fa-check-circle text-success': autoSaveStatus.includes('已自动保存'),
+                'fa-exclamation-circle text-danger': autoSaveStatus === '自动保存失败'
+              }"
+            ></i>
+            <span 
+              :class="{
+                'text-success': autoSaveStatus.includes('已自动保存'),
+                'text-danger': autoSaveStatus === '自动保存失败',
+                'text-warning': autoSaveStatus === '正在自动保存...'
+              }"
+            >
+              {{ autoSaveStatus }}
+            </span>
+          </div>
+          
           <button 
             @click="saveDraft" 
             class="btn btn-outline-secondary me-2"
@@ -58,10 +80,6 @@
             <i class="fas fa-edit me-2"></i>文章内容
           </label>
           <div class="editor-info">
-            <span v-if="autoSaveStatus" class="auto-save-status" :class="{ 'saving': autoSaveStatus === '正在自动保存...' }">
-              <i class="fas" :class="autoSaveStatus === '正在自动保存...' ? 'fa-spinner fa-spin' : 'fa-save'"></i>
-              {{ autoSaveStatus }}
-            </span>
             <span class="word-count">
               <i class="fas fa-info-circle me-1"></i>
               {{ wordCount }} 字
@@ -92,7 +110,7 @@
       style="display: block; z-index: 1050; position: fixed; top: 0; left: 0; right: 0; bottom: 0;"
       tabindex="-1"
     >
-      <div class="modal-dialog modal-xl" style="z-index: 1051; margin-top: 6rem; margin-bottom: 2rem;">
+      <div class="modal-dialog modal-xl" style="max-width: 85vw; width: 1000px;">
         <div class="modal-content publish-settings-modal">
           <div class="modal-header">
             <h5 class="modal-title">
@@ -105,11 +123,11 @@
             ></button>
           </div>
           <div class="modal-body">
-            <div class="row">
+            <div class="row g-4 align-items-start">
               <!-- 左侧设置 -->
-              <div class="col-md-6">
+              <div class="col-md-6 d-flex flex-column">
                 <!-- 文章摘要 -->
-                <div class="setting-card mb-4">
+                <div class="setting-card">
                   <div class="setting-header-with-buttons">
                     <h6 class="setting-title">
                       <i class="fas fa-align-left me-2"></i>文章摘要
@@ -157,7 +175,7 @@
                 </div>
 
                 <!-- 封面图片 -->
-                <div class="setting-card mb-4">
+                <div class="setting-card">
                   <h6 class="setting-title">
                     <i class="fas fa-image me-2"></i>封面图片
                   </h6>
@@ -169,7 +187,6 @@
                     >
                       <div v-if="!coverPreview" class="cover-placeholder">
                         <i class="fas fa-camera"></i>
-                        <p>点击上传封面</p>
                       </div>
                     </div>
                     <input
@@ -192,7 +209,7 @@
                 </div>
 
                 <!-- 标签 -->
-                <div class="setting-card mb-4">
+                <div class="setting-card">
                   <h6 class="setting-title">
                     <i class="fas fa-tags me-2"></i>标签
                     <span class="text-muted ms-2" style="font-size: 0.9rem; font-weight: normal;">(可选)</span>
@@ -224,36 +241,20 @@
                   </div>
                 </div>
 
-                <!-- 发布设置 -->
-                <div class="setting-card mb-4">
-                  <h6 class="setting-title">
-                    <i class="fas fa-cog me-2"></i>发布设置
-                  </h6>
-                  <div class="form-check">
-                    <input
-                      type="checkbox"
-                      id="allowComments"
-                      v-model="articleForm.allowComments"
-                      class="form-check-input"
-                    />
-                    <label class="form-check-label" for="allowComments">
-                      允许评论
-                    </label>
-                  </div>
-                </div>
+
               </div>
 
               <!-- 右侧设置 -->
-              <div class="col-md-6">
+              <div class="col-md-6 d-flex flex-column">
                 <!-- 作品集 -->
-                <div class="setting-card mb-4">
+                <div class="setting-card">
                   <h6 class="setting-title">
                     <i class="fas fa-briefcase me-2"></i>作品集
                     <span class="text-muted ms-2" style="font-size: 0.9rem; font-weight: normal;">(可选)</span>
                   </h6>
                   <div class="portfolio-input-group">
                     <!-- 选择现有作品集 -->
-                    <div class="form-group mb-2">
+                    <div class="mb-3">
                       <label class="form-label small text-muted">选择现有作品集：</label>
                       <div class="custom-select" @click="togglePortfolioDropdown" ref="portfolioSelectContainer">
                         <div class="select-display">
@@ -282,7 +283,7 @@
                     </div>
                     
                     <!-- 或者输入新作品集 -->
-                    <div class="form-group">
+                    <div class="mb-3">
                       <label class="form-label small text-muted">或者输入新作品集名称：</label>
                       <div class="input-group">
                         <input
@@ -352,6 +353,21 @@
                         标签：{{ getStatusText('tags') }}
                       </li>
                     </ul>
+                    
+                    <!-- 发布设置 -->
+                    <div class="publish-settings mt-3 pt-3 border-top">
+                      <div class="form-check">
+                        <input
+                          type="checkbox"
+                          id="allowComments"
+                          v-model="articleForm.allowComments"
+                          class="form-check-input"
+                        />
+                        <label class="form-check-label" for="allowComments">
+                          <i class="fas fa-comments me-2"></i>允许评论
+                        </label>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -428,12 +444,13 @@ const articleForm = ref({
 })
 
 // 自动保存相关状态
-const autoSaveInterval = ref(null)
+const autoSaveTimeout = ref(null) // 自动保存的定时器
 const lastSavedTime = ref(null)
 const isAutoSaving = ref(false)
-const autoSaveStatus = ref('') // 用于显示自动保存状态
-const localStorageKey = 'hive_draft_content' // 本地存储的键名
 const currentDraftId = ref(null) // 当前草稿的ID
+const hasUnsavedChanges = ref(false) // 是否有未保存的更改
+const autoSaveDelay = 3000 // 用户停止输入3秒后自动保存
+const autoSaveStatus = ref('') // 自动保存状态提示
 
 const coverInput = ref(null)
 const coverPreview = ref('')
@@ -481,17 +498,19 @@ const canActuallyPublish = computed(() => {
 
 // 初始化Vditor编辑器
 const initVditor = () => {
-  try {
-    // 确保DOM元素存在
-    const vditorElement = document.getElementById('vditor')
-    if (!vditorElement) {
-      console.error('Vditor容器元素不存在')
-      return
-    }
-    
-    if (vditor) {
-      vditor.destroy()
-    }
+  return new Promise((resolve, reject) => {
+    try {
+      // 确保DOM元素存在
+      const vditorElement = document.getElementById('vditor')
+      if (!vditorElement) {
+        console.error('Vditor容器元素不存在')
+        reject(new Error('Vditor容器元素不存在'))
+        return
+      }
+      
+      if (vditor) {
+        vditor.destroy()
+      }
     
     // 动态计算编辑器高度，基于真实DOM元素
     const calculateEditorHeight = () => {
@@ -712,23 +731,53 @@ const initVditor = () => {
               originalSetValue(value)
               articleForm.value.content = value
               updateWordCount()
+              // 只有在有实际内容时才标记为未保存
+              if (value && value.trim().length > 0) {
+                hasUnsavedChanges.value = true
+                // 触发智能自动保存
+                triggerSmartAutoSave()
+              }
             }
             
-            // 定期检查内容变化
+            // 监听编辑器输入事件
+            const editorElement = vditor.vditor.element
+            if (editorElement) {
+              editorElement.addEventListener('input', () => {
+                const currentContent = vditor.getValue()
+                if (currentContent !== articleForm.value.content) {
+                  articleForm.value.content = currentContent
+                  updateWordCount()
+                  // 只有在有实际内容时才标记为未保存
+                  if (currentContent && currentContent.trim().length > 0) {
+                    hasUnsavedChanges.value = true
+                    // 触发智能自动保存
+                    triggerSmartAutoSave()
+                  }
+                }
+              })
+            }
+            
+            // 定期检查内容变化（作为备用方案）
             const contentCheckInterval = setInterval(() => {
               if (vditor && typeof vditor.getValue === 'function') {
                 const currentContent = vditor.getValue()
                 if (currentContent !== articleForm.value.content) {
                   articleForm.value.content = currentContent
                   updateWordCount()
+                  // 只有在有实际内容时才标记为未保存
+                  if (currentContent && currentContent.trim().length > 0) {
+                    hasUnsavedChanges.value = true
+                    // 触发智能自动保存
+                    triggerSmartAutoSave()
+                  }
                 }
               } else {
                 clearInterval(contentCheckInterval)
               }
-            }, 1000)
+            }, 2000) // 降低检查频率到2秒
             
             // 存储定时器引用，在组件卸载时清除
-            const contentCheckIntervalRef = contentCheckInterval
+            window.contentCheckIntervalRef = contentCheckInterval
           }
         } catch (error) {
           console.warn('Vditor事件监听器设置失败:', error)
@@ -821,7 +870,11 @@ const initVditor = () => {
               // 延迟执行，确保DOM已更新
               setTimeout(() => {
                 const newHeight = calculateEditorHeight()
-                vditor.setHeight(newHeight)
+                if (vditor && typeof vditor.setHeight === 'function') {
+                  vditor.setHeight(newHeight)
+                } else if (vditor && vditor.vditor && typeof vditor.vditor.setHeight === 'function') {
+                  vditor.vditor.setHeight(newHeight)
+                }
               }, 100)
             }
           }
@@ -832,12 +885,17 @@ const initVditor = () => {
           // 存储监听器引用，在组件卸载时移除
           const handleResizeRef = handleResize
         }, 1000)
+        
+        // Vditor初始化完成，resolve Promise
+        resolve()
       }
     })
     
   } catch (error) {
     console.error('Vditor初始化失败:', error)
+    reject(error)
   }
+  })
 }
 
 // 方法
@@ -1035,9 +1093,6 @@ const saveDraft = async () => {
     console.log('准备发送的草稿数据:', draftData)
     
     try {
-      // 先保存到本地存储
-      const localSaveSuccess = saveToLocalStorage()
-      
       // 尝试保存到服务器
       const response = await articleAPI.saveDraft(draftData)
       console.log('保存草稿响应:', response)
@@ -1050,23 +1105,22 @@ const saveDraft = async () => {
         showNotification('草稿保存成功！', 'success')
         // 更新最后保存时间
         lastSavedTime.value = new Date()
-        updateAutoSaveStatus('已保存')
+        // 清除未保存更改标记
+        hasUnsavedChanges.value = false
+        // 更新自动保存状态显示
+        updateAutoSaveStatus(`已保存 ${formatTime(lastSavedTime.value)}`)
       } else if (!response || response === '' || response === null || 
           (typeof response === 'object' && Object.keys(response).length === 0)) {
         showNotification('草稿保存成功！', 'success')
         // 更新最后保存时间
         lastSavedTime.value = new Date()
-        updateAutoSaveStatus('已保存')
+        // 清除未保存更改标记
+        hasUnsavedChanges.value = false
+        // 更新自动保存状态显示
+        updateAutoSaveStatus(`已保存 ${formatTime(lastSavedTime.value)}`)
       } else {
         console.error('保存草稿返回未知响应:', response)
-        // 如果本地保存成功，至少告诉用户内容已保存到本地
-        if (localSaveSuccess) {
-          showNotification('已保存到本地，但服务器保存失败', 'warning')
-          updateAutoSaveStatus('已保存到本地')
-        } else {
-          showNotification('保存失败，请重试', 'danger')
-          updateAutoSaveStatus('保存失败')
-        }
+        showNotification('保存失败，请重试', 'danger')
       }
     } catch (apiError) {
       console.error('API调用错误:', apiError)
@@ -1077,17 +1131,12 @@ const saveDraft = async () => {
         
         if (status === 401) {
           errorMessage = '身份验证失败，请重新登录'
-          // 保存到本地，避免数据丢失
-          const localSaveSuccess = saveToLocalStorage()
-          if (localSaveSuccess) {
-            showNotification('身份验证失败，但内容已保存到本地', 'warning')
-            updateAutoSaveStatus('已保存到本地')
-            // 提示用户重新登录
-            setTimeout(() => {
-              showNotification('请重新登录后再尝试保存', 'info')
-            }, 3000)
-            return
-          }
+          showNotification(errorMessage, 'warning')
+          // 提示用户重新登录
+          setTimeout(() => {
+            showNotification('请重新登录后再尝试保存', 'info')
+          }, 3000)
+          return
         } else if (status === 403) {
           errorMessage = '您没有权限执行此操作'
         } else if (status === 500) {
@@ -1098,68 +1147,115 @@ const saveDraft = async () => {
         
         console.error('API错误响应:', apiError.response)
       } else if (apiError.request) {
-        errorMessage = '网络请求失败，内容已保存到本地'
-        // 保存到本地，避免数据丢失
-        saveToLocalStorage()
+        errorMessage = '网络请求失败'
         console.error('API请求错误:', apiError.request)
-        showNotification(errorMessage, 'warning')
-        updateAutoSaveStatus('已保存到本地')
-        return
       } else {
         errorMessage += `: ${apiError.message || '未知错误'}`
       }
       
       showNotification(errorMessage, 'danger')
-      updateAutoSaveStatus('保存失败')
     }
   } catch (error) {
     console.error('保存草稿过程中发生错误:', error)
     showNotification('保存失败：' + (error.message || '未知错误'), 'danger')
-    updateAutoSaveStatus('保存失败')
   } finally {
     isSaving.value = false
   }
 }
 
+// 智能自动保存触发器
+const triggerSmartAutoSave = () => {
+  // 清除之前的定时器
+  if (autoSaveTimeout.value) {
+    clearTimeout(autoSaveTimeout.value)
+  }
+  
+  // 设置新的定时器，在用户停止输入后自动保存
+  autoSaveTimeout.value = setTimeout(() => {
+    if (hasUnsavedChanges.value) {
+      autoSaveDraft()
+    }
+  }, autoSaveDelay)
+}
+
+// 监听标题输入变化
+const handleTitleChange = () => {
+  // 只有在有实际标题内容时才标记为未保存
+  if (articleForm.value.title && articleForm.value.title.trim().length > 0) {
+    hasUnsavedChanges.value = true
+    triggerSmartAutoSave()
+  }
+}
+
+// 格式化时间显示
+const formatTime = (date) => {
+  if (!date) return ''
+  
+  // 直接显示具体的时间，格式：HH:MM
+  return date.toLocaleTimeString('zh-CN', { 
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  })
+}
+
+// 更新自动保存状态显示
+const updateAutoSaveStatus = (status) => {
+  autoSaveStatus.value = status
+  // 不再自动清除状态，让用户看到保存时间
+}
+
 // 自动保存草稿
 const autoSaveDraft = async () => {
-  // 如果没有内容或正在手动保存，则不自动保存
-  if (isSaving.value || (!articleForm.value.title && !articleForm.value.content)) {
+  // 如果没有未保存的更改，跳过自动保存
+  if (!hasUnsavedChanges.value) {
     return
   }
 
-  // 如果用户未登录，不进行自动保存到服务器，但仍保存到本地
+  // 如果正在手动保存，则不自动保存
+  if (isSaving.value) {
+    return
+  }
+
+  // 检查是否有实际内容需要保存
+  const hasTitle = articleForm.value.title && articleForm.value.title.trim().length > 0
+  const hasContent = articleForm.value.content && articleForm.value.content.trim().length > 0
+  
+  // 如果标题和内容都为空，不进行自动保存
+  if (!hasTitle && !hasContent) {
+    console.log('没有实际内容，跳过自动保存')
+    hasUnsavedChanges.value = false // 清除未保存标记
+    return
+  }
+
+  // 如果用户未登录，不进行自动保存
   if (!authStore.isAuthenticated) {
-    console.log('用户未登录，仅保存到本地存储')
-    saveToLocalStorage()
-    updateAutoSaveStatus('已保存到本地')
-    setTimeout(() => {
-      if (autoSaveStatus.value === '已保存到本地') {
-        updateAutoSaveStatus('')
-      }
-    }, 3000)
+    console.log('用户未登录，跳过自动保存')
     return
   }
   
-  // 检查token是否有效
+  // 检查token是否需要刷新（只有在即将过期时才刷新）
   try {
-    await authStore.refreshToken()
-  } catch (error) {
-    console.warn('Token刷新失败，仅保存到本地存储:', error)
-    saveToLocalStorage()
-    updateAutoSaveStatus('已保存到本地')
-    setTimeout(() => {
-      if (autoSaveStatus.value === '已保存到本地') {
-        updateAutoSaveStatus('')
+    const shouldRefresh = await authStore.shouldRefreshToken()
+    if (shouldRefresh) {
+      console.log('token即将过期，尝试刷新...')
+      const refreshSuccess = await authStore.refreshToken()
+      if (!refreshSuccess) {
+        console.warn('token刷新失败，但继续尝试自动保存草稿')
+        // 不返回，继续尝试保存草稿
+      } else {
+        console.log('token刷新成功')
       }
-    }, 3000)
-    return
+    }
+  } catch (error) {
+    console.warn('Token刷新失败，但继续尝试自动保存草稿:', error)
+    // 不返回，继续尝试保存草稿
   }
 
   try {
     isAutoSaving.value = true
     updateAutoSaveStatus('正在自动保存...')
-    console.log('开始自动保存草稿...')
+    console.log('开始智能自动保存草稿...')
     
     // 准备草稿数据
     const draftData = {
@@ -1175,187 +1271,51 @@ const autoSaveDraft = async () => {
     
     console.log('自动保存草稿数据:', draftData)
     
-    try {
-      // 先保存到本地存储
-      const localSaveSuccess = saveToLocalStorage()
-      
-      // 尝试保存到服务器
-      const response = await articleAPI.saveDraft(draftData)
-      console.log('自动保存草稿响应:', response)
-      
-      // 判断响应是否成功
-      if (response && response.articleId) {
-        console.log('自动保存草稿成功，articleId:', response.articleId)
-        // 始终使用返回的articleId更新当前草稿ID
-        currentDraftId.value = response.articleId
-        // 更新最后保存时间
-        lastSavedTime.value = new Date()
-        updateAutoSaveStatus('已自动保存')
-        // 3秒后隐藏状态
-        setTimeout(() => {
-          if (autoSaveStatus.value === '已自动保存') {
-            updateAutoSaveStatus('')
-          }
-        }, 3000)
-      } else if (!response || response === '' || response === null || 
-          (typeof response === 'object' && Object.keys(response).length === 0)) {
-        // 更新最后保存时间
-        lastSavedTime.value = new Date()
-        updateAutoSaveStatus('已自动保存')
-        // 3秒后隐藏状态
-        setTimeout(() => {
-          if (autoSaveStatus.value === '已自动保存') {
-            updateAutoSaveStatus('')
-          }
-        }, 3000)
-      } else {
-        console.error('自动保存草稿返回未知响应:', response)
-        // 如果本地保存成功，至少告诉用户内容已保存到本地
-        if (localSaveSuccess) {
-          updateAutoSaveStatus('已保存到本地')
-          // 3秒后隐藏状态
-          setTimeout(() => {
-            if (autoSaveStatus.value === '已保存到本地') {
-              updateAutoSaveStatus('')
-            }
-          }, 3000)
-        } else {
-          updateAutoSaveStatus('自动保存失败')
-        }
-      }
-    } catch (apiError) {
-      console.error('自动保存API调用错误:', apiError)
-      
-      if (apiError.response) {
-        const status = apiError.response.status
-        console.error('自动保存API错误响应:', apiError.response)
-        
-        if (status === 401) {
-          // 身份验证失败，保存到本地
-          const localSaveSuccess = saveToLocalStorage()
-          if (localSaveSuccess) {
-            updateAutoSaveStatus('已保存到本地')
-            setTimeout(() => {
-              if (autoSaveStatus.value === '已保存到本地') {
-                updateAutoSaveStatus('')
-              }
-            }, 3000)
-            return
-          }
-        }
-      } else if (apiError.request) {
-        console.error('自动保存API请求错误:', apiError.request)
-        // 网络请求失败，保存到本地
-        const localSaveSuccess = saveToLocalStorage()
-        if (localSaveSuccess) {
-          updateAutoSaveStatus('已保存到本地')
-          setTimeout(() => {
-            if (autoSaveStatus.value === '已保存到本地') {
-              updateAutoSaveStatus('')
-            }
-          }, 3000)
-          return
-        }
-      }
-      
+    // 尝试保存到服务器
+    const response = await articleAPI.saveDraft(draftData)
+    console.log('自动保存草稿响应:', response)
+    
+    // 判断响应是否成功
+    if (response && response.articleId) {
+      console.log('自动保存草稿成功，articleId:', response.articleId)
+      // 始终使用返回的articleId更新当前草稿ID
+      currentDraftId.value = response.articleId
+      // 更新最后保存时间
+      lastSavedTime.value = new Date()
+      // 清除未保存更改标记
+      hasUnsavedChanges.value = false
+      // 更新状态提示
+      updateAutoSaveStatus(`已自动保存 ${formatTime(lastSavedTime.value)}`)
+    } else {
+      console.error('自动保存草稿返回未知响应:', response)
       updateAutoSaveStatus('自动保存失败')
     }
   } catch (error) {
     console.error('自动保存草稿过程中发生错误:', error)
     updateAutoSaveStatus('自动保存失败')
+    
+    if (error.response) {
+      const status = error.response.status
+      console.error('自动保存API错误响应:', error.response)
+      
+      if (status === 401) {
+        console.log('身份验证失败，跳过自动保存')
+      }
+    } else if (error.request) {
+      console.error('自动保存API请求错误:', error.request)
+    }
   } finally {
     isAutoSaving.value = false
   }
 }
 
-// 更新自动保存状态显示
-const updateAutoSaveStatus = (status) => {
-  autoSaveStatus.value = status
-}
 
-// 保存草稿到本地存储
-const saveToLocalStorage = () => {
-  try {
-    const draftData = {
-      id: currentDraftId.value, // 保存当前草稿ID
-      title: articleForm.value.title,
-      content: articleForm.value.content,
-      excerpt: articleForm.value.excerpt,
-      tags: Array.isArray(articleForm.value.tags) ? [...articleForm.value.tags] : [],
-      portfolioId: articleForm.value.portfolioId,
-      timestamp: new Date().toISOString()
-    }
-    
-    localStorage.setItem(localStorageKey, JSON.stringify(draftData))
-    console.log('草稿已保存到本地存储，ID:', currentDraftId.value)
-    return true
-  } catch (error) {
-    console.error('保存到本地存储失败:', error)
-    return false
-  }
-}
 
-// 从本地存储加载草稿
-const loadFromLocalStorage = () => {
-  try {
-    const savedDraft = localStorage.getItem(localStorageKey)
-    if (savedDraft) {
-      const draftData = JSON.parse(savedDraft)
-      console.log('从本地存储加载草稿:', draftData)
-      
-      // 检查草稿是否过期（超过24小时）
-      const savedTime = new Date(draftData.timestamp)
-      const currentTime = new Date()
-      const hoursDiff = (currentTime - savedTime) / (1000 * 60 * 60)
-      
-      if (hoursDiff > 24) {
-        console.log('本地草稿已过期（超过24小时），不加载')
-        return false
-      }
-      
-      // 如果当前表单为空，则加载本地草稿
-      if (!articleForm.value.title && !articleForm.value.content) {
-        // 加载草稿ID
-        currentDraftId.value = draftData.id || null
-        console.log('从本地存储加载草稿ID:', currentDraftId.value)
-        
-        articleForm.value.title = draftData.title || ''
-        articleForm.value.content = draftData.content || ''
-        articleForm.value.excerpt = draftData.excerpt || ''
-        articleForm.value.tags = draftData.tags || []
-        articleForm.value.portfolioId = draftData.portfolioId || ''
-        
-        // 如果编辑器已初始化，更新编辑器内容
-        if (vditor) {
-          try {
-            vditor.setValue(draftData.content || '')
-          } catch (e) {
-            console.warn('设置编辑器内容失败:', e)
-          }
-        }
-        
-        updateWordCount()
-        return true
-      }
-    }
-    return false
-  } catch (error) {
-    console.error('从本地存储加载草稿失败:', error)
-    return false
-  }
-}
 
-// 清除本地存储的草稿
-const clearLocalStorage = () => {
-  try {
-    localStorage.removeItem(localStorageKey)
-    console.log('本地草稿已清除')
-    return true
-  } catch (error) {
-    console.error('清除本地草稿失败:', error)
-    return false
-  }
-}
+
+
+
+
 
 const confirmPublish = async () => {
   if (!authStore.isAuthenticated) {
@@ -1364,12 +1324,6 @@ const confirmPublish = async () => {
   }
 
   try {
-    // 在发布前检查token有效性
-    try {
-      await authStore.refreshToken()
-    } catch (refreshError) {
-      // Token刷新失败时继续使用当前token
-    }
     
     // 调试：检查发布条件
     console.log('发布条件检查:', {
@@ -1448,9 +1402,6 @@ const confirmPublish = async () => {
       if (response && response.articleId) {
         showNotification('文章发布成功！', 'success')
         showPublishModal.value = false
-        
-        // 发布成功，清除本地草稿
-        clearLocalStorage()
         
         // 发布成功，跳转到文章页面
         setTimeout(() => {
@@ -1628,6 +1579,40 @@ const handleClickOutside = (event) => {
   }
 }
 
+// 获取路由信息
+const route = useRoute()
+
+// 处理路由变化的函数
+const handleRouteChange = async () => {
+  console.log('当前路由信息:', route)
+  console.log('路由查询参数:', route.query)
+  
+  if (route && route.query && route.query.edit) {
+    const editId = route.query.edit
+    console.log('进入文章编辑模式，ID:', editId)
+    isEditMode.value = true
+    editingArticleId.value = parseInt(editId)
+    // 等待Vditor初始化完成后再加载文章
+    await nextTick()
+    loadArticleForEdit(editingArticleId.value)
+  }
+  // 检查是否是草稿编辑模式
+  else if (route && route.query && route.query.draft) {
+    const draftId = route.query.draft
+    console.log('进入草稿编辑模式，ID:', draftId)
+    // 等待Vditor初始化完成后再加载草稿
+    await nextTick()
+    loadDraftForEdit(draftId)
+  }
+  // 新文章模式
+  else {
+    console.log('新文章模式')
+  }
+}
+
+// 监听路由变化
+watch(() => route.query, handleRouteChange, { immediate: true })
+
 // 组件挂载
 onMounted(async () => {
   if (!authStore.isAuthenticated) {
@@ -1639,31 +1624,7 @@ onMounted(async () => {
   await nextTick()
   
   // 初始化Vditor编辑器
-  initVditor()
-  
-  // 检查是否是编辑模式
-  const route = useRoute()
-  if (route && route.query && route.query.edit) {
-    const editId = route.query.edit
-    isEditMode.value = true
-    editingArticleId.value = parseInt(editId)
-    loadArticleForEdit(editingArticleId.value)
-  }
-  // 检查是否是草稿编辑模式
-  else if (route && route.query && route.query.draft) {
-    const draftId = route.query.draft
-    loadDraftForEdit(draftId)
-  }
-  // 如果不是编辑模式，尝试从本地存储加载草稿
-  else {
-    // 延迟加载本地草稿，确保编辑器已初始化
-    setTimeout(() => {
-      const loaded = loadFromLocalStorage()
-      if (loaded) {
-        showNotification('已从本地加载未保存的草稿', 'info')
-      }
-    }, 1000)
-  }
+  await initVditor()
   
   loadPortfolios()
   
@@ -1672,56 +1633,74 @@ onMounted(async () => {
   
   // 确保字数统计从0开始
   updateWordCount()
-  
-  // 设置自动保存定时器 (每60秒自动保存一次)
-  autoSaveInterval.value = setInterval(autoSaveDraft, 60000)
 })
 
 // 加载文章用于编辑
 const loadArticleForEdit = async (articleId) => {
   try {
+    console.log('开始加载文章用于编辑，ID:', articleId)
     const article = await articleAPI.getArticleById(articleId)
-    if (article) {
+    console.log('获取到的文章数据:', article)
+    
+    // 检查数据结构，适配不同的响应格式
+    const articleData = article?.data || article
+    console.log('处理后的文章数据:', articleData)
+    
+    if (articleData && articleData.articleId) {
       // 填充表单数据
       articleForm.value = {
-        title: article.title || '',
-        excerpt: article.excerpt || '',
-        content: article.content || '',
-        tags: article.tags ? article.tags.map(tag => tag.name) : [],
-        portfolioId: article.portfolioId || '',
-        allowComments: article.allowComments !== false
+        title: articleData.title || '',
+        excerpt: articleData.excerpt || '',
+        content: articleData.content || '',
+        tags: articleData.tags ? articleData.tags.map(tag => tag.name) : [],
+        portfolioId: articleData.portfolioId || '',
+        allowComments: articleData.allowComments !== false
       }
       
+      console.log('填充后的表单数据:', articleForm.value)
+      
       // 设置封面图片
-      if (article.coverImg) {
-        coverPreview.value = article.coverImg
+      if (articleData.coverImg) {
+        coverPreview.value = articleData.coverImg
       }
       
       // 设置作品集
-      if (article.portfolioId) {
-        selectedPortfolioId.value = article.portfolioId
+      if (articleData.portfolioId) {
+        selectedPortfolioId.value = articleData.portfolioId
       }
       
       // 设置编辑器内容
-      if (vditor && article.content) {
+      console.log('Vditor实例状态:', vditor)
+      if (vditor && articleData.content) {
         try {
+          console.log('尝试设置编辑器内容:', articleData.content)
           if (typeof vditor.setValue === 'function') {
-            vditor.setValue(article.content)
+            vditor.setValue(articleData.content)
+            console.log('使用vditor.setValue设置内容成功')
           } else if (vditor.vditor && typeof vditor.vditor.setValue === 'function') {
-            vditor.vditor.setValue(article.content)
+            vditor.vditor.setValue(articleData.content)
+            console.log('使用vditor.vditor.setValue设置内容成功')
           } else if (vditor.vditor && vditor.vditor.lute) {
             // 直接设置内容
-            vditor.vditor.lute.WYSIWYGSetContent(article.content)
+            vditor.vditor.lute.WYSIWYGSetContent(articleData.content)
+            console.log('使用lute.WYSIWYGSetContent设置内容成功')
+          } else {
+            console.warn('无法找到合适的Vditor设置内容方法')
           }
         } catch (error) {
           console.warn('设置Vditor内容失败:', error)
         }
+      } else {
+        console.warn('Vditor未初始化或文章内容为空')
       }
       
       // 更新字数统计
       updateWordCount()
       
       showNotification('文章加载成功，可以开始编辑', 'success')
+    } else {
+      console.error('获取到的文章数据为空')
+      showNotification('文章数据为空', 'danger')
     }
   } catch (error) {
     console.error('加载文章失败:', error)
@@ -1732,38 +1711,59 @@ const loadArticleForEdit = async (articleId) => {
 // 加载草稿用于编辑
 const loadDraftForEdit = async (draftId) => {
   try {
+    console.log('开始加载草稿用于编辑，ID:', draftId)
     const draft = await articleAPI.getDraftById(draftId)
-    if (draft && draft.data) {
+    console.log('获取到的草稿数据:', draft)
+    
+    // 检查数据结构，适配不同的响应格式
+    const draftData = draft?.data || draft
+    console.log('处理后的草稿数据:', draftData)
+    
+    if (draftData && draftData.articleId) {
       // 填充表单数据
       articleForm.value = {
-        title: draft.data.title || '',
-        excerpt: draft.data.excerpt || '',
-        content: draft.data.content || '',
-        tags: draft.data.tags ? draft.data.tags : [],
-        portfolioId: draft.data.portfolioId || '',
+        title: draftData.title || '',
+        excerpt: draftData.excerpt || '',
+        content: draftData.content || '',
+        tags: draftData.tags ? draftData.tags : [],
+        portfolioId: draftData.portfolioId || '',
         allowComments: true
       }
       
+      console.log('填充后的表单数据:', articleForm.value)
+      
       // 设置编辑器内容
-      if (vditor && draft.data.content) {
+      console.log('Vditor实例状态:', vditor)
+      if (vditor && draftData.content) {
         try {
+          console.log('尝试设置编辑器内容:', draftData.content)
           if (typeof vditor.setValue === 'function') {
-            vditor.setValue(draft.data.content)
+            vditor.setValue(draftData.content)
+            console.log('使用vditor.setValue设置内容成功')
           } else if (vditor.vditor && typeof vditor.vditor.setValue === 'function') {
-            vditor.vditor.setValue(draft.data.content)
+            vditor.vditor.setValue(draftData.content)
+            console.log('使用vditor.vditor.setValue设置内容成功')
           } else if (vditor.vditor && vditor.vditor.lute) {
             // 直接设置内容
-            vditor.vditor.lute.WYSIWYGSetContent(draft.data.content)
+            vditor.vditor.lute.WYSIWYGSetContent(draftData.content)
+            console.log('使用lute.WYSIWYGSetContent设置内容成功')
+          } else {
+            console.warn('无法找到合适的Vditor设置内容方法')
           }
         } catch (error) {
           console.warn('设置Vditor内容失败:', error)
         }
+      } else {
+        console.warn('Vditor未初始化或草稿内容为空')
       }
       
       // 更新字数统计
       updateWordCount()
       
       showNotification('草稿加载成功，可以继续编辑', 'success')
+    } else {
+      console.error('获取到的草稿数据为空或格式不正确')
+      showNotification('草稿数据为空', 'danger')
     }
   } catch (error) {
     console.error('加载草稿失败:', error)
@@ -1784,9 +1784,9 @@ onUnmounted(() => {
   }
   
   // 清除自动保存定时器
-  if (autoSaveInterval.value) {
-    clearInterval(autoSaveInterval.value)
-    autoSaveInterval.value = null
+  if (autoSaveTimeout.value) {
+    clearTimeout(autoSaveTimeout.value)
+    autoSaveTimeout.value = null
   }
   
   // 销毁Vditor编辑器
@@ -1849,6 +1849,31 @@ onUnmounted(() => {
   display: flex;
   gap: 0.75rem;
   flex-shrink: 0;
+  align-items: center;
+}
+
+.auto-save-status {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.auto-save-status .text-success {
+  color: #28a745 !important;
+}
+
+.auto-save-status .text-danger {
+  color: #dc3545 !important;
+}
+
+.auto-save-status .text-warning {
+  color: #ffc107 !important;
 }
 
 /* 头部标题输入框样式 */
@@ -2010,30 +2035,7 @@ onUnmounted(() => {
   gap: 1rem;
 }
 
-.auto-save-status {
-  font-size: 0.85rem;
-  color: #28a745;
-  background: rgba(40, 167, 69, 0.1);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  border: 1px solid rgba(40, 167, 69, 0.2);
-  box-shadow: none;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-}
 
-.auto-save-status.saving {
-  color: #ffc107;
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.2);
-}
-
-.auto-save-status i {
-  font-size: 0.8rem;
-}
 
 .word-count {
   font-size: 0.85rem;
@@ -2342,6 +2344,9 @@ onUnmounted(() => {
   margin-bottom: 1.5rem;
   box-shadow: 0 4px 16px rgba(0,0,0,0.05);
   transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .setting-card:hover {
@@ -2389,8 +2394,8 @@ onUnmounted(() => {
 
 .cover-preview {
   width: 100%;
-  height: 140px;
-  border: 3px dashed #dee2e6;
+  height: 160px;
+  border: 2px dashed #dee2e6;
   border-radius: 12px;
   background-size: cover;
   background-position: center;
@@ -2399,26 +2404,40 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
 }
 
 .cover-preview:hover {
   border-color: #f6d55c;
   background-color: #f8f9fa;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(246, 213, 92, 0.15);
+}
+
+.cover-preview:hover .cover-placeholder {
+  color: #495057;
+}
+
+.cover-preview:hover .cover-placeholder i {
+  color: #f3a712;
+  transform: scale(1.05);
 }
 
 .cover-placeholder {
   color: #6c757d;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
 }
 
 .cover-placeholder i {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  display: block;
+  font-size: 3rem;
   color: #f6d55c;
+  transition: all 0.3s ease;
 }
 
 .tags-input {
@@ -2466,44 +2485,60 @@ onUnmounted(() => {
   transform: scale(1.1);
 }
 
-/* 作品集输入组件样式 */
+/* 作品集输入组件样式 - 重写 */
 .portfolio-input-group {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  border: 1px solid #e9ecef;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  width: 100%;
+}
+
+.portfolio-input-group .mb-3 {
+  margin-bottom: 1rem;
+}
+
+.portfolio-input-group .form-group {
+  margin-bottom: 0;
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .portfolio-input-group .form-label {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: #6c757d;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   font-weight: 500;
 }
 
-.portfolio-input-group .form-select,
 .portfolio-input-group .form-control {
-  border-radius: 8px;
-  border: 2px solid #dee2e6;
-  transition: all 0.3s ease;
-  padding: 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
-.portfolio-input-group .form-select:focus,
 .portfolio-input-group .form-control:focus {
   border-color: #f6d55c;
   box-shadow: 0 0 0 0.2rem rgba(246, 213, 92, 0.25);
+  outline: 0;
 }
 
-.portfolio-input-group .input-group .btn {
-  border-radius: 0 8px 8px 0;
-  border-left: none;
-  padding: 0.75rem 1rem;
+.portfolio-input-group .input-group {
+  display: flex;
+  width: 100%;
 }
 
 .portfolio-input-group .input-group .form-control {
-  border-radius: 8px 0 0 8px;
+  border-radius: 0.375rem 0 0 0.375rem;
+  border-right: 0;
+}
+
+.portfolio-input-group .input-group .btn {
+  border-radius: 0 0.375rem 0.375rem 0;
+  border-left: 1px solid #dee2e6;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
 }
 
 .selected-portfolio .alert {
@@ -2521,44 +2556,56 @@ onUnmounted(() => {
   font-size: 0.8rem;
 }
 
-/* 美化下拉框样式 */
+/* 作品集选择框样式 - 重写 */
 .custom-select {
   position: relative;
-  min-width: 200px;
+  width: 100%;
   cursor: pointer;
   user-select: none;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
 }
 
 .select-display {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  background-color: white;
-  color: #333;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  color: #495057;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  min-height: 38px;
 }
 
 .custom-select:hover .select-display {
   border-color: #f6d55c;
-  box-shadow: 0 4px 16px rgba(246, 213, 92, 0.15);
-  transform: translateY(-2px);
+}
+
+.custom-select:focus-within .select-display {
+  border-color: #f6d55c;
+  box-shadow: 0 0 0 0.2rem rgba(246, 213, 92, 0.25);
+  outline: 0;
 }
 
 .select-text {
   flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .select-arrow {
   margin-left: 0.5rem;
-  transition: transform 0.3s ease;
-  color: #666;
-  font-size: 0.8rem;
+  transition: transform 0.15s ease-in-out;
+  color: #6c757d;
+  font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
 .select-arrow.rotated {
@@ -2570,27 +2617,25 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   right: 0;
-  background-color: white;
-  border: 2px solid #f6d55c;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
   border-top: none;
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  margin-top: -2px;
-  overflow: hidden;
+  border-radius: 0 0 0.375rem 0.375rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  z-index: 1050;
   max-height: 200px;
   overflow-y: auto;
 }
 
 .select-option {
-  padding: 1rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  background-color: white;
-  transition: all 0.2s ease;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border-bottom: 1px solid #f8f9fa;
   cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
 }
 
 .select-option:last-child {
@@ -2598,14 +2643,13 @@ onUnmounted(() => {
 }
 
 .select-option:hover {
-  background-color: #fff8e1;
-  color: #333;
+  background-color: #f8f9fa;
 }
 
 .select-option.selected {
   background-color: #f6d55c;
-  color: #333;
-  font-weight: 600;
+  color: #212529;
+  font-weight: 500;
 }
 
 .select-option.selected:hover {
@@ -2641,6 +2685,27 @@ onUnmounted(() => {
   background: #f8f9fa;
   padding-left: 0.5rem;
   border-radius: 8px;
+}
+
+/* 发布设置样式 */
+.publish-settings {
+  border-top: 1px solid #e9ecef;
+}
+
+.publish-settings .form-check {
+  margin-bottom: 0;
+}
+
+.publish-settings .form-check-label {
+  font-size: 0.9rem;
+  color: #495057;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.publish-settings .form-check-label i {
+  color: #6c757d;
 }
 
 .text-success {
@@ -2683,59 +2748,79 @@ onUnmounted(() => {
 
 /* 发布设置模态框样式优化 */
 .publish-settings-modal {
-  max-height: 85vh !important;
+  max-height: 90vh;
   overflow: hidden;
-  z-index: 1055 !important;
-  position: relative !important;
-  border-radius: 16px !important;
+  position: relative;
+  border-radius: 16px;
 }
 
 .publish-settings-modal .modal-content {
-  background: white !important;
-  border: none !important;
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+  background: white;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  min-height: 600px;
 }
 
 .publish-settings-modal .modal-header {
-  padding: 1.5rem 2rem !important;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%) !important;
-  border-bottom: 1px solid #e9ecef !important;
-  border-radius: 16px 16px 0 0 !important;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9ecef;
+  border-radius: 16px 16px 0 0;
 }
 
 .publish-settings-modal .modal-title {
-  font-size: 1.4rem !important;
-  font-weight: 700 !important;
-  color: #2c3e50 !important;
-  margin: 0 !important;
-  line-height: 1.4 !important;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0;
+  line-height: 1.4;
 }
 
 .publish-settings-modal .modal-title i {
-  color: #f6d55c !important;
+  color: #f6d55c;
 }
 
 .publish-settings-modal .modal-body {
-  max-height: calc(85vh - 180px) !important;
-  overflow-y: auto !important;
-  padding: 2rem !important;
+  max-height: calc(90vh - 180px);
+  overflow-y: auto;
+  padding: 2rem;
+  min-height: 450px;
+}
+
+.publish-settings-modal .row {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  height: 100%;
+}
+
+.publish-settings-modal .col-md-6 {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .publish-settings-modal .modal-footer {
-  padding: 1.5rem 2rem !important;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
-  border-top: 1px solid #e9ecef !important;
-  border-radius: 0 0 16px 16px !important;
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-top: 1px solid #e9ecef;
+  border-radius: 0 0 16px 16px;
 }
 
 /* 设置卡片样式优化 */
 .publish-settings-modal .setting-card {
-  margin-bottom: 2rem !important;
+  margin-bottom: 0;
+  flex: 1;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
 }
 
 .publish-settings-modal .setting-card:last-child {
-  margin-bottom: 0 !important;
+  flex: 1.2;
+  min-height: 220px;
 }
 
 /* 摘要标题和按钮的布局 */
@@ -2855,7 +2940,7 @@ onUnmounted(() => {
   
   /* 移动端作品集输入优化 */
   .portfolio-input-group {
-    padding: 1rem;
+    padding: 0;
   }
   
   .portfolio-input-group .input-group {
@@ -2863,18 +2948,19 @@ onUnmounted(() => {
   }
   
   .portfolio-input-group .input-group .form-control {
-    border-radius: 8px;
+    border-radius: 0.375rem;
     margin-bottom: 0.5rem;
+    border-right: 1px solid #dee2e6;
   }
   
   .portfolio-input-group .input-group .btn {
-    border-radius: 8px;
+    border-radius: 0.375rem;
     border-left: 1px solid #dee2e6;
   }
   
   /* 移动端下拉框优化 */
   .custom-select {
-    min-width: 100%;
+    width: 100%;
   }
   
   .select-dropdown {
@@ -2883,73 +2969,75 @@ onUnmounted(() => {
   
   /* 移动端模态框优化 */
   .publish-settings-modal .modal-dialog {
-    max-width: 98vw !important;
-    margin: 2rem auto 1rem auto !important;
+    max-width: 98vw;
+    width: 98vw;
+    margin: 1rem auto 0.5rem auto;
   }
   
   .publish-settings-modal .modal-body {
-    max-height: calc(85vh - 120px) !important;
-    padding: 1rem !important;
+    max-height: calc(90vh - 100px);
+    padding: 1.5rem;
   }
   
   .publish-settings-modal .modal-header,
   .publish-settings-modal .modal-footer {
-    padding: 1rem !important;
+    padding: 1.5rem;
   }
   
   .publish-settings-modal .modal-title {
-    font-size: 1.2rem !important;
+    font-size: 1.3rem;
+  }
+  
+  .publish-settings-modal .setting-card {
+    padding: 1.5rem;
+    min-height: 150px;
   }
 }
 
 /* 确保模态框正确显示 */
 .modal.show {
-  display: block !important;
-  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: block;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .modal-backdrop.show {
-  opacity: 0.5 !important;
-  z-index: 1049 !important;
+  opacity: 0.5;
+  z-index: 1049;
 }
 
 /* 强制模态框显示 */
-.publish-settings-modal {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
+.modal.show .publish-settings-modal {
+  display: block;
+  visibility: visible;
+  opacity: 1;
 }
 
 /* 确保模态框内容可见 */
-.publish-settings-modal .modal-content {
-  background: white !important;
-  border: 1px solid #dee2e6 !important;
-  border-radius: 16px !important;
-}
-
-.publish-settings-modal .modal-dialog {
-  margin-top: 4rem !important;
-  margin-bottom: 2rem !important;
-  position: relative !important;
-  z-index: 1051 !important;
-}
-
-.publish-settings-modal .modal-content {
-  position: relative !important;
-  z-index: 1052 !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3) !important;
+.modal-dialog {
+  margin: 6rem auto 2rem auto;
+  position: relative;
+  z-index: 1051;
 }
 
 /* 响应式模态框优化 */
 @media (max-width: 1200px) {
   .publish-settings-modal .modal-dialog {
-    max-width: 95vw !important;
-    margin: 3rem auto 1.5rem auto !important;
+    max-width: 95vw;
+    width: 95vw;
+    margin: 2rem auto 1rem auto;
   }
   
   .publish-settings-modal .modal-body {
-    max-height: calc(85vh - 140px) !important;
-    padding: 1.5rem !important;
+    max-height: calc(90vh - 160px);
+    padding: 2rem;
+  }
+  
+  .publish-settings-modal .modal-header {
+    padding: 1.5rem 2rem;
+  }
+  
+  .publish-settings-modal .modal-footer {
+    padding: 1.5rem 2rem;
   }
 }
 

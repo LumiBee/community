@@ -29,14 +29,14 @@ export const tagAPI = {
   },
 
   /**
-   * 根据标签名获取文章
-   * @param {string} tagName - 标签名
+   * 根据标签slug获取文章
+   * @param {string} tagSlug - 标签slug
    * @param {number} page - 页码，默认1
    * @param {number} size - 每页大小，默认10
    */
-  getArticlesByTagName(tagName, page = 1, size = 10) {
+  getArticlesByTagSlug(tagSlug, page = 1, size = 10) {
     return request({
-      url: `/tags/${encodeURIComponent(tagName)}`,
+      url: `/tags/${encodeURIComponent(tagSlug)}/articles`,
       method: 'get',
       params: { page, size }
     })
