@@ -27,7 +27,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/comments")
 @Tag(name = "评论管理", description = "文章评论相关的 API 接口")
 public class CommentController {
 

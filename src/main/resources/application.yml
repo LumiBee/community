@@ -1,5 +1,7 @@
 server:
   port: 8090
+  servlet:
+    context-path: /api  # 全局API前缀
   # 启用压缩 - 优先使用Brotli
   compression:
     enabled: true

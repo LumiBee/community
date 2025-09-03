@@ -1,5 +1,6 @@
 <template>
-  <div class="profile-page">
+  <div>
+    <div class="profile-page">
     <!-- 错误提示 -->
     <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show m-3" role="alert">
       <strong>加载失败!</strong> {{ errorMessage }}
@@ -19,7 +20,7 @@
       <!-- 预加载封面图片 -->
       <img 
         v-if="profileData.user?.backgroundImgUrl" 
-        :src="profileData.user.backgroundImgUrl" 
+        :src="getProcessedImageUrl(profileData.user.backgroundImgUrl)" 
         :alt="`${profileData.user?.name || '用户'}的封面图片`"
         class="cover-image-preload"
         @load="onCoverImageLoad"
@@ -312,14 +313,15 @@
       @crop="handleCropComplete"
     />
     
-    <!-- 删除文章确认弹窗 -->
+    </div>
+    
+    <!-- 删除文章确认弹窗 - 移到profile-page容器外部 -->
     <ConfirmDeleteModal
       :visible="showDeleteModal"
       title="删除文章"
       :message="`您确定要删除文章「${articleToDelete?.title}」吗？`"
       warning-message="删除后，该文章将无法恢复。"
       confirm-text="确认删除"
-      :position-index="deleteModalPositionIndex"
       @confirm="deleteArticle"
       @cancel="closeDeleteModal"
       @close="closeDeleteModal"
@@ -361,7 +363,7 @@ const croppedImageData = ref(null)
 // 删除相关
 const showDeleteModal = ref(false)
 const articleToDelete = ref(null)
-const deleteModalPositionIndex = ref(0)
+
 const isOwner = computed(() => profileData.value.isOwner)
 const articles = computed(() => profileData.value.articles?.records || [])
 const hasNextPage = computed(() => {
@@ -422,11 +424,39 @@ const avatarLoaded = ref(false)
 
 // 计算封面样式
 const coverStyle = computed(() => {
-  const coverUrl = profileData.value.user?.backgroundImgUrl || '/img/bg.jpg'
+  let coverUrl = profileData.value.user?.backgroundImgUrl || '/img/bg.jpg'
+  
+  // 如果是完整的后端URL，转换为相对路径以使用Vite代理
+  if (coverUrl.startsWith('http://localhost:8090/')) {
+    coverUrl = coverUrl.replace('http://localhost:8090', '')
+  }
+  
+  // 如果是相对路径的uploads，需要添加/api前缀（因为后端设置了全局API前缀）
+  if (coverUrl.startsWith('/uploads/')) {
+    coverUrl = '/api' + coverUrl
+  }
+  
   return {
     backgroundImage: coverImageLoaded.value ? `url(${coverUrl})` : 'none'
   }
 })
+
+// 处理图片URL的函数
+const getProcessedImageUrl = (url) => {
+  if (!url) return url
+  
+  // 如果是完整的后端URL，转换为相对路径
+  if (url.startsWith('http://localhost:8090/')) {
+    url = url.replace('http://localhost:8090', '')
+  }
+  
+  // 如果是相对路径的uploads，需要添加/api前缀（因为后端设置了全局API前缀）
+  if (url.startsWith('/uploads/')) {
+    url = '/api' + url
+  }
+  
+  return url
+}
 
 // 图片加载处理函数
 const onCoverImageLoad = () => {
@@ -514,7 +544,7 @@ const fetchProfileData = async () => {
   
   try {
     const response = await request({
-      url: `/api/profile/${username.value}`,
+      url: `/profile/${username.value}`,
       method: 'get',
       params: { page: currentPage.value, size: pageSize.value },
       timeout: 30000 // 增加超时时间到30秒
@@ -561,7 +591,7 @@ const toggleFollow = async () => {
     const userIdStr = ensureBigIntAsString(profileData.value.user.id);
     debugId(profileData.value.user.id, '目标用户ID');
     const response = await request({
-      url: `/api/user/${userIdStr}/follow`,
+      url: `/user/${userIdStr}/follow`,
       method: 'post'
     })
 
@@ -715,7 +745,6 @@ const goToPage = (page) => {
 // 确认删除文章
 const confirmDeleteArticle = (article, index) => {
   articleToDelete.value = article
-  deleteModalPositionIndex.value = index
   showDeleteModal.value = true
 }
 
@@ -757,7 +786,6 @@ const deleteArticle = async () => {
     isLoading.value = false
     // 清理状态
     articleToDelete.value = null
-    deleteModalPositionIndex.value = 0
   }
 }
 
@@ -765,7 +793,6 @@ const deleteArticle = async () => {
 const closeDeleteModal = () => {
   showDeleteModal.value = false
   articleToDelete.value = null
-  deleteModalPositionIndex.value = 0
 }
 
 // 预加载关键图片资源
@@ -992,8 +1019,8 @@ onMounted(() => {
 
 .cover-edit-btn {
   position: absolute;
-  top: 30px;
-  right: 30px;
+  top: 25px;
+  right: 0px;
   z-index: 10;
   opacity: 0.95;
   /* 简化过渡效果 */

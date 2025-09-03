@@ -10,7 +10,7 @@ export const cacheAPI = {
    */
   clearAllCaches() {
     return request({
-      url: '/api/admin/cache/all',
+      url: '/admin/cache/all',
       method: 'DELETE'
     })
   },
@@ -20,7 +20,7 @@ export const cacheAPI = {
    */
   clearArticleCaches() {
     return request({
-      url: '/api/admin/cache/articles',
+      url: '/admin/cache/articles',
       method: 'DELETE'
     })
   },
@@ -31,7 +31,7 @@ export const cacheAPI = {
    */
   clearUserCaches(userId) {
     return request({
-      url: `/api/admin/cache/user/${userId}`,
+      url: `/admin/cache/user/${userId}`,
       method: 'DELETE'
     })
   }

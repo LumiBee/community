@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/favorites")
+@RequestMapping("/favorites")
 @Tag(name = "收藏管理", description = "收藏相关的 API 接口")
 public class FavoriteController {
 

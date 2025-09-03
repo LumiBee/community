@@ -57,10 +57,16 @@
           <label for="articleContent" class="form-label">
             <i class="fas fa-edit me-2"></i>文章内容
           </label>
-          <span class="word-count">
-            <i class="fas fa-info-circle me-1"></i>
-            {{ wordCount }} 字
-          </span>
+          <div class="editor-info">
+            <span v-if="autoSaveStatus" class="auto-save-status" :class="{ 'saving': autoSaveStatus === '正在自动保存...' }">
+              <i class="fas" :class="autoSaveStatus === '正在自动保存...' ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+              {{ autoSaveStatus }}
+            </span>
+            <span class="word-count">
+              <i class="fas fa-info-circle me-1"></i>
+              {{ wordCount }} 字
+            </span>
+          </div>
         </div>
       </div>
       
@@ -420,6 +426,14 @@ const articleForm = ref({
   portfolioId: '',
   allowComments: true
 })
+
+// 自动保存相关状态
+const autoSaveInterval = ref(null)
+const lastSavedTime = ref(null)
+const isAutoSaving = ref(false)
+const autoSaveStatus = ref('') // 用于显示自动保存状态
+const localStorageKey = 'hive_draft_content' // 本地存储的键名
+const currentDraftId = ref(null) // 当前草稿的ID
 
 const coverInput = ref(null)
 const coverPreview = ref('')
@@ -995,6 +1009,7 @@ const showNotification = (message, type = 'success') => {
   }, 3000)
 }
 
+// 手动保存草稿
 const saveDraft = async () => {
   if (!authStore.isAuthenticated) {
     router.push('/login')
@@ -1003,28 +1018,342 @@ const saveDraft = async () => {
 
   try {
     isSaving.value = true
+    console.log('开始保存草稿...')
+    
     // 准备草稿数据，确保字段名与后端DTO匹配
     const draftData = {
-      title: articleForm.value.title,
-      content: articleForm.value.content,
-      excerpt: articleForm.value.excerpt,
-      tagsName: articleForm.value.tags,
+      id: currentDraftId.value, // 如果有草稿ID，则更新现有草稿
+      title: articleForm.value.title || '无标题草稿',
+      content: articleForm.value.content || '',
+      excerpt: articleForm.value.excerpt || '',
+      tags: Array.isArray(articleForm.value.tags) ? [...articleForm.value.tags] : [],
+      portfolioId: articleForm.value.portfolioId || null,
       portfolioName: articleForm.value.portfolioId ? 
         portfolios.value.find(p => p.id === articleForm.value.portfolioId)?.title : null
     }
     
-    const response = await articleAPI.saveDraft(draftData)
+    console.log('准备发送的草稿数据:', draftData)
     
-    if (response.success) {
-      showNotification('草稿保存成功！', 'success')
-    } else {
-      showNotification('保存失败，请重试', 'danger')
+    try {
+      // 先保存到本地存储
+      const localSaveSuccess = saveToLocalStorage()
+      
+      // 尝试保存到服务器
+      const response = await articleAPI.saveDraft(draftData)
+      console.log('保存草稿响应:', response)
+      
+      // 判断响应是否成功
+      if (response && response.articleId) {
+        console.log('草稿保存成功，articleId:', response.articleId)
+        // 始终使用返回的articleId更新当前草稿ID
+        currentDraftId.value = response.articleId
+        showNotification('草稿保存成功！', 'success')
+        // 更新最后保存时间
+        lastSavedTime.value = new Date()
+        updateAutoSaveStatus('已保存')
+      } else if (!response || response === '' || response === null || 
+          (typeof response === 'object' && Object.keys(response).length === 0)) {
+        showNotification('草稿保存成功！', 'success')
+        // 更新最后保存时间
+        lastSavedTime.value = new Date()
+        updateAutoSaveStatus('已保存')
+      } else {
+        console.error('保存草稿返回未知响应:', response)
+        // 如果本地保存成功，至少告诉用户内容已保存到本地
+        if (localSaveSuccess) {
+          showNotification('已保存到本地，但服务器保存失败', 'warning')
+          updateAutoSaveStatus('已保存到本地')
+        } else {
+          showNotification('保存失败，请重试', 'danger')
+          updateAutoSaveStatus('保存失败')
+        }
+      }
+    } catch (apiError) {
+      console.error('API调用错误:', apiError)
+      let errorMessage = '保存失败'
+      
+      if (apiError.response) {
+        const status = apiError.response.status
+        
+        if (status === 401) {
+          errorMessage = '身份验证失败，请重新登录'
+          // 保存到本地，避免数据丢失
+          const localSaveSuccess = saveToLocalStorage()
+          if (localSaveSuccess) {
+            showNotification('身份验证失败，但内容已保存到本地', 'warning')
+            updateAutoSaveStatus('已保存到本地')
+            // 提示用户重新登录
+            setTimeout(() => {
+              showNotification('请重新登录后再尝试保存', 'info')
+            }, 3000)
+            return
+          }
+        } else if (status === 403) {
+          errorMessage = '您没有权限执行此操作'
+        } else if (status === 500) {
+          errorMessage = '服务器错误，请稍后再试'
+        } else {
+          errorMessage += `: ${apiError.response.data?.message || apiError.response.statusText}`
+        }
+        
+        console.error('API错误响应:', apiError.response)
+      } else if (apiError.request) {
+        errorMessage = '网络请求失败，内容已保存到本地'
+        // 保存到本地，避免数据丢失
+        saveToLocalStorage()
+        console.error('API请求错误:', apiError.request)
+        showNotification(errorMessage, 'warning')
+        updateAutoSaveStatus('已保存到本地')
+        return
+      } else {
+        errorMessage += `: ${apiError.message || '未知错误'}`
+      }
+      
+      showNotification(errorMessage, 'danger')
+      updateAutoSaveStatus('保存失败')
     }
   } catch (error) {
-    console.error('保存草稿失败:', error)
+    console.error('保存草稿过程中发生错误:', error)
     showNotification('保存失败：' + (error.message || '未知错误'), 'danger')
+    updateAutoSaveStatus('保存失败')
   } finally {
     isSaving.value = false
+  }
+}
+
+// 自动保存草稿
+const autoSaveDraft = async () => {
+  // 如果没有内容或正在手动保存，则不自动保存
+  if (isSaving.value || (!articleForm.value.title && !articleForm.value.content)) {
+    return
+  }
+
+  // 如果用户未登录，不进行自动保存到服务器，但仍保存到本地
+  if (!authStore.isAuthenticated) {
+    console.log('用户未登录，仅保存到本地存储')
+    saveToLocalStorage()
+    updateAutoSaveStatus('已保存到本地')
+    setTimeout(() => {
+      if (autoSaveStatus.value === '已保存到本地') {
+        updateAutoSaveStatus('')
+      }
+    }, 3000)
+    return
+  }
+  
+  // 检查token是否有效
+  try {
+    await authStore.refreshToken()
+  } catch (error) {
+    console.warn('Token刷新失败，仅保存到本地存储:', error)
+    saveToLocalStorage()
+    updateAutoSaveStatus('已保存到本地')
+    setTimeout(() => {
+      if (autoSaveStatus.value === '已保存到本地') {
+        updateAutoSaveStatus('')
+      }
+    }, 3000)
+    return
+  }
+
+  try {
+    isAutoSaving.value = true
+    updateAutoSaveStatus('正在自动保存...')
+    console.log('开始自动保存草稿...')
+    
+    // 准备草稿数据
+    const draftData = {
+      id: currentDraftId.value, // 如果有草稿ID，则更新现有草稿
+      title: articleForm.value.title || '无标题草稿',
+      content: articleForm.value.content || '',
+      excerpt: articleForm.value.excerpt || '',
+      tags: Array.isArray(articleForm.value.tags) ? [...articleForm.value.tags] : [],
+      portfolioId: articleForm.value.portfolioId || null,
+      portfolioName: articleForm.value.portfolioId ? 
+        portfolios.value.find(p => p.id === articleForm.value.portfolioId)?.title : null
+    }
+    
+    console.log('自动保存草稿数据:', draftData)
+    
+    try {
+      // 先保存到本地存储
+      const localSaveSuccess = saveToLocalStorage()
+      
+      // 尝试保存到服务器
+      const response = await articleAPI.saveDraft(draftData)
+      console.log('自动保存草稿响应:', response)
+      
+      // 判断响应是否成功
+      if (response && response.articleId) {
+        console.log('自动保存草稿成功，articleId:', response.articleId)
+        // 始终使用返回的articleId更新当前草稿ID
+        currentDraftId.value = response.articleId
+        // 更新最后保存时间
+        lastSavedTime.value = new Date()
+        updateAutoSaveStatus('已自动保存')
+        // 3秒后隐藏状态
+        setTimeout(() => {
+          if (autoSaveStatus.value === '已自动保存') {
+            updateAutoSaveStatus('')
+          }
+        }, 3000)
+      } else if (!response || response === '' || response === null || 
+          (typeof response === 'object' && Object.keys(response).length === 0)) {
+        // 更新最后保存时间
+        lastSavedTime.value = new Date()
+        updateAutoSaveStatus('已自动保存')
+        // 3秒后隐藏状态
+        setTimeout(() => {
+          if (autoSaveStatus.value === '已自动保存') {
+            updateAutoSaveStatus('')
+          }
+        }, 3000)
+      } else {
+        console.error('自动保存草稿返回未知响应:', response)
+        // 如果本地保存成功，至少告诉用户内容已保存到本地
+        if (localSaveSuccess) {
+          updateAutoSaveStatus('已保存到本地')
+          // 3秒后隐藏状态
+          setTimeout(() => {
+            if (autoSaveStatus.value === '已保存到本地') {
+              updateAutoSaveStatus('')
+            }
+          }, 3000)
+        } else {
+          updateAutoSaveStatus('自动保存失败')
+        }
+      }
+    } catch (apiError) {
+      console.error('自动保存API调用错误:', apiError)
+      
+      if (apiError.response) {
+        const status = apiError.response.status
+        console.error('自动保存API错误响应:', apiError.response)
+        
+        if (status === 401) {
+          // 身份验证失败，保存到本地
+          const localSaveSuccess = saveToLocalStorage()
+          if (localSaveSuccess) {
+            updateAutoSaveStatus('已保存到本地')
+            setTimeout(() => {
+              if (autoSaveStatus.value === '已保存到本地') {
+                updateAutoSaveStatus('')
+              }
+            }, 3000)
+            return
+          }
+        }
+      } else if (apiError.request) {
+        console.error('自动保存API请求错误:', apiError.request)
+        // 网络请求失败，保存到本地
+        const localSaveSuccess = saveToLocalStorage()
+        if (localSaveSuccess) {
+          updateAutoSaveStatus('已保存到本地')
+          setTimeout(() => {
+            if (autoSaveStatus.value === '已保存到本地') {
+              updateAutoSaveStatus('')
+            }
+          }, 3000)
+          return
+        }
+      }
+      
+      updateAutoSaveStatus('自动保存失败')
+    }
+  } catch (error) {
+    console.error('自动保存草稿过程中发生错误:', error)
+    updateAutoSaveStatus('自动保存失败')
+  } finally {
+    isAutoSaving.value = false
+  }
+}
+
+// 更新自动保存状态显示
+const updateAutoSaveStatus = (status) => {
+  autoSaveStatus.value = status
+}
+
+// 保存草稿到本地存储
+const saveToLocalStorage = () => {
+  try {
+    const draftData = {
+      id: currentDraftId.value, // 保存当前草稿ID
+      title: articleForm.value.title,
+      content: articleForm.value.content,
+      excerpt: articleForm.value.excerpt,
+      tags: Array.isArray(articleForm.value.tags) ? [...articleForm.value.tags] : [],
+      portfolioId: articleForm.value.portfolioId,
+      timestamp: new Date().toISOString()
+    }
+    
+    localStorage.setItem(localStorageKey, JSON.stringify(draftData))
+    console.log('草稿已保存到本地存储，ID:', currentDraftId.value)
+    return true
+  } catch (error) {
+    console.error('保存到本地存储失败:', error)
+    return false
+  }
+}
+
+// 从本地存储加载草稿
+const loadFromLocalStorage = () => {
+  try {
+    const savedDraft = localStorage.getItem(localStorageKey)
+    if (savedDraft) {
+      const draftData = JSON.parse(savedDraft)
+      console.log('从本地存储加载草稿:', draftData)
+      
+      // 检查草稿是否过期（超过24小时）
+      const savedTime = new Date(draftData.timestamp)
+      const currentTime = new Date()
+      const hoursDiff = (currentTime - savedTime) / (1000 * 60 * 60)
+      
+      if (hoursDiff > 24) {
+        console.log('本地草稿已过期（超过24小时），不加载')
+        return false
+      }
+      
+      // 如果当前表单为空，则加载本地草稿
+      if (!articleForm.value.title && !articleForm.value.content) {
+        // 加载草稿ID
+        currentDraftId.value = draftData.id || null
+        console.log('从本地存储加载草稿ID:', currentDraftId.value)
+        
+        articleForm.value.title = draftData.title || ''
+        articleForm.value.content = draftData.content || ''
+        articleForm.value.excerpt = draftData.excerpt || ''
+        articleForm.value.tags = draftData.tags || []
+        articleForm.value.portfolioId = draftData.portfolioId || ''
+        
+        // 如果编辑器已初始化，更新编辑器内容
+        if (vditor) {
+          try {
+            vditor.setValue(draftData.content || '')
+          } catch (e) {
+            console.warn('设置编辑器内容失败:', e)
+          }
+        }
+        
+        updateWordCount()
+        return true
+      }
+    }
+    return false
+  } catch (error) {
+    console.error('从本地存储加载草稿失败:', error)
+    return false
+  }
+}
+
+// 清除本地存储的草稿
+const clearLocalStorage = () => {
+  try {
+    localStorage.removeItem(localStorageKey)
+    console.log('本地草稿已清除')
+    return true
+  } catch (error) {
+    console.error('清除本地草稿失败:', error)
+    return false
   }
 }
 
@@ -1119,6 +1448,10 @@ const confirmPublish = async () => {
       if (response && response.articleId) {
         showNotification('文章发布成功！', 'success')
         showPublishModal.value = false
+        
+        // 发布成功，清除本地草稿
+        clearLocalStorage()
+        
         // 发布成功，跳转到文章页面
         setTimeout(() => {
           router.push(`/article/${response.slug}`)
@@ -1316,6 +1649,21 @@ onMounted(async () => {
     editingArticleId.value = parseInt(editId)
     loadArticleForEdit(editingArticleId.value)
   }
+  // 检查是否是草稿编辑模式
+  else if (route && route.query && route.query.draft) {
+    const draftId = route.query.draft
+    loadDraftForEdit(draftId)
+  }
+  // 如果不是编辑模式，尝试从本地存储加载草稿
+  else {
+    // 延迟加载本地草稿，确保编辑器已初始化
+    setTimeout(() => {
+      const loaded = loadFromLocalStorage()
+      if (loaded) {
+        showNotification('已从本地加载未保存的草稿', 'info')
+      }
+    }, 1000)
+  }
   
   loadPortfolios()
   
@@ -1324,6 +1672,9 @@ onMounted(async () => {
   
   // 确保字数统计从0开始
   updateWordCount()
+  
+  // 设置自动保存定时器 (每60秒自动保存一次)
+  autoSaveInterval.value = setInterval(autoSaveDraft, 60000)
 })
 
 // 加载文章用于编辑
@@ -1378,6 +1729,48 @@ const loadArticleForEdit = async (articleId) => {
   }
 }
 
+// 加载草稿用于编辑
+const loadDraftForEdit = async (draftId) => {
+  try {
+    const draft = await articleAPI.getDraftById(draftId)
+    if (draft && draft.data) {
+      // 填充表单数据
+      articleForm.value = {
+        title: draft.data.title || '',
+        excerpt: draft.data.excerpt || '',
+        content: draft.data.content || '',
+        tags: draft.data.tags ? draft.data.tags : [],
+        portfolioId: draft.data.portfolioId || '',
+        allowComments: true
+      }
+      
+      // 设置编辑器内容
+      if (vditor && draft.data.content) {
+        try {
+          if (typeof vditor.setValue === 'function') {
+            vditor.setValue(draft.data.content)
+          } else if (vditor.vditor && typeof vditor.vditor.setValue === 'function') {
+            vditor.vditor.setValue(draft.data.content)
+          } else if (vditor.vditor && vditor.vditor.lute) {
+            // 直接设置内容
+            vditor.vditor.lute.WYSIWYGSetContent(draft.data.content)
+          }
+        } catch (error) {
+          console.warn('设置Vditor内容失败:', error)
+        }
+      }
+      
+      // 更新字数统计
+      updateWordCount()
+      
+      showNotification('草稿加载成功，可以继续编辑', 'success')
+    }
+  } catch (error) {
+    console.error('加载草稿失败:', error)
+    showNotification('加载草稿失败：' + (error.message || '未知错误'), 'danger')
+  }
+}
+
 // 组件卸载时移除监听器
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
@@ -1388,6 +1781,12 @@ onUnmounted(() => {
   }
   if (window.handleResizeRef) {
     window.removeEventListener('resize', window.handleResizeRef)
+  }
+  
+  // 清除自动保存定时器
+  if (autoSaveInterval.value) {
+    clearInterval(autoSaveInterval.value)
+    autoSaveInterval.value = null
   }
   
   // 销毁Vditor编辑器
@@ -1603,6 +2002,37 @@ onUnmounted(() => {
 .editor-header .form-label i {
   color: #6c757d;
   margin-right: 0.5rem;
+}
+
+.editor-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.auto-save-status {
+  font-size: 0.85rem;
+  color: #28a745;
+  background: rgba(40, 167, 69, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  box-shadow: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.auto-save-status.saving {
+  color: #ffc107;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.2);
+}
+
+.auto-save-status i {
+  font-size: 0.8rem;
 }
 
 .word-count {

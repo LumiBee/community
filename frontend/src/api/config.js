@@ -4,7 +4,7 @@ import { getSafeUserFromStorage, debugId } from '@/utils/bigint-helper'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8090', // 后端API地址
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8090/api', // 后端API地址（已包含/api前缀）
   timeout: 30000, // 请求超时时间增加到30秒
   withCredentials: true, // 允许携带cookie（用于Spring Security会话）
   headers: {

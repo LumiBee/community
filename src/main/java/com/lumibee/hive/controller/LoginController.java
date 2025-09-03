@@ -45,10 +45,10 @@ public class LoginController {
     
     // JWT密钥 - 实际应用中应该放在配置文件中
     private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
-    // JWT过期时间 - 24小时
-    private static final long JWT_EXPIRATION = 86400000;
-    // JWT刷新阈值 - 当token剩余时间少于30分钟时自动刷新
-    private static final long JWT_REFRESH_THRESHOLD = 1800000; // 30分钟
+    // JWT过期时间 - 2周
+    private static final long JWT_EXPIRATION = 1209600000; // 2周 = 14 * 24 * 60 * 60 * 1000
+    // JWT刷新阈值 - 当token剩余时间少于1天时自动刷新
+    private static final long JWT_REFRESH_THRESHOLD = 86400000; // 1天 = 24 * 60 * 60 * 1000
     
     @Autowired
     private UserService userService;
@@ -180,7 +180,7 @@ public class LoginController {
     /**
      * API登录端点，用于处理前端AJAX登录请求
      */
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     @Operation(summary = "用户登录", description = "处理用户登录请求，支持记住我功能")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "登录成功"),
@@ -280,7 +280,7 @@ public class LoginController {
     /**
      * 获取登录页面状态API
      */
-    @GetMapping("/api/login-status")
+    @GetMapping("/login-status")
     public ResponseEntity<Map<String, Object>> getLoginStatus(
             @RequestParam(value = "signupSuccess", required = false) String signupSuccess,
             @RequestParam(value = "signupMessage", required = false) String signupMessage) {
@@ -301,7 +301,7 @@ public class LoginController {
     /**
      * 关闭密码设置提示
      */
-    @PostMapping("/api/user/dismiss-password-prompt")
+    @PostMapping("/user/dismiss-password-prompt")
     public ResponseEntity<Map<String, String>> dismissPasswordPrompt(HttpSession session) {
         if (session != null) {
             session.removeAttribute("showPasswordSetupPrompt");
@@ -318,7 +318,7 @@ public class LoginController {
     /**
      * Token刷新端点
      */
-    @PostMapping("/api/auth/refresh")
+    @PostMapping("/auth/refresh")
     public ResponseEntity<Map<String, Object>> refreshToken(@RequestHeader("Authorization") String authHeader) {
         Map<String, Object> responseMap = new HashMap<>();
         
@@ -389,7 +389,7 @@ public class LoginController {
     /**
      * API登出端点，用于处理前端AJAX登出请求
      */
-    @PostMapping("/api/logout")
+    @PostMapping("/logout")
     @Operation(summary = "登出状态", description = "切换为登出状态")
     public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();

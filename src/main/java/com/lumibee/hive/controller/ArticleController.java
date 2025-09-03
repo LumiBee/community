@@ -36,7 +36,7 @@ public class ArticleController {
 
     @Autowired private UserService userService;
 
-    @PostMapping("/api/article/{articleId}/like")
+    @PostMapping("/article/{articleId}/like")
     @Operation(summary = "切换文章点赞状态", description = "用户点赞或取消点赞文章")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "操作成功"),
@@ -61,7 +61,7 @@ public class ArticleController {
     /**
      * 获取热门文章API
      */
-    @GetMapping("/api/articles/popular")
+    @GetMapping("/articles/popular")
     @ResponseBody
     @Operation(summary = "获取热门文章", description = "根据浏览量等指标获取热门文章列表")
     @ApiResponses(value = {
@@ -76,7 +76,7 @@ public class ArticleController {
     /**
      * 获取精选文章API
      */
-    @GetMapping("/api/articles/featured")
+    @GetMapping("/articles/featured")
     @ResponseBody
     @Operation(summary = "获取精选文章", description = "获取系统精选的文章列表")
     @ApiResponses(value = {
@@ -90,7 +90,7 @@ public class ArticleController {
     /**
      * 通过slug获取文章详情API
      */
-    @GetMapping("/api/article/{slug}")
+    @GetMapping("/article/{slug}")
     @ResponseBody
     @Operation(summary = "通过slug获取文章详情", description = "根据文章的slug获取完整的文章详情信息")
     @ApiResponses(value = {
@@ -142,7 +142,7 @@ public class ArticleController {
     /**
      * 根据ID获取文章详情API
      */
-    @GetMapping("/api/article/id/{articleId}")
+    @GetMapping("/article/id/{articleId}")
     @ResponseBody
     @Operation(summary = "根据ID获取文章详情", description = "根据文章ID获取文章详情信息")
     @ApiResponses(value = {
@@ -161,7 +161,7 @@ public class ArticleController {
     /**
      * 获取相关文章API
      */
-    @GetMapping("/api/article/{articleId}/related")
+    @GetMapping("/article/{articleId}/related")
     @ResponseBody
     @Operation(summary = "获取相关文章", description = "根据文章ID获取相关的文章推荐")
     @ApiResponses(value = {

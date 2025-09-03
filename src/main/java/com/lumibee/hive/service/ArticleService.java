@@ -25,7 +25,7 @@ public interface ArticleService {
     Integer countArticlesByUserId(Long id);
     List<ArticleExcerptDTO> getArticlesByUserId(Long id);
     List<ArticleExcerptDTO> selectFeaturedArticles();
-    ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId);
+    ArticleDetailsDTO saveDraft(Integer articleId,ArticlePublishRequestDTO requestDTO, Long userId);
     Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize);
     ArticleDetailsDTO selectDraftById(Integer articleId);
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);

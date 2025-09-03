@@ -40,24 +40,9 @@ public class PortfolioController {
     @Autowired private UserService userService;
 
     /**
-     * 重定向作品集详情页到Vue SPA
-     */
-    @GetMapping("/portfolio/{id}")
-    @Operation(summary = "重定向到作品集详情页", description = "重定向到Vue SPA的作品集详情页面")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "302", description = "重定向成功")
-    })
-    public ResponseEntity<Void> redirectToPortfolioDetailSPA(
-            @Parameter(description = "作品集ID") @PathVariable("id") Integer id) {
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/portfolio/" + id)
-                .build();
-    }
-
-    /**
      * 获取单个作品集详情API
      */
-    @GetMapping("/api/portfolio/{id}")
+    @GetMapping("/portfolio/{id}")
     @Operation(summary = "获取作品集详情", description = "根据ID获取指定作品集的详细信息")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功"),
@@ -81,7 +66,7 @@ public class PortfolioController {
     /**
      * 获取所有作品集API
      */
-    @GetMapping("/api/portfolios")
+    @GetMapping("/portfolios")
     @Operation(summary = "获取所有作品集", description = "获取系统中所有作品集的列表")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功")
@@ -101,7 +86,7 @@ public class PortfolioController {
     /**
      * 创建作品集API
      */
-    @PostMapping("/api/portfolio")
+    @PostMapping("/portfolio")
     @Operation(summary = "创建作品集", description = "创建新的作品集")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "创建成功"),

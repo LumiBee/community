@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * 仅管理员可访问
  */
 @RestController
-@RequestMapping("/api/admin/cache")
+@RequestMapping("/admin/cache")
 @PreAuthorize("hasRole('ADMIN')") // 仅管理员可访问
 @Tag(name = "缓存管理", description = "管理缓存相关的 API 接口，需要管理员身份")
 public class CacheController {

@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 @RestController
-@RequestMapping("/api/tags")
+@RequestMapping("/tags")
 @io.swagger.v3.oas.annotations.tags.Tag(name = "标签管理", description = "文章标签相关的 API 接口")
 public class TagController {
 

@@ -121,59 +121,56 @@
           </h5>
           
           <!-- 文章列表 -->
-          <div v-if="articles.length > 0">
-                          <router-link
-                v-for="article in articles"
-                :key="article.articleId"
-                :to="`/article/${article.slug}`"
-                class="article-link"
-                style="display: block; text-decoration: none; color: inherit; opacity: 1 !important; visibility: visible !important;"
-              >
-                <div class="card mb-4 box-shadow article-card" style="opacity: 1 !important; visibility: visible !important; position: static !important; display: block !important;">
-                  <div class="card-body d-flex flex-column">
-                    <div>
-                      <h2 class="mb-1 h4 font-weight-bold article-title">
-                        <a class="text-dark">{{ article.title }}</a>
-                      </h2>
-                      <p class="card-text mb-auto article-excerpt">{{ article.excerpt }}</p>
-                    </div>
-                    <div class="mt-3 d-flex justify-content-between align-items-center w-100 article-meta">
-                      <div class="d-flex align-items-center author-info">
-                        <router-link :to="`/profile/${article.userName}`" class="author-avatar-link">
-                          <img
-                            v-if="article.avatarUrl"
-                            :src="getAuthorAvatarUrl(article.avatarUrl)"
-                            alt="作者头像"
-                            class="author-avatar"
-                          />
-                          <div class="author-avatar" v-else>
-                            {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
-                          </div>
-                        </router-link>
-                        <small class="text-muted">{{ article.userName || '佚名' }}</small>
-                        <small class="text-muted ms-2">
-                          {{ formatTime(article.gmtModified) }}
-                        </small>
+          <ol class="list-unstyled compact-article-list" v-if="articles.length > 0">
+            <li
+              v-for="(article, index) in articles"
+              :key="article.articleId"
+              class="compact-article-item"
+              data-aos="fade-up"
+              :data-aos-delay="index * 50"
+              @click="$router.push(`/article/${article.slug}`)"
+            >
+              <div class="compact-article-content">
+                <h6 class="compact-article-title">
+                  <span class="text-dark">
+                    {{ article.title }}
+                  </span>
+                </h6>
+                <p class="compact-article-excerpt">{{ article.excerpt }}</p>
+                <div class="compact-article-meta">
+                  <div class="compact-author-info">
+                    <router-link 
+                      :to="`/profile/${article.userName}`" 
+                      class="author-avatar-link"
+                      @click.stop
+                    >
+                      <img
+                        v-if="article.avatarUrl"
+                        :src="getAuthorAvatarUrl(article.avatarUrl)"
+                        alt="作者头像"
+                        class="compact-author-avatar"
+                      />
+                      <div class="compact-author-avatar" v-else>
+                        {{ (article.userName || '佚名').charAt(0).toUpperCase() }}
                       </div>
-                      <div class="article-stats">
-                        <span class="stat-item">
-                          <i class="fas fa-eye"></i>
-                          <small>{{ article.viewCount || 0 }}</small>
-                        </span>
-                        <span class="stat-item">
-                          <i class="fas fa-heart"></i>
-                          <small>{{ article.likes || 0 }}</small>
-                        </span>
-                        <span class="stat-item">
-                          <i class="fas fa-comment"></i>
-                          <small>{{ article.commentCount || 0 }}</small>
-                        </span>
-                      </div>
-                    </div>
+                    </router-link>
+                    <span class="compact-author-name">{{ article.userName || '佚名' }}</span>
+                    <span class="compact-time">{{ formatTime(article.gmtModified) }}</span>
+                  </div>
+                  <div class="compact-stats">
+                    <span class="compact-stat-item">
+                      <i class="fas fa-eye"></i>
+                      <span>{{ article.viewCount || 0 }}</span>
+                    </span>
+                    <span class="compact-stat-item">
+                      <i class="fas fa-heart"></i>
+                      <span>{{ article.likes || 0 }}</span>
+                    </span>
                   </div>
                 </div>
-              </router-link>
-          </div>
+              </div>
+            </li>
+          </ol>
           
           <!-- 无文章提示 -->
           <div v-else-if="!loading" class="empty-state">
@@ -225,46 +222,40 @@
           <h5 class="font-weight-bold spanborder">
             <span>热门阅读</span>
           </h5>
-          <ol class="list-unstyled" v-if="popularArticles.length > 0">
+          <ol class="list-unstyled compact-popular-list" v-if="popularArticles.length > 0">
             <li
               v-for="(article, index) in popularArticles"
               :key="article.articleId"
-              class="pb-3 pt-3 border-bottom"
+              class="compact-popular-item"
               data-aos="fade-left"
               :data-aos-delay="index * 100"
             >
-              <div class="d-flex align-items-center">
-                <div style="width: 100%;">
-                  <h6 class="font-weight-bold mb-0" style="margin-bottom: 2px;">
-                    <router-link :to="`/article/${article.slug}`" class="text-dark">
-                      {{ article.title }}
-                    </router-link>
-                  </h6>
-                  <small class="text-muted d-flex align-items-center w-100 pt-0" style="justify-content: space-between;">
-                    <span class="d-flex align-items-center">
-                      <img
-                        v-if="article.avatarUrl"
-                        :src="getAuthorAvatarUrl(article.avatarUrl)"
-                        alt="作者头像"
-                        style="width: 18px; height: 18px; border-radius: 50%; margin-right: 4px; object-fit: cover;"
-                      />
-                      <small class="text-muted" style="font-size: 12px;">{{ article.userName || '佚名' }}</small>
+              <div class="compact-article-content">
+                <h6 class="compact-article-title">
+                  <router-link :to="`/article/${article.slug}`" class="text-dark">
+                    {{ article.title }}
+                  </router-link>
+                </h6>
+                <div class="compact-article-meta">
+                  <div class="compact-author-info">
+                    <img
+                      v-if="article.avatarUrl"
+                      :src="getAuthorAvatarUrl(article.avatarUrl)"
+                      alt="作者头像"
+                      class="compact-author-avatar"
+                    />
+                    <span class="compact-author-name">{{ article.userName || '佚名' }}</span>
+                  </div>
+                  <div class="compact-stats">
+                    <span class="compact-stat-item">
+                      <i class="fas fa-eye"></i>
+                      <span>{{ article.viewCount || 0 }}</span>
                     </span>
-                    <span style="display: inline-flex; align-items: center; gap: 0.5rem;" class="ms-auto">
-                      <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-eye" style="color: #ffc107; font-size: 0.8rem;"></i>
-                        <small>{{ article.viewCount || 0 }}</small>
-                      </span>
-                      <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-heart" style="color: #ffc107; font-size: 0.8rem;"></i>
-                        <small>{{ article.likes || 0 }}</small>
-                      </span>
-                      <span style="display: inline-flex; align-items: center; gap: 0.25rem;">
-                        <i class="fas fa-comment" style="color: #ffc107; font-size: 0.8rem;"></i>
-                        <small>{{ article.commentCount || 0 }}</small>
-                      </span>
+                    <span class="compact-stat-item">
+                      <i class="fas fa-heart"></i>
+                      <span>{{ article.likes || 0 }}</span>
                     </span>
-                  </small>
+                  </div>
                 </div>
               </div>
             </li>
@@ -278,7 +269,7 @@
             v-if="tags.length > 0"
             id="tagBubbleContainer"
             class="tag-cloud-container"
-            style="position: relative; height: 700px; margin-bottom: 20px; overflow: hidden;"
+            style="position: relative; height: 800px; margin-bottom: 20px; overflow: hidden;"
           >
             <router-link
               v-for="tag in tags"
@@ -345,19 +336,8 @@ const loadHomeData = async (page = 1) => {
     // 使用统一的首页API获取数据
     const homeRes = await articleAPI.getHomeArticles(page, pagination.value.size)
     
-    // 处理首页数据
-    console.log('🔍 检查数据结构:', {
-      hasArticles: !!homeRes.articles,
-      articlesType: typeof homeRes.articles,
-      articlesKeys: homeRes.articles ? Object.keys(homeRes.articles) : 'N/A',
-      hasRecords: !!(homeRes.articles && homeRes.articles.records),
-      recordsType: homeRes.articles?.records ? typeof homeRes.articles.records : 'N/A',
-      recordsLength: homeRes.articles?.records?.length || 'N/A'
-    })
     
     if (homeRes.articles && homeRes.articles.records) {
-      console.log('📝 文章数据:', homeRes.articles.records)
-      console.log('📝 文章数量:', homeRes.articles.records.length)
       articles.value = homeRes.articles.records
       pagination.value = {
         current: homeRes.articles.current,
@@ -365,15 +345,7 @@ const loadHomeData = async (page = 1) => {
         totalPages: homeRes.articles.pages,
         total: homeRes.articles.total
       }
-      console.log('📄 更新后的分页信息:', pagination.value)
     } else {
-      console.warn('⚠️ API响应中没有找到文章数据:', homeRes)
-      console.warn('⚠️ 详细检查:', {
-        articles: homeRes.articles,
-        records: homeRes.articles?.records,
-        condition1: !!homeRes.articles,
-        condition2: !!(homeRes.articles && homeRes.articles.records)
-      })
       articles.value = []
     }
     
@@ -433,23 +405,25 @@ const initSmartTagCloud = () => {
     const containerWidth = container.offsetWidth
     const containerHeight = container.offsetHeight
 
-    // 丰富的颜色调色板
+    // 丰富的颜色调色板 - 使用更鲜艳的颜色
     const colorPalette = [
       '#FF6B6B', '#4ECDC4', '#45B7D1', '#FED766', '#2AB7CA',
       '#F0B67F', '#FE4A49', '#547980', '#8A9B0F', '#C3D89F',
       '#FF9E9D', '#3D405B', '#81B29A', '#F2CC8F', '#E07A5F',
       '#D81E5B', '#F4A261', '#2A9D8F', '#E9C46A', '#264653',
-      '#6C5CE7', '#A29BFE', '#FD79A8', '#FDCB6E', '#E84393'
+      '#6C5CE7', '#A29BFE', '#FD79A8', '#FDCB6E', '#E84393',
+      '#FF5733', '#33A8FF', '#33FF57', '#FF33A8', '#A833FF',
+      '#FF8333', '#33FFC5', '#FF33C5', '#33FF83', '#C533FF'
     ]
 
     // 根据文章数计算泡泡大小的参数
     const baseSize = 70 // 最小泡泡的直径 (px)
-    const maxSize = 130 // 最大泡泡的直径 (px)
-    const countFactor = 1.2 // 每篇文章数增加多少像素直径
+    const maxSize = 140 // 最大泡泡的直径 (px)
+    const countFactor = 1.5 // 每篇文章数增加多少像素直径
 
-    const baseFontSize = 13 // 基础字体大小 (px)
-    const maxFontSize = 18 // 最大字体大小 (px)
-    const countFactorFont = 0.2 // 每篇文章数增加多少像素字体大小
+    const baseFontSize = 14 // 基础字体大小 (px)
+    const maxFontSize = 20 // 最大字体大小 (px)
+    const countFactorFont = 0.3 // 每篇文章数增加多少像素字体大小
 
     // 计算最大文章数
     let maxArticleCount = 0
@@ -464,18 +438,20 @@ const initSmartTagCloud = () => {
     let placedBubbles = []
 
     // 首先根据文章数量排序泡泡，确保较大的泡泡先放置
+    // 同时限制最大显示数量，避免过多标签导致重叠
+    const maxBubbles = 20; // 最多显示20个标签
     const sortedBubbles = [...bubbles].sort((a, b) => {
       const countA = parseInt(a.getAttribute('data-count') || '0')
       const countB = parseInt(b.getAttribute('data-count') || '0')
       return countB - countA // 降序排列
-    })
+    }).slice(0, maxBubbles) // 只取前maxBubbles个
 
     sortedBubbles.forEach((bubble, index) => {
       const articleCount = parseInt(bubble.getAttribute('data-count') || '0')
 
-      // 1. 设置颜色
+      // 1. 设置颜色 - 更鲜艳的颜色
       const colorIndex = (index + Math.floor(Math.random() * 5)) % colorPalette.length
-      bubble.style.background = `linear-gradient(135deg, ${colorPalette[colorIndex]}, ${lightenColor(colorPalette[colorIndex], 20)})`
+      bubble.style.background = colorPalette[colorIndex]
 
       // 2. 设置大小 (基于文章数)
       let diameter = baseSize + articleCount * countFactor
@@ -495,20 +471,68 @@ const initSmartTagCloud = () => {
       const paddingValue = Math.max(2, diameter * 0.05)
       bubble.style.padding = paddingValue + 'px'
 
-      // 3. 设置位置 (尝试避免重叠)
+      // 3. 设置位置 (使用网格布局减少重叠)
       let bestPos = null
       let minOverlap = Infinity
       
-      // 尝试多个位置，选择重叠最小的
-      for (let i = 0; i < 100; i++) {
-        const x = Math.random() * (containerWidth - diameter)
-        const y = Math.random() * (containerHeight - diameter)
+      // 尝试更多位置，选择重叠最小的
+      for (let i = 0; i < 300; i++) {
+        let x, y;
+        
+        if (i < 100) {
+          // 策略1: 使用网格布局
+          const gridSize = Math.ceil(Math.sqrt(bubbles.length));
+          const cellWidth = containerWidth / gridSize;
+          const cellHeight = containerHeight / gridSize;
+          
+          const gridX = i % gridSize;
+          const gridY = Math.floor(i / gridSize) % gridSize;
+          
+          // 在网格单元内随机位置
+          x = gridX * cellWidth + Math.random() * (cellWidth - diameter);
+          y = gridY * cellHeight + Math.random() * (cellHeight - diameter);
+        } else if (i < 200) {
+          // 策略2: 圆形分布
+          const angle = Math.random() * Math.PI * 2;
+          const maxRadius = Math.min(containerWidth, containerHeight) * 0.4;
+          // 使用平方根分布使点更均匀分布
+          const distance = Math.sqrt(Math.random()) * maxRadius;
+          const centerX = containerWidth / 2;
+          const centerY = containerHeight / 2;
+          
+          x = centerX + Math.cos(angle) * distance - diameter / 2;
+          y = centerY + Math.sin(angle) * distance - diameter / 2;
+        } else {
+          // 策略3: 完全随机，但避开中心区域
+          const centerX = containerWidth / 2;
+          const centerY = containerHeight / 2;
+          const centerRadius = Math.min(containerWidth, containerHeight) * 0.2;
+          
+          do {
+            x = Math.random() * (containerWidth - diameter);
+            y = Math.random() * (containerHeight - diameter);
+            // 计算到中心的距离
+            const dx = x + diameter/2 - centerX;
+            const dy = y + diameter/2 - centerY;
+            const distanceToCenter = Math.sqrt(dx*dx + dy*dy);
+            
+            // 如果距离中心够远，接受这个位置
+            if (distanceToCenter > centerRadius) {
+              break;
+            }
+          } while (i % 10 !== 0); // 每10次尝试就接受一次，避免无限循环
+        }
+        
+        // 确保不超出容器边界
+        const adjustedX = Math.max(0, Math.min(containerWidth - diameter, x));
+        const adjustedY = Math.max(0, Math.min(containerHeight - diameter, y));
+        
         const pos = {
-          x: x,
-          y: y,
-          radius: diameter / 2,
-          right: x + diameter,
-          bottom: y + diameter
+          x: adjustedX,
+          y: adjustedY,
+          radius: diameter / 2 + 5, // 增加一点缓冲区，减少视觉上的重叠
+          right: adjustedX + diameter,
+          bottom: adjustedY + diameter
         }
         
         const overlapAmount = calculateOverlap(pos, placedBubbles)
@@ -534,41 +558,52 @@ const initSmartTagCloud = () => {
         bubble.style.top = y + 'px'
       }
 
-      // 添加轻微的随机旋转
-      const rotation = Math.random() * 6 - 3 // -3到3度
-      bubble.style.transform = `rotate(${rotation}deg)`
+      // 不添加旋转，保持泡泡正常显示
+      bubble.style.transform = ''
     })
 
-    // 为部分泡泡添加动画
-    const animatedBubbles = bubbles.filter((_, index) => index % 3 === 0)
-    
-    animatedBubbles.forEach((bubble) => {
-      const floatY = Math.random() * 8 + 3 // 3-11px
+    // 为泡泡添加轻微的浮动动效
+    bubbles.forEach((bubble, index) => {
+      // 根据标签的大小调整浮动幅度
+      const diameter = parseFloat(bubble.style.width);
+      const floatAmount = Math.max(3, Math.min(8, diameter / 15)); // 浮动幅度在3-8px之间
       
+      // 随机浮动方向和时间
+      const direction = index % 2 === 0 ? 1 : -1; // 交替上下浮动
+      const duration = 3000 + Math.random() * 2000; // 3-5秒
+      const delay = Math.random() * 2000; // 随机延迟，使动画错开
+      
+      // 应用动画
       bubble.animate([
-        { transform: bubble.style.transform || 'rotate(0deg)' },
-        { transform: `${bubble.style.transform || 'rotate(0deg)'} translateY(-${floatY}px)` },
-        { transform: bubble.style.transform || 'rotate(0deg)' }
+        { transform: 'translateY(0px)' },
+        { transform: `translateY(${direction * floatAmount}px)` },
+        { transform: 'translateY(0px)' }
       ], {
-        duration: 3000 + Math.random() * 2000, // 3-5秒
+        duration: duration,
         iterations: Infinity,
         direction: 'alternate',
         easing: 'ease-in-out',
-        delay: Math.random() * 1000
-      })
+        delay: delay
+      });
     })
     
-    // 计算重叠程度
+    // 计算重叠程度 - 改进版本，更严格地避免重叠
     function calculateOverlap(newBubble, existingBubbles) {
       let totalOverlap = 0
       for (let existing of existingBubbles) {
-        const dx = newBubble.x + newBubble.radius - (existing.x + existing.radius)
-        const dy = newBubble.y + newBubble.radius - (existing.y + existing.radius)
+        // 计算两个圆心之间的距离
+        const dx = (newBubble.x + newBubble.radius) - (existing.x + existing.radius)
+        const dy = (newBubble.y + newBubble.radius) - (existing.y + existing.radius)
         const distance = Math.sqrt(dx * dx + dy * dy)
+        
+        // 两个圆的半径之和
         const minDistance = newBubble.radius + existing.radius
         
+        // 如果距离小于两个圆半径之和，则有重叠
         if (distance < minDistance) {
-          totalOverlap += (minDistance - distance)
+          // 计算重叠程度，并给较大的重叠更高的惩罚
+          const overlap = minDistance - distance
+          totalOverlap += overlap * overlap // 平方惩罚，使算法更倾向于避免大的重叠
         }
       }
       return totalOverlap
@@ -713,12 +748,13 @@ onBeforeUnmount(() => {
 
 .article-card {
   background: white;
-  border-radius: 1.5rem;
+  border-radius: 1.2rem;
   border: 1px solid rgba(255, 193, 7, 0.08);
-  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 3px 15px rgba(255, 193, 7, 0.05), 0 1px 3px rgba(0, 0, 0, 0.04);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
+  margin-bottom: 1rem;
 }
 
 .article-card::before {
@@ -747,7 +783,7 @@ onBeforeUnmount(() => {
   color: #2c3e50;
   font-weight: 700;
   line-height: 1.3;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   transition: color 0.3s ease;
 }
 
@@ -758,19 +794,19 @@ onBeforeUnmount(() => {
 .article-excerpt {
   color: #64748b;
   line-height: 1.5;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .author-info {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.3rem;
+  padding: 0.1rem 0;
 }
 
 .author-avatar {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   object-fit: cover;
   background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
@@ -779,8 +815,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   color: white;
   font-weight: 600;
-  font-size: 14px;
-  box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+  font-size: 11px;
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.25);
   transition: transform 0.3s ease;
 }
 
@@ -799,15 +835,16 @@ onBeforeUnmount(() => {
 }
 
 .article-meta {
-  padding-top: 0.75rem;
+  padding-top: 0.2rem;
   border-top: 1px solid #f1f5f9;
-  margin-top: 0.75rem;
+  margin-top: 0.2rem;
+  padding-bottom: 0.1rem;
 }
 
 .article-stats {
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 1rem;
 }
 
 .stat-item {
@@ -851,44 +888,33 @@ onBeforeUnmount(() => {
   cursor: pointer;
   z-index: 1;
   
-  /* 真实的3D泡泡效果 */
-  border: 3px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.15),
-    0 4px 16px rgba(0, 0, 0, 0.1),
-    inset 0 3px 12px rgba(255, 255, 255, 0.8),
-    inset 0 -3px 12px rgba(0, 0, 0, 0.1);
+  /* 简洁的泡泡效果 */
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   
   /* 防止文字选中 */
   user-select: none;
   -webkit-user-select: none;
   
-  /* 添加光泽效果 */
-  background-image: 
-    radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.8) 0%, transparent 50%),
-    radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.4) 0%, transparent 50%);
+  /* 为奇数和偶数标签添加不同的浮动动画 */
+  will-change: transform;
 }
 
 .tag-bubble:hover {
-  transform: scale(1.2) translateY(-12px);
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.25),
-    0 8px 20px rgba(0, 0, 0, 0.15),
-    inset 0 4px 16px rgba(255, 255, 255, 0.9),
-    inset 0 -4px 16px rgba(0, 0, 0, 0.15);
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
   color: white;
   text-decoration: none;
-  border-color: rgba(255, 255, 255, 0.9);
   z-index: 100;
-  filter: brightness(1.15) saturate(1.3);
+  filter: brightness(1.1);
 }
 
 /* 点击效果 */
 .tag-bubble:active {
-  transform: scale(1.1) translateY(-4px);
+  transform: scale(1.05);
   transition: all 0.1s ease;
 }
 
@@ -902,47 +928,26 @@ onBeforeUnmount(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  padding: 0 8px;
 }
 
 .tag-count {
   display: block;
-  font-size: 0.8em;
+  font-size: 0.85em;
   opacity: 0.9;
-  margin-top: 2px;
+  margin-top: 4px;
+  font-weight: normal;
 }
 
-/* 泡泡入场动画 */
-@keyframes bubble-appear {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) translateY(20px);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.1) translateY(-5px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0px);
-  }
+/* 轻微的浮动动画效果 */
+@keyframes float-up {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
 }
 
-/* 泡泡闪烁效果 */
-@keyframes bubble-shimmer {
-  0%, 100% { 
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.15),
-      0 4px 16px rgba(0, 0, 0, 0.1),
-      inset 0 3px 12px rgba(255, 255, 255, 0.8),
-      inset 0 -3px 12px rgba(0, 0, 0, 0.1);
-  }
-  50% { 
-    box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.2),
-      0 6px 20px rgba(0, 0, 0, 0.15),
-      inset 0 4px 16px rgba(255, 255, 255, 0.9),
-      inset 0 -2px 8px rgba(0, 0, 0, 0.05);
-  }
+@keyframes float-down {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(5px); }
 }
 
 /* ===== 现代化轮播图样式 ===== */
@@ -1390,23 +1395,281 @@ onBeforeUnmount(() => {
   background: linear-gradient(90deg, #ffda58 0%, #ffc107 100%);
 }
 
-/* 热门阅读列表 */
-.list-unstyled li {
-  padding: 0.75rem 0;
+/* 热门阅读列表 - 紧凑样式 */
+.compact-popular-list {
+  margin: 0;
+  padding: 0;
+}
+
+.compact-popular-item {
+  padding: 0.8rem 0;
   border-bottom: 1px solid #f1f5f9;
   transition: all 0.3s ease;
-  border-radius: 0.75rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
   position: relative;
 }
 
-.list-unstyled li:hover {
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.02) 0%, rgba(255, 218, 88, 0.02) 100%);
-  transform: translateX(8px);
-  border-color: rgba(255, 193, 7, 0.1);
-  padding-left: 1rem;
+.compact-popular-item:last-child {
+  border-bottom: none;
 }
 
+.compact-popular-item:hover {
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.02) 0%, rgba(255, 218, 88, 0.02) 100%);
+  transform: translateX(4px);
+  border-color: rgba(255, 193, 7, 0.1);
+  padding-left: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.compact-article-content {
+  width: 100%;
+}
+
+.compact-article-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-article-title a {
+  color: #2c3e50;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.compact-popular-item:hover .compact-article-title a {
+  color: #ffc107;
+}
+
+.compact-article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.compact-author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.compact-author-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 193, 7, 0.2);
+  margin-right: 4px;
+}
+
+.compact-author-name {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+
+.compact-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.compact-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-left: 8px;
+}
+
+.compact-stat-item i {
+  color: #ffc107;
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.compact-popular-item:hover .compact-stat-item i {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.compact-popular-item:hover .compact-stat-item {
+  color: #ffc107;
+}
+
+/* 所有文章区域紧凑布局 */
+.compact-article-list {
+  margin: 0;
+  padding: 0;
+}
+
+.compact-article-item {
+  padding: 1.5rem;
+  border: 1px solid #eaedf1;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  margin-bottom: 1.5rem; /* 增加底部间距，使卡片之间的空间更大 */
+  position: relative;
+  background-color: #ffffff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.compact-article-item:last-child {
+  border-bottom: none;
+}
+
+.compact-article-item:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(255, 252, 240, 1) 100%);
+  transform: translateY(-5px);
+  border-color: rgba(255, 193, 7, 0.2);
+  box-shadow: 0 10px 20px rgba(255, 193, 7, 0.1);
+}
+
+.compact-article-item .compact-article-title {
+  margin: 0 0 0.8rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-article-item .compact-article-title span {
+  color: #2c3e50;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.compact-article-item:hover .compact-article-title span {
+  color: #ffc107;
+}
+
+.compact-article-excerpt {
+  color: #64748b;
+  font-size: 1.15rem;
+  line-height: 1.6;
+  margin: 0.8rem 0 1.2rem 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* 从2行增加到3行 */
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 5.5rem; /* 确保有足够的高度显示3行内容 */
+}
+
+.compact-time {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  margin-left: 10px;
+  background-color: transparent;
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+}
+
+/* 所有文章区域的作者信息和统计信息样式 */
+.compact-article-item .compact-article-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.compact-article-item .compact-author-info {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.compact-article-item .compact-author-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 193, 7, 0.2);
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  background: linear-gradient(135deg, #ffc107 0%, #ffda58 100%);
+  box-shadow: 0 2px 6px rgba(255, 193, 7, 0.15);
+  position: relative;
+  z-index: 2;
+}
+
+.compact-article-item .compact-author-name {
+  font-size: 1rem;
+  color: #4b5563;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.compact-article-item .compact-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.compact-article-item .compact-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 1rem;
+  color: #64748b;
+  margin-left: 10px;
+  background-color: transparent;
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.compact-article-item .compact-stat-item i {
+  color: #ffc107;
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.compact-article-item:hover .compact-stat-item i {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.compact-article-item:hover .compact-stat-item {
+  color: #ffc107;
+  background-color: transparent;
+}
+
+/* 保留原有的通用样式作为备用 */
 .list-unstyled li h6 a {
   color: #2c3e50;
   font-weight: 600;
@@ -1421,19 +1684,14 @@ onBeforeUnmount(() => {
 
 /* 智能标签云容器 */
 .tag-cloud-container {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border-radius: 1.5rem;
-  box-shadow: 0 4px 20px rgba(255, 193, 7, 0.08);
-  border: 1px solid rgba(255, 193, 7, 0.1);
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
   min-height: 500px;
-  /* 背景装饰 */
-  background-image: 
-    radial-gradient(circle at 20% 20%, rgba(255, 193, 7, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(255, 218, 88, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
 }
 
 .tag-cloud-container::before {
@@ -1497,9 +1755,10 @@ onBeforeUnmount(() => {
   }
   
   .article-meta {
-    flex-direction: column;
-    align-items: flex-start !important;
-    gap: 0.75rem;
+    flex-direction: row;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0;
   }
   
   .article-card {

@@ -55,53 +55,21 @@ const props = defineProps({
   confirmText: {
     type: String,
     default: '确认删除'
-  },
-  positionIndex: {
-    type: Number,
-    default: 0
   }
 })
 
 const emit = defineEmits(['confirm', 'cancel', 'close'])
 
-// 根据位置索引计算弹窗位置
+// 弹窗位置始终居中
 const modalPosition = computed(() => {
   if (!props.visible) {
     return {}
   }
-
-  // 获取视口尺寸
-  const viewportWidth = window.innerWidth
-  const isMobile = viewportWidth < 768
-
-  // 根据屏幕尺寸调整位置
-  if (isMobile) {
-    // 移动端：居中显示
-    const positions = [
-      { top: '25%', left: '50%' },
-      { top: '35%', left: '50%' },
-      { top: '45%', left: '50%' },
-      { top: '55%', left: '50%' },
-      { top: '65%', left: '50%' },
-      { top: '75%', left: '50%' }
-    ]
-    const index = Math.min(props.positionIndex, positions.length - 1)
-    return positions[index]
-  } else {
-    // 桌面端：2列布局，每个位置对应不同的弹窗位置
-    const positions = [
-      // 第一行：位置0和1
-      { top: '25%', left: '30%' },
-      { top: '25%', left: '70%' },
-      // 第二行：位置2和3
-      { top: '50%', left: '30%' },
-      { top: '50%', left: '70%' },
-      // 第三行：位置4和5
-      { top: '75%', left: '30%' },
-      { top: '75%', left: '70%' }
-    ]
-    const index = Math.min(props.positionIndex, positions.length - 1)
-    return positions[index]
+  
+  // 始终居中显示
+  return {
+    top: '50%',
+    left: '50%'
   }
 })
 
@@ -143,7 +111,7 @@ const handleOverlayClick = () => {
 }
 
 .confirm-delete-modal {
-  position: absolute;
+  position: fixed;
   background: white;
   border-radius: 12px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);

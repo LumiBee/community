@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
       clearInterval(tokenRefreshTimer)
     }
     
-    // 每30分钟检查一次token是否需要刷新
+    // 每6小时检查一次token是否需要刷新
     tokenRefreshTimer = setInterval(async () => {
       if (user.value?.token) {
         try {
@@ -38,7 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
           console.error('自动刷新token失败:', error)
         }
       }
-    }, 30 * 60 * 1000) // 30分钟
+    }, 6 * 60 * 60 * 1000) // 6小时
   }
 
   // 停止token自动刷新
@@ -83,6 +83,29 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = loading
   }
   
+  // 检查token是否需要刷新
+  const shouldRefreshToken = async () => {
+    if (!user.value || !user.value.token) {
+      return false
+    }
+    
+    try {
+      // 解析JWT token获取过期时间
+      const token = user.value.token
+      const payload = JSON.parse(atob(token.split('.')[1]))
+      const expirationTime = payload.exp * 1000 // 转换为毫秒
+      const currentTime = Date.now()
+      const timeUntilExpiry = expirationTime - currentTime
+      
+      // 如果剩余时间少于1天（86400000毫秒），则需要刷新
+      const refreshThreshold = 24 * 60 * 60 * 1000 // 1天
+      return timeUntilExpiry < refreshThreshold
+    } catch (error) {
+      console.error('检查token过期时间失败:', error)
+      return false
+    }
+  }
+
   // 刷新token
   const refreshToken = async () => {
     if (!user.value || !user.value.token) {
@@ -109,6 +132,13 @@ export const useAuthStore = defineStore('auth', () => {
       }
     } catch (err) {
       console.error('Token刷新失败:', err)
+      
+      // 如果是401或403错误，说明token已过期，清除用户状态
+      if (err.status === 401 || err.status === 403) {
+        console.log('Token已过期，清除用户状态')
+        setUser(null)
+      }
+      
       return false
     }
   }
@@ -394,6 +424,7 @@ export const useAuthStore = defineStore('auth', () => {
     clearError,
     setLoading,
     checkAuthStatus,
+    shouldRefreshToken,
     refreshToken,
     startTokenRefresh,
     stopTokenRefresh,

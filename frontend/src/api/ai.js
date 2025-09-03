@@ -9,7 +9,7 @@ export const aiAPI = {
       
       // 使用配置好的axios实例，而不是原生fetch
       const response = await request({
-        url: '/api/ai/generate-summary-deepseek',
+        url: '/ai/generate-summary-deepseek',
         method: 'post',
         data: {
           textContent,

@@ -54,7 +54,7 @@ public class SignupController {
     /**
      * 处理用户注册API
      */
-    @PostMapping("/api/signup")
+    @PostMapping("/signup")
     @Operation(summary = "用户注册", description = "处理新用户注册请求")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "注册成功"),

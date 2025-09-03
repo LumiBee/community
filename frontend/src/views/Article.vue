@@ -253,8 +253,9 @@
     
     <!-- 收藏选择模态框 -->
     <FavoriteModal
+      v-if="article?.articleId"
       :visible="showFavoriteModal"
-      :article-id="article?.articleId"
+      :article-id="article.articleId"
       @close="closeFavoriteModal"
       @success="handleFavoriteSuccess"
     />

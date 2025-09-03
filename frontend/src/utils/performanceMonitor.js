@@ -233,7 +233,11 @@ export const generatePerformanceReport = () => {
 };
 
 // 发送性能数据到分析服务
-export const sendPerformanceData = (endpoint = '/api/performance') => {
+export const sendPerformanceData = (endpoint = '/performance') => {
+  // 暂时禁用性能数据发送，因为后端没有对应的API
+  console.log('性能数据收集完成，但未发送到服务器（后端API未实现）');
+  return;
+  
   const report = generatePerformanceReport();
   
   if ('navigator' in window && 'sendBeacon' in navigator) {

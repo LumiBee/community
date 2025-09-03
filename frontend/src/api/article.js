@@ -1,4 +1,5 @@
 import request from './config'
+import { useAuthStore } from '@/store/auth'
 
 /**
  * 文章相关API
@@ -11,7 +12,7 @@ export const articleAPI = {
    */
   getHomeArticles(page = 1, size = 8) {
     return request({
-      url: '/api/home',
+      url: '/home',
       method: 'get',
       params: { page, size }
     })
@@ -23,7 +24,7 @@ export const articleAPI = {
    */
   getArticleBySlug(slug) {
     return request({
-      url: `/api/article/${slug}`,
+      url: `/article/${slug}`,
       method: 'get'
     }).catch(error => {
       console.error(`获取文章失败 [${slug}]:`, error)
@@ -40,7 +41,7 @@ export const articleAPI = {
    */
   getArticleById(articleId) {
     return request({
-      url: `/api/article/id/${articleId}`,
+      url: `/article/id/${articleId}`,
       method: 'get'
     }).catch(error => {
       console.error(`获取文章失败 [${articleId}]:`, error)
@@ -57,7 +58,7 @@ export const articleAPI = {
    */
   getPopularArticles(limit = 6) {
     return request({
-      url: '/api/articles/popular',
+      url: '/articles/popular',
       method: 'get',
       params: { limit }
     })
@@ -68,7 +69,7 @@ export const articleAPI = {
    */
   getFeaturedArticles() {
     return request({
-      url: '/api/articles/featured',
+      url: '/articles/featured',
       method: 'get'
     })
   },
@@ -80,7 +81,7 @@ export const articleAPI = {
    */
   getRelatedArticles(articleId, limit = 6) {
     return request({
-      url: `/api/article/${articleId}/related`,
+      url: `/article/${articleId}/related`,
       method: 'get',
       params: { limit }
     }).catch(error => {
@@ -95,7 +96,7 @@ export const articleAPI = {
    */
   searchArticles(query) {
     return request({
-      url: '/api/search',
+      url: '/search',
       method: 'get',
       params: { query }
     })
@@ -107,7 +108,7 @@ export const articleAPI = {
    */
   toggleLike(articleId) {
     return request({
-      url: `/api/article/${articleId}/like`,
+      url: `/article/${articleId}/like`,
       method: 'post'
     })
   },
@@ -118,7 +119,7 @@ export const articleAPI = {
    */
   publishArticle(articleData) {
     return request({
-      url: '/api/article/publish',
+      url: '/article/publish',
       method: 'post',
       data: articleData
     })
@@ -131,7 +132,7 @@ export const articleAPI = {
    */
   updateArticle(articleId, articleData) {
     return request({
-      url: `/api/article/${articleId}/edit`,
+      url: `/article/${articleId}/edit`,
       method: 'put',
       data: articleData
     })
@@ -143,7 +144,7 @@ export const articleAPI = {
    */
   deleteArticle(articleId) {
     return request({
-      url: `/api/article/delete/${articleId}`,
+      url: `/article/delete/${articleId}`,
       method: 'delete'
     })
   },
@@ -152,43 +153,84 @@ export const articleAPI = {
    * 保存草稿
    * @param {Object} draftData - 草稿数据
    */
-  saveDraft(draftData) {
-    return request({
-      url: '/api/drafts',
+  async saveDraft(draftData) {
+    console.log('API调用: saveDraft', draftData)
+    
+    // 准备请求数据，确保字段名与后端DTO匹配
+    const requestData = {
+      title: draftData.title,
+      content: draftData.content,
+      excerpt: draftData.excerpt || '',
+      tagsName: draftData.tags || [],
+      portfolioName: draftData.portfolioName || null
+    };
+    
+    // 如果有草稿ID，则添加到请求数据中（用于更新现有草稿）
+    if (draftData.id) {
+      requestData.articleId = draftData.id;
+      console.log('更新现有草稿，articleId:', draftData.id);
+    } else {
+      console.log('创建新草稿');
+    }
+    
+    console.log('请求数据:', requestData);
+    
+    // 检查token是否需要刷新（只有在即将过期时才刷新）
+    const authStore = useAuthStore()
+    if (authStore.user?.token) {
+      try {
+        // 只有在token即将过期时才尝试刷新
+        const shouldRefresh = await authStore.shouldRefreshToken()
+        if (shouldRefresh) {
+          console.log('token即将过期，尝试刷新...')
+          const refreshSuccess = await authStore.refreshToken()
+          if (!refreshSuccess) {
+            console.warn('token刷新失败，可能需要重新登录')
+            throw new Error('登录状态已过期，请重新登录后再保存草稿')
+          }
+          console.log('token刷新成功')
+        }
+      } catch (refreshError) {
+        console.warn('token刷新失败:', refreshError)
+        // 如果token刷新失败，直接返回错误，不继续执行
+        throw new Error('Token刷新失败，无法保存草稿')
+      }
+    }
+    
+    // 调用API
+    const response = await request({
+      url: '/article/save-draft',
       method: 'post',
-      data: draftData
-    })
+      data: requestData
+    });
+    
+    console.log('保存草稿API响应:', response);
+    return response;
   },
 
   /**
-   * 获取草稿列表
+   * 获取草稿列表（使用文章API，通过status过滤）
    */
   getDrafts() {
     return request({
-      url: '/api/drafts',
+      url: '/article/drafts',
       method: 'get'
     })
   },
 
   /**
-   * 根据ID获取草稿
+   * 根据ID获取草稿（使用文章详情API）
    * @param {number} draftId - 草稿ID
    */
   getDraftById(draftId) {
-    return request({
-      url: `/api/drafts/${draftId}`,
-      method: 'get'
-    })
+    return this.getArticleById(draftId)
   },
 
   /**
-   * 删除草稿
+   * 删除草稿（使用文章删除API）
    * @param {number} draftId - 草稿ID
    */
   deleteDraft(draftId) {
-    return request({
-      url: `/api/drafts/${draftId}`,
-      method: 'delete'
-    })
+    return this.deleteArticle(draftId)
   }
 }

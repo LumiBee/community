@@ -90,28 +90,28 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
                         .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
                                         "/uploads/**", // 上传的文件（包括头像）
-                                        "/api/home", // 首页 API
-                                        "/api/tags/**", // 标签 API
-                                        "/api/articles/**", // 文章 API
-                                        "/api/article/**", // 单篇文章 API
-                                        "/api/portfolios", // 作品集 API (GET)
-                                        "/api/signup", // 注册API
-                                        "/api/login", // API登录端点
-                                        "/api/ai/**", // AI 相关 API - 允许所有用户访问
-                                        "/api/profile/**", // 个人资料 API
-                                        "/api/debug/**", // 调试API
-                                        "/api/user/debug/**", // 用户调试API
+                                        "/home", // 首页 API
+                                        "/tags/**", // 标签 API
+                                        "/articles/**", // 文章 API
+                                        "/article/**", // 单篇文章 API
+                                        "/portfolios", // 作品集 API (GET)
+                                        "/signup", // 注册API
+                                        "/login", // API登录端点
+                                        "/ai/**", // AI 相关 API - 允许所有用户访问
+                                        "/profile/**", // 个人资料 API
+                                        "/debug/**", // 调试API
+                                        "/user/debug/**", // 用户调试API
                                         "/login-process", // 登录处理URL
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档
                                         "/v3/api-docs/**" // OpenAPI 3 文档
                                         ).permitAll() // 以上路径允许所有用户访问
-                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集需要认证
-                        .requestMatchers("/api/user/current").authenticated() // 获取当前用户需要认证
-                        .requestMatchers("/api/auth/refresh").authenticated() // Token刷新接口需要认证
-                        .requestMatchers("/publish", "/drafts", "/api/article/save-draft").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/portfolio").authenticated() // 创建作品集需要认证
+                        .requestMatchers("/user/current").authenticated() // 获取当前用户需要认证
+                        .requestMatchers("/auth/refresh").permitAll() // Token刷新接口允许匿名访问
+                        .requestMatchers("/publish", "/drafts", "/article/save-draft").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/article/*/comment").authenticated()
                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -143,7 +143,7 @@ public class SecurityConfig {
                 )
                 .logout(logout ->
                         logout
-                                .logoutUrl("/api/logout") // 改为API登出端点
+                                .logoutUrl("/logout") // 改为API登出端点
                                 .logoutSuccessUrl("/") // 简化重定向URL
                                 .invalidateHttpSession(true)
                                 .deleteCookies("JSESSIONID", "remember-me")
@@ -153,7 +153,7 @@ public class SecurityConfig {
                 .rememberMe(rememberMe ->
                         rememberMe
                                 .tokenRepository(persistentTokenRepository())
-                                .tokenValiditySeconds(604800) // 7天
+                                .tokenValiditySeconds(1209600) // 2周 = 14 * 24 * 60 * 60
                                 .userDetailsService(customUserServiceImpl)
                                 .rememberMeParameter("remember-me")
                                 .key("lumiHiveRememberMeKey")
@@ -163,23 +163,24 @@ public class SecurityConfig {
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                 .ignoringRequestMatchers(
                                         "/login-process", // 登录处理URL
-                                        "/api/login", // API登录端点
-                                        "/api/logout", // API登出端点
-                                        "/api/auth/refresh", // Token刷新接口
-                                        "/api/search/**", // 搜索 API
-                                        "/api/home", // 首页 API
-                                        "/api/tags/**", // 标签 API
-                                        "/api/articles/**", // 文章 API
-                                        "/api/article/**", // 单篇文章 API
-                                        "/api/portfolios", // 作品集 API
-                                        "/api/portfolio", // 作品集 API (POST)
-                                        "/api/user/**", // 用户相关 API（包括关注功能）
-                                        "/api/signup", // 注册 API
-                                        "/api/profile/**", // 个人资料 API
-                                        "/api/ai/**", // AI 相关 API
-                                        "/api/debug/**", // 调试API
-                                        "/api/user/debug/**", // 用户调试API
-                                        "/api/favorites/**", // 收藏相关 API
+                                        "/login", // API登录端点
+                                        "/logout", // API登出端点
+                                        "/auth/refresh", // Token刷新接口
+                                        "/search/**", // 搜索 API
+                                        "/home", // 首页 API
+                                        "/tags/**", // 标签 API
+                                        "/articles/**", // 文章 API
+                                        "/article/**", // 单篇文章 API
+                                        "/portfolios", // 作品集 API
+                                        "/portfolio", // 作品集 API (POST)
+                                        "/user/**", // 用户相关 API（包括关注功能）
+                                        "/signup", // 注册 API
+                                        "/profile/**", // 个人资料 API
+                                        "/ai/**", // AI 相关 API
+                                        "/article/save-draft", // 保存草稿 API
+                                        "/debug/**", // 调试API
+                                        "/user/debug/**", // 用户调试API
+                                        "/favorites/**", // 收藏相关 API
                                         "/update-cover", // 更新封面图片API
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页

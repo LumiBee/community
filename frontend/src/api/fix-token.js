@@ -8,7 +8,7 @@ async function getJwtToken() {
   try {
     console.log('正在获取 JWT 令牌...');
     
-    const response = await fetch('/api/login', {
+    const response = await fetch('/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -56,7 +56,7 @@ async function publishArticleWithToken(token) {
       excerpt: '测试摘要'
     };
     
-    const response = await fetch('/api/article/publish', {
+    const response = await fetch('/article/publish', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

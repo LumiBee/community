@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/search")
+@RequestMapping("/search")
 @Tag(name = "搜索管理", description = "搜索相关的 API 接口")
 public class SearchController {
 

@@ -9,7 +9,7 @@ export const portfolioAPI = {
    */
   getAllPortfolios() {
     return request({
-      url: '/api/portfolios',
+      url: '/portfolios',
       method: 'get'
     })
   },
@@ -20,7 +20,7 @@ export const portfolioAPI = {
    */
   getPortfolioById(portfolioId) {
     return request({
-      url: `/api/portfolio/${portfolioId}`,
+      url: `/portfolio/${portfolioId}`,
       method: 'get'
     })
   },
@@ -31,7 +31,7 @@ export const portfolioAPI = {
    */
   createPortfolio(portfolioData) {
     return request({
-      url: '/api/portfolio',
+      url: '/portfolio',
       method: 'post',
       data: portfolioData
     })
@@ -44,7 +44,7 @@ export const portfolioAPI = {
    */
   updatePortfolio(portfolioId, portfolioData) {
     return request({
-      url: `/api/portfolio/${portfolioId}`,
+      url: `/portfolio/${portfolioId}`,
       method: 'put',
       data: portfolioData
     })
@@ -56,7 +56,7 @@ export const portfolioAPI = {
    */
   deletePortfolio(portfolioId) {
     return request({
-      url: `/api/portfolio/${portfolioId}`,
+      url: `/portfolio/${portfolioId}`,
       method: 'delete'
     })
   },
@@ -67,7 +67,7 @@ export const portfolioAPI = {
    */
   getUserPortfolios(userId) {
     return request({
-      url: `/api/users/${userId}/portfolios`,
+      url: `/users/${userId}/portfolios`,
       method: 'get'
     })
   }

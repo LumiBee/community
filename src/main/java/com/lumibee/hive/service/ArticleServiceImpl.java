@@ -451,6 +451,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+
     /**
      * 定时清除精选文章缓存（每10分钟执行一次）
      */
@@ -463,22 +464,46 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
-    public ArticleDetailsDTO saveDraft(ArticlePublishRequestDTO requestDTO, Long userId) {
-        Article article = new Article();
+    public ArticleDetailsDTO saveDraft(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
+        Article article = null;
+        boolean isNewArticle = false;
+        
+        if (articleId == null) {
+            // 创建新草稿
+            article = new Article();
+            isNewArticle = true;
+        } else {
+            // 更新现有草稿
+            article = articleMapper.selectById(articleId);
+            if (article == null || !article.getUserId().equals(userId)) {
+                throw new RuntimeException("草稿不存在或不属于当前用户");
+            }
+        }
+
         article.setTitle(requestDTO.getTitle());
         article.setContent(requestDTO.getContent());
         article.setExcerpt(requestDTO.getExcerpt());
         article.setUserId(userId);
-        article.setGmtCreate(LocalDateTime.now());
         article.setGmtModified(LocalDateTime.now());
+        
+        // 只有新文章才设置创建时间
+        if (isNewArticle) {
+            article.setGmtCreate(LocalDateTime.now());
+        }
 
         article.setStatus(Article.ArticleStatus.draft);
         article.setSlug(createUniqueSlug(requestDTO.getTitle()));
 
-        articleMapper.insert(article);
+        // 根据是否为新文章选择插入或更新
+        if (isNewArticle) {
+            articleMapper.insert(article);
+        } else {
+            articleMapper.updateById(article);
+        }
 
         return getArticleBySlug(article.getSlug());
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -495,30 +520,32 @@ public class ArticleServiceImpl implements ArticleService {
 
     @NotNull
     private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
-        // 使用自定义查询来确保返回所有必要的字段
+        // 使用MyBatis-Plus的分页查询
+        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
+        
+        // 转换为DTO
+        List<ArticleExcerptDTO> articleDTOList = articlePage.getRecords().stream()
+            .map(article -> {
+                ArticleExcerptDTO dto = new ArticleExcerptDTO();
+                BeanUtils.copyProperties(article, dto);
+                
+                // 获取用户信息
+                User user = userService.selectById(article.getUserId());
+                if (user != null) {
+                    dto.setUserName(user.getName());
+                    dto.setAvatarUrl(user.getAvatarUrl());
+                }
+                
+                return dto;
+            })
+            .collect(Collectors.toList());
+        
+        // 创建返回的分页对象
         Page<ArticleExcerptDTO> articleDTOPage = new Page<>(pageNum, pageSize);
-        
-        // 构建自定义查询SQL
-        String sql = "SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.gmt_modified, " +
-                    "a.view_count, a.likes, a.background_url, " +
-                    "u.name AS user_name, u.avatar_url " +
-                    "FROM articles a " +
-                    "LEFT JOIN user u ON a.user_id = u.id " +
-                    "WHERE a.deleted = 0 AND a.status = 'published' " +
-                    "ORDER BY a.gmt_modified DESC " +
-                    "LIMIT " + ((pageNum - 1) * pageSize) + ", " + pageSize;
-        
-        // 执行查询
-        List<ArticleExcerptDTO> articleDTOList = articleMapper.selectArticleExcerptsForPage(sql);
-        
-        // 获取总数
-        Long total = articleMapper.selectCount(queryWrapper);
-        
-        // 设置分页信息
         articleDTOPage.setRecords(articleDTOList);
-        articleDTOPage.setTotal(total);
-        articleDTOPage.setCurrent(pageNum);
-        articleDTOPage.setSize(pageSize);
+        articleDTOPage.setTotal(articlePage.getTotal());
+        articleDTOPage.setCurrent(articlePage.getCurrent());
+        articleDTOPage.setSize(articlePage.getSize());
         
         return articleDTOPage;
     }

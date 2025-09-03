@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -94,24 +93,9 @@ public class ProfileController {
     }
 
     /**
-     * 重定向用户资料页到Vue SPA
-     */
-    @GetMapping("/profile/{name}")
-    @Operation(summary = "重定向到用户资料页", description = "重定向到Vue SPA的用户资料页面")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "302", description = "重定向成功")
-    })
-    public ResponseEntity<Void> redirectToUserProfileSPA(
-            @Parameter(description = "用户名") @PathVariable("name") String name) {
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "/profile/" + name)
-                .build();
-    }
-
-    /**
      * 获取用户资料数据API
      */
-    @GetMapping("/api/profile/{name}")
+    @GetMapping("/profile/{name}")
     @Operation(summary = "获取用户资料数据", description = "根据用户名获取用户的详细资料信息")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功"),

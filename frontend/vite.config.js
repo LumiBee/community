@@ -71,6 +71,17 @@ export default defineConfig({
         target: 'http://localhost:8090',
         changeOrigin: true,
         secure: false,
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('uploads proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('Sending uploads Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, _res) => {
+            console.log('Received uploads Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        }
       },
       // 内容页面代理（用于SSR内容获取）
       '/api/article': {

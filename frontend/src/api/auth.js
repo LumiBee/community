@@ -12,7 +12,7 @@ export const authAPI = {
    */
   login(loginData) {
     return request({
-      url: '/api/login', // 使用新的API登录端点
+      url: '/login', // 使用新的API登录端点
       method: 'post',
       data: loginData,
       headers: {
@@ -31,7 +31,7 @@ export const authAPI = {
    */
   register(signupData) {
     return request({
-      url: '/api/signup',
+      url: '/signup',
       method: 'post',
       data: signupData,
       headers: {
@@ -45,7 +45,7 @@ export const authAPI = {
    */
   logout() {
     return request({
-      url: '/api/logout',
+      url: '/logout',
       method: 'post'
     })
   },
@@ -55,7 +55,7 @@ export const authAPI = {
    */
   getCurrentUser() {
     return request({
-      url: '/api/user/current',
+      url: '/user/current',
       method: 'get'
     })
   },
@@ -65,7 +65,7 @@ export const authAPI = {
    */
   checkAuth() {
     return request({
-      url: '/api/auth/check',
+      url: '/auth/check',
       method: 'get'
     })
   },
@@ -74,9 +74,23 @@ export const authAPI = {
    * 刷新token
    */
   refreshToken() {
+    // 从本地存储获取当前token
+    const storedUser = localStorage.getItem('hive_auth_user')
+    if (!storedUser) {
+      throw new Error('没有找到用户信息，请重新登录')
+    }
+    
+    const user = JSON.parse(storedUser)
+    if (!user || !user.token) {
+      throw new Error('没有找到有效token，请重新登录')
+    }
+    
     return request({
-      url: '/api/auth/refresh',
-      method: 'post'
+      url: '/auth/refresh',
+      method: 'post',
+      headers: {
+        'Authorization': `Bearer ${user.token}`
+      }
     })
   },
 
@@ -85,7 +99,7 @@ export const authAPI = {
    */
   dismissPasswordPrompt() {
     return request({
-      url: '/api/user/dismiss-password-prompt',
+      url: '/user/dismiss-password-prompt',
       method: 'post'
     })
   }

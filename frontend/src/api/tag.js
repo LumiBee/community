@@ -9,7 +9,7 @@ export const tagAPI = {
    */
   getAllTags() {
     return request({
-      url: '/api/tags',
+      url: '/tags',
       method: 'get'
     })
   },
@@ -22,7 +22,7 @@ export const tagAPI = {
    */
   getArticlesByTag(tagId, page = 1, size = 10) {
     return request({
-      url: `/api/tags/${tagId}/articles`,
+      url: `/tags/${tagId}/articles`,
       method: 'get',
       params: { page, size }
     })
@@ -36,7 +36,7 @@ export const tagAPI = {
    */
   getArticlesByTagName(tagName, page = 1, size = 10) {
     return request({
-      url: `/api/tags/${encodeURIComponent(tagName)}`,
+      url: `/tags/${encodeURIComponent(tagName)}`,
       method: 'get',
       params: { page, size }
     })
@@ -50,7 +50,7 @@ export const tagAPI = {
    */
   createTag(tagData) {
     return request({
-      url: '/api/tags',
+      url: '/tags',
       method: 'post',
       data: tagData
     })
@@ -63,7 +63,7 @@ export const tagAPI = {
    */
   updateTag(tagId, tagData) {
     return request({
-      url: `/api/tags/${tagId}`,
+      url: `/tags/${tagId}`,
       method: 'put',
       data: tagData
     })
@@ -75,7 +75,7 @@ export const tagAPI = {
    */
   deleteTag(tagId) {
     return request({
-      url: `/api/tags/${tagId}`,
+      url: `/tags/${tagId}`,
       method: 'delete'
     })
   },
@@ -86,7 +86,7 @@ export const tagAPI = {
    */
   getPopularTags(limit = 20) {
     return request({
-      url: '/api/tags/popular',
+      url: '/tags/popular',
       method: 'get',
       params: { limit }
     })
@@ -98,7 +98,7 @@ export const tagAPI = {
    */
   searchTags(query) {
     return request({
-      url: '/api/tags/search',
+      url: '/tags/search',
       method: 'get',
       params: { query }
     })

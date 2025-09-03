@@ -1,25 +1,24 @@
 package com.lumibee.hive.service;
 
-import com.lumibee.hive.model.User;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.lumibee.hive.model.User;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
-import java.security.SecureRandom;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class RememberMeService {
     
     private static final String REMEMBER_ME_COOKIE_NAME = "remember-me";
-    private static final int REMEMBER_ME_DURATION = 604800; // 7天，单位：秒
+    private static final int REMEMBER_ME_DURATION = 1209600; // 2周，单位：秒
     
     // 内存存储remember-me token，实际应用中应该使用数据库
     private static final Map<String, RememberMeToken> tokenStore = new ConcurrentHashMap<>();

@@ -48,7 +48,7 @@ public class IndexController {
     /**
      * 获取发布页面数据API
      */
-    @GetMapping("/api/publish")
+    @GetMapping("/publish")
     public ResponseEntity<Map<String, Object>> getPublishData(
             @RequestParam(name = "draftId", required = false) Integer draftId) {
         Map<String, Object> response = new HashMap<>();
@@ -70,7 +70,7 @@ public class IndexController {
     /**
      * 获取首页数据API
      */
-    @GetMapping("/api/home")
+    @GetMapping("/home")
     @Operation(summary = "获取首页数据", description = "获取首页需要显示的文章、标签和精选文章数据")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功")
@@ -95,32 +95,5 @@ public class IndexController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/index/articles")
-    @Operation(summary = "获取首页文章", description = "获取首页需要显示的文章数据")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
-    })
-    public ResponseEntity<Map<String, Object>> getIndexArticles(
-            @Parameter(description = "限制返回数量") @RequestParam(defaultValue = "6") int limit) {
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            // 获取热门文章
-            List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
-            response.put("popularArticles", popularArticles);
-            
-            // 获取精选文章
-            List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
-            response.put("featuredArticles", featuredArticles);
-            
-            response.put("success", true);
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "获取文章失败: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(response);
-        }
-    }
+
 }

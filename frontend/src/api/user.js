@@ -12,7 +12,7 @@ export const userAPI = {
    */
   getProfile(username, page = 1, size = 6) {
     return request({
-      url: `/api/profile/${username}`,
+      url: `/profile/${username}`,
       method: 'get',
       params: { page, size }
     })
@@ -24,7 +24,7 @@ export const userAPI = {
    */
   getUserByUsername(username) {
     return request({
-      url: `/api/users/${username}`,
+      url: `/users/${username}`,
       method: 'get'
     })
   },
@@ -45,7 +45,7 @@ export const userAPI = {
     }
     
     return request({
-      url: '/api/user/profile',
+      url: '/user/profile',
       method: 'put',
       data: params,
       headers: {
@@ -60,7 +60,7 @@ export const userAPI = {
    */
   uploadAvatar(formData) {
     return request({
-      url: '/api/user/avatar',
+      url: '/user/avatar',
       method: 'post',
       data: formData,
       headers: {
@@ -75,7 +75,7 @@ export const userAPI = {
    */
   toggleFollow(userId) {
     return request({
-      url: `/api/user/${userId}/follow`,
+      url: `/user/${userId}/follow`,
       method: 'post'
     })
   },
@@ -86,7 +86,7 @@ export const userAPI = {
    */
   getFollowers(userId) {
     return request({
-      url: `/api/users/${userId}/followers`,
+      url: `/users/${userId}/followers`,
       method: 'get'
     })
   },
@@ -97,7 +97,7 @@ export const userAPI = {
    */
   getFollowing(userId) {
     return request({
-      url: `/api/users/${userId}/following`,
+      url: `/users/${userId}/following`,
       method: 'get'
     })
   },
@@ -110,7 +110,7 @@ export const userAPI = {
    */
   getUserArticles(userId, page = 1, size = 6) {
     return request({
-      url: `/api/users/${userId}/articles`,
+      url: `/users/${userId}/articles`,
       method: 'get',
       params: { page, size }
     })
@@ -124,7 +124,7 @@ export const userAPI = {
    */
   changePassword(passwordData) {
     return request({
-      url: '/api/user/password',
+      url: '/user/password',
       method: 'put',
       data: passwordData
     })
@@ -136,7 +136,7 @@ export const userAPI = {
    */
   getUserStats(userId) {
     return request({
-      url: `/api/users/${userId}/stats`,
+      url: `/users/${userId}/stats`,
       method: 'get'
     })
   },
@@ -147,7 +147,7 @@ export const userAPI = {
    */
   isFollowing(userId) {
     return request({
-      url: `/api/user/${userId}/is-following`,
+      url: `/user/${userId}/is-following`,
       method: 'get'
     })
   },
@@ -157,7 +157,7 @@ export const userAPI = {
    */
   getCurrentUser() {
     return request({
-      url: '/api/user/current',
+      url: '/user/current',
       method: 'get'
     })
   }

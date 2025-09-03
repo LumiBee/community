@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,7 +33,7 @@ public class DraftController {
     @Autowired private ArticleService articleService;
     @Autowired private UserService userService;
 
-    @PostMapping("/api/article/save-draft")
+    @PostMapping("/article/save-draft")
     @ResponseBody
     @Operation(summary = "保存草稿", description = "保存文章草稿或更新现有草稿")
     @ApiResponses(value = {
@@ -49,30 +49,35 @@ public class DraftController {
         }
 
         if (requestDTO.getArticleId() != null) {
-            ArticleDetailsDTO updatedDraft = articleService.updateArticle(requestDTO.getArticleId(), requestDTO, user.getId());
+            ArticleDetailsDTO updatedDraft = articleService.saveDraft(requestDTO.getArticleId(), requestDTO, user.getId());
             return ResponseEntity.ok(updatedDraft);
         }else {
             if (requestDTO.getTitle() == null || requestDTO.getContent() == null) {
                 requestDTO.setTitle("无标题草稿");
             }
 
-            ArticleDetailsDTO savedDraft = articleService.saveDraft(requestDTO, user.getId());
+            ArticleDetailsDTO savedDraft = articleService.saveDraft(null, requestDTO, user.getId());
             return ResponseEntity.ok(savedDraft);
         }
     }
 
-    @GetMapping("/drafts")
-    @Operation(summary = "显示草稿页面", description = "显示用户的草稿列表页面")
+    @GetMapping("/article/drafts")
+    @Operation(summary = "获取草稿列表", description = "获取当前用户的草稿列表")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "页面显示成功")
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "401", description = "用户未认证")
     })
-    public String showDraftsPage(
-            @Parameter(description = "页面模型") Model model,
+    public ResponseEntity<Page<ArticleExcerptDTO>> getDrafts(
+            @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
+            @Parameter(description = "每页数量") @RequestParam(name = "size", defaultValue = "10") long pageSize,
             @AuthenticationPrincipal Principal principal) {
         User user = userService.getCurrentUserFromPrincipal(principal);
-        Page<ArticleExcerptDTO> drafts = articleService.getArticlesByUserId(user.getId(), 1, 10);
-
-        model.addAttribute("drafts", drafts);
-        return "drafts";
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        Page<ArticleExcerptDTO> drafts = articleService.getArticlesByUserId(user.getId(), pageNum, pageSize);
+        return ResponseEntity.ok(drafts);
     }
+
 }
