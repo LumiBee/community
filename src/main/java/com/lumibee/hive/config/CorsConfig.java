@@ -17,7 +17,11 @@ public class CorsConfig implements WebMvcConfigurer {
                 // 允许发送 Cookie
                 .allowCredentials(true)
                 // 放行哪些域名（必须用 patterns，否则 * 会和 allowCredentials 冲突）
-                .allowedOriginPatterns("*")
+                .allowedOriginPatterns(
+                    "http://localhost:3000",  // 开发环境
+                    "https://your-frontend-domain.vercel.app",  // Vercel部署域名
+                    "https://your-custom-domain.com"  // 自定义域名
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
