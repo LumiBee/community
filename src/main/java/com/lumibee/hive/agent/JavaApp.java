@@ -6,7 +6,7 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +18,7 @@ import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 
 @Component
-@Lazy
+@ConditionalOnProperty(name = "baidu.translate.app-id")
 @Log4j2
 public class JavaApp {
 
