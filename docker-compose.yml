@@ -81,6 +81,10 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_DATABASE: 0
       SPRING_DATA_REDIS_TIMEOUT: 10s
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: cgqlbh114514
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
     volumes:
       - ./config:/config
     networks:
