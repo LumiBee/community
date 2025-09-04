@@ -23,7 +23,7 @@ services:
 
   # 2. Redis 缓存服务
   redis-cache:
-    image: redis:7.0-alpine
+    image: redis:6.2-alpine
     container_name: redis-cache
     restart: always
     command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
