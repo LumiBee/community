@@ -19,8 +19,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 // 放行哪些域名（必须用 patterns，否则 * 会和 allowCredentials 冲突）
                 .allowedOriginPatterns(
                     "http://localhost:3000",  // 开发环境
-                    "https://your-frontend-domain.vercel.app",  // Vercel部署域名
-                    "https://your-custom-domain.com"  // 自定义域名
+                    "https://www.hivelumi.com",  // 生产环境前端域名
+                    "https://hivelumi.com"  // 不带www的域名
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
                 .allowedHeaders("*")
