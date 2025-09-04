@@ -76,6 +76,16 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
       _JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true"
+      SPRING_CONFIG_LOCATION: "classpath:/,optional:file:/config/override.yml"
+      # 使用标准Spring Boot环境变量格式
+      SPRING_DATA_REDIS_HOST: redis-cache
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_DATABASE: 0
+      SPRING_DATA_REDIS_TIMEOUT: 10s
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/community?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: cgqlbh114514
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
     volumes:
       - ./config:/config
       - ./uploads:/app/uploads
