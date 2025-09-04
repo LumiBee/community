@@ -20,7 +20,8 @@ public class CorsConfig implements WebMvcConfigurer {
                 .allowedOriginPatterns(
                     "http://localhost:3000",  // 开发环境
                     "https://www.hivelumi.com",  // 生产环境前端域名
-                    "https://hivelumi.com"  // 不带www的域名
+                    "https://hivelumi.com",  // 不带www的域名
+                    "https://api.hivelumi.com"  // API子域名
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
                 .allowedHeaders("*")
