@@ -72,8 +72,6 @@ services:
         condition: service_started
     ports:
       - "8090:8090"
-    env_file:
-      - .env
     environment:
       SPRING_PROFILES_ACTIVE: prod
       _JAVA_OPTIONS: "-Djava.net.preferIPv4Stack=true"
