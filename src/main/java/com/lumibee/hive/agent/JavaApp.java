@@ -6,17 +6,19 @@ import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Component;
 
 import com.lumibee.hive.advisors.MyLoggerAdvisor;
 import com.lumibee.hive.rag.QueryRewriter;
 import com.lumibee.hive.utils.TransApi;
 
 import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 @Component
+@Lazy
 @Log4j2
 public class JavaApp {
 
