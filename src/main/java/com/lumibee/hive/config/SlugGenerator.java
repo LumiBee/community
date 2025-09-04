@@ -1,11 +1,10 @@
 package com.lumibee.hive.config;
 
-import com.github.promeg.pinyinhelper.Pinyin;
-import org.springframework.stereotype.Component;
-
 import java.text.Normalizer;
 import java.util.Locale;
 import java.util.regex.Pattern;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class SlugGenerator {
@@ -22,8 +21,8 @@ public class SlugGenerator {
 
         String title = input.toLowerCase(Locale.ENGLISH);
 
-        // 1. 对中文进行拼音转换
-        title = Pinyin.toPinyin(title, "-").toLowerCase(Locale.ENGLISH);
+        // 1. 对中文进行简单处理（移除中文字符，保留英文和数字）
+        title = title.replaceAll("[\\u4e00-\\u9fff]", ""); // 移除中文字符
 
 
         // 2. 标准化（例如，将带音调的字符转为基本字符）
