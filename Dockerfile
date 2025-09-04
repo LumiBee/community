@@ -1,5 +1,5 @@
-# 使用一个轻量级的 Java 21 运行环境作为基础镜像
-FROM openjdk:21-jdk-slim
+# 使用一个轻量级的 Java 17 运行环境作为基础镜像
+FROM openjdk:17-jdk-slim
 
 # 安装网络诊断工具
 RUN apt-get update && apt-get install -y \
