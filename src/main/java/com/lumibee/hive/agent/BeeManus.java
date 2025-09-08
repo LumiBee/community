@@ -13,7 +13,7 @@ public class BeeManus extends ToolCallAgent {
         super(allTools);
         this.setName("beeManus");
         String SYSTEM_PROMPT = """  
-                You are YuManus, an all-capable AI assistant, aimed at solving any task presented by the user.  
+                You are BeeManus, an all-capable AI assistant, aimed at solving any task presented by the user.  
                 You have various tools at your disposal that you can call upon to efficiently complete complex requests.  
                 """;
         this.setSystemPrompt(SYSTEM_PROMPT);

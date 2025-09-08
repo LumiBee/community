@@ -16,6 +16,10 @@ import com.lumibee.hive.utils.TransApi;
 
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 @Component
 @ConditionalOnProperty(name = "baidu.translate.app-id")
@@ -51,7 +55,7 @@ public class JavaApp {
 
        this.messageWindowChatMemory = MessageWindowChatMemory.builder()
                //.chatMemoryRepository(mysqlChatMemoryRepository)
-               .maxMessages(100) // 直接在这里使用魔法值，或者定义为常量
+               .maxMessages(100)
                .build();
 
        this.chatClient = builder
@@ -60,24 +64,46 @@ public class JavaApp {
    }
 
    public String doChatWithRag(String message, String conversationId) {
-       log.info("LoveApp.doChatWithRag: message={}, conversationId={}", message, conversationId);
-       // 使用 QueryRewriter 来重写和翻译查询, 获取翻译后的消息
-       String apiResponse = new TransApi(APP_ID, SECURITY_KEY)
-               .getTransResult(queryRewriter.rewriteQuery(message), "auto", "zh");
+       log.info("JavaApp.doChatWithRag: message={}, conversationId={}", message, conversationId);
+       try {
+           // 暂时禁用QueryRewriter，直接使用原始消息避免字体错误
+           String translatedMessage = message;
+           log.info("Using original message: {}", translatedMessage);
 
-       // 解析API响应，提取翻译后的消息
-       String translatedMessage = new JSONObject(apiResponse)
-               .getJSONArray("trans_result")
-               .getJSONObject(0)
-               .getString("dst");
-
-       log.info("Translated message: {}", translatedMessage);
-
-       return chatClient.prompt()
-               .user(translatedMessage)
-               .advisors(a -> a.param("conversationId", conversationId))
-               .call()
-               .content();
+           // 使用流式处理，收集所有结果
+           StringBuilder result = new StringBuilder();
+           
+           try {
+               chatClient.prompt(javaPromptTemplate.create())
+                       .user(translatedMessage)
+                       .advisors(a -> a.param("conversationId", conversationId))
+                       .stream()
+                       .content()
+                       .doOnNext(chunk -> {
+                           result.append(chunk);
+                           log.debug("收到AI响应片段: {}", chunk);
+                       })
+                       .doOnComplete(() -> log.info("AI响应完成"))
+                       .doOnError(error -> log.error("AI响应错误: {}", error.getMessage(), error))
+                       .blockLast(Duration.ofMinutes(5)); // 5分钟超时，给足够时间生成完整内容
+               
+               String finalResult = result.toString();
+               if (finalResult.isEmpty()) {
+                   log.warn("AI响应为空");
+                   return "抱歉，AI助手暂时无法响应，请稍后再试。";
+               }
+               
+               log.info("AI响应成功，长度: {}", finalResult.length());
+               return finalResult;
+               
+           } catch (Exception aiError) {
+               log.error("AI调用失败: {}", aiError.getMessage(), aiError);
+               return "抱歉，AI助手暂时无法响应，请稍后再试。";
+           }
+       } catch (Exception e) {
+           log.error("Java指导对话失败: {}", e.getMessage(), e);
+           return "抱歉，AI助手暂时无法响应，请稍后再试。";
+       }
    }
 
 
@@ -86,7 +112,7 @@ public class JavaApp {
        return chatClient.prompt(javaPromptTemplate.create())
                .user(message)
                .advisors(a -> a.param("conversationId", conversationId))
-               .toolCallbacks(allTools)
+                .toolCallbacks(allTools)
                .stream()
                .content();
    }

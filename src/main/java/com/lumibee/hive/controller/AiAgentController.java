@@ -66,7 +66,7 @@ public class AiAgentController {
     public SseEmitter doChatWithSseEmitter(
             @Parameter(description = "对话消息") String message, 
             @Parameter(description = "会话ID") String conversationId) {
-        SseEmitter emitter = new SseEmitter(18000L); // 设置超时时间为 3 分钟
+        SseEmitter emitter = new SseEmitter(300000L); // 设置超时时间为 5 分钟
         // 获取 Flux 数据流并直接订阅
         javaApp.doChatWithStream(message, conversationId)
                 .subscribe(

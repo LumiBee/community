@@ -39,6 +39,8 @@ server:
       last-modified: true
 
 spring:
+  profiles:
+    active: dev  # 默认激活dev配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     # Druid 连接池配置优化
