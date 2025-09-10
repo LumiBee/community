@@ -40,21 +40,6 @@ public class TagController {
         List<TagDTO> tags = tagService.selectAllTags();
         return ResponseEntity.ok(tags);
     }
-
-    @GetMapping("/{slug}")
-    @Operation(summary = "根据slug获取标签信息", description = "根据标签slug获取标签信息")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "404", description = "标签不存在")
-    })
-    public ResponseEntity<TagDTO> getTagBySlug(
-            @Parameter(description = "标签slug") @PathVariable String slug) {
-        TagDTO tag = tagService.selectTagBySlug(slug);
-        if (tag == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(tag);
-    }
     
     @GetMapping("/{tagSlug}/articles")
     @Operation(summary = "根据标签slug获取文章列表", description = "根据标签slug获取该标签下的所有文章")
@@ -64,26 +49,8 @@ public class TagController {
     })
     public ResponseEntity<List<ArticleExcerptDTO>> getArticlesByTagSlug(
             @Parameter(description = "标签slug") @PathVariable String tagSlug) {
-        // 首先根据slug查找标签
-        TagDTO tag = tagService.selectTagBySlug(tagSlug);
-        if (tag == null) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        // 然后根据标签ID获取文章列表
-        List<ArticleExcerptDTO> articles = articleService.getArticlesByTagId(tag.getTagId());
+        List<ArticleExcerptDTO> articles = articleService.getArticlesByTagSlug(tagSlug);
         return ResponseEntity.ok(articles);
     }
-    
 
-    @GetMapping("/article/{articleId}")
-    @Operation(summary = "获取文章标签", description = "根据文章ID获取该文章的所有标签")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
-    })
-    public ResponseEntity<List<Tag>> getTagsByArticleId(
-            @Parameter(description = "文章ID") @PathVariable Integer articleId) {
-        List<Tag> tags = tagService.selectTagsByArticleId(articleId);
-        return ResponseEntity.ok(tags);
-    }
 }

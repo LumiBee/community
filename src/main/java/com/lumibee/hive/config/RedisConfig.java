@@ -20,7 +20,24 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.lumibee.hive.constant.CacheNames;
 
+/**
+ * Redis配置类
+ * 
+ * 功能：
+ * 1. 配置RedisCacheManager - 管理Spring Cache注解
+ * 2. 配置RedisTemplate - 提供通用Redis操作
+ * 3. 实现分层TTL策略 - 根据业务特点设置不同的缓存过期时间
+ * 4. 配置序列化策略 - 键使用String，值使用JSON序列化
+ * 5. 防缓存穿透 - 禁用null值缓存
+ * 
+ * 分层TTL设计原则：
+ * - 访问频率越高，TTL越长
+ * - 数据变化越频繁，TTL越短
+ * - 业务重要性越高，TTL越长
+ * - 数据一致性要求越高，TTL越短
+ */
 @Configuration
 @EnableCaching // 启用Spring的注解驱动缓存管理功能
 public class RedisConfig {
@@ -42,37 +59,96 @@ public class RedisConfig {
                 // 配置键的序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置值的序列化方式
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-                // 不缓存null值，防止缓存穿透
-                .disableCachingNullValues();
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
-        // 构建 RedisCacheManager
         return RedisCacheManager.builder(factory)
                 .cacheDefaults(defaultConfig)
-                .withCacheConfiguration("featuredArticles", 
-                    RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofMinutes(10))
-                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-                        .disableCachingNullValues())
-                .withCacheConfiguration("tagDetails", 
-                    RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofHours(2))
-                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-                        .disableCachingNullValues()) // 保持不允许null值
-                .withCacheConfiguration("homepageArticles", 
-                    RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofMinutes(15))
-                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-                        .disableCachingNullValues())
-                .withCacheConfiguration("profileArticles", 
-                    RedisCacheConfiguration.defaultCacheConfig()
-                        .entryTtl(Duration.ofMinutes(15))
-                        .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
-                        .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer))
-                        .disableCachingNullValues())
+                
+                // ==================== 文章相关缓存 ====================
+                
+                // 文章详情缓存 - 2小时
+                .withCacheConfiguration(CacheNames.ARTICLE_DETAIL, 
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer)
+                    .disableCachingNullValues())
+                
+                // 首页文章列表 - 30分钟
+                .withCacheConfiguration(CacheNames.HOMEPAGE_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
+                
+                // 所有文章列表 - 1小时
+                .withCacheConfiguration(CacheNames.ALL_ARTICLES, 
+                    createCacheConfig(Duration.ofHours(1), stringSerializer, jsonSerializer))
+                
+                // 标签文章列表 - 45分钟
+                .withCacheConfiguration(CacheNames.TAG_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(45), stringSerializer, jsonSerializer))
+                
+                // 用户文章列表 - 15分钟
+                .withCacheConfiguration(CacheNames.USER_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(15), stringSerializer, jsonSerializer))
+                
+                // 搜索文章列表 - 5分钟
+                .withCacheConfiguration(CacheNames.SEARCH_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(5), stringSerializer, jsonSerializer))
+                
+                // 热门文章列表 - 1小时
+                .withCacheConfiguration(CacheNames.POPULAR_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(60), stringSerializer, jsonSerializer))
+                
+                // 精选文章列表 - 2小时
+                .withCacheConfiguration(CacheNames.FEATURED_ARTICLES, 
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+                
+                // 作品集文章列表 - 30分钟
+                .withCacheConfiguration(CacheNames.PORTFOLIO_ARTICLES, 
+                    createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
+                
+                // ==================== 用户相关缓存 ====================
+
+                // 用户个人中心 - 15分钟
+                .withCacheConfiguration(CacheNames.USER_PROFILE,
+                        createCacheConfig(Duration.ofMinutes(15), stringSerializer, jsonSerializer))
+                
+                // 用户关注关系 - 30分钟
+                .withCacheConfiguration(CacheNames.USER_FOLLOW, 
+                    createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
+                
+                // 用户统计信息 - 1小时
+                .withCacheConfiguration(CacheNames.USER_STATUS,
+                    createCacheConfig(Duration.ofHours(1), stringSerializer, jsonSerializer))
+
+                // ==================== 标签相关缓存 ====================
+                
+                // 所有标签列表 - 2小时
+                .withCacheConfiguration(CacheNames.ALL_TAGS, 
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+                
+                // 热门标签列表 - 2小时
+                .withCacheConfiguration(CacheNames.POPULAR_TAGS, 
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+                
+                // ==================== 收藏相关缓存 ====================
+                
+                // 收藏详情 - 2小时
+                .withCacheConfiguration(CacheNames.FAVORITES_DETAIL,
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+
+                // 用户收藏列表 - 2小时
+                .withCacheConfiguration(CacheNames.FAVORITES_USER,
+                        createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+
+                // ==================== 评论相关缓存 ====================
+
+                // 评论相关缓存 - 10分钟
+                .withCacheConfiguration(CacheNames.COMMENTS, 
+                    createCacheConfig(Duration.ofMinutes(10), stringSerializer, jsonSerializer))
+
+                // ==================== 作品集相关缓存 ====================
+
+                // 作品集详情 - 2小时
+                .withCacheConfiguration(CacheNames.PORTFOLIO_DETAIL, 
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
+                
                 .build();
     }
 
@@ -99,6 +175,21 @@ public class RedisConfig {
         return template;
     }
 
+    /**
+     * 创建缓存配置的辅助方法
+     * 
+     * @param ttl 缓存过期时间
+     * @param stringSerializer 键序列化器（String类型）
+     * @param jsonSerializer 值序列化器（JSON格式）
+     * @return 配置好的RedisCacheConfiguration
+     */
+    private RedisCacheConfiguration createCacheConfig(Duration ttl, StringRedisSerializer stringSerializer, Jackson2JsonRedisSerializer<Object> jsonSerializer) {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(ttl) // 设置缓存过期时间
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer)) // 键使用String序列化
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)) // 值使用JSON序列化
+                .disableCachingNullValues(); // 禁用null值缓存，防止缓存穿透
+    }
 
     /**
      * 创建一个配置好的 Jackson2JsonRedisSerializer

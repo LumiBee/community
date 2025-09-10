@@ -31,7 +31,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             "LEFT JOIN user u ON u.id = a.user_id " +
             "WHERE a.portfolio_id = #{portfolioId} AND a.status = 'published' AND a.deleted = 0 " +
             "ORDER BY a.gmt_modified DESC")
-    List<ArticleExcerptDTO> selectArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
+    List<ArticleExcerptDTO> getArticlesByPortfolioId(@Param("portfolioId") Integer portfolioId);
     @Select("SELECT article_id, title, slug, excerpt, view_count, likes, gmt_modified from articles " +
             "WHERE user_id = #{id} AND deleted = 0 AND status = 'published' " +
             "ORDER BY gmt_modified DESC")
@@ -56,7 +56,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "userName", column = "user_name"),
             @Result(property = "avatarUrl", column = "avatar_url")
     })
-    List<ArticleExcerptDTO> selectArticleSummaries(@Param("limit") Integer limit);
+    List<ArticleExcerptDTO> getPopularArticles(@Param("limit") Integer limit);
     @Select("SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.gmt_modified, " +
             "u.name AS user_name, u.avatar_url " +
             "from articles a " +
@@ -92,7 +92,7 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "userName", column = "user_name"),
             @Result(property = "avatarUrl", column = "avatar_url")
     })
-    List<ArticleExcerptDTO> selectFeaturedArticles(@Param("title") String title);
+    List<ArticleExcerptDTO> getFeaturedArticles(@Param("title") String title);
     @Select("SELECT slug, gmt_modified from articles WHERE status = 'published' AND deleted = 0")
     List<ArticleExcerptDTO> selectSitemapDetails();
     

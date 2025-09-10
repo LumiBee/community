@@ -12,10 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,8 +36,13 @@ import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.constant.CacheNames;
 
 
+/**
+ * 文章服务实现类
+ * 负责文章相关的业务逻辑处理，包括文章的增删改查、发布、草稿保存等操作
+ */
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -54,9 +56,17 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private ArticleRepository articleRepository;
     @Autowired private ArticleFavoritesMapper favoriteMapper;
     @Autowired private CacheManager cacheManager;
+    @Autowired private RedisCacheService redisCacheService;
 
+
+    /**
+     * 获取首页文章列表
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页的文章摘要列表
+     */
     @Override
-    @Cacheable(value = "homepageArticles", key = "#pageNum + '-' + #pageSize")
+    @Cacheable(value = CacheNames.HOMEPAGE_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).homepageArticles(#pageNum, #pageSize)")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
@@ -68,8 +78,12 @@ public class ArticleServiceImpl implements ArticleService {
         return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
     }
 
+    /**
+     * 获取所有已发布的文章详情
+     * @return 文章详情列表
+     */
     @Override
-    @Cacheable(value = "allArticles", key = "'all'")
+    @Cacheable(value = CacheNames.ALL_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allArticles()")
     @Transactional(readOnly = true)
     public List<ArticleDetailsDTO> selectAll() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -104,8 +118,102 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDetailsDTOs;
     }
 
+    /**
+     * 获取热门文章列表
+     * @param limit 限制数量
+     * @return 热门文章摘要列表
+     */
     @Override
-    @Cacheable(value = "profileArticles", key = "#userId + '-' + #pageNum + '-' + #pageSize")
+    @Cacheable(value = CacheNames.POPULAR_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).popularArticles(#limit)")
+    @Transactional(readOnly = true)
+    public List<ArticleExcerptDTO> getPopularArticles(int limit) {
+        return articleMapper.getPopularArticles(limit);
+    }
+
+    /**
+     * 获取精选文章列表
+     * @return 精选文章摘要列表
+     */
+    @Override
+    @Cacheable(value = CacheNames.FEATURED_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).featuredArticles()")
+    @Transactional(readOnly = true)
+    public List<ArticleExcerptDTO> getFeaturedArticles() {
+        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("deleted", 0)
+                .eq("status", Article.ArticleStatus.published)
+                .eq("is_featured", true)
+                .orderByDesc("gmt_modified");
+
+        List<Article> featuredArticles = articleMapper.selectList(queryWrapper);
+        if (featuredArticles.isEmpty()) {
+            return new ArrayList<>(); // 如果没有精选文章，返回空列表
+        }
+
+        // 获取所有用户ID
+        List<Long> userIds = featuredArticles.stream()
+                .map(Article::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        // 批量获取用户信息
+        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
+                .collect(Collectors.toMap(User::getId, user -> user));
+
+        List<ArticleExcerptDTO> articleExcerptDTOS = new ArrayList<>();
+        for (Article article : featuredArticles) {
+            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
+            BeanUtils.copyProperties(article, articleDTO);
+
+            // 设置用户信息
+            User user = userMap.get(article.getUserId());
+            if (user != null) {
+                articleDTO.setUserName(user.getName());
+                articleDTO.setAvatarUrl(user.getAvatarUrl());
+            }
+
+            articleExcerptDTOS.add(articleDTO);
+        }
+
+        return articleExcerptDTOS;
+    }
+
+    /**
+     * 根据标签slug获取文章列表
+     * @param tagSlug 标签slug
+     * @return 该标签下的文章摘要列表
+     */
+    @Override
+    @Cacheable(value = CacheNames.TAG_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).tagArticles(#tagSlug)")
+    @Transactional(readOnly = true)
+    public List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug) {
+        TagDTO tag = tagService.selectTagBySlug(tagSlug);
+        if (tag == null) {
+            return new ArrayList<>();
+        }
+        return articleMapper.getArticlesByTagId(tag.getTagId());
+    }
+
+    /**
+     * 根据作品集ID获取文章列表
+     * @param id 作品集ID
+     * @return 该作品集下的文章摘要列表
+     */
+    @Override
+    @Cacheable(value = CacheNames.PORTFOLIO_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioArticles(#id)")
+    @Transactional(readOnly = true)
+    public List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id) {
+        return articleMapper.getArticlesByPortfolioId(id);
+    }
+
+    /**
+     * 获取用户个人页面的文章列表
+     * @param userId 用户ID
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 分页的文章摘要列表
+     */
+    @Override
+    @Cacheable(value = CacheNames.USER_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userArticles(#userId)")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
@@ -118,23 +226,13 @@ public class ArticleServiceImpl implements ArticleService {
         return getArticleExcerptDTOPage(pageNum, pageSize, articleProfilePageRequest, queryWrapper);
     }
 
+    /**
+     * 根据slug获取文章详情
+     * @param slug 文章slug
+     * @return 文章详情
+     */
     @Override
-    public String createUniqueSlug(String title) {
-        String baseSlug = SlugGenerator.generateSlug(title);
-        if (baseSlug.isEmpty()) {
-            baseSlug = "article-" + System.currentTimeMillis();
-        }
-
-        String potentialSlug = baseSlug;
-        int count = 0;
-        while (articleMapper.selectBySlug(potentialSlug)) {
-            potentialSlug = potentialSlug + "-" + count++;
-        }
-
-        return potentialSlug;
-    }
-
-    @Override
+    @Cacheable(value = CacheNames.ARTICLE_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleDetail(#slug)")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
@@ -214,18 +312,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleDetailsDTO getArticleByIdSimple(Integer articleId) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
-            return null;
-        }
-        
-        ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
-        BeanUtils.copyProperties(article, articleDetailsDTO);
-        return articleDetailsDTO;
-    }
-
-    @Override
     @Transactional
     public LikeResponse toggleLike(long userId, int articleId) {
         //获取当前文章的点赞状态
@@ -269,26 +355,13 @@ public class ArticleServiceImpl implements ArticleService {
         articleMapper.incrementViewCount(articleId);
     }
 
+    /**
+     * 发布文章
+     * @param requestDTO 文章发布请求数据
+     * @param userId 用户ID
+     * @return 文章详情
+     */
     @Override
-    @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> selectArticleSummaries(int limit) {
-        return articleMapper.selectArticleSummaries(limit);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> getArticlesByTagId(int tagId) {
-        return articleMapper.getArticlesByTagId(tagId);
-    }
-
-    @Override
-    @Caching(evict = {
-            @CacheEvict(value = "homepageArticles", allEntries = true),
-            @CacheEvict(value = "profileArticles", allEntries = true),
-            @CacheEvict(value = "featuredArticles", allEntries = true),
-            @CacheEvict(value = "allTags", allEntries = true),
-            @CacheEvict(value = "allPortfolios", allEntries = true)
-    })
     @Transactional
     public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId) {
         if (requestDTO.getArticleId() != null) {
@@ -324,6 +397,8 @@ public class ArticleServiceImpl implements ArticleService {
                     tagService.incrementArticleCount(tag.getTagId());
                 }
             }
+            // 清除标签列表缓存
+            redisCacheService.clearAllTagListCaches();
         }
 
         // 将文章保存到 Elasticsearch
@@ -338,16 +413,116 @@ public class ArticleServiceImpl implements ArticleService {
         articleDocument.setViewCount(article.getViewCount());
         articleDocument.setAvatarUrl(user.getAvatarUrl());  // 确保头像URL被正确设置
         
-        // 保存到Elasticsearch - 这是关键的缺失步骤
+        // 保存到Elasticsearch
         articleRepository.save(articleDocument);
+
+        // 发布文章后，清除相关缓存
+        redisCacheService.clearArticleRelatedCaches(article);
 
         return this.getArticleBySlug(article.getSlug());
     }
 
+    /**
+     * 更新文章
+     * @param articleId 文章ID
+     * @param requestDTO 文章更新请求数据
+     * @param userId 用户ID
+     * @return 文章详情
+     */
     @Override
-    @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> selectArticlesByPortfolioId(Integer id) {
-        return articleMapper.selectArticlesByPortfolioId(id);
+    @Transactional
+    public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
+        Article existingArticle = articleMapper.selectById(articleId);
+        if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
+            throw new  RuntimeException("文章不存在或不属于当前用户");
+        }
+
+        existingArticle.setTitle(requestDTO.getTitle());
+        existingArticle.setContent(requestDTO.getContent());
+        existingArticle.setExcerpt(requestDTO.getExcerpt());
+        existingArticle.setGmtModified(LocalDateTime.now());
+
+        // 更新作品集
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
+            Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
+            existingArticle.setPortfolioId(portfolio.getId());
+            portfolioService.updatePortfolioGmt(portfolio.getId(), userId);
+        }else {
+            existingArticle.setPortfolioId(null);
+        }
+
+        // 更新标签
+        articleMapper.deleteArticleTagByArticleId(articleId);
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
+            Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
+            for (Tag tag : tags) {
+                if (tag != null) {
+                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
+                    tagService.incrementArticleCount(tag.getTagId());
+                }
+            }
+            // 清除标签列表缓存
+            redisCacheService.clearAllTagListCaches();
+        }
+
+        existingArticle.setStatus(Article.ArticleStatus.published);
+        articleMapper.updateById(existingArticle);
+
+        // 更新Elasticsearch中的文章数据
+        User user = userMapper.selectById(userId);
+        ArticleDocument articleDocument = new ArticleDocument();
+        articleDocument.setId(articleId);
+        articleDocument.setContent(requestDTO.getContent());
+        articleDocument.setUserName(user.getName());
+        articleDocument.setTitle(requestDTO.getTitle());
+        articleDocument.setSlug(existingArticle.getSlug());
+        articleDocument.setLikes(existingArticle.getLikes());
+        articleDocument.setViewCount(existingArticle.getViewCount());
+        articleDocument.setAvatarUrl(user.getAvatarUrl());
+
+        // 保存/更新到Elasticsearch
+        articleRepository.save(articleDocument);
+
+        // 更新文章后，清除相关缓存
+        redisCacheService.clearArticleRelatedCaches(existingArticle);
+
+        return getArticleBySlug(existingArticle.getSlug());
+    }
+
+    /**
+     * 删除文章
+     * @param articleId 文章ID
+     * @param userId 用户ID
+     * @return 文章详情
+     */
+    @Override
+    @Transactional
+    public ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new RuntimeException("文章不存在");
+        }
+
+        // 验证用户权限：只有文章作者才能删除文章
+        if (!article.getUserId().equals(userId)) {
+            throw new RuntimeException("无权限删除此文章");
+        }
+
+        if (article.getSlug() != null) {
+            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+        }
+
+        int result = articleMapper.deleteById(articleId);
+        if (result == 0) {
+            throw new RuntimeException("删除文章失败");
+        }
+        articleRepository.deleteById(articleId);
+
+        // 删除文章后，清除相关缓存
+        redisCacheService.clearArticleRelatedCaches(article);
+        redisCacheService.clearAllTagListCaches();
+
+        return convertToArticleDetailsDTO(article);
     }
 
     @Override
@@ -356,61 +531,9 @@ public class ArticleServiceImpl implements ArticleService {
         return articleMapper.countArticlesByUserId(id);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> getArticlesByUserId(Long id) {
-        return articleMapper.getArticlesByUserId(id);
-    }
-
-    @Override
-    @Cacheable(value = "featuredArticles", key = "'all'")
-    @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> selectFeaturedArticles() {
-        QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("deleted", 0)
-                    .eq("status", Article.ArticleStatus.published)
-                    .eq("is_featured", true)
-                    .orderByDesc("gmt_modified");
-
-        List<Article> featuredArticles = articleMapper.selectList(queryWrapper);
-        if (featuredArticles.isEmpty()) {
-            return new ArrayList<>(); // 如果没有精选文章，返回空列表
-        }
-        
-        // 获取所有用户ID
-        List<Long> userIds = featuredArticles.stream()
-                .map(Article::getUserId)
-                .distinct()
-                .collect(Collectors.toList());
-        
-        // 批量获取用户信息
-        Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
-                .collect(Collectors.toMap(User::getId, user -> user));
-        
-        List<ArticleExcerptDTO> articleExcerptDTOS = new ArrayList<>();
-        for (Article article : featuredArticles) {
-            ArticleExcerptDTO articleDTO = new ArticleExcerptDTO();
-            BeanUtils.copyProperties(article, articleDTO);
-            
-            // 设置用户信息
-            User user = userMap.get(article.getUserId());
-            if (user != null) {
-                articleDTO.setUserName(user.getName());
-                articleDTO.setAvatarUrl(user.getAvatarUrl());
-            }
-            
-            articleExcerptDTOS.add(articleDTO);
-        }
-
-        return articleExcerptDTOS;
-    }
-
-    /**
-     * 设置文章精选状态
-     */
-    @CacheEvict(value = "featuredArticles", key = "'all'")
+    // TODO : 完善权限控制，确保只有管理员可以设置精选文章
     @Transactional
-    public void setArticleFeatured(Integer articleId, boolean isFeatured) {
+    public void setArticleFeatured(Integer articleId, boolean isFeatured, User.UserRole role) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在");
@@ -424,42 +547,6 @@ public class ArticleServiceImpl implements ArticleService {
         if (article.getSlug() != null) {
             Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
         }
-    }
-
-    /**
-     * 批量设置文章精选状态
-     */
-    @CacheEvict(value = "featuredArticles", key = "'all'")
-    @Transactional
-    public void batchSetArticleFeatured(List<Integer> articleIds, boolean isFeatured) {
-        if (articleIds == null || articleIds.isEmpty()) {
-            return;
-        }
-        
-        for (Integer articleId : articleIds) {
-            Article article = articleMapper.selectById(articleId);
-            if (article != null) {
-                article.setFeatured(isFeatured);
-                article.setGmtModified(LocalDateTime.now());
-                articleMapper.updateById(article);
-                
-                // 清除相关缓存
-                if (article.getSlug() != null) {
-                    Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
-                }
-            }
-        }
-    }
-
-
-    /**
-     * 定时清除精选文章缓存（每10分钟执行一次）
-     */
-    @CacheEvict(value = "featuredArticles", key = "'all'")
-    @Scheduled(fixedRate = 600000) // 10分钟 = 600000毫秒
-    public void scheduledClearFeaturedArticlesCache() {
-        // 这个方法只是用来清除缓存，不需要实现
-        // 定时任务会自动清除精选文章缓存，确保数据新鲜度
     }
 
     @Override
@@ -504,52 +591,6 @@ public class ArticleServiceImpl implements ArticleService {
         return getArticleBySlug(article.getSlug());
     }
 
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ArticleExcerptDTO> getArticlesByUserId(Long userId, long pageNum, long pageSize) {
-        Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
-        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<> ();
-        queryWrapper.eq(Article::getUserId, userId)
-                    .eq(Article::getDeleted, 0)
-                    .eq(Article::getStatus, Article.ArticleStatus.draft)
-                    .orderByDesc(Article::getGmtModified);
-
-        return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
-    }
-
-    @NotNull
-    private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
-        // 使用MyBatis-Plus的分页查询
-        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
-        
-        // 转换为DTO
-        List<ArticleExcerptDTO> articleDTOList = articlePage.getRecords().stream()
-            .map(article -> {
-                ArticleExcerptDTO dto = new ArticleExcerptDTO();
-                BeanUtils.copyProperties(article, dto);
-                
-                // 获取用户信息
-                User user = userService.selectById(article.getUserId());
-                if (user != null) {
-                    dto.setUserName(user.getName());
-                    dto.setAvatarUrl(user.getAvatarUrl());
-                }
-                
-                return dto;
-            })
-            .collect(Collectors.toList());
-        
-        // 创建返回的分页对象
-        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(pageNum, pageSize);
-        articleDTOPage.setRecords(articleDTOList);
-        articleDTOPage.setTotal(articlePage.getTotal());
-        articleDTOPage.setCurrent(articlePage.getCurrent());
-        articleDTOPage.setSize(articlePage.getSize());
-        
-        return articleDTOPage;
-    }
-
     @Override
     @Transactional(readOnly = true)
     public ArticleDetailsDTO selectDraftById(Integer articleId) {
@@ -566,127 +607,6 @@ public class ArticleServiceImpl implements ArticleService {
         BeanUtils.copyProperties(article, detailsDTO);
 
         return detailsDTO;
-    }
-
-    @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "articleDetails", key = "#result.slug"),
-                    @CacheEvict(value = "allTags", allEntries = true),
-                    @CacheEvict(value = "allPortfolios", allEntries = true),
-                    @CacheEvict(value = "homepageArticles", allEntries = true),
-                    @CacheEvict(value = "profileArticles", allEntries = true),
-                    @CacheEvict(value = "featuredArticles", allEntries = true)
-            }
-    )
-    @Transactional
-    public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
-        Article existingArticle = articleMapper.selectById(articleId);
-        if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
-            throw new  RuntimeException("文章不存在或不属于当前用户");
-        }
-
-        existingArticle.setTitle(requestDTO.getTitle());
-        existingArticle.setContent(requestDTO.getContent());
-        existingArticle.setExcerpt(requestDTO.getExcerpt());
-        existingArticle.setGmtModified(LocalDateTime.now());
-
-        // 更新作品集
-        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
-            Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
-            existingArticle.setPortfolioId(portfolio.getId());
-            portfolioService.updatePortfolioGmt(portfolio.getId(), userId);
-        }else {
-            existingArticle.setPortfolioId(null);
-        }
-
-        // 更新标签
-        articleMapper.deleteArticleTagByArticleId(articleId);
-        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
-            Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
-            for (Tag tag : tags) {
-                if (tag != null) {
-                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
-                    tagService.incrementArticleCount(tag.getTagId());
-                }
-            }
-        }
-
-        existingArticle.setStatus(Article.ArticleStatus.published);
-        articleMapper.updateById(existingArticle);
-
-        // 更新Elasticsearch中的文章数据
-        User user = userMapper.selectById(userId);
-        ArticleDocument articleDocument = new ArticleDocument();
-        articleDocument.setId(articleId);
-        articleDocument.setContent(requestDTO.getContent());
-        articleDocument.setUserName(user.getName());
-        articleDocument.setTitle(requestDTO.getTitle());
-        articleDocument.setSlug(existingArticle.getSlug());
-        articleDocument.setLikes(existingArticle.getLikes());
-        articleDocument.setViewCount(existingArticle.getViewCount());
-        articleDocument.setAvatarUrl(user.getAvatarUrl());
-        
-        // 保存/更新到Elasticsearch
-        articleRepository.save(articleDocument);
-
-        return getArticleBySlug(existingArticle.getSlug());
-    }
-
-    @Override
-    @Caching(evict = {
-            @CacheEvict(value = "homepageArticles", allEntries = true),
-            @CacheEvict(value = "profileArticles", allEntries = true),
-            @CacheEvict(value = "featuredArticles", allEntries = true)
-    })
-    @Transactional
-    public ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
-            throw new RuntimeException("文章不存在");
-        }
-        
-        // 验证用户权限：只有文章作者才能删除文章
-        if (!article.getUserId().equals(userId)) {
-            throw new RuntimeException("无权限删除此文章");
-        }
-
-        if (article.getSlug() != null) {
-            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
-        }
-
-        int result = articleMapper.deleteById(articleId);
-        if (result == 0) {
-            throw new RuntimeException("删除文章失败");
-        }
-        articleRepository.deleteById(articleId);
-
-        return convertToArticleDetailsDTO(article);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ArticleDocument> selectArticles(String query) {
-        return articleRepository.findByTitleOrContentWithPrefix(query);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<ArticleDocument> selectRelatedArticles(ArticleDetailsDTO currentArticle, int limit) {
-        if (currentArticle == null || currentArticle.getArticleId() == null) {
-            return new ArrayList<>();
-        }
-
-        List<ArticleDocument> relatedArticles = articleRepository.selectRelatedArticles(
-                currentArticle.getTitle(),
-                currentArticle.getContent(),
-                currentArticle.getArticleId());
-
-        if (relatedArticles.size() > limit) {
-            return relatedArticles.subList(0, limit);
-        }
-
-        return relatedArticles;
     }
 
     @Override
@@ -727,6 +647,38 @@ public class ArticleServiceImpl implements ArticleService {
         return dto;
     }
 
+    @NotNull
+    private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
+        // 使用MyBatis-Plus的分页查询
+        Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
+
+        // 转换为DTO
+        List<ArticleExcerptDTO> articleDTOList = articlePage.getRecords().stream()
+                .map(article -> {
+                    ArticleExcerptDTO dto = new ArticleExcerptDTO();
+                    BeanUtils.copyProperties(article, dto);
+
+                    // 获取用户信息
+                    User user = userService.selectById(article.getUserId());
+                    if (user != null) {
+                        dto.setUserName(user.getName());
+                        dto.setAvatarUrl(user.getAvatarUrl());
+                    }
+
+                    return dto;
+                })
+                .collect(Collectors.toList());
+
+        // 创建返回的分页对象
+        Page<ArticleExcerptDTO> articleDTOPage = new Page<>(pageNum, pageSize);
+        articleDTOPage.setRecords(articleDTOList);
+        articleDTOPage.setTotal(articlePage.getTotal());
+        articleDTOPage.setCurrent(articlePage.getCurrent());
+        articleDTOPage.setSize(articlePage.getSize());
+
+        return articleDTOPage;
+    }
+
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
         if (portfolio == null) return null;
         PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类
@@ -739,5 +691,20 @@ public class ArticleServiceImpl implements ArticleService {
         TagDTO dto = new TagDTO(); // 假设您已创建 TagDTO 类
         BeanUtils.copyProperties(tag, dto);
         return dto;
+    }
+
+    public String createUniqueSlug(String title) {
+        String baseSlug = SlugGenerator.generateSlug(title);
+        if (baseSlug.isEmpty()) {
+            baseSlug = "article-" + System.currentTimeMillis();
+        }
+
+        String potentialSlug = baseSlug;
+        int count = 0;
+        while (articleMapper.selectBySlug(potentialSlug)) {
+            potentialSlug = potentialSlug + "-" + count++;
+        }
+
+        return potentialSlug;
     }
 }

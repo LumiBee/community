@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,23 +24,27 @@ import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.constant.CacheNames;
 
+/**
+ * 作品集服务实现类
+ * 负责作品集相关的业务逻辑处理，包括作品集的增删改查、文章关联等
+ */
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
 
     @Autowired private PortfolioMapper portfolioMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleMapper articleMapper;
+    @Autowired private RedisCacheService redisCacheService;
 
     @Override
-    @CacheEvict(value = "allPortfolios", allEntries = true)
     @Transactional
     public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId) {
         return selectOrCreatePortfolio(portfolioName, userId, "Portfolio for " + portfolioName);
     }
 
     @Override
-    @CacheEvict(value = "allPortfolios", allEntries = true)
     @Transactional
     public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId, String description) {
         if (portfolioName == null || portfolioName.isEmpty()) {
@@ -63,13 +66,19 @@ public class PortfolioServiceImpl implements PortfolioService {
             portfolio.setDescription(description != null ? description : "Portfolio for " + portfolioName);
             portfolio.setUserId(userId);
             portfolioMapper.insert(portfolio);
+            
+            // 清除作品集相关缓存
+            try {
+                redisCacheService.clearPortfolioDetailCaches(portfolio.getId());
+            } catch (Exception e) {
+                System.err.println("清除作品集缓存时出错: " + e.getMessage());
+            }
         }
 
         return portfolio;
     }
 
     @Override
-    @Cacheable(value = "allPortfolios")
     @Transactional(readOnly = true)
     public List<PortfolioDetailsDTO> selectAllPortfolios() {
         System.out.println("=== 开始获取所有作品集 ===");
@@ -131,7 +140,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    @Cacheable(value = "portfolioDetails", key = "#id")
+    @Cacheable(value = CacheNames.PORTFOLIO_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioDetail(#id)")
     @Transactional(readOnly = true)
     public PortfolioDetailsDTO selectPortfolioById(Integer id) {
         if (id == null) {
@@ -157,7 +166,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             }
         }
 
-        List<ArticleExcerptDTO> articles = articleMapper.selectArticlesByPortfolioId(portfolio.getId());
+        List<ArticleExcerptDTO> articles = articleMapper.getArticlesByPortfolioId(portfolio.getId());
         dto.setArticles(articles != null ? articles : Collections.emptyList());
 
         Integer articleCount = articleMapper.countArticlesByPortfolioId(portfolio.getId());
@@ -167,7 +176,6 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    @CacheEvict(value = "portfolioDetails", key = "#id")
     @Transactional
     public void updatePortfolioGmt(Integer id, Long userId) {
         if (id == null || userId == null) {

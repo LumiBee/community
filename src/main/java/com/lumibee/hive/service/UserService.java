@@ -29,14 +29,6 @@ public interface UserService {
     
     // 获取UserFollowingMapper实例（用于调试）
     UserFollowingMapper getUserFollowingMapper();
-    
-    /**
-     * 更新用户资料
-     * @param userId 用户ID
-     * @param userName 用户名
-     * @param email 邮箱
-     * @param bio 个人简介
-     * @return 更新后的用户信息
-     */
+
     User updateProfile(Long userId, String userName, String email, String bio);
 }

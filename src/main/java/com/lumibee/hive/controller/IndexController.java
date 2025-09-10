@@ -82,8 +82,8 @@ public class IndexController {
         int limit = 6;
         
         Page<ArticleExcerptDTO> articlePage = articleService.getHomepageArticle(pageNum, pageSize);
-        List<ArticleExcerptDTO> popularArticles = articleService.selectArticleSummaries(limit);
-        List<ArticleExcerptDTO> featuredArticles = articleService.selectFeaturedArticles();
+        List<ArticleExcerptDTO> popularArticles = articleService.getPopularArticles(limit);
+        List<ArticleExcerptDTO> featuredArticles = articleService.getFeaturedArticles();
         List<TagDTO> allTags = tagService.selectAllTags();
 
         Map<String, Object> response = new HashMap<>();

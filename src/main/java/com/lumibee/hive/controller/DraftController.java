@@ -76,7 +76,7 @@ public class DraftController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        Page<ArticleExcerptDTO> drafts = articleService.getArticlesByUserId(user.getId(), pageNum, pageSize);
+        Page<ArticleExcerptDTO> drafts = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
         return ResponseEntity.ok(drafts);
     }
 

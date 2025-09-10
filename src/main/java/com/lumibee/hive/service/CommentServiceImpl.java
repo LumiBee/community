@@ -1,14 +1,12 @@
 package com.lumibee.hive.service;
 
 import com.lumibee.hive.dto.CommentDTO;
-import com.lumibee.hive.dto.UserDTO;
 import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.mapper.CommentMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Comments;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +18,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.lumibee.hive.constant.CacheNames;
+
+/**
+ * 评论服务实现类
+ * 负责评论相关的业务逻辑处理，包括评论的增删改查、评论树结构管理等
+ */
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -28,7 +32,7 @@ public class CommentServiceImpl implements CommentService {
     @Autowired private CacheManager cacheManager;
 
     @Override
-    @Cacheable(value = "articleComments", key = "#articleId")
+    @Cacheable(value = CacheNames.COMMENTS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleComments(#articleId)")
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentsByArticleId(Integer articleId) {
         // 1. 获取所有顶级评论
@@ -61,7 +65,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @CacheEvict(value = "articleComments", key = "#articleId")
     @Transactional
     public Comments addComment(Integer articleId, String content, Long userId, Long parentId) {
         Comments comment = new Comments();
@@ -90,8 +93,8 @@ public class CommentServiceImpl implements CommentService {
     private void evictArticleDetailsCache(Integer articleId) {
         Article article = articleMapper.selectById(articleId);
         if (article != null && article.getSlug() != null) {
-            // 使用 CacheManager 获取名为 "articleDetails" 的缓存，并根据 slug 清除条目
-            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+            // 使用 CacheManager 获取名为 "article-detail" 的缓存，并根据 slug 清除条目
+            Objects.requireNonNull(cacheManager.getCache(CacheNames.ARTICLE_DETAIL)).evict(article.getSlug());
         }
     }
 }

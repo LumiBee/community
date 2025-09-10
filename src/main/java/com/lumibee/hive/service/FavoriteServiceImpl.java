@@ -5,7 +5,6 @@ import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.FavoriteDetailsDTO;
 import com.lumibee.hive.dto.FavoriteResponse;
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
-import com.lumibee.hive.mapper.ArticleMapper;
 import com.lumibee.hive.mapper.FavoriteMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.ArticleFavorites;
@@ -13,8 +12,7 @@ import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +20,19 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.lumibee.hive.constant.CacheNames;
+
+/**
+ * 收藏服务实现类
+ * 负责收藏夹相关的业务逻辑处理，包括收藏夹的增删改查、文章收藏管理等
+ */
 @Service
 public class FavoriteServiceImpl implements FavoriteService {
 
     @Autowired private FavoriteMapper favoriteMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
+    @Autowired private RedisCacheService redisCacheService;
 
     @Override
     @Transactional
@@ -44,10 +49,18 @@ public class FavoriteServiceImpl implements FavoriteService {
         favorite.setPublic(true); // 默认设置为公开
         favoriteMapper.insert(favorite);
 
+        // 清除用户收藏相关缓存
+        try {
+            redisCacheService.clearUserFavoritesCaches(userId);
+        } catch (Exception e) {
+            System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
+        }
+
         return favorite;
     }
 
     @Override
+    @Cacheable(value = CacheNames.FAVORITES_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).favoriteDetail(#favoriteId)")
     @Transactional(readOnly = true)
     public FavoriteDetailsDTO selectFavoritesById(Long favoriteId) {
         // 1. 获取收藏夹基本信息
@@ -111,6 +124,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
+    @Cacheable(value = CacheNames.FAVORITES_USER, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFavorites(#userId)")
     @Transactional(readOnly = true)
     public List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId) {
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();
@@ -154,6 +168,13 @@ public class FavoriteServiceImpl implements FavoriteService {
         newArticleFavorite.setArticleId(articleId);
         newArticleFavorite.setFavoriteId(favoriteId);
         articleFavoritesMapper.insert(newArticleFavorite);
+
+        // 清除用户收藏相关缓存
+        try {
+            redisCacheService.clearUserFavoritesCaches(userId);
+        } catch (Exception e) {
+            System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
+        }
 
         Integer articlesCount = articleFavoritesMapper.countArticlesFavorited(articleId);
 

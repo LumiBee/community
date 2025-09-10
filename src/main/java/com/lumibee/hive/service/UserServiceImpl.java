@@ -7,13 +7,13 @@ import java.util.List;
 
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,13 +21,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.lumibee.hive.mapper.UserFollowingMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.constant.CacheNames;
 
+/**
+ * 用户服务实现类
+ * 负责用户相关的业务逻辑处理，包括用户认证、资料管理、关注关系等
+ */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired private UserMapper userMapper;
     @Autowired private UserFollowingMapper userFollowingMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
+    @Autowired private RedisCacheService redisCacheService;
     
     @Override
     public UserMapper getUserMapper() {
@@ -39,72 +45,115 @@ public class UserServiceImpl implements UserService {
         return userFollowingMapper;
     }
 
+    /**
+     * 根据用户名查找用户
+     * @param name 用户名
+     * @return 用户信息
+     */
     @Override
+    @Cacheable(value = CacheNames.USER_PROFILE, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfile(#name)")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
-        System.out.println("UserServiceImpl.selectByName: 直接从数据库加载用户: " + name);
-        User user = userMapper.selectByName(name);
-        if (user != null) {
-            System.out.println("UserServiceImpl.selectByName: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
-        }
-        return user;
+        return userMapper.selectByName(name);
     }
 
+    /**
+     * 根据邮箱查找用户
+     * @param email 邮箱
+     * @return 用户信息
+     */
     @Override
     @Transactional(readOnly = true)
     public User selectByEmail(String email) {
-        System.out.println("UserServiceImpl.selectByEmail: 直接从数据库加载用户: " + email);
-        User user = userMapper.selectByEmail(email);
-        if (user != null) {
-            System.out.println("UserServiceImpl.selectByEmail: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
-        }
-        return user;
+        return userMapper.selectByEmail(email);
     }
 
+    /**
+     * 根据GitHub ID查找用户
+     * @param githubId GitHub ID
+     * @return 用户信息
+     */
     @Override
     @Transactional(readOnly = true)
     public User selectByGithubId(String githubId) {
-        System.out.println("UserServiceImpl.selectByGithubId: 直接从数据库加载用户: " + githubId);
-        User user = userMapper.selectByGithubId(githubId);
-        if (user != null) {
-            System.out.println("UserServiceImpl.selectByGithubId: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
-        }
-        return user;
+        return userMapper.selectByGithubId(githubId);
     }
 
+    /**
+     * 检查用户是否关注了另一个用户
+     * @param userId 被关注的用户ID
+     * @param followerId 关注者用户ID
+     * @return 是否关注
+     */
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", key = "#id"),
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByEmail", allEntries = true)
-    })
+    @Cacheable(value = CacheNames.USER_FOLLOW, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollow(#userId, #followerId)")
+    @Transactional(readOnly = true)
+    public boolean isFollowing(Long userId, Long followerId) {
+        if (userId == null || followerId == null || userId.equals(followerId)) {
+            return false;
+        }
+        Integer result = userFollowingMapper.isFollowing(followerId, userId);
+        return result == 1;
+    }
+
+    /**
+     * 获取用户的粉丝数量
+     * @param id 用户ID
+     * @return 粉丝数量
+     */
+    @Override
+    @Cacheable(value = CacheNames.USER_STATUS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFansCount(#id)")
+    @Transactional(readOnly = true)
+    public Integer countFansByUserId(Long id) {
+        return userFollowingMapper.countFansByUserId(id);
+    }
+
+    /**
+     * 获取用户的关注数量
+     * @param id 用户ID
+     * @return 关注数量
+     */
+    @Override
+    @Cacheable(value = CacheNames.USER_STATUS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollowersCount(#id)")
+    @Transactional(readOnly = true)
+    public Integer countFollowingByUserId(Long id) {
+        return userFollowingMapper.countFollowingByUserId(id);
+    }
+
+    /**
+     * 更新用户密码
+     * @param id 用户ID
+     * @param newPassword 新密码
+     * @return 是否更新成功
+     */
+    @Override
     @Transactional
     public boolean updatePassword(Long id, String newPassword) {
-        // 先获取完整的用户信息
         User existingUser = userMapper.selectById(id);
         if (existingUser == null) {
             return false;
         }
-        
-        // 只更新密码和修改时间
+
         User user = new User();
         user.setId(id);
         user.setPassword(newPassword);
         user.setGmtModified(LocalDateTime.now());
 
-        System.out.println("更新用户密码: ID=" + id + ", 密码长度=" + (newPassword != null ? newPassword.length() : 0));
         int updatedRows = userMapper.updateById(user);
-        System.out.println("密码更新结果: " + (updatedRows > 0 ? "成功" : "失败"));
-
+        
+        // 清除用户相关缓存
+        if (updatedRows > 0) {
+            try {
+                redisCacheService.clearUserRelatedCaches(id, existingUser.getName());
+            } catch (Exception e) {
+                System.err.println("清除用户相关缓存时出错: " + e.getMessage());
+            }
+        }
+        
         return updatedRows > 0;
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", key = "#userId"),
-            @CacheEvict(value = "users", allEntries = true),
-            @CacheEvict(value = "usersByEmail", allEntries = true)
-    })
     @Transactional
     public User updateProfile(Long userId, String userName, String email, String bio) {
         // 先获取完整的用户信息
@@ -112,7 +161,7 @@ public class UserServiceImpl implements UserService {
         if (existingUser == null) {
             throw new IllegalArgumentException("用户不存在");
         }
-        
+
         // 检查用户名是否已被其他用户使用
         if (!userName.equals(existingUser.getName())) {
             User userWithSameName = userMapper.selectByName(userName);
@@ -120,7 +169,7 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("用户名已被使用");
             }
         }
-        
+
         // 检查邮箱是否已被其他用户使用
         if (!email.equals(existingUser.getEmail())) {
             User userWithSameEmail = userMapper.selectByEmail(email);
@@ -128,7 +177,7 @@ public class UserServiceImpl implements UserService {
                 throw new IllegalArgumentException("邮箱已被使用");
             }
         }
-        
+
         // 更新用户信息
         User user = new User();
         user.setId(userId);
@@ -141,33 +190,19 @@ public class UserServiceImpl implements UserService {
         int updatedRows = userMapper.updateById(user);
         System.out.println("资料更新结果: " + (updatedRows > 0 ? "成功" : "失败"));
 
+        // 清除相关缓存
+        try {
+            redisCacheService.clearUserRelatedCaches(userId, existingUser.getName());
+        } catch (Exception e) {
+            System.err.println("清除用户相关缓存时出错: " + e.getMessage());
+        }
+
         if (updatedRows > 0) {
             // 返回更新后的完整用户信息
             return userMapper.selectById(userId);
         } else {
             throw new RuntimeException("更新用户资料失败");
         }
-    }
-
-    @Override
-    @Cacheable(value = "isFollowing", key = "#userId + '-' + #followerId")
-    @Transactional(readOnly = true)
-    public boolean isFollowing(Long userId, Long followerId) {
-        if (userId == null || followerId == null || userId.equals(followerId)) {
-            // 用户不能关注自己，或者参数无效
-            return false;
-        }
-        
-        // userId是当前用户ID（关注者），followerId是作者ID（被关注者）
-        // 在数据库中：user_id=被关注者，follower_id=关注者
-        // 所以查询时：user_id=followerId（作者），follower_id=userId（当前用户）
-        System.out.println("isFollowing - 检查关注状态: 当前用户ID=" + userId + ", 作者ID=" + followerId);
-        System.out.println("isFollowing - 数据库查询: user_id=" + followerId + ", follower_id=" + userId);
-        Integer result = userFollowingMapper.isFollowing(followerId, userId);
-        System.out.println("isFollowing - 查询结果: " + result);
-        boolean isFollowing = result == 1;
-        System.out.println("isFollowing - 最终结果: " + isFollowing);
-        return isFollowing; // 返回 true 如果存在关注关系
     }
 
     @Override
@@ -194,14 +229,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Caching(
-            evict = {
-                    @CacheEvict(value = "users", key = "#user.id"),
-                    @CacheEvict(value = "users", key = "#user.name"),
-                    @CacheEvict(value = "usersByEmail", key = "#user.email"),
-                    @CacheEvict(value = "usersByGithubId", key = "#user.githubId", condition = "#user.githubId != null")
-            }
-    )
     @Transactional
     public int updateById(User user) {
         return userMapper.updateById(user);
@@ -328,13 +355,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = "users", key = "#followerId"),
-            @CacheEvict(value = "users", key = "#userId"),
-            @CacheEvict(value = "isFollowing", key = "#followerId + '-' + #userId"),
-            @CacheEvict(value = "followingCount", key = "#followerId"),
-            @CacheEvict(value = "fansCount", key = "#userId")
-    })
     @Transactional
     public boolean toggleFollow(Long followerId, Long userId) {
         // 这里followerId是当前用户（关注者），userId是要关注的作者（被关注者）
@@ -352,26 +372,58 @@ public class UserServiceImpl implements UserService {
         if (isCurrentlyFollowing) {
             // 如果已经关注，则取消关注
             userFollowingMapper.unfollowUser(userId, followerId);
+            
+            // 清除关注相关缓存
+            try {
+                redisCacheService.clearUserStatusCaches(userId);
+                redisCacheService.clearUserStatusCaches(followerId);
+                redisCacheService.clearUserFollowCaches(userId, followerId);
+            } catch (Exception e) {
+                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
+            }
+            
             return false;
         } else {
             // 如果未关注，则添加关注
             userFollowingMapper.followUser(userId, followerId);
+            
+            // 清除关注相关缓存
+            try {
+                redisCacheService.clearUserStatusCaches(userId);
+                redisCacheService.clearUserStatusCaches(followerId);
+                redisCacheService.clearUserFollowCaches(userId, followerId);
+            } catch (Exception e) {
+                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
+            }
+            
             return true;
         }
     }
 
     @Override
-    @Cacheable(value = "fansCount", key = "#id")
     @Transactional(readOnly = true)
-    public Integer countFansByUserId(Long id) {
-        return userFollowingMapper.countFansByUserId(id);
-    }
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
 
-    @Override
-    @Cacheable(value = "followingCount", key = "#id")
-    @Transactional(readOnly = true)
-    public Integer countFollowingByUserId(Long id) {
-        return userFollowingMapper.countFollowingByUserId(id);
+        User user = null;
+        // 1. 尝试按邮箱查找
+        if (usernameOrEmail.contains("@")) { // 一个简单的判断是否可能是邮箱
+            user = this.selectByEmail(usernameOrEmail);
+        }
+
+        // 2. 如果按邮箱未找到，或者输入的不像邮箱，则尝试按用户名查找
+        if (user == null) {
+            user = this.selectByName(usernameOrEmail);
+        }
+
+        if (user == null) {
+            throw new UsernameNotFoundException("用户 '" + usernameOrEmail + "' 未找到");
+        }
+
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            throw new UsernameNotFoundException("用户 '" + usernameOrEmail + "' 未设置密码，无法登录");
+        }
+
+        return user;
     }
 
     @Override
@@ -381,8 +433,8 @@ public class UserServiceImpl implements UserService {
                 user.getPassword(),
                 user.getAuthorities()
         );
-
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+
 
 }

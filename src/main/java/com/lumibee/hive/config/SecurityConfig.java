@@ -29,7 +29,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.CustomUserServiceImpl;
 import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.UserServiceImpl;
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
@@ -49,9 +48,6 @@ public class SecurityConfig {
 
     @Autowired
     private DataSource dataSource;
-
-    @Autowired
-    private CustomUserServiceImpl customUserServiceImpl;
     
     @Autowired
     private RememberMeFilter rememberMeFilter;
@@ -98,7 +94,6 @@ public class SecurityConfig {
                                         "/portfolio/**", // 作品集详情 API (GET)
                                         "/signup", // 注册API
                                         "/login", // API登录端点
-                                        "/ai/**", // AI 相关 API - 允许所有用户访问
                                         "/profile/**", // 个人资料 API
                                         "/debug/**", // 调试API
                                         "/user/debug/**", // 用户调试API
@@ -113,6 +108,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/refresh").permitAll() // Token刷新接口允许匿名访问
                         .requestMatchers("/publish", "/drafts", "/article/save-draft").authenticated()
                         .requestMatchers(HttpMethod.POST, "/article/*/comment").authenticated()
+                        .requestMatchers("/ai/**").authenticated() // AI 相关 API 需要认证
                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -155,7 +151,7 @@ public class SecurityConfig {
                         rememberMe
                                 .tokenRepository(persistentTokenRepository())
                                 .tokenValiditySeconds(1209600) // 2周 = 14 * 24 * 60 * 60
-                                .userDetailsService(customUserServiceImpl)
+                                .userDetailsService(userServiceImpl)
                                 .rememberMeParameter("remember-me")
                                 .key("lumiHiveRememberMeKey")
                 )
@@ -177,7 +173,7 @@ public class SecurityConfig {
                                         "/user/**", // 用户相关 API（包括关注功能）
                                         "/signup", // 注册 API
                                         "/profile/**", // 个人资料 API
-                                        "/ai/**", // AI 相关 API
+                                        "/ai/**", // AI 相关 API - 忽略CSRF但需要认证
                                         "/article/save-draft", // 保存草稿 API
                                         "/debug/**", // 调试API
                                         "/user/debug/**", // 用户调试API
