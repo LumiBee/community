@@ -57,6 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private ArticleFavoritesMapper favoriteMapper;
     @Autowired private CacheManager cacheManager;
     @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
 
 
     /**

@@ -37,6 +37,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleMapper articleMapper;
     @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
 
     @Override
     @Transactional

@@ -33,6 +33,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
     @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
 
     @Override
     @Transactional

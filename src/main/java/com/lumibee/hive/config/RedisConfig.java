@@ -60,7 +60,6 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置值的序列化方式
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
-                // 默认情况下允许缓存null值，防止缓存穿透
 
         return RedisCacheManager.builder(factory)
                 .cacheDefaults(defaultConfig)
@@ -69,8 +68,7 @@ public class RedisConfig {
                 
                 // 文章详情缓存 - 2小时
                 .withCacheConfiguration(CacheNames.ARTICLE_DETAIL, 
-                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer)
-                    .disableCachingNullValues())
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 首页文章列表 - 30分钟
                 .withCacheConfiguration(CacheNames.HOMEPAGE_ARTICLES, 
@@ -92,9 +90,9 @@ public class RedisConfig {
                 .withCacheConfiguration(CacheNames.SEARCH_ARTICLES, 
                     createCacheConfig(Duration.ofMinutes(5), stringSerializer, jsonSerializer))
                 
-                // 热门文章列表 - 1小时
+                // 热门文章列表 - 2小时
                 .withCacheConfiguration(CacheNames.POPULAR_ARTICLES, 
-                    createCacheConfig(Duration.ofMinutes(60), stringSerializer, jsonSerializer))
+                    createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 精选文章列表 - 2小时
                 .withCacheConfiguration(CacheNames.FEATURED_ARTICLES, 
@@ -206,6 +204,15 @@ public class RedisConfig {
         double offset = (Math.random() - 0.5) * 0.2; // -10% 到 +10%
         long randomSeconds = (long) (baseSeconds * (1 + offset));
         return Duration.ofSeconds(Math.max(randomSeconds, 60)); // 最少1分钟
+    }
+    
+    /**
+     * 获取缓存统计信息
+     * @return 缓存统计信息
+     */
+    public String getCacheStatistics() {
+        return String.format("缓存配置统计: 共配置了%d个缓存类型，默认TTL: 1小时，随机偏移: ±10%%", 
+            CacheNames.class.getDeclaredFields().length);
     }
 
     /**

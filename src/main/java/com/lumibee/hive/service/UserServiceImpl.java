@@ -34,6 +34,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired private UserFollowingMapper userFollowingMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
     @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
     
     @Override
     public UserMapper getUserMapper() {

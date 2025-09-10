@@ -28,6 +28,7 @@ public class TagServiceImpl implements TagService {
 
     @Autowired private TagMapper tagMapper;
     @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
 
     /**
      * 增加标签的文章计数

@@ -30,6 +30,7 @@ public class CommentServiceImpl implements CommentService {
     @Autowired private CommentMapper commentMapper;
     @Autowired private ArticleMapper articleMapper;
     @Autowired private CacheManager cacheManager;
+    @Autowired private CacheMonitoringService cacheMonitoringService;
 
     @Override
     @Cacheable(value = CacheNames.COMMENTS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleComments(#articleId)")

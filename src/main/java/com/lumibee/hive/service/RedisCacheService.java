@@ -1,5 +1,6 @@
 package com.lumibee.hive.service;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +29,9 @@ public class RedisCacheService {
 
     @Autowired
     private TagMapper tagMapper;
+
+    @Autowired
+    private CacheMonitoringService cacheMonitoringService;
 
     @Value("${spring.cache.redis.key-prefix:}")
     private String keyPrefix;
@@ -84,6 +88,32 @@ public class RedisCacheService {
         if (article.getPortfolioId() != null) {
             clearPortfolioArticleCaches(article.getPortfolioId());
         }
+    }
+
+    // 监控缓存获取操作
+    public <T> T get(String key, Class<T> type) {
+        return cacheMonitoringService.monitorCacheOperation("get", () -> {
+            try {
+                Object value = redisTemplate.opsForValue().get(key);
+                return value != null ? (T) value : null;
+            } catch (Exception e) {
+                log.error("Redis get 操作失败: {}", e.getMessage(), e);
+                return null;
+            }
+        });
+    }
+
+    // 监控缓存设置操作
+    public void set(String key, Object value, Duration ttl) {
+        cacheMonitoringService.monitorCacheOperation("set", () -> {
+            try {
+                redisTemplate.opsForValue().set(key, value, ttl);
+                return true;
+            } catch (Exception e) {
+                log.error("设置缓存失败: {}", key, e);
+                return false;
+            }
+        });
     }
 
     /**

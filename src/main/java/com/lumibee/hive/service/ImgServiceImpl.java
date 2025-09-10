@@ -23,8 +23,9 @@ public class ImgServiceImpl implements ImgService {
     @Autowired private FileStorageService fileStorageService;
     
     @Autowired private UserService userService;
+
+    @Autowired private RedisCacheService cacheService;
     
-    @Autowired private CacheService cacheService;
     
     @Value("${avatar.max.size}") // 默认2MB
     private long maxAvatarSize;

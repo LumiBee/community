@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lumibee.hive.service.RedisCacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.CacheService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
 
@@ -39,7 +39,7 @@ public class UserController {
 
     @Autowired private UserService userService;
     @Autowired private ImgService imgService;
-    @Autowired private CacheService cacheService;
+    @Autowired private RedisCacheService cacheService;
 
     /**
      * 获取当前用户信息
@@ -309,7 +309,7 @@ public class UserController {
             try {
                 if (userNameChanged) {
                     // 如果用户名发生变化，清理用户名相关的所有缓存
-                    cacheService.clearUserNameChangeCaches();
+                    cacheService.clearUserRelatedCaches(currentUser.getId(), currentUser.getName());
                 } else {
                     // 如果只是其他信息变化，只清理用户相关缓存
                     cacheService.clearUserArticleCaches(currentUser.getId());

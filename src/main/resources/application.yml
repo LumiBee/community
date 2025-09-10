@@ -88,6 +88,15 @@ spring:
   ai:
     dashscope:
       api-key: "placeholder_dashscope_key"
+  
+  # 缓存配置
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000 # 默认1小时
+      cache-null-values: true # 允许缓存null值
+      key-prefix: "hive::" # 缓存键前缀
+      use-key-prefix: true # 使用键前缀
 
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
@@ -115,29 +124,41 @@ avatar:
   allowed:
     extensions: jpg,jpeg,png,gif  # 允许的文件类型
 
+
 # 监控配置
 management:
   endpoints:
     web:
       exposure:
         include: health,info,metrics,prometheus,env,beans,configprops
+      base-path: /actuator
   endpoint:
     health:
       show-details: when_authorized
       show-components: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
   metrics:
     export:
       prometheus:
+        enabled: true
         step: 60s
+    tags:
+      application: hive
+      environment: ${spring.profiles.active:dev}
     distribution:
       percentiles-histogram:
         http.server.requests: true
         jdbc.connections.active: true
-  info:
-    env:
+  health:
+    redis:
       enabled: true
-    git:
-      mode: full
+    db:
+      enabled: true
+    caches:
+      enabled: true
 
 # 日志配置
 logging:
