@@ -221,7 +221,6 @@ public class SecurityConfig {
                     sessionUser.setEmail(user.getEmail());
 
                     session.setAttribute("user", sessionUser); //将 User 对象以键名 "user" 存入 session
-                    System.out.println("Form Login Success: User '" + sessionUser.getName() + "' set in session.");
                 } else {
                     System.err.println("Form Login Success, but could not reload user from DB with identifier: " + userIdentifier);
                 }
@@ -270,7 +269,6 @@ public class SecurityConfig {
                 user.setPassword(null); // 新 OAuth 用户，本地密码为 null
                 userService.insert(user);
                 needsPasswordPrompt = true;
-                System.out.println("New user created via Spring Security OAuth2: " + user.getName());
             }  else {
                 if (user.getPassword() == null || user.getPassword().isBlank()) {
                     needsPasswordPrompt = true;
@@ -278,7 +276,6 @@ public class SecurityConfig {
 
                 user.setGmtModified(LocalDateTime.now());
                 userService.updateById(user);
-                System.out.println("Updated existing user info via Spring Security OAuth2: " + user.getName());
             }
 
             session.setAttribute("user", user);

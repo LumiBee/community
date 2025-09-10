@@ -31,23 +31,19 @@ public class CacheService {
      * 当用户信息更新时调用
      */
     public void clearArticleRelatedCaches() {
-        System.out.println("开始清理文章相关缓存...");
         
         for (String cacheName : ARTICLE_RELATED_CACHES) {
             try {
                 var cache = cacheManager.getCache(cacheName);
                 if (cache != null) {
                     cache.clear();
-                    System.out.println("已清理缓存: " + cacheName);
                 } else {
-                    System.out.println("缓存不存在: " + cacheName);
                 }
             } catch (Exception e) {
                 System.err.println("清理缓存失败 " + cacheName + ": " + e.getMessage());
             }
         }
         
-        System.out.println("文章相关缓存清理完成");
     }
 
     /**
@@ -55,7 +51,6 @@ public class CacheService {
      * @param userId 用户ID
      */
     public void clearUserArticleCaches(Long userId) {
-        System.out.println("开始清理用户 " + userId + " 的文章缓存...");
         
         // 清理个人资料页文章缓存
         try {
@@ -65,7 +60,6 @@ public class CacheService {
                 // 我们需要清理所有包含该用户ID的缓存
                 // 这里简化处理，直接清理整个缓存
                 profileCache.clear();
-                System.out.println("已清理用户个人资料页文章缓存");
             }
         } catch (Exception e) {
             System.err.println("清理用户个人资料页文章缓存失败: " + e.getMessage());
@@ -80,7 +74,6 @@ public class CacheService {
      * 当用户名发生变化时调用，需要清理所有可能包含用户名的缓存
      */
     public void clearUserNameChangeCaches() {
-        System.out.println("开始清理用户名变化相关缓存...");
         
         try {
             // 清理所有文章相关缓存（因为文章可能包含作者用户名）
@@ -90,24 +83,20 @@ public class CacheService {
             var userCache = cacheManager.getCache("users");
             if (userCache != null) {
                 userCache.clear();
-                System.out.println("已清理用户缓存");
             }
             
             // 清理用户邮箱相关缓存
             var userEmailCache = cacheManager.getCache("usersByEmail");
             if (userEmailCache != null) {
                 userEmailCache.clear();
-                System.out.println("已清理用户邮箱缓存");
             }
             
             // 清理个人资料页缓存（因为URL可能包含用户名）
             var profileCache = cacheManager.getCache("profileArticles");
             if (profileCache != null) {
                 profileCache.clear();
-                System.out.println("已清理个人资料页缓存");
             }
             
-            System.out.println("用户名变化相关缓存清理完成");
         } catch (Exception e) {
             System.err.println("清理用户名变化相关缓存失败: " + e.getMessage());
         }
@@ -118,17 +107,14 @@ public class CacheService {
      * 谨慎使用，仅在必要时调用
      */
     public void clearAllCaches() {
-        System.out.println("开始清理所有缓存...");
         
         try {
             cacheManager.getCacheNames().forEach(cacheName -> {
                 var cache = cacheManager.getCache(cacheName);
                 if (cache != null) {
                     cache.clear();
-                    System.out.println("已清理缓存: " + cacheName);
                 }
             });
-            System.out.println("所有缓存清理完成");
         } catch (Exception e) {
             System.err.println("清理所有缓存失败: " + e.getMessage());
         }

@@ -78,19 +78,14 @@ public class AiApiController {
     })
     public ResponseEntity<SummaryResponse> generateSummaryWithDeepSeek(
         @Parameter(description = "摘要生成请求数据") @RequestBody SummaryRequest request) {
-        System.out.println("=== AI摘要接口被调用 ===");
-        System.out.println("收到AI摘要请求: " + request.getTextContent().substring(0, Math.min(50, request.getTextContent().length())) + "...");
         
         if (request.getTextContent() == null || request.getTextContent().trim().isEmpty()) {
-            System.out.println("文本内容为空");
             return ResponseEntity.badRequest().body(new SummaryResponse("文本内容不能为空。"));
         }
 
         try {
-            System.out.println("开始调用DeepSeek服务生成摘要...");
             // 调用 DeepSeek 服务生成摘要
             String summary = okHttpAiService.generateSummary(request.getTextContent(), request.getMaxLength());
-            System.out.println("DeepSeek服务返回摘要: " + summary);
             
             // 检查摘要是否有效
             if (summary == null || summary.trim().isEmpty() || summary.contains("生成摘要失败")) {
@@ -99,8 +94,6 @@ public class AiApiController {
             }
             
             SummaryResponse response = new SummaryResponse(summary);
-            System.out.println("创建响应对象: " + response);
-            System.out.println("响应对象的summary字段: " + response.getSummary());
             
             return ResponseEntity.ok(response);
         } catch (Exception e) {

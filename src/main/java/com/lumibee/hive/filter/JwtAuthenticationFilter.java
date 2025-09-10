@@ -42,16 +42,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             // 记录请求信息
-            System.out.println("JwtAuthenticationFilter 处理请求: " + request.getMethod() + " " + request.getRequestURI());
             
             // 检查是否是作品集创建请求
             if (request.getMethod().equals("POST") && request.getRequestURI().equals("/api/portfolio")) {
-                System.out.println("=== 检测到作品集创建请求 ===");
-                System.out.println("请求头信息:");
                 java.util.Enumeration<String> headerNames = request.getHeaderNames();
                 while (headerNames.hasMoreElements()) {
                     String headerName = headerNames.nextElement();
-                    System.out.println(headerName + ": " + request.getHeader(headerName));
                 }
             }
             
@@ -59,23 +55,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String jwt = getJwtFromRequest(request);
             
             if (StringUtils.hasText(jwt)) {
-                System.out.println("请求中包含JWT令牌: " + jwt.substring(0, Math.min(20, jwt.length())) + "...");
                 
                 // 验证令牌
                 boolean isValid = validateToken(jwt);
-                System.out.println("JWT令牌验证结果: " + (isValid ? "有效" : "无效"));
                 
                 // 如果令牌有效，则设置认证信息
                 if (isValid) {
                     // 从JWT中获取用户ID
                     Long userId = getUserIdFromToken(jwt);
-                    System.out.println("从JWT中获取的用户ID: " + userId);
                     
                     // 根据用户ID获取用户信息
                     User user = userService.selectById(userId);
                     
                     if (user != null) {
-                        System.out.println("成功获取用户信息: ID=" + user.getId() + ", 名称=" + user.getName());
                         
                         // 创建认证令牌
                         UsernamePasswordAuthenticationToken authentication = 
@@ -87,13 +79,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         // 设置安全上下文
                         SecurityContextHolder.getContext().setAuthentication(authentication);
                         
-                        System.out.println("JWT认证成功: 用户ID=" + userId + ", 设置到SecurityContext");
                     } else {
-                        System.out.println("未找到用户: ID=" + userId);
                     }
                 }
             } else {
-                System.out.println("请求中没有JWT令牌");
             }
         } catch (Exception ex) {
             logger.error("JWT认证过程中发生错误", ex);
@@ -110,14 +99,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 从请求头中获取JWT令牌
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            System.out.println("从Authorization头中获取到JWT令牌");
             return bearerToken.substring(7);
         }
         
         // 如果请求头中没有，尝试从请求参数中获取
         String paramToken = request.getParameter("token");
         if (StringUtils.hasText(paramToken)) {
-            System.out.println("从请求参数中获取到JWT令牌");
             return paramToken;
         }
         
@@ -125,18 +112,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 if ("jwt_token".equals(cookie.getName())) {
-                    System.out.println("从cookie中获取到JWT令牌");
                     return cookie.getValue();
                 }
             }
         }
         
         // 记录所有请求头，用于调试
-        System.out.println("请求头信息:");
         java.util.Enumeration<String> headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String headerName = headerNames.nextElement();
-            System.out.println(headerName + ": " + request.getHeader(headerName));
         }
         
         return null;

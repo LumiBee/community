@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.constant.CacheNames;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.PortfolioDetailsDTO;
 import com.lumibee.hive.mapper.ArticleMapper;
@@ -24,7 +25,6 @@ import com.lumibee.hive.mapper.PortfolioMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.constant.CacheNames;
 
 /**
  * 作品集服务实现类
@@ -81,20 +81,16 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     @Transactional(readOnly = true)
     public List<PortfolioDetailsDTO> selectAllPortfolios() {
-        System.out.println("=== 开始获取所有作品集 ===");
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("deleted", 0).orderByDesc("gmt_modified");
         List<Portfolio> portfolios = portfolioMapper.selectList(queryWrapper);
         
-        System.out.println("从数据库查询到的作品集数量: " + (portfolios != null ? portfolios.size() : 0));
         if (portfolios != null) {
             for (Portfolio p : portfolios) {
-                System.out.println("作品集: ID=" + p.getId() + ", name=" + p.getName() + ", userId=" + p.getUserId());
             }
         }
 
         if (portfolios == null || portfolios.isEmpty()) {
-            System.out.println("没有找到作品集，返回空列表");
             return List.of();
         }
 
@@ -152,7 +148,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         Portfolio portfolio = portfolioMapper.selectOne(queryWrapper);
 
         if (portfolio == null || portfolio.getId() == null) {
-            throw new IllegalArgumentException("没有找到作品集，请检查slug是否正确");
+            return null; // 返回null，会被缓存防止穿透
         }
         
         PortfolioDetailsDTO dto = new PortfolioDetailsDTO();

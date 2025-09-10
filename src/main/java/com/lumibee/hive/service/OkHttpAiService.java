@@ -41,7 +41,6 @@ public class OkHttpAiService {
             );
             return extractSummary(response);
         } catch (Exception e) {
-            System.out.println("生成摘要失败： " + e.getMessage());
             return "生成摘要失败，请稍后再试。";
         }
     }

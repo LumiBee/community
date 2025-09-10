@@ -1,9 +1,10 @@
 package com.lumibee.hive.service;
 
-import com.lumibee.hive.model.Article;
-import com.lumibee.hive.model.Tag;
-import com.lumibee.hive.constant.CacheNames;
-import lombok.extern.log4j.Log4j2;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.lumibee.hive.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -12,9 +13,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.lumibee.hive.constant.CacheNames;
+import com.lumibee.hive.model.Article;
+import com.lumibee.hive.model.Tag;
+
+import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
@@ -24,7 +27,7 @@ public class RedisCacheService {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    private TagService tagService;
+    private TagMapper tagMapper;
 
     @Value("${spring.cache.redis.key-prefix:}")
     private String keyPrefix;
@@ -72,7 +75,7 @@ public class RedisCacheService {
         clearUserArticleCaches(article.getUserId());
 
         // 清除相关标签的文章列表缓存 （如果有）
-        List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
+        List<Tag> tags = tagMapper.selectTagsByArticleId(article.getArticleId());
         for (Tag tag : tags) {
             clearTagArticleCaches(tag.getSlug());
         }
@@ -157,7 +160,6 @@ public class RedisCacheService {
         clearCachesByPattern(keyPrefix + CacheNames.PORTFOLIO_DETAIL + "::" + portfolioId);
     }
 
-
     private void clearCachesByPattern(String pattern) {
         log.info("清除缓存数据, pattern={}", pattern);
         try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
@@ -182,4 +184,5 @@ public class RedisCacheService {
             log.error("清除缓存数据时发生错误: {}", e.getMessage(), e);
         }
     }
+
 }

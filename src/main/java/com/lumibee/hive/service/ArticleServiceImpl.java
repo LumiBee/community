@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
+import com.lumibee.hive.constant.CacheNames;
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
@@ -36,7 +37,6 @@ import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.constant.CacheNames;
 
 
 /**
@@ -260,12 +260,7 @@ public class ArticleServiceImpl implements ArticleService {
                 Integer userArticleCount = articleMapper.countArticlesByUserId(user.getId());
                 Integer userFollowersCount = userService.countFansByUserId(user.getId());
                 Integer userFollowingCount = userService.countFollowingByUserId(user.getId());
-                
-                System.out.println("文章详情页 - 用户统计: userId=" + user.getId() + 
-                    ", 文章数=" + userArticleCount + 
-                    ", 粉丝数=" + userFollowersCount + 
-                    ", 关注数=" + userFollowingCount + 
-                    ", 个人简介=" + user.getBio());
+
                 
                 articleDetailsDTO.setUserArticleCount(userArticleCount);
                 articleDetailsDTO.setUserFollowersCount(userFollowersCount);

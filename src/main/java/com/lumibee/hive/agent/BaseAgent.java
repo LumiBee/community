@@ -155,7 +155,6 @@ public abstract class BaseAgent {
     protected void handleStuckState() {
         String stuckPrompt = "监测到重复响应，考虑新策略，避免重复已经尝试过的无效路径";
         this.nextStepPrompt = stuckPrompt + "\n" + (this.nextStepPrompt != null ? this.nextStepPrompt : "");
-        System.out.println("Agent is stuck, add next step prompt: " + stuckPrompt);
     }
 
     /**

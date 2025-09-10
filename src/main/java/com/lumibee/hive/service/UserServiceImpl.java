@@ -186,9 +186,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setBio(bio);
         user.setGmtModified(LocalDateTime.now());
 
-        System.out.println("更新用户资料: ID=" + userId + ", 用户名=" + userName + ", 邮箱=" + email);
         int updatedRows = userMapper.updateById(user);
-        System.out.println("资料更新结果: " + (updatedRows > 0 ? "成功" : "失败"));
 
         // 清除相关缓存
         try {
@@ -210,15 +208,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
         if (id == null || articleId == null) {
             // 如果用户ID或文章ID无效，直接返回false
-            System.out.println("isFavoritedByCurrentUser: 参数无效 - userId=" + id + ", articleId=" + articleId);
             return false;
         }
 
-        System.out.println("isFavoritedByCurrentUser: 查询收藏状态 - userId=" + id + ", articleId=" + articleId);
         Integer result = articleFavoritesMapper.selectIfFavoriteExists(id, articleId);
-        System.out.println("isFavoritedByCurrentUser: 查询结果=" + result);
         boolean isFavorited = result != null && result > 0;
-        System.out.println("isFavoritedByCurrentUser: 最终结果=" + isFavorited);
         return isFavorited; // 返回 true 如果存在收藏关系
     }
 
@@ -237,10 +231,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public User selectById(Long id) {
-        System.out.println("UserServiceImpl.selectById: 直接从数据库加载用户: " + id);
         User user = userMapper.selectById(id);
         if (user != null) {
-            System.out.println("UserServiceImpl.selectById: 找到用户: " + user.getId() + ", 密码: " + (user.getPassword() != null ? "已设置(长度=" + user.getPassword().length() + ")" : "未设置"));
         }
         return user;
     }
@@ -258,11 +250,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional(readOnly = true)
     public User getCurrentUserFromPrincipal(Principal principal) {
         if (principal == null) {
-            System.out.println("UserService: Received a NULL Principal.");
             return null;
         }
 
-        System.out.println("UserService: Processing Principal of type: " + principal.getClass().getName());
 
         User currentUser = null;
         String identifier = null;
@@ -272,48 +262,33 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (principal instanceof Authentication) {
             actualPrincipal = ((Authentication) principal).getPrincipal();
             if (actualPrincipal == null) {
-                System.out.println("UserService: Authentication.getPrincipal() returned NULL.");
                 return null;
             }
-            System.out.println("UserService: Extracted actual Principal from Authentication: " + actualPrincipal.getClass().getName());
         }
 
         if (actualPrincipal instanceof com.lumibee.hive.model.User) {
-            System.out.println("UserService: Principal is already an instance of com.lumibee.hive.model.User.");
             return (com.lumibee.hive.model.User) actualPrincipal;
         } else if (actualPrincipal instanceof UserDetails) {
-            System.out.println("UserService: Principal is an instance of UserDetails.");
             identifier = ((UserDetails) actualPrincipal).getUsername();
-            System.out.println("UserService: Identifier from UserDetails (username): " + identifier);
             if (identifier != null) {
                 // 直接从数据库加载用户，绕过缓存
                 currentUser = userMapper.selectByName(identifier);
                 if (currentUser == null) {
-                    System.out.println("UserService: User not found by name '" + identifier + "', trying by email.");
                     currentUser = userMapper.selectByEmail(identifier);
                 }
-                
-                // 检查密码是否正确加载
-                if (currentUser != null) {
-                    System.out.println("UserService: 从数据库加载用户成功: ID=" + currentUser.getId() + 
-                                      ", 密码: " + (currentUser.getPassword() != null ? 
-                                                  "已设置(长度=" + currentUser.getPassword().length() + ")" : "未设置"));
-                }
+
             }
         } else if (actualPrincipal instanceof OAuth2User) {
-            System.out.println("UserService: Principal is an instance of OAuth2User.");
             OAuth2User oauth2User = (OAuth2User) actualPrincipal;
             // 尝试从OAuth2User获取多种可能的标识符，按优先级
             identifier = oauth2User.getAttribute("login"); // GitHub 的用户名
             if (identifier != null) {
-                System.out.println("UserService: Identifier from OAuth2User (login attribute): " + identifier);
                 currentUser = userMapper.selectByName(identifier);
             }
 
             if (currentUser == null) {
                 identifier = oauth2User.getAttribute("email"); // 尝试邮箱
                 if (identifier != null) {
-                    System.out.println("UserService: Identifier from OAuth2User (email attribute): " + identifier);
                     currentUser = userMapper.selectByEmail(identifier);
                 }
             }
@@ -321,35 +296,22 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (currentUser == null) {
                 // 对于OAuth2，getName() 通常返回的是提供商给该用户的唯一ID (例如数字字符串)
                 String oauthProviderId = oauth2User.getName();
-                System.out.println("UserService: Identifier from OAuth2User (oauth2User.getName()): " + oauthProviderId);
                 // 假设您有一个方法可以通过GitHub ID (或其他OAuth提供商的ID) 来查找用户
                 currentUser = userMapper.selectByGithubId(oauthProviderId);
                 if (currentUser == null) {
-                    System.out.println("UserService: User not found by OAuth Provider ID: " + oauthProviderId);
                 }
             }
         } else {
-            System.out.println("UserService: Principal is of an UNKNOWN type to resolve to User directly: " + actualPrincipal.getClass().getName());
             // 尝试使用 principal.getName() 作为最后的手段，但它不一定总是用户名
             identifier = principal.getName(); // java.security.Principal 的 getName()
             if(identifier != null){
-                System.out.println("UserService: Fallback: Identifier from principal.getName(): " + identifier);
                 // 直接从数据库加载用户，绕过缓存
                 currentUser = userMapper.selectByName(identifier);
-                
-                // 检查密码是否正确加载
-                if (currentUser != null) {
-                    System.out.println("UserService: 从数据库加载用户成功: ID=" + currentUser.getId() + 
-                                      ", 密码: " + (currentUser.getPassword() != null ? 
-                                                  "已设置(长度=" + currentUser.getPassword().length() + ")" : "未设置"));
-                }
             }
         }
 
         if (currentUser != null) {
-            System.out.println("UserService: User resolved: " + currentUser.getName());
         } else {
-            System.out.println("UserService: Failed to resolve User from Principal.");
         }
         return currentUser;
     }
@@ -363,7 +325,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return false;
         }
         
-        System.out.println("toggleFollow - 关注者ID: " + followerId + ", 被关注者ID: " + userId);
         
         // 检查当前用户是否已经关注了作者
         // 在following表中：user_id=被关注者，follower_id=关注者

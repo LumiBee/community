@@ -53,7 +53,6 @@ public class RememberMeFilter extends OncePerRequestFilter {
                     session.setAttribute("user", user);
                     session.setAttribute("rememberMe", true);
                     
-                    System.out.println("Remember-me自动登录成功: " + user.getName());
                 } else {
                     // token无效，清除cookie
                     rememberMeService.clearRememberMeCookie(response);

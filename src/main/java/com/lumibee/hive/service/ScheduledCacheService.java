@@ -22,17 +22,13 @@ public class ScheduledCacheService {
      */
     @Scheduled(cron = "0 0 2 * * ?")
     public void dailyCacheCleanup() {
-        System.out.println("=== 开始每日缓存清理任务 ===");
-        System.out.println("清理时间: " + LocalDateTime.now());
         
         try {
             cacheService.clearAllCaches();
-            System.out.println("每日缓存清理任务完成");
         } catch (Exception e) {
             System.err.println("每日缓存清理任务失败: " + e.getMessage());
         }
         
-        System.out.println("=== 每日缓存清理任务结束 ===");
     }
 
     /**
@@ -41,17 +37,13 @@ public class ScheduledCacheService {
      */
     @Scheduled(cron = "0 0 * * * ?")
     public void hourlyArticleCacheCleanup() {
-        System.out.println("=== 开始每小时文章缓存清理任务 ===");
-        System.out.println("清理时间: " + LocalDateTime.now());
         
         try {
             cacheService.clearArticleRelatedCaches();
-            System.out.println("每小时文章缓存清理任务完成");
         } catch (Exception e) {
             System.err.println("每小时文章缓存清理任务失败: " + e.getMessage());
         }
         
-        System.out.println("=== 每小时文章缓存清理任务结束 ===");
     }
 
     /**
@@ -60,16 +52,12 @@ public class ScheduledCacheService {
      */
     @Scheduled(cron = "0 */30 * * * ?")
     public void featuredArticlesCacheCleanup() {
-        System.out.println("=== 开始精选文章缓存清理任务 ===");
-        System.out.println("清理时间: " + LocalDateTime.now());
         
         try {
             cacheService.clearArticleRelatedCaches();
-            System.out.println("精选文章缓存清理完成");
         } catch (Exception e) {
             System.err.println("精选文章缓存清理失败: " + e.getMessage());
         }
         
-        System.out.println("=== 精选文章缓存清理任务结束 ===");
     }
 }

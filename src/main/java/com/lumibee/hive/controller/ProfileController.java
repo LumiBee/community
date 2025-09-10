@@ -70,10 +70,6 @@ public class ProfileController {
         }
 
         // 调试信息
-        System.out.println("收到封面图片上传请求:");
-        System.out.println("文件名: " + coverImageFile.getOriginalFilename());
-        System.out.println("文件大小: " + coverImageFile.getSize() + " 字节");
-        System.out.println("内容类型: " + coverImageFile.getContentType());
 
         try {
             String newImageUrl = imgService.uploadCover(currentUser.getId(), coverImageFile);
@@ -107,24 +103,20 @@ public class ProfileController {
             @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
             @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "6") long pageSize,
             @AuthenticationPrincipal Principal principal) {
-        System.out.println("获取用户资料: " + name + ", 页码: " + pageNum + ", 大小: " + pageSize);
         
         try {
             // 根据路径中的name查找用户
             User user = userService.selectByName(name);
             if (user == null) {
-                System.out.println("用户不存在: " + name);
                 return ResponseEntity.notFound().build();
             }
             
-            System.out.println("找到用户: " + user.getId() + ", " + user.getName());
 
             // 判断正在查看的页面是否属于当前登录的用户
             boolean isOwner = false;
             User currentUser = userService.getCurrentUserFromPrincipal(principal);
             if (principal != null && currentUser != null && currentUser.getId().equals(user.getId())) {
                 isOwner = true;
-                System.out.println("当前用户是页面所有者");
             }
 
             // 获取用户统计数据
@@ -134,8 +126,6 @@ public class ProfileController {
             Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
             Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
 
-            System.out.println("用户统计: 文章=" + articleCount + ", 粉丝=" + fans + ", 关注=" + followers);
-            System.out.println("文章分页: 总数=" + articlePage.getTotal() + ", 页数=" + articlePage.getPages());
 
             Map<String, Object> response = new HashMap<>();
             response.put("user", user);

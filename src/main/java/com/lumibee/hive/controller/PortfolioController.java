@@ -72,14 +72,7 @@ public class PortfolioController {
         @ApiResponse(responseCode = "200", description = "获取成功")
     })
     public ResponseEntity<List<PortfolioDetailsDTO>> getAllPortfolios() {
-        System.out.println("=== 获取所有作品集API被调用 ===");
         List<PortfolioDetailsDTO> allPortfolios = portfolioService.selectAllPortfolios();
-        System.out.println("返回作品集数量: " + (allPortfolios != null ? allPortfolios.size() : 0));
-        if (allPortfolios != null) {
-            for (PortfolioDetailsDTO p : allPortfolios) {
-                System.out.println("返回作品集: ID=" + p.getId() + ", name=" + p.getName() + ", userName=" + p.getUserName());
-            }
-        }
         return ResponseEntity.ok(allPortfolios);
     }
 
@@ -96,39 +89,27 @@ public class PortfolioController {
     public ResponseEntity<Portfolio> createPortfolio(
             @Parameter(description = "作品集创建请求") @RequestBody PortfolioCreateRequest request, 
             @AuthenticationPrincipal Principal principal) {
-        System.out.println("=== 创建作品集API被调用 ===");
-        System.out.println("Principal: " + principal);
-        System.out.println("Request: " + request);
         
         if (request == null || request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-            System.out.println("请求数据无效");
             return ResponseEntity.badRequest().build();
         }
 
         // 从当前登录用户获取用户ID
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
-        System.out.println("当前用户: " + currentUser);
         
         if (currentUser == null || currentUser.getId() == null) {
-            System.out.println("用户未认证或用户ID为空");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
             String description = request.getDescription() != null ? request.getDescription().trim() : null;
-            System.out.println("创建作品集 - 标题: " + request.getTitle() + ", 描述: " + description + ", 用户ID: " + currentUser.getId());
-            
             Portfolio portfolio = portfolioService.selectOrCreatePortfolio(request.getTitle().trim(), currentUser.getId(), description);
             if (portfolio != null) {
-                System.out.println("作品集创建成功: " + portfolio.getId());
                 return ResponseEntity.ok(portfolio);
             } else {
-                System.out.println("作品集创建失败");
                 return ResponseEntity.badRequest().build();
             }
         } catch (Exception e) {
-            System.out.println("创建作品集时发生异常: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -28,10 +28,8 @@ public class DataSyncController implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("=================start=================");
         List<ArticleDetailsDTO> articles = articleService.selectAll();
         if (articles == null || articles.isEmpty()) {
-            System.out.println("No articles found to sync with Elasticsearch.");
             return ;
         }
 
@@ -61,8 +59,6 @@ public class DataSyncController implements CommandLineRunner {
         }
 
         articleRepository.saveAll(documents);
-        System.out.println("Data sync completed. " + documents.size() + " articles indexed.");
-        System.out.println("=================over=================");
 
     }
 }

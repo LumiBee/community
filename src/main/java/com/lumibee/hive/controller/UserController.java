@@ -55,11 +55,9 @@ public class UserController {
 
         User user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
-            System.out.println("用户未找到，返回401");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         
-        System.out.println("找到用户: " + user.getName());
         return ResponseEntity.ok(user);
     }
 
@@ -74,9 +72,6 @@ public class UserController {
             @Parameter(description = "要关注的用户ID") @PathVariable("userId") Long userId,
             @AuthenticationPrincipal Principal principal) {
 
-        System.out.println("=== toggleFollow 被调用 ===");
-        System.out.println("接收到的用户ID (Long): " + userId);
-        System.out.println("用户ID类型: " + (userId != null ? userId.getClass().getName() : "null"));
 
         // 获取当前用户
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
@@ -95,18 +90,15 @@ public class UserController {
         // 调用服务层方法切换关注状态
         // 注意：这里是当前用户(currentUser)关注作者(userId)
         // 所以参数顺序应该是 currentUser.getId(), userId
-        System.out.println("关注操作 - 当前用户ID: " + currentUser.getId() + ", 要关注的用户ID: " + userId);
         
         // 验证用户是否存在
         User targetUser = userService.selectById(userId);
         if (targetUser == null) {
-            System.out.println("错误：要关注的用户不存在，ID: " + userId);
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "要关注的用户不存在");
             return ResponseEntity.badRequest().body(response);
         }
-        System.out.println("要关注的用户存在: " + targetUser.getName());
         
         boolean isFollowing = userService.toggleFollow(currentUser.getId(), userId);
         
@@ -125,38 +117,6 @@ public class UserController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping("/debug/users")
-    @Operation(summary = "调试用户列表", description = "获取所有用户的基本信息（调试用）")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
-    })
-    public ResponseEntity<Map<String, Object>> debugUsers() {
-        Map<String, Object> response = new HashMap<>();
-        
-        try {
-            // 获取所有用户的基本信息
-            List<User> users = userService.getUserMapper().selectList(null);
-            List<Map<String, Object>> userList = new ArrayList<>();
-            
-            for (User user : users) {
-                Map<String, Object> userInfo = new HashMap<>();
-                userInfo.put("id", user.getId());
-                userInfo.put("name", user.getName());
-                userInfo.put("email", user.getEmail());
-                userList.add(userInfo);
-            }
-            
-            response.put("success", true);
-            response.put("users", userList);
-            response.put("count", userList.size());
-            
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("error", e.getMessage());
-        }
-        
-        return ResponseEntity.ok(response);
-    }
 
     /**
      * 检查当前用户是否关注了指定用户
@@ -245,7 +205,6 @@ public class UserController {
             // 自动清理相关缓存
             try {
                 cacheService.clearUserArticleCaches(currentUser.getId());
-                System.out.println("用户头像更新后，已自动清理相关缓存");
             } catch (Exception e) {
                 System.err.println("清理缓存失败: " + e.getMessage());
                 // 缓存清理失败不影响头像上传的成功
@@ -350,13 +309,11 @@ public class UserController {
             try {
                 if (userNameChanged) {
                     // 如果用户名发生变化，清理用户名相关的所有缓存
-                    System.out.println("检测到用户名变化，清理用户名相关缓存");
                     cacheService.clearUserNameChangeCaches();
                 } else {
                     // 如果只是其他信息变化，只清理用户相关缓存
                     cacheService.clearUserArticleCaches(currentUser.getId());
                 }
-                System.out.println("用户资料更新后，已自动清理相关缓存");
             } catch (Exception e) {
                 System.err.println("清理缓存失败: " + e.getMessage());
                 // 缓存清理失败不影响资料更新的成功

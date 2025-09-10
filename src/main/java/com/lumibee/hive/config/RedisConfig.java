@@ -60,6 +60,7 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置值的序列化方式
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
+                // 默认情况下允许缓存null值，防止缓存穿透
 
         return RedisCacheManager.builder(factory)
                 .cacheDefaults(defaultConfig)
@@ -177,18 +178,34 @@ public class RedisConfig {
 
     /**
      * 创建缓存配置的辅助方法
-     * 
+     *
      * @param ttl 缓存过期时间
      * @param stringSerializer 键序列化器（String类型）
      * @param jsonSerializer 值序列化器（JSON格式）
      * @return 配置好的RedisCacheConfiguration
      */
     private RedisCacheConfiguration createCacheConfig(Duration ttl, StringRedisSerializer stringSerializer, Jackson2JsonRedisSerializer<Object> jsonSerializer) {
+        // 添加随机偏移防止雪崩
+        Duration randomTtl = addRandomOffset(ttl);
+        
         return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(ttl) // 设置缓存过期时间
+                .entryTtl(randomTtl) // 设置随机缓存过期时间
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer)) // 键使用String序列化
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)) // 值使用JSON序列化
-                .disableCachingNullValues(); // 禁用null值缓存，防止缓存穿透
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)); // 值使用JSON序列化
+                // 默认情况下允许缓存null值
+    }
+
+    /**
+     * 添加随机偏移量防止缓存雪崩
+     * @param baseTtl 基础TTL
+     * @return 添加随机偏移后的TTL
+     */
+    private Duration addRandomOffset(Duration baseTtl) {
+        long baseSeconds = baseTtl.getSeconds();
+        // 添加±10%的随机偏移
+        double offset = (Math.random() - 0.5) * 0.2; // -10% 到 +10%
+        long randomSeconds = (long) (baseSeconds * (1 + offset));
+        return Duration.ofSeconds(Math.max(randomSeconds, 60)); // 最少1分钟
     }
 
     /**

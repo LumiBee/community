@@ -32,7 +32,6 @@ public class WebSearchTool {
 
         try {
             String response = HttpUtil.get(SEARCH_API_URL, paramMap);
-            System.out.println(response);
             // 解析JSON响应
             JSONObject jsonObject = JSONUtil.parseObj(response);
             // 获取organic_results数组并截取前5个结果

@@ -47,26 +47,20 @@ public class PublishController {
         @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
         @Parameter(description = "文章发布请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
 
-        System.out.println("PublishController.publishArticle 被调用");
-        System.out.println("Principal: " + (principal != null ? principal.getClass().getName() : "null"));
         
         // 检查用户是否已认证
         if (principal == null) {
-            System.out.println("用户未认证: principal 为 null");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         
         // 获取当前用户
         var user = userService.getCurrentUserFromPrincipal(principal);
-        System.out.println("获取到用户: " + (user != null ? "ID=" + user.getId() + ", 名称=" + user.getName() : "null"));
         
         if (user == null) {
-            System.out.println("用户未认证: 无法从 principal 获取用户信息");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         
         Long userId = user.getId();
-        System.out.println("发布文章请求: " + requestDTO);
         ArticleDetailsDTO newArticle = articleService.publishArticle(requestDTO, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newArticle);

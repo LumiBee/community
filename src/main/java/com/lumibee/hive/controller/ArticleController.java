@@ -124,11 +124,8 @@ public class ArticleController {
             article.setFollowed(followedByCurrentUser);
 
             // 判断当前用户是否收藏了文章
-            System.out.println("ArticleController: 检查收藏状态 - userId=" + user.getId() + ", articleId=" + article.getArticleId());
             boolean favoritedByCurrentUser = userService.isFavoritedByCurrentUser(user.getId(), article.getArticleId());
-            System.out.println("ArticleController: 收藏状态结果=" + favoritedByCurrentUser);
             article.setFavorited(favoritedByCurrentUser);
-            System.out.println("ArticleController: 设置后的收藏状态=" + article.isFavorited());
         } else {
             // 未登录用户默认未关注和未点赞
             article.setFollowed(false);

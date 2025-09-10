@@ -196,8 +196,6 @@ public class LoginController {
         String password = loginRequest.get("password");
         String rememberMe = loginRequest.get("remember-me");
         
-        System.out.println("接收到登录请求: account=" + account + ", password长度=" + (password != null ? password.length() : 0) + ", rememberMe=" + rememberMe);
-        
         Map<String, Object> responseMap = new HashMap<>();
         
         try {
@@ -205,38 +203,25 @@ public class LoginController {
             UsernamePasswordAuthenticationToken authToken = 
                 new UsernamePasswordAuthenticationToken(account, password);
             
-            System.out.println("准备认证...");
-            
-            System.out.println("准备开始认证过程...");
             // 尝试认证
             Authentication authentication = authenticationManager.authenticate(authToken);
-            
-            System.out.println("认证成功，设置安全上下文");
-            System.out.println("认证结果: " + authentication);
-            System.out.println("认证主体类型: " + authentication.getPrincipal().getClass().getName());
             
             // 认证成功，设置安全上下文
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
-                            // 获取用户信息
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                System.out.println("获取到UserDetails: " + userDetails.getClass().getName());
-                System.out.println("UserDetails.getUsername(): " + userDetails.getUsername());
-                System.out.println("UserDetails.getPassword(): " + (userDetails.getPassword() != null ? "已设置" : "未设置"));
-                
-                // 由于User实现了UserDetails，我们可以直接转换为User对象
-                User user = (User) userDetails;
-                System.out.println("转换为User对象: ID=" + user.getId() + ", Name=" + user.getName());
-                
-                // 生成JWT令牌并设置到用户对象中
-                String jwtToken = generateJwtToken(user);
-                user.setToken(jwtToken);
-                System.out.println("已生成JWT令牌并设置到用户对象中");
+            // 获取用户信息
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            
+            // 由于User实现了UserDetails，我们可以直接转换为User对象
+            User user = (User) userDetails;
+            
+            // 生成JWT令牌并设置到用户对象中
+            String jwtToken = generateJwtToken(user);
+            user.setToken(jwtToken);
             
             if (user != null) {
                 // 处理remember-me功能
                 if ("on".equals(rememberMe)) {
-                    System.out.println("启用remember-me功能");
                     // 使用RememberMeService创建token
                     String rememberMeToken = rememberMeService.createRememberMeToken(user);
                     // 设置remember-me cookie
@@ -244,7 +229,6 @@ public class LoginController {
                     
                     // 在session中标记用户选择了remember-me
                     session.setAttribute("rememberMe", true);
-                    System.out.println("Remember-me token已创建并设置cookie");
                 }
                 
                 // 将用户信息存入会话
@@ -305,7 +289,6 @@ public class LoginController {
     public ResponseEntity<Map<String, String>> dismissPasswordPrompt(HttpSession session) {
         if (session != null) {
             session.removeAttribute("showPasswordSetupPrompt");
-            System.out.println("Session attribute 'showPasswordSetupPrompt' removed by user action.");
         }
         
         Map<String, String> response = new HashMap<>();
@@ -395,16 +378,12 @@ public class LoginController {
         Map<String, Object> responseMap = new HashMap<>();
         
         try {
-            System.out.println("开始处理API登出请求");
-            
             // 清除安全上下文
             SecurityContextHolder.clearContext();
-            System.out.println("安全上下文已清除");
             
             // 清除会话
             if (session != null) {
                 session.invalidate();
-                System.out.println("会话已失效");
             }
             
             // 清除所有相关的cookie
@@ -418,14 +397,12 @@ public class LoginController {
                         cookie.setPath("/");
                         cookie.setMaxAge(0);
                         response.addCookie(cookie);
-                        System.out.println("已清除cookie: " + cookie.getName());
                     }
                 }
             }
             
             responseMap.put("success", true);
             responseMap.put("message", "登出成功");
-            System.out.println("API登出处理完成");
             
             return ResponseEntity.ok(responseMap);
         } catch (Exception e) {
