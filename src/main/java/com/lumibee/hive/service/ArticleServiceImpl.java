@@ -56,7 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private ArticleRepository articleRepository;
     @Autowired private ArticleFavoritesMapper favoriteMapper;
     @Autowired private CacheManager cacheManager;
-    @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheService cacheService;
     @Autowired private CacheMonitoringService cacheMonitoringService;
 
 
@@ -394,7 +394,7 @@ public class ArticleServiceImpl implements ArticleService {
                 }
             }
             // 清除标签列表缓存
-            redisCacheService.clearAllTagListCaches();
+            cacheService.clearAllTagListCaches();
         }
 
         // 将文章保存到 Elasticsearch
@@ -413,7 +413,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(articleDocument);
 
         // 发布文章后，清除相关缓存
-        redisCacheService.clearArticleRelatedCaches(article);
+        cacheService.clearArticleRelatedCaches(article);
 
         return this.getArticleBySlug(article.getSlug());
     }
@@ -458,7 +458,7 @@ public class ArticleServiceImpl implements ArticleService {
                 }
             }
             // 清除标签列表缓存
-            redisCacheService.clearAllTagListCaches();
+            cacheService.clearAllTagListCaches();
         }
 
         existingArticle.setStatus(Article.ArticleStatus.published);
@@ -480,7 +480,7 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(articleDocument);
 
         // 更新文章后，清除相关缓存
-        redisCacheService.clearArticleRelatedCaches(existingArticle);
+        cacheService.clearArticleRelatedCaches(existingArticle);
 
         return getArticleBySlug(existingArticle.getSlug());
     }
@@ -515,8 +515,8 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.deleteById(articleId);
 
         // 删除文章后，清除相关缓存
-        redisCacheService.clearArticleRelatedCaches(article);
-        redisCacheService.clearAllTagListCaches();
+        cacheService.clearArticleRelatedCaches(article);
+        cacheService.clearAllTagListCaches();
 
         return convertToArticleDetailsDTO(article);
     }

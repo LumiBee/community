@@ -36,7 +36,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Autowired private PortfolioMapper portfolioMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleMapper articleMapper;
-    @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheService cacheService;
     @Autowired private CacheMonitoringService cacheMonitoringService;
 
     @Override
@@ -70,7 +70,7 @@ public class PortfolioServiceImpl implements PortfolioService {
             
             // 清除作品集相关缓存
             try {
-                redisCacheService.clearPortfolioDetailCaches(portfolio.getId());
+                cacheService.clearPortfolioDetailCaches(portfolio.getId());
             } catch (Exception e) {
                 System.err.println("清除作品集缓存时出错: " + e.getMessage());
             }

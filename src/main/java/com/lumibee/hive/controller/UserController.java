@@ -2,12 +2,10 @@ package com.lumibee.hive.controller;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import com.lumibee.hive.service.RedisCacheService;
+import com.lumibee.hive.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +37,7 @@ public class UserController {
 
     @Autowired private UserService userService;
     @Autowired private ImgService imgService;
-    @Autowired private RedisCacheService cacheService;
+    @Autowired private CacheService cacheService;
 
     /**
      * 获取当前用户信息

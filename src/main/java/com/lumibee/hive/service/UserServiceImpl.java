@@ -33,18 +33,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired private UserMapper userMapper;
     @Autowired private UserFollowingMapper userFollowingMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheService cacheService;
     @Autowired private CacheMonitoringService cacheMonitoringService;
-    
-    @Override
-    public UserMapper getUserMapper() {
-        return userMapper;
-    }
-
-    @Override
-    public UserFollowingMapper getUserFollowingMapper() {
-        return userFollowingMapper;
-    }
 
     /**
      * 根据用户名查找用户
@@ -145,7 +135,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // 清除用户相关缓存
         if (updatedRows > 0) {
             try {
-                redisCacheService.clearUserRelatedCaches(id, existingUser.getName());
+                cacheService.clearUserRelatedCaches(id, existingUser.getName());
             } catch (Exception e) {
                 System.err.println("清除用户相关缓存时出错: " + e.getMessage());
             }
@@ -191,7 +181,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         // 清除相关缓存
         try {
-            redisCacheService.clearUserRelatedCaches(userId, existingUser.getName());
+            cacheService.clearUserRelatedCaches(userId, existingUser.getName());
         } catch (Exception e) {
             System.err.println("清除用户相关缓存时出错: " + e.getMessage());
         }
@@ -337,9 +327,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             
             // 清除关注相关缓存
             try {
-                redisCacheService.clearUserStatusCaches(userId);
-                redisCacheService.clearUserStatusCaches(followerId);
-                redisCacheService.clearUserFollowCaches(userId, followerId);
+                cacheService.clearUserStatusCaches(userId);
+                cacheService.clearUserStatusCaches(followerId);
+                cacheService.clearUserFollowCaches(userId, followerId);
             } catch (Exception e) {
                 System.err.println("清除关注相关缓存时出错: " + e.getMessage());
             }
@@ -351,9 +341,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             
             // 清除关注相关缓存
             try {
-                redisCacheService.clearUserStatusCaches(userId);
-                redisCacheService.clearUserStatusCaches(followerId);
-                redisCacheService.clearUserFollowCaches(userId, followerId);
+                cacheService.clearUserStatusCaches(userId);
+                cacheService.clearUserStatusCaches(followerId);
+                cacheService.clearUserFollowCaches(userId, followerId);
             } catch (Exception e) {
                 System.err.println("清除关注相关缓存时出错: " + e.getMessage());
             }

@@ -27,7 +27,7 @@ import com.lumibee.hive.constant.CacheNames;
 public class TagServiceImpl implements TagService {
 
     @Autowired private TagMapper tagMapper;
-    @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheService cacheService;
     @Autowired private CacheMonitoringService cacheMonitoringService;
 
     /**
@@ -42,7 +42,7 @@ public class TagServiceImpl implements TagService {
             
             // 清除标签相关缓存
             try {
-                redisCacheService.clearAllTagListCaches();
+                cacheService.clearAllTagListCaches();
             } catch (Exception e) {
                 log.error("清除标签相关缓存时出错: {}", e.getMessage());
             }
@@ -112,7 +112,7 @@ public class TagServiceImpl implements TagService {
         
         // 清除标签相关缓存
         try {
-            redisCacheService.clearAllTagListCaches();
+            cacheService.clearAllTagListCaches();
         } catch (Exception e) {
             log.error("清除标签相关缓存时出错: {}", e.getMessage());
         }

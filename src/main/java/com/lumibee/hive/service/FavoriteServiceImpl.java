@@ -32,7 +32,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Autowired private FavoriteMapper favoriteMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private RedisCacheService redisCacheService;
+    @Autowired private CacheService cacheService;
     @Autowired private CacheMonitoringService cacheMonitoringService;
 
     @Override
@@ -52,7 +52,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         // 清除用户收藏相关缓存
         try {
-            redisCacheService.clearUserFavoritesCaches(userId);
+            cacheService.clearUserFavoritesCaches(userId);
         } catch (Exception e) {
             System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
         }
@@ -172,7 +172,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         // 清除用户收藏相关缓存
         try {
-            redisCacheService.clearUserFavoritesCaches(userId);
+            cacheService.clearUserFavoritesCaches(userId);
         } catch (Exception e) {
             System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
         }
