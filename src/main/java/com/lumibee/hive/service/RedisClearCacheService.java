@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.lumibee.hive.mapper.TagMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -14,7 +13,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
-import com.lumibee.hive.constant.CacheNames;
+import com.lumibee.hive.mapper.TagMapper;
 import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.Tag;
 
@@ -22,7 +21,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Service
 @Log4j2
-public class CacheService {
+public class RedisClearCacheService {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -31,25 +30,42 @@ public class CacheService {
     private TagMapper tagMapper;
 
     @Autowired
-    private CacheMonitoringService cacheMonitoringService;
+    private RedisMonitoringService redisMonitoringService;
 
     @Value("${spring.cache.redis.key-prefix:}")
     private String keyPrefix;
 
     public void clearAllArticleListCaches() {
-        clearCachesByPattern(keyPrefix + CacheNames.HOMEPAGE_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.ALL_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.TAG_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.USER_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.SEARCH_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.POPULAR_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.FEATURED_ARTICLES + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.PORTFOLIO_ARTICLES + "::*");
+        // 使用正确的缓存键模式进行清理
+        clearCachesByPattern(keyPrefix + "articles::list::homepage::*");
+        clearCachesByPattern(keyPrefix + "articles::list::all::*");
+        clearCachesByPattern(keyPrefix + "articles::list::tag::*");
+        clearCachesByPattern(keyPrefix + "articles::list::user::*");
+        clearCachesByPattern(keyPrefix + "articles::list::search::*");
+        clearCachesByPattern(keyPrefix + "articles::list::popular::*");
+        clearCachesByPattern(keyPrefix + "articles::list::featured::*");
+        clearCachesByPattern(keyPrefix + "articles::list::portfolio::*");
     }
 
     public void clearAllTagListCaches() {
-        clearCachesByPattern(keyPrefix + CacheNames.ALL_TAGS + "::*");
-        clearCachesByPattern(keyPrefix + CacheNames.POPULAR_TAGS + "::*");
+        clearCachesByPattern(keyPrefix + "tags::list::all::*");
+        clearCachesByPattern(keyPrefix + "tags::list::popular::*");
+    }
+    
+    /**
+     * 清除文章标签列表缓存
+     * @param articleId 文章ID
+     */
+    public void clearArticleTagsCaches(Integer articleId) {
+        clearCachesByPattern(keyPrefix + "tags::list::article::" + articleId);
+    }
+    
+    /**
+     * 清除标签详情缓存
+     * @param tagSlug 标签slug
+     */
+    public void clearTagDetailCaches(String tagSlug) {
+        clearCachesByPattern(keyPrefix + "tags::detail::" + tagSlug);
     }
 
     public void clearUserRelatedCaches(Long userId, String userName) {
@@ -78,10 +94,15 @@ public class CacheService {
         // 清除作者的个人页面缓存
         clearUserArticleCaches(article.getUserId());
 
+        // 清除文章标签列表缓存
+        clearArticleTagsCaches(article.getArticleId());
+
         // 清除相关标签的文章列表缓存 （如果有）
         List<Tag> tags = tagMapper.selectTagsByArticleId(article.getArticleId());
         for (Tag tag : tags) {
             clearTagArticleCaches(tag.getSlug());
+            // 清除标签详情缓存（因为文章数量可能发生变化）
+            clearTagDetailCaches(tag.getSlug());
         }
 
         // 5. 清除作品集相关缓存（如果有）
@@ -92,7 +113,7 @@ public class CacheService {
 
     // 监控缓存获取操作
     public <T> T get(String key, Class<T> type) {
-        return cacheMonitoringService.monitorCacheOperation("get", () -> {
+        return redisMonitoringService.monitorCacheOperation("get", () -> {
             try {
                 Object value = redisTemplate.opsForValue().get(key);
                 return value != null ? (T) value : null;
@@ -105,7 +126,7 @@ public class CacheService {
 
     // 监控缓存设置操作
     public void set(String key, Object value, Duration ttl) {
-        cacheMonitoringService.monitorCacheOperation("set", () -> {
+        redisMonitoringService.monitorCacheOperation("set", () -> {
             try {
                 redisTemplate.opsForValue().set(key, value, ttl);
                 return true;
@@ -120,49 +141,51 @@ public class CacheService {
      * 清除指定用户个人中心缓存
      */
     public void clearUserProfileCaches(String name) {
-        clearCachesByPattern(keyPrefix + CacheNames.USER_PROFILE + "::" + name);
+        clearCachesByPattern(keyPrefix + "users::profile::" + name);
     }
 
     /**
      * 清除制定用户粉丝/关注列表缓存
      */
     public void clearUserStatusCaches(Long userId) {
-        clearCachesByPattern(keyPrefix + CacheNames.USER_STATUS + "::" + userId);
+        clearCachesByPattern(keyPrefix + "users::count::*::" + userId);
     }
     
     /**
      * 清除特定标签的文章列表缓存
      */
     public void clearTagArticleCaches(String tagSlug) {
-        clearCachesByPattern(keyPrefix + CacheNames.TAG_ARTICLES + "::" + tagSlug);
+        clearCachesByPattern(keyPrefix + "articles::list::tag::" + tagSlug);
     }
     
     /**
      * 清除特定用户的文章列表缓存
      */
     public void clearUserArticleCaches(Long userId) {
-        clearCachesByPattern(keyPrefix + CacheNames.USER_ARTICLES + "::" + userId);
+        clearCachesByPattern(keyPrefix + "articles::list::user::" + userId);
     }
     
     /**
      * 清除首页文章缓存
      */
     public void clearHomepageArticleCaches() {
-        clearCachesByPattern(keyPrefix + CacheNames.HOMEPAGE_ARTICLES + "::*");
+        log.info("开始清除首页文章缓存");
+        clearCachesByPattern(keyPrefix + "articles::list::homepage::*");
+        log.info("首页文章缓存清除完成");
     }
     
     /**
      * 清除文章详情缓存
      */
     public void clearArticleDetailCaches(String slug) {
-        clearCachesByPattern(keyPrefix + CacheNames.ARTICLE_DETAIL + "::" + slug);
+        clearCachesByPattern(keyPrefix + "articles::detail::" + slug);
     }
     
     /**
      * 清除作品集文章缓存
      */
     public void clearPortfolioArticleCaches(Integer portfolioId) {
-        clearCachesByPattern(keyPrefix + CacheNames.PORTFOLIO_ARTICLES + "::" + portfolioId);
+        clearCachesByPattern(keyPrefix + "articles::list::portfolio::" + portfolioId);
     }
 
     /**
@@ -171,7 +194,7 @@ public class CacheService {
      * @param followerId 关注者ID
      */
     public void clearUserFollowCaches(Long userId, Long followerId) {
-        clearCachesByPattern(keyPrefix + CacheNames.USER_FOLLOW + "::" + userId + "::" + followerId);
+        clearCachesByPattern(keyPrefix + "users::follow::" + userId + "::" + followerId);
     }
 
     /**
@@ -179,7 +202,7 @@ public class CacheService {
      * @param userId 用户ID
      */
     public void clearUserFavoritesCaches(Long userId) {
-        clearCachesByPattern(keyPrefix + CacheNames.FAVORITES_USER + "::" + userId);
+        clearCachesByPattern(keyPrefix + "favorites::list::user::" + userId);
     }
 
     /**
@@ -187,7 +210,17 @@ public class CacheService {
      * @param portfolioId 作品集ID
      */
     public void clearPortfolioDetailCaches(Integer portfolioId) {
-        clearCachesByPattern(keyPrefix + CacheNames.PORTFOLIO_DETAIL + "::" + portfolioId);
+        clearCachesByPattern(keyPrefix + "portfolios::detail::" + portfolioId);
+    }
+    
+    /**
+     * 手动清除所有缓存（用于调试和紧急情况）
+     */
+    public void clearAllCaches() {
+        log.info("开始清除所有缓存");
+        clearAllArticleListCaches();
+        clearAllTagListCaches();
+        log.info("所有缓存清除完成");
     }
 
     private void clearCachesByPattern(String pattern) {

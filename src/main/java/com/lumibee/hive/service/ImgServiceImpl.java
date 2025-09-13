@@ -24,7 +24,7 @@ public class ImgServiceImpl implements ImgService {
     
     @Autowired private UserService userService;
 
-    @Autowired private CacheService cacheService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
     
     
     @Value("${avatar.max.size}") // 默认2MB
@@ -73,7 +73,7 @@ public class ImgServiceImpl implements ImgService {
         
         // 自动清理相关缓存
         try {
-            cacheService.clearUserArticleCaches(userId);
+            redisClearCacheService.clearUserArticleCaches(userId);
         } catch (Exception e) {
             System.err.println("ImgService: 清理缓存失败: " + e.getMessage());
             // 缓存清理失败不影响头像上传的成功

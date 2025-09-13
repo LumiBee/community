@@ -1,11 +1,7 @@
 package com.lumibee.hive.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -17,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.constant.CacheNames;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.PortfolioDetailsDTO;
 import com.lumibee.hive.mapper.ArticleMapper;
@@ -36,8 +31,9 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Autowired private PortfolioMapper portfolioMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleMapper articleMapper;
-    @Autowired private CacheService cacheService;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
+    @Autowired private RedisCounterService redisCounterService;
 
     @Override
     @Transactional
@@ -68,9 +64,16 @@ public class PortfolioServiceImpl implements PortfolioService {
             portfolio.setUserId(userId);
             portfolioMapper.insert(portfolio);
             
+            // 更新 Redis 计数器
+            try {
+                redisCounterService.incrementUserPortfolio(userId);
+            } catch (Exception e) {
+                System.err.println("更新 Redis 用户作品集计数时出错: " + e.getMessage());
+            }
+            
             // 清除作品集相关缓存
             try {
-                cacheService.clearPortfolioDetailCaches(portfolio.getId());
+                redisClearCacheService.clearPortfolioDetailCaches(portfolio.getId());
             } catch (Exception e) {
                 System.err.println("清除作品集缓存时出错: " + e.getMessage());
             }
@@ -108,9 +111,25 @@ public class PortfolioServiceImpl implements PortfolioService {
         }
 
         List<Integer> portfolioIds = portfolios.stream().map(Portfolio::getId).collect(Collectors.toList());
-        Map<Integer, Integer> articleCountsMap = Collections.emptyMap();
+        Map<Integer, Integer> articleCountsMap = new HashMap<>();
         if(!portfolioIds.isEmpty()){
-            articleCountsMap = portfolioMapper.countArticlesForPortfolios(portfolioIds);
+            // 从 Redis 获取作品集文章数量
+            for (Integer portfolioId : portfolioIds) {
+                try {
+                    int articleCount = redisCounterService.getPortfolioArticleCount(portfolioId);
+                    if (!redisCounterService.existsPortfolioArticleCount(portfolioId)) {
+                        // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                        Integer dbCount = articleMapper.countArticlesByPortfolioId(portfolioId);
+                        articleCount = dbCount != null ? dbCount : 0;
+                        redisCounterService.setPortfolioArticleCount(portfolioId, articleCount);
+                    }
+                    articleCountsMap.put(portfolioId, articleCount);
+                } catch (Exception e) {
+                    // 如果 Redis 出错，从数据库获取
+                    Integer dbCount = articleMapper.countArticlesByPortfolioId(portfolioId);
+                    articleCountsMap.put(portfolioId, dbCount != null ? dbCount : 0);
+                }
+            }
         }
 
         List<PortfolioDetailsDTO> portfolioDTOs = new ArrayList<>();
@@ -137,7 +156,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    @Cacheable(value = CacheNames.PORTFOLIO_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioDetail(#id)")
+    @Cacheable(value = "portfolios::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioDetail(#id)")
     @Transactional(readOnly = true)
     public PortfolioDetailsDTO selectPortfolioById(Integer id) {
         if (id == null) {

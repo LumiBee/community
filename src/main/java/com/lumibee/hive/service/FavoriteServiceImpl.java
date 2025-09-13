@@ -1,5 +1,20 @@
 package com.lumibee.hive.service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.FavoriteDetailsDTO;
@@ -10,17 +25,6 @@ import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.ArticleFavorites;
 import com.lumibee.hive.model.Favorites;
 import com.lumibee.hive.model.User;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.lumibee.hive.constant.CacheNames;
 
 /**
  * 收藏服务实现类
@@ -32,8 +36,9 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Autowired private FavoriteMapper favoriteMapper;
     @Autowired private UserMapper userMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private CacheService cacheService;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
+    @Autowired private RedisCounterService redisCounterService;
 
     @Override
     @Transactional
@@ -52,7 +57,7 @@ public class FavoriteServiceImpl implements FavoriteService {
 
         // 清除用户收藏相关缓存
         try {
-            cacheService.clearUserFavoritesCaches(userId);
+            redisClearCacheService.clearUserFavoritesCaches(userId);
         } catch (Exception e) {
             System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
         }
@@ -61,7 +66,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    @Cacheable(value = CacheNames.FAVORITES_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).favoriteDetail(#favoriteId)")
+    @Cacheable(value = "favorites::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).favoriteDetail(#favoriteId)")
     @Transactional(readOnly = true)
     public FavoriteDetailsDTO selectFavoritesById(Long favoriteId) {
         // 1. 获取收藏夹基本信息
@@ -125,7 +130,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    @Cacheable(value = CacheNames.FAVORITES_USER, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFavorites(#userId)")
+    @Cacheable(value = "favorites::list::user", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFavorites(#userId)")
     @Transactional(readOnly = true)
     public List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId) {
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();
@@ -140,7 +145,22 @@ public class FavoriteServiceImpl implements FavoriteService {
         return favoritesList.stream().map(favorite -> {
             FavoriteDetailsDTO favoriteDTO = new FavoriteDetailsDTO();
             BeanUtils.copyProperties(favorite, favoriteDTO);
-            favoriteDTO.setArticlesCount(articleFavoritesMapper.countArticlesInFavorite(favorite.getId()));
+            
+            // 从 Redis 获取收藏夹文章数量
+            try {
+                int articlesCount = redisCounterService.getFavoriteArticleCount(favorite.getId());
+                if (!redisCounterService.existsFavoriteArticleCount(favorite.getId())) {
+                    // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                    int dbCount = articleFavoritesMapper.countArticlesInFavorite(favorite.getId());
+                    redisCounterService.setFavoriteArticleCount(favorite.getId(), dbCount);
+                    articlesCount = dbCount;
+                }
+                favoriteDTO.setArticlesCount(articlesCount);
+            } catch (Exception e) {
+                // 如果 Redis 出错，从数据库获取
+                favoriteDTO.setArticlesCount(articleFavoritesMapper.countArticlesInFavorite(favorite.getId()));
+            }
+            
             favoriteDTO.setAvatarUrl(userMapper.selectById(favorite.getUserId()).getAvatarUrl());
             favoriteDTO.setUserName(userMapper.selectById(favorite.getUserId()).getUsername());
             return favoriteDTO;
@@ -170,14 +190,32 @@ public class FavoriteServiceImpl implements FavoriteService {
         newArticleFavorite.setFavoriteId(favoriteId);
         articleFavoritesMapper.insert(newArticleFavorite);
 
+        // 更新 Redis 计数器
+        try {
+            // 文章被收藏次数 +1
+            redisCounterService.incrementArticleFavorite(articleId);
+            // 收藏夹文章数量 +1
+            redisCounterService.incrementFavoriteArticle(favoriteId);
+            // 用户收藏文章数量 +1
+            redisCounterService.incrementUserFavorite(userId);
+        } catch (Exception e) {
+            System.err.println("更新 Redis 计数器时出错: " + e.getMessage());
+        }
+
         // 清除用户收藏相关缓存
         try {
-            cacheService.clearUserFavoritesCaches(userId);
+            redisClearCacheService.clearUserFavoritesCaches(userId);
         } catch (Exception e) {
             System.err.println("清除用户收藏缓存时出错: " + e.getMessage());
         }
 
-        Integer articlesCount = articleFavoritesMapper.countArticlesFavorited(articleId);
+        // 从 Redis 获取文章被收藏次数
+        int articlesCount = redisCounterService.getArticleFavoriteCount(articleId);
+        if (articlesCount == 0) {
+            // 如果 Redis 中没有数据，从数据库获取
+            articlesCount = articleFavoritesMapper.countArticlesFavorited(articleId);
+            redisCounterService.setArticleFavoriteCount(articleId, articlesCount);
+        }
 
         return new FavoriteResponse(true, "文章成功收藏到文件夹", true, articlesCount);
     }
@@ -206,6 +244,16 @@ public class FavoriteServiceImpl implements FavoriteService {
         int deletedRows = articleFavoritesMapper.deleteByArticleId(articleId, userId);
 
         if (deletedRows > 0) {
+            // 更新 Redis 计数器
+            try {
+                // 文章被收藏次数 -deletedRows
+                redisCounterService.incrementBy("article:favorite:" + articleId, -deletedRows);
+                // 用户收藏文章数量 -deletedRows
+                redisCounterService.incrementBy("user:favorite:" + userId, -deletedRows);
+            } catch (Exception e) {
+                System.err.println("更新 Redis 计数器时出错: " + e.getMessage());
+            }
+            
             result.put("success", true);
             result.put("message", "已成功从收藏夹中移除所有文章");
         } else {
@@ -292,6 +340,18 @@ public class FavoriteServiceImpl implements FavoriteService {
         Integer deleted = articleFavoritesMapper.deleteByArticleIdAndFavoriteId(articledId, favoriteId, userId);
 
         if (deleted > 0) {
+            // 更新 Redis 计数器
+            try {
+                // 文章被收藏次数 -1
+                redisCounterService.decrementArticleFavorite(articledId);
+                // 收藏夹文章数量 -1
+                redisCounterService.decrementFavoriteArticle(favoriteId);
+                // 用户收藏文章数量 -1
+                redisCounterService.decrementUserFavorite(userId);
+            } catch (Exception e) {
+                System.err.println("更新 Redis 计数器时出错: " + e.getMessage());
+            }
+            
             result.put("success", true);
             result.put("message", "已成功从该收藏夹中移除文章");
         } else {

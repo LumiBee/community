@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.LikeResponse;
-import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
@@ -33,7 +32,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ArticleController {
 
     @Autowired private ArticleService articleService;
-
     @Autowired private UserService userService;
 
     @PostMapping("/article/{articleId}/like")
@@ -52,9 +50,9 @@ public class ArticleController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // 调用服务层方法切换点赞状态
+        // 调用服务层方法切换点赞状态（Service 层已处理 Redis 操作）
         LikeResponse response = articleService.toggleLike(user.getId(), articleId);
-
+        
         return ResponseEntity.ok(response);
     }
 
@@ -104,7 +102,7 @@ public class ArticleController {
         User user = userService.getCurrentUserFromPrincipal(principal);
         
         // 根据 slug 获取文章
-        ArticleDetailsDTO article = articleService.getArticleBySlug(slug);
+        ArticleDetailsDTO article = articleService.getArticleBySlug(slug, user.getId());
 
         if (article == null) {
             return ResponseEntity.notFound().build();

@@ -69,8 +69,6 @@ public class ProfileController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        // 调试信息
-
         try {
             String newImageUrl = imgService.uploadCover(currentUser.getId(), coverImageFile);
             // 更新用户信息

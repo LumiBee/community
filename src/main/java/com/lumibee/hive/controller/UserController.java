@@ -5,7 +5,6 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.lumibee.hive.service.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibee.hive.model.User;
+import com.lumibee.hive.service.RedisClearCacheService;
 import com.lumibee.hive.service.ImgService;
 import com.lumibee.hive.service.UserService;
 
@@ -37,27 +36,8 @@ public class UserController {
 
     @Autowired private UserService userService;
     @Autowired private ImgService imgService;
-    @Autowired private CacheService cacheService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
 
-    /**
-     * 获取当前用户信息
-     */
-    @GetMapping("/current")
-    @ResponseBody
-    @Operation(summary = "获取当前用户信息", description = "获取当前登录用户的详细信息")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
-    })
-    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal Principal principal) {
-
-        User user = userService.getCurrentUserFromPrincipal(principal);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-        
-        return ResponseEntity.ok(user);
-    }
 
     @PostMapping("/{userId}/follow")
     @Operation(summary = "切换关注状态", description = "关注或取消关注指定用户")
@@ -202,7 +182,7 @@ public class UserController {
             
             // 自动清理相关缓存
             try {
-                cacheService.clearUserArticleCaches(currentUser.getId());
+                redisClearCacheService.clearUserArticleCaches(currentUser.getId());
             } catch (Exception e) {
                 System.err.println("清理缓存失败: " + e.getMessage());
                 // 缓存清理失败不影响头像上传的成功
@@ -307,10 +287,10 @@ public class UserController {
             try {
                 if (userNameChanged) {
                     // 如果用户名发生变化，清理用户名相关的所有缓存
-                    cacheService.clearUserRelatedCaches(currentUser.getId(), currentUser.getName());
+                    redisClearCacheService.clearUserRelatedCaches(currentUser.getId(), currentUser.getName());
                 } else {
                     // 如果只是其他信息变化，只清理用户相关缓存
-                    cacheService.clearUserArticleCaches(currentUser.getId());
+                    redisClearCacheService.clearUserArticleCaches(currentUser.getId());
                 }
             } catch (Exception e) {
                 System.err.println("清理缓存失败: " + e.getMessage());

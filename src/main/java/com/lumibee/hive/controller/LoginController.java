@@ -1,12 +1,11 @@
 package com.lumibee.hive.controller;
 
-import java.nio.charset.StandardCharsets;
-import java.security.Key;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,21 +13,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.RememberMeService;
-import com.lumibee.hive.service.UserService;
+import com.lumibee.hive.service.RedisRememberMeService;
+import com.lumibee.hive.service.RedisSessionService;
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,132 +30,25 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import lombok.extern.log4j.Log4j2;
 
 @RestController
+@Log4j2
 @Tag(name = "登录管理", description = "登录相关的 API 接口")
 public class LoginController {
     
-    // JWT密钥 - 实际应用中应该放在配置文件中
-    private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
-    // JWT过期时间 - 2周
-    private static final long JWT_EXPIRATION = 1209600000; // 2周 = 14 * 24 * 60 * 60 * 1000
-    // JWT刷新阈值 - 当token剩余时间少于1天时自动刷新
-    private static final long JWT_REFRESH_THRESHOLD = 86400000; // 1天 = 24 * 60 * 60 * 1000
-    
-    @Autowired
-    private UserService userService;
     
     @Autowired
     private AuthenticationManager authenticationManager;
     
     @Autowired
-    private RememberMeService rememberMeService;
+    private RedisRememberMeService rememberMeService;
     
-    /**
-     * 生成JWT令牌
-     * @param user 用户对象
-     * @return JWT令牌字符串
-     */
-    private String generateJwtToken(User user) {
-        Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
-        
-        // 创建JWT密钥
-        Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-        
-        // 创建JWT令牌
-        return Jwts.builder()
-                .setSubject(user.getId().toString())
-                .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .claim("name", user.getName())
-                .claim("email", user.getEmail())
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-    }
+    @Autowired
+    private RedisSessionService redisSessionService;
     
-    /**
-     * 验证JWT令牌
-     * @param token JWT令牌
-     * @return 验证结果
-     */
-    private boolean validateJwtToken(String token) {
-        try {
-            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-            Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * 从JWT令牌中获取用户ID
-     * @param token JWT令牌
-     * @return 用户ID
-     */
-    private Long getUserIdFromToken(String token) {
-        try {
-            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-            String userId = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-            return Long.parseLong(userId);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-    
-    /**
-     * 检查JWT令牌是否需要刷新
-     * @param token JWT令牌
-     * @return 是否需要刷新
-     */
-    private boolean shouldRefreshToken(String token) {
-        try {
-            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-            Date expiration = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-            
-            long timeUntilExpiry = expiration.getTime() - System.currentTimeMillis();
-            return timeUntilExpiry < JWT_REFRESH_THRESHOLD;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * 获取JWT令牌剩余时间（分钟）
-     * @param token JWT令牌
-     * @return 剩余时间（分钟）
-     */
-    private long getRemainingTimeInMinutes(String token) {
-        try {
-            Key key = Keys.hmacShaKeyFor(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
-            Date expiration = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-            
-            long timeUntilExpiry = expiration.getTime() - System.currentTimeMillis();
-            return Math.max(0, timeUntilExpiry / 60000); // 转换为分钟
-        } catch (Exception e) {
-            return -1; // 错误时返回-1
-        }
-    }
+    @Value("${app.session.timeout:1800}") // 30分钟
+    private int sessionTimeoutSeconds;
 
     /**
      * 重定向登录页面到Vue SPA
@@ -173,7 +59,6 @@ public class LoginController {
         @ApiResponse(responseCode = "200", description = "重定向成功")
     })
     public ResponseEntity<Void> redirectToLoginSPA() {
-        // 直接返回成功状态，让前端Vue路由处理
         return ResponseEntity.ok().build();
     }
 
@@ -189,19 +74,26 @@ public class LoginController {
     })
     public ResponseEntity<?> apiLogin(
             @Parameter(description = "登录请求参数") @RequestBody Map<String, String> loginRequest, 
-            HttpSession session, 
             HttpServletRequest request, 
             HttpServletResponse response) {
+        
+        // 输入验证
         String account = loginRequest.get("account");
         String password = loginRequest.get("password");
         String rememberMe = loginRequest.get("remember-me");
         
-        Map<String, Object> responseMap = new HashMap<>();
+        if (account == null || account.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(createErrorResponse("用户名不能为空"));
+        }
+        
+        if (password == null || password.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(createErrorResponse("密码不能为空"));
+        }
         
         try {
             // 创建认证令牌
             UsernamePasswordAuthenticationToken authToken = 
-                new UsernamePasswordAuthenticationToken(account, password);
+                new UsernamePasswordAuthenticationToken(account.trim(), password);
             
             // 尝试认证
             Authentication authentication = authenticationManager.authenticate(authToken);
@@ -210,85 +102,62 @@ public class LoginController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             
             // 获取用户信息
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = (User) authentication.getPrincipal();
             
-            // 由于User实现了UserDetails，我们可以直接转换为User对象
-            User user = (User) userDetails;
+            // 生成会话ID
+            String sessionId = UUID.randomUUID().toString();
             
-            // 生成JWT令牌并设置到用户对象中
-            String jwtToken = generateJwtToken(user);
-            user.setToken(jwtToken);
+            // 存储到Redis Session
+            redisSessionService.storeSession(sessionId, user);
             
-            if (user != null) {
-                // 处理remember-me功能
-                if ("on".equals(rememberMe)) {
-                    // 使用RememberMeService创建token
-                    String rememberMeToken = rememberMeService.createRememberMeToken(user);
-                    // 设置remember-me cookie
-                    rememberMeService.setRememberMeCookie(response, rememberMeToken);
-                    
-                    // 在session中标记用户选择了remember-me
-                    session.setAttribute("rememberMe", true);
-                }
-                
-                // 将用户信息存入会话
-                session.setAttribute("user", user);
-                
-                // 返回用户信息
-                responseMap.put("success", true);
-                responseMap.put("user", user);
-                responseMap.put("message", "登录成功");
-                
-                return ResponseEntity.ok(responseMap);
-            } else {
-                responseMap.put("success", false);
-                responseMap.put("message", "登录成功但无法获取用户信息");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+            // 设置会话Cookie
+            Cookie sessionCookie = new Cookie("session", sessionId);
+            sessionCookie.setHttpOnly(true);
+            sessionCookie.setPath("/");
+            sessionCookie.setMaxAge(sessionTimeoutSeconds);
+            response.addCookie(sessionCookie);
+            
+            // 处理remember-me功能
+            if ("on".equals(rememberMe)) {
+                String rememberMeToken = rememberMeService.createRememberMeToken(user);
+                rememberMeService.setRememberMeCookie(response, rememberMeToken);
             }
-        } catch (AuthenticationException e) {
-            responseMap.put("success", false);
-            responseMap.put("message", "用户名或密码错误");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-        } catch (Exception e) {
-            // 记录详细错误信息
-            System.err.println("Login error: " + e.getMessage());
-            e.printStackTrace();
             
-            responseMap.put("success", false);
-            responseMap.put("message", "登录过程中发生错误: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
+            // 返回成功响应
+            Map<String, Object> responseMap = new HashMap<>();
+            responseMap.put("success", true);
+            responseMap.put("user", user);
+            responseMap.put("message", "登录成功");
+            responseMap.put("sessionId", sessionId);
+            
+            return ResponseEntity.ok(responseMap);
+            
+        } catch (AuthenticationException e) {
+            log.warn("登录失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(createErrorResponse("用户名或密码错误"));
+        } catch (Exception e) {
+            log.error("登录过程中发生错误", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(createErrorResponse("登录过程中发生错误，请稍后重试"));
         }
     }
 
-
-    /**
-     * 获取登录页面状态API
-     */
-    @GetMapping("/login-status")
-    public ResponseEntity<Map<String, Object>> getLoginStatus(
-            @RequestParam(value = "signupSuccess", required = false) String signupSuccess,
-            @RequestParam(value = "signupMessage", required = false) String signupMessage) {
-        
-        Map<String, Object> response = new HashMap<>();
-        
-        if ("true".equals(signupSuccess) && signupMessage != null) {
-            response.put("showSignupSuccessPopup", true);
-            response.put("popupMessage", signupMessage);
-        } else {
-            response.put("showSignupSuccessPopup", false);
-            response.put("popupMessage", null);
-        }
-        
-        return ResponseEntity.ok(response);
-    }
 
     /**
      * 关闭密码设置提示
      */
     @PostMapping("/user/dismiss-password-prompt")
-    public ResponseEntity<Map<String, String>> dismissPasswordPrompt(HttpSession session) {
-        if (session != null) {
-            session.removeAttribute("showPasswordSetupPrompt");
+    public ResponseEntity<Map<String, String>> dismissPasswordPrompt(HttpServletRequest request) {
+        // 从Redis Session中获取用户信息
+        String sessionId = getSessionIdFromRequest(request);
+        if (sessionId != null) {
+            User user = redisSessionService.getSession(sessionId);
+            if (user != null) {
+                // 可以在这里处理密码提示的关闭逻辑
+                // 比如在用户表中添加标记字段
+                log.info("用户 {} 关闭了密码设置提示", user.getName());
+            }
         }
         
         Map<String, String> response = new HashMap<>();
@@ -299,120 +168,74 @@ public class LoginController {
     }
 
     /**
-     * Token刷新端点
-     */
-    @PostMapping("/auth/refresh")
-    public ResponseEntity<Map<String, Object>> refreshToken(@RequestHeader("Authorization") String authHeader) {
-        Map<String, Object> responseMap = new HashMap<>();
-        
-        try {
-            // 提取token
-            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-                responseMap.put("success", false);
-                responseMap.put("message", "无效的认证头");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-            }
-            
-            String token = authHeader.substring(7);
-            
-            // 验证token
-            if (!validateJwtToken(token)) {
-                responseMap.put("success", false);
-                responseMap.put("message", "无效的token");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-            }
-            
-            // 检查是否需要刷新
-            if (!shouldRefreshToken(token)) {
-                // 获取剩余时间信息
-                long remainingTime = getRemainingTimeInMinutes(token);
-                responseMap.put("success", false);
-                responseMap.put("message", "token尚未需要刷新，剩余时间充足");
-                responseMap.put("remainingTimeMinutes", remainingTime);
-                responseMap.put("refreshThresholdMinutes", JWT_REFRESH_THRESHOLD / 60000);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseMap);
-            }
-            
-            // 获取用户ID
-            Long userId = getUserIdFromToken(token);
-            if (userId == null) {
-                responseMap.put("success", false);
-                responseMap.put("message", "无法从token中获取用户信息");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-            }
-            
-            // 获取用户信息
-            User user = userService.selectById(userId);
-            if (user == null) {
-                responseMap.put("success", false);
-                responseMap.put("message", "用户不存在");
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(responseMap);
-            }
-            
-            // 生成新的token
-            String newToken = generateJwtToken(user);
-            
-            responseMap.put("success", true);
-            responseMap.put("message", "token刷新成功");
-            responseMap.put("token", newToken);
-            responseMap.put("user", user);
-            
-            return ResponseEntity.ok(responseMap);
-            
-        } catch (Exception e) {
-            System.err.println("Token刷新过程中发生错误: " + e.getMessage());
-            e.printStackTrace();
-            
-            responseMap.put("success", false);
-            responseMap.put("message", "token刷新失败: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
-        }
-    }
-
-    /**
      * API登出端点，用于处理前端AJAX登出请求
      */
     @PostMapping("/logout")
     @Operation(summary = "登出状态", description = "切换为登出状态")
-    public ResponseEntity<Map<String, Object>> apiLogout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Map<String, Object>> apiLogout(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();
         
         try {
+            // 获取会话ID
+            String sessionId = getSessionIdFromRequest(request);
+            
+            // 清除Redis Session
+            if (sessionId != null) {
+                redisSessionService.deleteSession(sessionId);
+                log.info("用户会话 {} 已清除", sessionId);
+            }
+            
             // 清除安全上下文
             SecurityContextHolder.clearContext();
             
-            // 清除会话
-            if (session != null) {
-                session.invalidate();
-            }
+            // 清除会话Cookie
+            Cookie sessionCookie = new Cookie("session", "");
+            sessionCookie.setPath("/");
+            sessionCookie.setMaxAge(0);
+            response.addCookie(sessionCookie);
             
-            // 清除所有相关的cookie
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if ("JSESSIONID".equals(cookie.getName()) || 
-                        "remember-me".equals(cookie.getName()) ||
-                        "XSRF-TOKEN".equals(cookie.getName())) {
-                        cookie.setValue("");
-                        cookie.setPath("/");
-                        cookie.setMaxAge(0);
-                        response.addCookie(cookie);
-                    }
-                }
-            }
+            // 清除remember-me cookie
+            Cookie rememberMeCookie = new Cookie("remember-me", "");
+            rememberMeCookie.setPath("/");
+            rememberMeCookie.setMaxAge(0);
+            response.addCookie(rememberMeCookie);
             
             responseMap.put("success", true);
             responseMap.put("message", "登出成功");
             
             return ResponseEntity.ok(responseMap);
-        } catch (Exception e) {
-            System.err.println("登出过程中发生错误: " + e.getMessage());
-            e.printStackTrace();
             
+        } catch (Exception e) {
+            log.error("登出过程中发生错误", e);
             responseMap.put("success", false);
-            responseMap.put("message", "登出过程中发生错误: " + e.getMessage());
+            responseMap.put("message", "登出过程中发生错误");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
-
+    
+    
+    /**
+     * 从请求中获取会话ID
+     */
+    private String getSessionIdFromRequest(HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("session".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * 创建错误响应
+     */
+    private Map<String, Object> createErrorResponse(String message) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", false);
+        response.put("message", message);
+        return response;
+    }
 }

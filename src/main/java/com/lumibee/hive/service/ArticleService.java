@@ -7,7 +7,6 @@ import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.dto.LikeResponse;
-import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
 
 public interface ArticleService {
@@ -16,11 +15,11 @@ public interface ArticleService {
     List<ArticleExcerptDTO> getPopularArticles(int limit);
     List<ArticleExcerptDTO> getFeaturedArticles();
     ArticleDetailsDTO getArticleBySlug(String slug);
+    ArticleDetailsDTO getArticleBySlug(String slug, Long userId);
     List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug);
     List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id);
     LikeResponse toggleLike(long userId, int articleId);
     boolean isUserLiked(long userId, int articleId);
-    void incrementViewCount(Integer articleId);
     ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId);
     Integer countArticlesByUserId(Long id);
     ArticleDetailsDTO saveDraft(Integer articleId,ArticlePublishRequestDTO requestDTO, Long userId);

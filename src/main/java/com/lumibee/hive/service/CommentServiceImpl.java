@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.lumibee.hive.constant.CacheNames;
 
 /**
  * 评论服务实现类
@@ -30,10 +29,10 @@ public class CommentServiceImpl implements CommentService {
     @Autowired private CommentMapper commentMapper;
     @Autowired private ArticleMapper articleMapper;
     @Autowired private CacheManager cacheManager;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
 
     @Override
-    @Cacheable(value = CacheNames.COMMENTS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleComments(#articleId)")
+    @Cacheable(value = "comments::list::article", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleComments(#articleId)")
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentsByArticleId(Integer articleId) {
         // 1. 获取所有顶级评论
@@ -95,7 +94,7 @@ public class CommentServiceImpl implements CommentService {
         Article article = articleMapper.selectById(articleId);
         if (article != null && article.getSlug() != null) {
             // 使用 CacheManager 获取名为 "article-detail" 的缓存，并根据 slug 清除条目
-            Objects.requireNonNull(cacheManager.getCache(CacheNames.ARTICLE_DETAIL)).evict(article.getSlug());
+            Objects.requireNonNull(cacheManager.getCache("articles::detail")).evict(article.getSlug());
         }
     }
 }

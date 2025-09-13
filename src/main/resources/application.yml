@@ -98,6 +98,11 @@ spring:
       key-prefix: "hive::" # 缓存键前缀
       use-key-prefix: true # 使用键前缀
 
+# 应用配置
+app:
+  session:
+    timeout: 1800  # 30分钟，单位：秒
+
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
   global-config:

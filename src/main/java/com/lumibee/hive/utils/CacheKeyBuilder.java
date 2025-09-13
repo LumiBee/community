@@ -22,13 +22,12 @@ public class CacheKeyBuilder {
     
     // 所有文章列表
     public static String allArticles() {
-        return String.join(SEPARATOR, ARTICLES_PREFIX, "list", "all");
+        return "";
     }
     
     // 首页文章列表
     public static String homepageArticles(int page, int size) {
         return String.join(SEPARATOR, 
-            ARTICLES_PREFIX, "list", "homepage", 
             "page" + PARAM_SEPARATOR + page,
             "size" + PARAM_SEPARATOR + size
         );
@@ -36,122 +35,107 @@ public class CacheKeyBuilder {
     
     // 标签文章列表
     public static String tagArticles(String tagSlug) {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "tag", tagSlug
-        );
+        return tagSlug;
     }
     
     // 用户文章列表
     public static String userArticles(Long userId) {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "user", userId.toString()
-        );
+        return userId.toString();
     }
     
     // 搜索文章列表
     public static String searchArticles(String query) {
         String queryHash = String.valueOf(query.hashCode());
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "search", queryHash
-        );
+        return queryHash;
     }
     
     // 热门文章列表
     public static String popularArticles(Integer limit) {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "popular", limit.toString()
-        );
+        return limit.toString();
     }
     
     // 精选文章列表
     public static String featuredArticles() {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "featured"
-        );
+        return "";
     }
     
     // 作品集文章列表
     public static String portfolioArticles(Long portfolioId) {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "list", "portfolio", portfolioId.toString()
-        );
+        return portfolioId.toString();
     }
     
     // 文章详情
     public static String articleDetail(String slug) {
-        return String.join(SEPARATOR,
-            ARTICLES_PREFIX, "detail", slug
-        );
+        return slug;
     }
     
     // ==================== 用户相关缓存键 ====================
 
     // 用户个人中心
     public static String userProfile(String name) {
-        return String.join(SEPARATOR,
-                USERS_PREFIX, "profile", name
-        );
+        return name;
+    }
+    
+    // 用户个人中心（根据ID）
+    public static String userProfileById(Long userId) {
+        return "id::" + userId.toString();
     }
     
     // 用户关注关系
     public static String userFollow(Long userId, Long followerId) {
-        return String.join(SEPARATOR,
-            USERS_PREFIX, "follow", userId.toString(), followerId.toString()
-        );
+        return userId.toString() + "::" + followerId.toString();
     }
     
     // 用户粉丝数
     public static String userFansCount(Long userId) {
-        return String.join(SEPARATOR,
-            USERS_PREFIX, "count", "fans", userId.toString()
-        );
+        return "fans::" + userId.toString();
     }
     
     // 用户关注数
     public static String userFollowersCount(Long userId) {
-        return String.join(SEPARATOR,
-            USERS_PREFIX, "count", "followers", userId.toString()
-        );
+        return "followers::" + userId.toString();
     }
     
     // ==================== 标签相关缓存键 ====================
     
     // 所有标签列表
     public static String allTags() {
-        return String.join(SEPARATOR, TAGS_PREFIX, "list", "all");
+        return "";
+    }
+    
+    // 标签详情
+    public static String tagDetail(String slug) {
+        return slug;
+    }
+    
+    // 文章标签列表
+    public static String articleTags(Integer articleId) {
+        return articleId.toString();
     }
     
     // ==================== 收藏相关缓存键 ====================
     
     // 收藏详情
     public static String favoriteDetail(Long favoriteId) {
-        return String.join(SEPARATOR,
-            FAVORITES_PREFIX, "detail", favoriteId.toString()
-        );
+        return favoriteId.toString();
     }
     
     // 用户收藏列表
     public static String userFavorites(Long userId) {
-        return String.join(SEPARATOR,
-            FAVORITES_PREFIX, "list", "user", userId.toString()
-        );
+        return userId.toString();
     }
     
     // ==================== 评论相关缓存键 ====================
     
     // 文章评论列表
     public static String articleComments(Long articleId) {
-        return String.join(SEPARATOR,
-            COMMENTS_PREFIX, "list", "article", articleId.toString()
-        );
+        return articleId.toString();
     }
     
     // ==================== 作品集相关缓存键 ====================
     
     // 作品集详情
     public static String portfolioDetail(Integer portfolioId) {
-        return String.join(SEPARATOR,
-            PORTFOLIOS_PREFIX, "detail", portfolioId.toString()
-        );
+        return portfolioId.toString();
     }
 }

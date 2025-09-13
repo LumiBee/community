@@ -20,7 +20,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.constant.CacheNames;
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticleExcerptDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
@@ -38,12 +37,14 @@ import com.lumibee.hive.model.Portfolio;
 import com.lumibee.hive.model.Tag;
 import com.lumibee.hive.model.User;
 
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 文章服务实现类
  * 负责文章相关的业务逻辑处理，包括文章的增删改查、发布、草稿保存等操作
  */
 @Service
+@Log4j2
 public class ArticleServiceImpl implements ArticleService {
 
     @Autowired private ArticleMapper articleMapper;
@@ -56,8 +57,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private ArticleRepository articleRepository;
     @Autowired private ArticleFavoritesMapper favoriteMapper;
     @Autowired private CacheManager cacheManager;
-    @Autowired private CacheService cacheService;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
+    @Autowired private RedisCounterService redisCounterService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
 
 
     /**
@@ -67,7 +69,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.HOMEPAGE_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).homepageArticles(#pageNum, #pageSize)")
+    @Cacheable(value = "articles::list::homepage", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).homepageArticles(#pageNum, #pageSize)")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
@@ -84,7 +86,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 文章详情列表
      */
     @Override
-    @Cacheable(value = CacheNames.ALL_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allArticles()")
+    @Cacheable(value = "articles::list::all", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allArticles()")
     @Transactional(readOnly = true)
     public List<ArticleDetailsDTO> selectAll() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -125,7 +127,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 热门文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.POPULAR_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).popularArticles(#limit)")
+    @Cacheable(value = "articles::list::popular", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).popularArticles(#limit)")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getPopularArticles(int limit) {
         return articleMapper.getPopularArticles(limit);
@@ -136,7 +138,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 精选文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.FEATURED_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).featuredArticles()")
+    @Cacheable(value = "articles::list::featured", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).featuredArticles()")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getFeaturedArticles() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
@@ -184,7 +186,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 该标签下的文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.TAG_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).tagArticles(#tagSlug)")
+    @Cacheable(value = "articles::list::tag", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).tagArticles(#tagSlug)")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug) {
         TagDTO tag = tagService.selectTagBySlug(tagSlug);
@@ -200,7 +202,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 该作品集下的文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.PORTFOLIO_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioArticles(#id)")
+    @Cacheable(value = "articles::list::portfolio", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioArticles(#id)")
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id) {
         return articleMapper.getArticlesByPortfolioId(id);
@@ -214,7 +216,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = CacheNames.USER_ARTICLES, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userArticles(#userId)")
+    @Cacheable(value = "articles::list::user", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userArticles(#userId)")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
@@ -233,9 +235,16 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 文章详情
      */
     @Override
-    @Cacheable(value = CacheNames.ARTICLE_DETAIL, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleDetail(#slug)")
+    @Cacheable(value = "articles::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleDetail(#slug)")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
+        return getArticleBySlug(slug, null);
+    }
+
+    @Override
+    @Cacheable(value = "articles::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleDetail(#slug)")
+    @Transactional
+    public ArticleDetailsDTO getArticleBySlug(String slug, Long userId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
         wrapper.eq("slug", slug).eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
@@ -245,7 +254,29 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         try {
-            articleMapper.incrementViewCount(article.getArticleId());
+            // 使用 Redis 计数器记录阅读量
+            int viewCount;
+            if (!redisCounterService.existsArticleViewCount(article.getArticleId())) {
+                // 如果 Redis 中不存在，从数据库加载并增加1
+                viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
+                redisCounterService.setArticleViewCount(article.getArticleId(), viewCount);
+            } else {
+                // 如果 Redis 中存在，直接增加1
+                viewCount = redisCounterService.incrementArticleView(article.getArticleId());
+            }
+            article.setViewCount(viewCount);
+            
+            // 从 Redis 获取点赞数，如果 Redis 中没有则从数据库加载
+            int likeCount;
+            if (!redisCounterService.existsArticleLikeCount(article.getArticleId())) {
+                // 如果 Redis 中不存在，从数据库加载
+                likeCount = article.getLikes() != null ? article.getLikes() : 0;
+                redisCounterService.setArticleLikeCount(article.getArticleId(), likeCount);
+            } else {
+                // 如果 Redis 中存在，直接获取
+                likeCount = redisCounterService.getArticleLikeCount(article.getArticleId());
+            }
+            article.setLikes(likeCount);
             User user = userService.selectById(article.getUserId());
             Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
             List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
@@ -258,11 +289,18 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
                 
                 // 获取用户的统计数据
-                Integer userArticleCount = articleMapper.countArticlesByUserId(user.getId());
                 Integer userFollowersCount = userService.countFansByUserId(user.getId());
                 Integer userFollowingCount = userService.countFollowingByUserId(user.getId());
-
                 
+                // 从 Redis 获取用户文章数量
+                int userArticleCount = redisCounterService.getUserArticleCount(user.getId());
+                if (!redisCounterService.existsUserArticleCount(user.getId())) {
+                    // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                    Integer dbCount = articleMapper.countArticlesByUserId(user.getId());
+                    userArticleCount = dbCount != null ? dbCount : 0;
+                    redisCounterService.setUserArticleCount(user.getId(), userArticleCount);
+                }
+
                 articleDetailsDTO.setUserArticleCount(userArticleCount);
                 articleDetailsDTO.setUserFollowersCount(userFollowersCount);
                 articleDetailsDTO.setUserFollowingCount(userFollowingCount);
@@ -319,22 +357,34 @@ public class ArticleServiceImpl implements ArticleService {
             //如果当前用户没有点赞，则插入点赞记录并更新文章的点赞状态
             articleLikesMapper.insertLike(userId, articleId);
             articleMapper.updateArticleLikes(articleId, 1);
+            // Redis 计数器操作
+            redisCounterService.incrementArticleLike(articleId);
             newLikedStatus = true;
         }else {
             //如果当前用户已经点赞，则删除点赞记录并更新文章的点赞状态
             articleLikesMapper.deleteLike(userId, articleId);
             articleMapper.updateArticleLikes(articleId, -1);
+            // Redis 计数器操作
+            redisCounterService.decrementArticleLike(articleId);
             newLikedStatus = false;
         }
 
-        // --- 手动清除缓存 ---
+        // 清除缓存
         Article article = articleMapper.selectById(articleId);
         if (article != null) {
-            Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
+            redisClearCacheService.clearArticleRelatedCaches(article);
         }
 
         //获取当前文章的点赞数量
-        Integer likesCount = articleMapper.countLikes(articleId);
+        int likesCount;
+        if (!redisCounterService.existsArticleLikeCount(articleId)) {
+            // 如果 Redis 中不存在，从数据库获取
+            likesCount = articleMapper.countLikes(articleId);
+            redisCounterService.setArticleLikeCount(articleId, likesCount);
+        } else {
+            // 如果 Redis 中存在，直接获取
+            likesCount = redisCounterService.getArticleLikeCount(articleId);
+        }
 
         return new LikeResponse(true, newLikedStatus, likesCount);
     }
@@ -343,12 +393,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(readOnly = true)
     public boolean isUserLiked(long userId, int articleId) {
         return articleLikesMapper.toggleLike(userId, articleId) != null;
-    }
-
-    @Override
-    @Transactional
-    public void incrementViewCount(Integer articleId) {
-        articleMapper.incrementViewCount(articleId);
     }
 
     /**
@@ -379,9 +423,23 @@ public class ArticleServiceImpl implements ArticleService {
             Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId).getId();
             article.setPortfolioId(portfolioId);
             portfolioService.updatePortfolioGmt(portfolioId, userId);
+            
+            // 更新 Redis 作品集文章计数
+            try {
+                redisCounterService.incrementPortfolioArticle(portfolioId);
+            } catch (Exception e) {
+                log.error("更新 Redis 作品集文章计数时出错: {}", e.getMessage());
+            }
         }
 
         articleMapper.insert(article);
+
+        // 更新 Redis 用户文章计数
+        try {
+            redisCounterService.incrementUserArticle(userId);
+        } catch (Exception e) {
+            log.error("更新 Redis 用户文章计数时出错: {}", e.getMessage());
+        }
 
         Integer articleId = article.getArticleId();
         List<String> tagsName = requestDTO.getTagsName();
@@ -394,7 +452,7 @@ public class ArticleServiceImpl implements ArticleService {
                 }
             }
             // 清除标签列表缓存
-            cacheService.clearAllTagListCaches();
+            redisClearCacheService.clearAllTagListCaches();
         }
 
         // 将文章保存到 Elasticsearch
@@ -402,18 +460,21 @@ public class ArticleServiceImpl implements ArticleService {
         ArticleDocument articleDocument = new ArticleDocument();
         articleDocument.setId(articleId);
         articleDocument.setContent(requestDTO.getContent());
-        articleDocument.setUserName(user.getName());  // 修正：使用getName()而不是getUsername()
+        articleDocument.setUserName(user.getName());
         articleDocument.setTitle(requestDTO.getTitle());
         articleDocument.setSlug(article.getSlug());
         articleDocument.setLikes(article.getLikes());
         articleDocument.setViewCount(article.getViewCount());
-        articleDocument.setAvatarUrl(user.getAvatarUrl());  // 确保头像URL被正确设置
+        articleDocument.setAvatarUrl(user.getAvatarUrl());
         
         // 保存到Elasticsearch
         articleRepository.save(articleDocument);
 
         // 发布文章后，清除相关缓存
-        cacheService.clearArticleRelatedCaches(article);
+        redisClearCacheService.clearArticleRelatedCaches(article);
+        
+        // 额外清除所有文章列表缓存，确保首页能显示新文章
+        redisClearCacheService.clearAllArticleListCaches();
 
         return this.getArticleBySlug(article.getSlug());
     }
@@ -439,12 +500,34 @@ public class ArticleServiceImpl implements ArticleService {
         existingArticle.setGmtModified(LocalDateTime.now());
 
         // 更新作品集
+        Integer oldPortfolioId = existingArticle.getPortfolioId();
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
             existingArticle.setPortfolioId(portfolio.getId());
             portfolioService.updatePortfolioGmt(portfolio.getId(), userId);
-        }else {
+            
+            // 更新 Redis 作品集文章计数
+            try {
+                // 如果原来有作品集，先减少计数
+                if (oldPortfolioId != null && !oldPortfolioId.equals(portfolio.getId())) {
+                    redisCounterService.decrementPortfolioArticle(oldPortfolioId);
+                }
+                // 增加新作品集计数
+                redisCounterService.incrementPortfolioArticle(portfolio.getId());
+            } catch (Exception e) {
+                log.error("更新 Redis 作品集文章计数时出错: {}", e.getMessage());
+            }
+        } else {
             existingArticle.setPortfolioId(null);
+            
+            // 如果原来有作品集，减少计数
+            if (oldPortfolioId != null) {
+                try {
+                    redisCounterService.decrementPortfolioArticle(oldPortfolioId);
+                } catch (Exception e) {
+                    log.error("更新 Redis 作品集文章计数时出错: {}", e.getMessage());
+                }
+            }
         }
 
         // 更新标签
@@ -458,7 +541,7 @@ public class ArticleServiceImpl implements ArticleService {
                 }
             }
             // 清除标签列表缓存
-            cacheService.clearAllTagListCaches();
+            redisClearCacheService.clearAllTagListCaches();
         }
 
         existingArticle.setStatus(Article.ArticleStatus.published);
@@ -480,7 +563,10 @@ public class ArticleServiceImpl implements ArticleService {
         articleRepository.save(articleDocument);
 
         // 更新文章后，清除相关缓存
-        cacheService.clearArticleRelatedCaches(existingArticle);
+        redisClearCacheService.clearArticleRelatedCaches(existingArticle);
+        
+        // 额外清除所有文章列表缓存，确保首页能显示更新后的文章
+        redisClearCacheService.clearAllArticleListCaches();
 
         return getArticleBySlug(existingArticle.getSlug());
     }
@@ -514,9 +600,21 @@ public class ArticleServiceImpl implements ArticleService {
         }
         articleRepository.deleteById(articleId);
 
+        // 更新 Redis 计数器
+        try {
+            // 用户文章计数 -1
+            redisCounterService.decrementUserArticle(userId);
+            // 如果文章有作品集，作品集文章计数 -1
+            if (article.getPortfolioId() != null) {
+                redisCounterService.decrementPortfolioArticle(article.getPortfolioId());
+            }
+        } catch (Exception e) {
+            log.error("更新 Redis 计数器时出错: {}", e.getMessage());
+        }
+
         // 删除文章后，清除相关缓存
-        cacheService.clearArticleRelatedCaches(article);
-        cacheService.clearAllTagListCaches();
+        redisClearCacheService.clearArticleRelatedCaches(article);
+        redisClearCacheService.clearAllTagListCaches();
 
         return convertToArticleDetailsDTO(article);
     }
@@ -524,7 +622,21 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(readOnly = true)
     public Integer countArticlesByUserId(Long id) {
-        return articleMapper.countArticlesByUserId(id);
+        // 从 Redis 获取用户文章数量
+        try {
+            int articleCount = redisCounterService.getUserArticleCount(id);
+            if (!redisCounterService.existsUserArticleCount(id)) {
+                // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                Integer dbCount = articleMapper.countArticlesByUserId(id);
+                articleCount = dbCount != null ? dbCount : 0;
+                redisCounterService.setUserArticleCount(id, articleCount);
+            }
+            return articleCount;
+        } catch (Exception e) {
+            log.error("获取用户 {} 文章数量时出错: {}", id, e.getMessage());
+            // 如果 Redis 出错，从数据库获取
+            return articleMapper.countArticlesByUserId(id);
+        }
     }
 
     // TODO : 完善权限控制，确保只有管理员可以设置精选文章
@@ -611,7 +723,22 @@ public class ArticleServiceImpl implements ArticleService {
         if (articleId == null) {
             return 0; // 如果文章ID无效，返回0
         }
-        return favoriteMapper.countArticlesFavorited(articleId);
+        
+        // 从 Redis 获取文章收藏数
+        try {
+            int favoriteCount = redisCounterService.getArticleFavoriteCount(articleId);
+            if (!redisCounterService.existsArticleFavoriteCount(articleId)) {
+                // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                int dbCount = favoriteMapper.countArticlesFavorited(articleId);
+                redisCounterService.setArticleFavoriteCount(articleId, dbCount);
+                return dbCount;
+            }
+            return favoriteCount;
+        } catch (Exception e) {
+            log.error("获取文章 {} 收藏数时出错: {}", articleId, e.getMessage());
+            // 如果 Redis 出错，从数据库获取
+            return favoriteMapper.countArticlesFavorited(articleId);
+        }
     }
 
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {

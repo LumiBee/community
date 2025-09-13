@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.lumibee.hive.constant.CacheNames;
 
 /**
  * Redis配置类
@@ -56,6 +55,8 @@ public class RedisConfig {
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 // 设置缓存默认过期时间为1小时
                 .entryTtl(Duration.ofHours(1))
+                // 设置键前缀
+                .prefixCacheNameWith("hive::")
                 // 配置键的序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置值的序列化方式
@@ -67,85 +68,85 @@ public class RedisConfig {
                 // ==================== 文章相关缓存 ====================
                 
                 // 文章详情缓存 - 2小时
-                .withCacheConfiguration(CacheNames.ARTICLE_DETAIL, 
+                .withCacheConfiguration("articles::detail", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 首页文章列表 - 30分钟
-                .withCacheConfiguration(CacheNames.HOMEPAGE_ARTICLES, 
+                .withCacheConfiguration("articles::list::homepage", 
                     createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
                 
                 // 所有文章列表 - 1小时
-                .withCacheConfiguration(CacheNames.ALL_ARTICLES, 
+                .withCacheConfiguration("articles::list::all", 
                     createCacheConfig(Duration.ofHours(1), stringSerializer, jsonSerializer))
                 
                 // 标签文章列表 - 45分钟
-                .withCacheConfiguration(CacheNames.TAG_ARTICLES, 
+                .withCacheConfiguration("articles::list::tag", 
                     createCacheConfig(Duration.ofMinutes(45), stringSerializer, jsonSerializer))
                 
                 // 用户文章列表 - 15分钟
-                .withCacheConfiguration(CacheNames.USER_ARTICLES, 
+                .withCacheConfiguration("articles::list::user", 
                     createCacheConfig(Duration.ofMinutes(15), stringSerializer, jsonSerializer))
                 
                 // 搜索文章列表 - 5分钟
-                .withCacheConfiguration(CacheNames.SEARCH_ARTICLES, 
+                .withCacheConfiguration("articles::list::search", 
                     createCacheConfig(Duration.ofMinutes(5), stringSerializer, jsonSerializer))
                 
                 // 热门文章列表 - 2小时
-                .withCacheConfiguration(CacheNames.POPULAR_ARTICLES, 
+                .withCacheConfiguration("articles::list::popular", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 精选文章列表 - 2小时
-                .withCacheConfiguration(CacheNames.FEATURED_ARTICLES, 
+                .withCacheConfiguration("articles::list::featured", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 作品集文章列表 - 30分钟
-                .withCacheConfiguration(CacheNames.PORTFOLIO_ARTICLES, 
+                .withCacheConfiguration("articles::list::portfolio", 
                     createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
                 
                 // ==================== 用户相关缓存 ====================
 
                 // 用户个人中心 - 15分钟
-                .withCacheConfiguration(CacheNames.USER_PROFILE,
+                .withCacheConfiguration("users::profile",
                         createCacheConfig(Duration.ofMinutes(15), stringSerializer, jsonSerializer))
                 
                 // 用户关注关系 - 30分钟
-                .withCacheConfiguration(CacheNames.USER_FOLLOW, 
+                .withCacheConfiguration("users::follow", 
                     createCacheConfig(Duration.ofMinutes(30), stringSerializer, jsonSerializer))
                 
                 // 用户统计信息 - 1小时
-                .withCacheConfiguration(CacheNames.USER_STATUS,
+                .withCacheConfiguration("users::count",
                     createCacheConfig(Duration.ofHours(1), stringSerializer, jsonSerializer))
 
                 // ==================== 标签相关缓存 ====================
                 
                 // 所有标签列表 - 2小时
-                .withCacheConfiguration(CacheNames.ALL_TAGS, 
+                .withCacheConfiguration("tags::list::all", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // 热门标签列表 - 2小时
-                .withCacheConfiguration(CacheNames.POPULAR_TAGS, 
+                .withCacheConfiguration("tags::list::popular", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 // ==================== 收藏相关缓存 ====================
                 
                 // 收藏详情 - 2小时
-                .withCacheConfiguration(CacheNames.FAVORITES_DETAIL,
+                .withCacheConfiguration("favorites::detail",
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
 
                 // 用户收藏列表 - 2小时
-                .withCacheConfiguration(CacheNames.FAVORITES_USER,
+                .withCacheConfiguration("favorites::list::user",
                         createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
 
                 // ==================== 评论相关缓存 ====================
 
                 // 评论相关缓存 - 10分钟
-                .withCacheConfiguration(CacheNames.COMMENTS, 
+                .withCacheConfiguration("comments::list::article", 
                     createCacheConfig(Duration.ofMinutes(10), stringSerializer, jsonSerializer))
 
                 // ==================== 作品集相关缓存 ====================
 
                 // 作品集详情 - 2小时
-                .withCacheConfiguration(CacheNames.PORTFOLIO_DETAIL, 
+                .withCacheConfiguration("portfolios::detail", 
                     createCacheConfig(Duration.ofHours(2), stringSerializer, jsonSerializer))
                 
                 .build();
@@ -188,6 +189,7 @@ public class RedisConfig {
         
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(randomTtl) // 设置随机缓存过期时间
+                .prefixCacheNameWith("hive::") // 设置键前缀
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer)) // 键使用String序列化
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer)); // 值使用JSON序列化
                 // 默认情况下允许缓存null值
@@ -211,8 +213,7 @@ public class RedisConfig {
      * @return 缓存统计信息
      */
     public String getCacheStatistics() {
-        return String.format("缓存配置统计: 共配置了%d个缓存类型，默认TTL: 1小时，随机偏移: ±10%%", 
-            CacheNames.class.getDeclaredFields().length);
+        return String.format("缓存配置统计: 共配置了%d个缓存类型，默认TTL: 1小时，随机偏移: ±10%%", 15);
     }
 
     /**

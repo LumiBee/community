@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 
 import javax.sql.DataSource;
 
+import com.lumibee.hive.filter.RedisSessionFilter;
+import com.lumibee.hive.service.RedisRememberMeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +34,6 @@ import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.UserServiceImpl;
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
-import com.lumibee.hive.filter.RememberMeFilter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +51,7 @@ public class SecurityConfig {
     private DataSource dataSource;
     
     @Autowired
-    private RememberMeFilter rememberMeFilter;
+    private RedisSessionFilter redisSessionFilter;
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -112,7 +113,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(rememberMeFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.and()) // 启用CORS支持
                 .formLogin(formLogin ->
                         formLogin

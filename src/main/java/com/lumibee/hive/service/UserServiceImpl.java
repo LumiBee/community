@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,10 +17,10 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import com.lumibee.hive.mapper.UserFollowingMapper;
 import com.lumibee.hive.mapper.UserMapper;
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.constant.CacheNames;
 
 /**
  * 用户服务实现类
@@ -33,8 +32,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired private UserMapper userMapper;
     @Autowired private UserFollowingMapper userFollowingMapper;
     @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private CacheService cacheService;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
+    @Autowired private RedisCounterService redisCounterService;
 
     /**
      * 根据用户名查找用户
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 用户信息
      */
     @Override
-    @Cacheable(value = CacheNames.USER_PROFILE, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfile(#name)")
+    @Cacheable(value = "users::profile", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfile(#name)")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
         return userMapper.selectByName(name);
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 是否关注
      */
     @Override
-    @Cacheable(value = CacheNames.USER_FOLLOW, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollow(#userId, #followerId)")
+    @Cacheable(value = "users::follow", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollow(#userId, #followerId)")
     @Transactional(readOnly = true)
     public boolean isFollowing(Long userId, Long followerId) {
         if (userId == null || followerId == null || userId.equals(followerId)) {
@@ -93,10 +93,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 粉丝数量
      */
     @Override
-    @Cacheable(value = CacheNames.USER_STATUS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFansCount(#id)")
+    @Cacheable(value = "users::count", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFansCount(#id)")
     @Transactional(readOnly = true)
     public Integer countFansByUserId(Long id) {
-        return userFollowingMapper.countFansByUserId(id);
+        if (!redisCounterService.existsUserFansCount(id)) {
+            Integer count = userFollowingMapper.countFansByUserId(id);
+            // 将数据库中的粉丝数写入Redis缓存
+            redisCounterService.setUserFansCount(id, count);
+        }
+
+        return redisCounterService.getUserFansCount(id);
     }
 
     /**
@@ -105,10 +111,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 关注数量
      */
     @Override
-    @Cacheable(value = CacheNames.USER_STATUS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollowersCount(#id)")
+    @Cacheable(value = "users::count", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollowersCount(#id)")
     @Transactional(readOnly = true)
     public Integer countFollowingByUserId(Long id) {
-        return userFollowingMapper.countFollowingByUserId(id);
+        if (!redisCounterService.existsUserFollowCount(id)) {
+            Integer count = userFollowingMapper.countFollowingByUserId(id);
+            // 将数据库中的粉丝数写入Redis缓存
+            redisCounterService.setUserFollowCount(id, count);
+        }
+
+        return redisCounterService.getUserFollowCount(id);
     }
 
     /**
@@ -135,13 +147,66 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // 清除用户相关缓存
         if (updatedRows > 0) {
             try {
-                cacheService.clearUserRelatedCaches(id, existingUser.getName());
+                redisClearCacheService.clearUserRelatedCaches(id, existingUser.getName());
             } catch (Exception e) {
                 System.err.println("清除用户相关缓存时出错: " + e.getMessage());
             }
         }
         
         return updatedRows > 0;
+    }
+
+    @Override
+    @Transactional
+    public boolean toggleFollow(Long followerId, Long userId) {
+        // 这里followerId是当前用户（关注者），userId是要关注的作者（被关注者）
+        if (followerId == null || userId == null || followerId.equals(userId)) {
+            // 用户不能关注自己，或者参数无效
+            return false;
+        }
+
+
+        // 检查当前用户是否已经关注了作者
+        // 在following表中：user_id=被关注者，follower_id=关注者
+        boolean isCurrentlyFollowing = userFollowingMapper.isFollowing(userId, followerId) == 1;
+
+        if (isCurrentlyFollowing) {
+            // 如果已经关注，则取消关注
+            userFollowingMapper.unfollowUser(userId, followerId);
+
+            // 关注/粉丝计数器减少
+            redisCounterService.decrementUserFollow(followerId);
+            redisCounterService.decrementUserFans(userId);
+
+            // 清除关注相关缓存
+            try {
+                redisClearCacheService.clearUserStatusCaches(userId);
+                redisClearCacheService.clearUserStatusCaches(followerId);
+                redisClearCacheService.clearUserFollowCaches(userId, followerId);
+            } catch (Exception e) {
+                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
+            }
+
+            return false;
+        } else {
+            // 如果未关注，则添加关注
+            userFollowingMapper.followUser(userId, followerId);
+
+            // 关注/粉丝计数器增加
+            redisCounterService.incrementUserFollow(followerId);
+            redisCounterService.incrementUserFans(userId);
+
+            // 清除关注相关缓存
+            try {
+                redisClearCacheService.clearUserStatusCaches(userId);
+                redisClearCacheService.clearUserStatusCaches(followerId);
+                redisClearCacheService.clearUserFollowCaches(userId, followerId);
+            } catch (Exception e) {
+                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
+            }
+
+            return true;
+        }
     }
 
     @Override
@@ -179,9 +244,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         int updatedRows = userMapper.updateById(user);
 
-        // 清除相关缓存
+        // 清除相关缓存（包括多种查询方式）
         try {
-            cacheService.clearUserRelatedCaches(userId, existingUser.getName());
+            redisClearCacheService.clearUserRelatedCaches(userId, existingUser.getName());
         } catch (Exception e) {
             System.err.println("清除用户相关缓存时出错: " + e.getMessage());
         }
@@ -210,16 +275,39 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public int insert(User user) {
-        return userMapper.insert(user);
+        int result = userMapper.insert(user);
+        
+        // 清除相关缓存（新用户创建后需要清除所有用户列表缓存）
+        if (result > 0) {
+            try {
+                redisClearCacheService.clearUserRelatedCaches(user.getId(), user.getName());
+            } catch (Exception e) {
+                System.err.println("清除用户相关缓存时出错: " + e.getMessage());
+            }
+        }
+        
+        return result;
     }
 
     @Override
     @Transactional
     public int updateById(User user) {
-        return userMapper.updateById(user);
+        int result = userMapper.updateById(user);
+        
+        // 清除相关缓存（用户信息更新后需要清除相关缓存）
+        if (result > 0) {
+            try {
+                redisClearCacheService.clearUserRelatedCaches(user.getId(), user.getName());
+            } catch (Exception e) {
+                System.err.println("清除用户相关缓存时出错: " + e.getMessage());
+            }
+        }
+        
+        return result;
     }
 
     @Override
+    @Cacheable(value = "users::profile", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfileById(#id)")
     @Transactional(readOnly = true)
     public User selectById(Long id) {
         User user = userMapper.selectById(id);
@@ -305,51 +393,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
         }
         return currentUser;
-    }
-
-    @Override
-    @Transactional
-    public boolean toggleFollow(Long followerId, Long userId) {
-        // 这里followerId是当前用户（关注者），userId是要关注的作者（被关注者）
-        if (followerId == null || userId == null || followerId.equals(userId)) {
-            // 用户不能关注自己，或者参数无效
-            return false;
-        }
-        
-        
-        // 检查当前用户是否已经关注了作者
-        // 在following表中：user_id=被关注者，follower_id=关注者
-        boolean isCurrentlyFollowing = userFollowingMapper.isFollowing(userId, followerId) == 1;
-
-        if (isCurrentlyFollowing) {
-            // 如果已经关注，则取消关注
-            userFollowingMapper.unfollowUser(userId, followerId);
-            
-            // 清除关注相关缓存
-            try {
-                cacheService.clearUserStatusCaches(userId);
-                cacheService.clearUserStatusCaches(followerId);
-                cacheService.clearUserFollowCaches(userId, followerId);
-            } catch (Exception e) {
-                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
-            }
-            
-            return false;
-        } else {
-            // 如果未关注，则添加关注
-            userFollowingMapper.followUser(userId, followerId);
-            
-            // 清除关注相关缓存
-            try {
-                cacheService.clearUserStatusCaches(userId);
-                cacheService.clearUserStatusCaches(followerId);
-                cacheService.clearUserFollowCaches(userId, followerId);
-            } catch (Exception e) {
-                System.err.println("清除关注相关缓存时出错: " + e.getMessage());
-            }
-            
-            return true;
-        }
     }
 
     @Override

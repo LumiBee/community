@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -16,7 +15,8 @@ import com.lumibee.hive.config.SlugGenerator;
 import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.mapper.TagMapper;
 import com.lumibee.hive.model.Tag;
-import com.lumibee.hive.constant.CacheNames;
+
+import lombok.extern.log4j.Log4j2;
 
 /**
  * 标签服务实现类
@@ -27,8 +27,9 @@ import com.lumibee.hive.constant.CacheNames;
 public class TagServiceImpl implements TagService {
 
     @Autowired private TagMapper tagMapper;
-    @Autowired private CacheService cacheService;
-    @Autowired private CacheMonitoringService cacheMonitoringService;
+    @Autowired private RedisClearCacheService redisClearCacheService;
+    @Autowired private RedisMonitoringService redisMonitoringService;
+    @Autowired private RedisCounterService redisCounterService;
 
     /**
      * 增加标签的文章计数
@@ -40,9 +41,21 @@ public class TagServiceImpl implements TagService {
         if (tagId != null) {
             tagMapper.incrementArticleCount(tagId);
             
+            // 更新 Redis 计数器
+            try {
+                redisCounterService.incrementTagArticle(tagId);
+            } catch (Exception e) {
+                log.error("更新 Redis 标签文章计数时出错: {}", e.getMessage());
+            }
+            
             // 清除标签相关缓存
             try {
-                cacheService.clearAllTagListCaches();
+                redisClearCacheService.clearAllTagListCaches();
+                // 获取标签信息以清除标签详情缓存
+                Tag tag = tagMapper.selectById(tagId);
+                if (tag != null) {
+                    redisClearCacheService.clearTagDetailCaches(tag.getSlug());
+                }
             } catch (Exception e) {
                 log.error("清除标签相关缓存时出错: {}", e.getMessage());
             }
@@ -75,6 +88,7 @@ public class TagServiceImpl implements TagService {
      * @return 标签列表
      */
     @Override
+    @Cacheable(value = "tags::list::article", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleTags(#articleId)")
     @Transactional(readOnly = true)
     public List<Tag> selectTagsByArticleId(Integer articleId) {
         return tagMapper.selectTagsByArticleId(articleId);
@@ -85,14 +99,32 @@ public class TagServiceImpl implements TagService {
      * @return 标签DTO列表
      */
     @Override
-    @Cacheable(value = CacheNames.ALL_TAGS, key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allTags()")
+    @Cacheable(value = "tags::list::all", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allTags()")
     @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
         try {
             List<TagDTO> result = tagMapper.selectAllTags();
             if (result == null) {
                 log.warn("selectAllTags returned null");
+                return null;
             }
+            
+            // 从 Redis 获取每个标签的文章数量
+            for (TagDTO tag : result) {
+                try {
+                    int articleCount = redisCounterService.getTagArticleCount(tag.getTagId());
+                    if (!redisCounterService.existsTagArticleCount(tag.getTagId())) {
+                        // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                        articleCount = tag.getArticleCount() != null ? tag.getArticleCount() : 0;
+                        redisCounterService.setTagArticleCount(tag.getTagId(), articleCount);
+                    }
+                    tag.setArticleCount(articleCount);
+                } catch (Exception e) {
+                    log.error("获取标签 {} 文章数量时出错: {}", tag.getTagId(), e.getMessage());
+                    // 如果 Redis 出错，使用数据库中的值
+                }
+            }
+            
             return result;
         } catch (Exception e) {
             log.error("Error occurred while selecting all tags", e);
@@ -110,15 +142,29 @@ public class TagServiceImpl implements TagService {
     public void insertTagArticleRelation(Integer articleId, Integer tagId) {
         tagMapper.insertTagArticleRelation(articleId, tagId);
         
+        // 更新 Redis 计数器
+        try {
+            redisCounterService.incrementTagArticle(tagId);
+        } catch (Exception e) {
+            log.error("更新 Redis 标签文章计数时出错: {}", e.getMessage());
+        }
+        
         // 清除标签相关缓存
         try {
-            cacheService.clearAllTagListCaches();
+            redisClearCacheService.clearArticleTagsCaches(articleId);
+            redisClearCacheService.clearAllTagListCaches();
+            // 获取标签信息以清除标签详情缓存
+            Tag tag = tagMapper.selectById(tagId);
+            if (tag != null) {
+                redisClearCacheService.clearTagDetailCaches(tag.getSlug());
+            }
         } catch (Exception e) {
             log.error("清除标签相关缓存时出错: {}", e.getMessage());
         }
     }
 
     @Override
+    @Cacheable(value = "tags::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).tagDetail(#slug)")
     @Transactional(readOnly = true)
     public TagDTO selectTagBySlug(String slug) {
         // 参数验证
@@ -131,7 +177,23 @@ public class TagServiceImpl implements TagService {
             TagDTO result = tagMapper.selectBySlug(slug.trim());
             if (result == null) {
                 log.debug("No tag found for slug: {}", slug);
+                return null;
             }
+            
+            // 从 Redis 获取标签的文章数量
+            try {
+                int articleCount = redisCounterService.getTagArticleCount(result.getTagId());
+                if (!redisCounterService.existsTagArticleCount(result.getTagId())) {
+                    // 如果 Redis 中没有数据，从数据库获取并设置到 Redis
+                    articleCount = result.getArticleCount() != null ? result.getArticleCount() : 0;
+                    redisCounterService.setTagArticleCount(result.getTagId(), articleCount);
+                }
+                result.setArticleCount(articleCount);
+            } catch (Exception e) {
+                log.error("获取标签 {} 文章数量时出错: {}", result.getTagId(), e.getMessage());
+                // 如果 Redis 出错，使用数据库中的值
+            }
+            
             return result;
         } catch (Exception e) {
             log.error("Error occurred while selecting tag by slug: {}", slug, e);
