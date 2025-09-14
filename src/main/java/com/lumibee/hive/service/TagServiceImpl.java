@@ -88,7 +88,7 @@ public class TagServiceImpl implements TagService {
      * @return 标签列表
      */
     @Override
-    @Cacheable(value = "tags::list::article", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleTags(#articleId)")
+    @Cacheable(value = "tags::list::article", key = "#articleId")
     @Transactional(readOnly = true)
     public List<Tag> selectTagsByArticleId(Integer articleId) {
         return tagMapper.selectTagsByArticleId(articleId);
@@ -99,7 +99,7 @@ public class TagServiceImpl implements TagService {
      * @return 标签DTO列表
      */
     @Override
-    @Cacheable(value = "tags::list::all", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).allTags()")
+    @Cacheable(value = "tags::list::all", key = "''")
     @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
         try {
@@ -164,7 +164,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Cacheable(value = "tags::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).tagDetail(#slug)")
+    @Cacheable(value = "tags::detail", key = "#slug")
     @Transactional(readOnly = true)
     public TagDTO selectTagBySlug(String slug) {
         // 参数验证

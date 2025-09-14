@@ -66,7 +66,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    @Cacheable(value = "favorites::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).favoriteDetail(#favoriteId)")
+    @Cacheable(value = "favorites::detail", key = "#favoriteId")
     @Transactional(readOnly = true)
     public FavoriteDetailsDTO selectFavoritesById(Long favoriteId) {
         // 1. 获取收藏夹基本信息
@@ -130,7 +130,7 @@ public class FavoriteServiceImpl implements FavoriteService {
     }
 
     @Override
-    @Cacheable(value = "favorites::list::user", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFavorites(#userId)")
+    @Cacheable(value = "favorites::list::user", key = "#userId")
     @Transactional(readOnly = true)
     public List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId) {
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();

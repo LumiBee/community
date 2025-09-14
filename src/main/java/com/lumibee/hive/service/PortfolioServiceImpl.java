@@ -156,7 +156,7 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
-    @Cacheable(value = "portfolios::detail", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).portfolioDetail(#id)")
+    @Cacheable(value = "portfolios::detail", key = "#id")
     @Transactional(readOnly = true)
     public PortfolioDetailsDTO selectPortfolioById(Integer id) {
         if (id == null) {

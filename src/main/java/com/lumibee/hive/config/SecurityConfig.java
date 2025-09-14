@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import javax.sql.DataSource;
 
 import com.lumibee.hive.filter.RedisSessionFilter;
-import com.lumibee.hive.service.RedisRememberMeService;
+import com.lumibee.hive.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +32,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
-import com.lumibee.hive.service.UserServiceImpl;
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
 
 import jakarta.servlet.ServletException;

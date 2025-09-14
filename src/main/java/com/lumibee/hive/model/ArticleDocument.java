@@ -18,6 +18,9 @@ public class ArticleDocument {
     @Field(type = FieldType.Text, analyzer = "ik_max_word", searchAnalyzer = "ik_smart")
     private String content;
 
+    @Field(type = FieldType.Text)
+    private String excerpt;
+
     @Field(type = FieldType.Keyword)
     private String userName;
 
@@ -32,4 +35,13 @@ public class ArticleDocument {
 
     @Field(type = FieldType.Integer)
     private Integer likes;
+
+    @Field(type = FieldType.Date)
+    private String gmtModified;
+
+    @Field(type = FieldType.Text)
+    private String backgroundUrl;
+
+    @Field(type = FieldType.Integer)
+    private Long userId;
 }

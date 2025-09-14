@@ -30,6 +30,7 @@ public class ArticleDetailsDTO {
     private Integer userArticleCount;
     private Integer userFollowersCount;
     private Integer userFollowingCount;
+    private String backgroundUrl;
     private PortfolioDTO portfolio;
     private List<TagDTO> tags;
 

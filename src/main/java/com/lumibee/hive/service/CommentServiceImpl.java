@@ -32,7 +32,7 @@ public class CommentServiceImpl implements CommentService {
     @Autowired private RedisMonitoringService redisMonitoringService;
 
     @Override
-    @Cacheable(value = "comments::list::article", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).articleComments(#articleId)")
+    @Cacheable(value = "comments::list::article", key = "#articleId")
     @Transactional(readOnly = true)
     public List<CommentDTO> getCommentsByArticleId(Integer articleId) {
         // 1. 获取所有顶级评论

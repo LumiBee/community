@@ -268,9 +268,18 @@ public class DataWarmupService {
                 Integer articleId = (Integer) articleObj.getClass().getMethod("getArticleId").invoke(articleObj);
                 String title = (String) articleObj.getClass().getMethod("getTitle").invoke(articleObj);
                 String content = (String) articleObj.getClass().getMethod("getContent").invoke(articleObj);
+                String excerpt = (String) articleObj.getClass().getMethod("getExcerpt").invoke(articleObj);
                 String slug = (String) articleObj.getClass().getMethod("getSlug").invoke(articleObj);
                 Integer likes = (Integer) articleObj.getClass().getMethod("getLikes").invoke(articleObj);
                 Integer viewCount = (Integer) articleObj.getClass().getMethod("getViewCount").invoke(articleObj);
+                Object gmtModifiedObj = articleObj.getClass().getMethod("getGmtModified").invoke(articleObj);
+                String backgroundUrl = null;
+                try {
+                    backgroundUrl = (String) articleObj.getClass().getMethod("getBackgroundUrl").invoke(articleObj);
+                } catch (NoSuchMethodException e) {
+                    // ArticleDetailsDTO可能没有getBackgroundUrl方法，使用null
+                    backgroundUrl = null;
+                }
                 
                 User user = userMap.get(userId);
 
@@ -278,11 +287,15 @@ public class DataWarmupService {
                 document.setId(articleId);
                 document.setTitle(title);
                 document.setContent(content);
+                document.setExcerpt(excerpt);
                 document.setSlug(slug);
                 document.setLikes(likes);
                 document.setViewCount(viewCount);
                 document.setUserName(user != null ? user.getName() : "");
                 document.setAvatarUrl(user != null ? user.getAvatarUrl() : "");
+                document.setGmtModified(gmtModifiedObj != null ? gmtModifiedObj.toString() : null);
+                document.setBackgroundUrl(backgroundUrl);
+                document.setUserId(userId);
                 documents.add(document);
             } catch (Exception e) {
                 log.warn("处理文章数据失败: {}", e.getMessage());

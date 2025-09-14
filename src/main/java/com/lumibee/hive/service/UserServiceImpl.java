@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 用户信息
      */
     @Override
-    @Cacheable(value = "users::profile", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfile(#name)")
+    @Cacheable(value = "users::profile", key = "#name")
     @Transactional(readOnly = true)
     public User selectByName(String name) {
         return userMapper.selectByName(name);
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 是否关注
      */
     @Override
-    @Cacheable(value = "users::follow", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollow(#userId, #followerId)")
+    @Cacheable(value = "users::follow", key = "#userId + '::' + #followerId")
     @Transactional(readOnly = true)
     public boolean isFollowing(Long userId, Long followerId) {
         if (userId == null || followerId == null || userId.equals(followerId)) {
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 粉丝数量
      */
     @Override
-    @Cacheable(value = "users::count", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFansCount(#id)")
+    @Cacheable(value = "users::count", key = "'fans::' + #id")
     @Transactional(readOnly = true)
     public Integer countFansByUserId(Long id) {
         if (!redisCounterService.existsUserFansCount(id)) {
@@ -111,7 +111,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
      * @return 关注数量
      */
     @Override
-    @Cacheable(value = "users::count", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userFollowersCount(#id)")
+    @Cacheable(value = "users::count", key = "'followers::' + #id")
     @Transactional(readOnly = true)
     public Integer countFollowingByUserId(Long id) {
         if (!redisCounterService.existsUserFollowCount(id)) {
@@ -307,7 +307,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    @Cacheable(value = "users::profile", key = "T(com.lumibee.hive.utils.CacheKeyBuilder).userProfileById(#id)")
+    @Cacheable(value = "users::profile", key = "'id::' + #id")
     @Transactional(readOnly = true)
     public User selectById(Long id) {
         User user = userMapper.selectById(id);
