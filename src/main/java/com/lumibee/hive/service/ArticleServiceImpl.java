@@ -293,7 +293,7 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = "articles::list::user", key = "#userId")
+    @Cacheable(value = "articles::list::user", key = "#userId + '::' + #pageNum + '::' + #pageSize")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
@@ -501,16 +501,43 @@ public class ArticleServiceImpl implements ArticleService {
             return updateArticle(requestDTO.getArticleId(), requestDTO, userId);
         }
 
-        Article article = new Article();
-        article.setTitle(requestDTO.getTitle());
-        article.setContent(requestDTO.getContent());
-        article.setExcerpt(requestDTO.getExcerpt());
+        // 检查是否存在相同标题的草稿
+        QueryWrapper<Article> draftQuery = new QueryWrapper<>();
+        draftQuery.eq("title", requestDTO.getTitle())
+                  .eq("user_id", userId) // 确保是当前用户的草稿，这样即使是相同标题也不会冲突
+                  .eq("status", Article.ArticleStatus.draft)
+                  .eq("deleted", 0)
+                  .orderByDesc("gmt_modified")
+                  .last("LIMIT 1");
+        
+        Article existingArticle = articleMapper.selectOne(draftQuery);
 
-        article.setUserId(userId);
-        article.setGmtCreate(LocalDateTime.now());
-        article.setGmtModified(LocalDateTime.now());
-        article.setStatus(Article.ArticleStatus.published);
-        article.setSlug(createUniqueSlug(requestDTO.getTitle()));
+        Article article;
+        boolean isNewArticle = false;
+
+        // 如果草稿不为空，则更新该草稿为已发布状态
+        if (existingArticle != null && existingArticle.getStatus() == Article.ArticleStatus.draft) {
+            // 将现有草稿转换为已发布状态
+            article = existingArticle;
+            article.setContent(requestDTO.getContent());
+            article.setExcerpt(requestDTO.getExcerpt());
+            article.setGmtModified(LocalDateTime.now());
+            article.setStatus(Article.ArticleStatus.published);
+            // 草稿转发布，不需要增加文章计数
+            isNewArticle = false;
+        } else {
+            // 创建新文章（保留作为备用，防止万分之一的可能）
+            article = new Article();
+            article.setTitle(requestDTO.getTitle());
+            article.setContent(requestDTO.getContent());
+            article.setExcerpt(requestDTO.getExcerpt());
+            article.setUserId(userId);
+            article.setGmtCreate(LocalDateTime.now());
+            article.setGmtModified(LocalDateTime.now());
+            article.setStatus(Article.ArticleStatus.published);
+            article.setSlug(createUniqueSlug(requestDTO.getTitle()));
+            isNewArticle = true;
+        }
 
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId).getId();
@@ -525,8 +552,13 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        articleMapper.insert(article);
-
+        // 根据是否为新文章选择插入或更新
+        if (isNewArticle) {
+            articleMapper.insert(article);
+        } else {
+            articleMapper.updateById(article);
+        }
+        
         // 更新 Redis 用户文章计数
         try {
             redisCounterService.incrementUserArticle(userId);

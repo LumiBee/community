@@ -46,3 +46,6 @@ application-prod.yml
 
 logs/
 tmp/
+
+# Docker Compose 配置文件（包含敏感信息）
+docker-compose.yml
