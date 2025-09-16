@@ -135,6 +135,7 @@ public class ArticleServiceImpl implements ArticleService {
             List<String> popularArticleIds = redisPopularArticleService.getPopularArticleIds(limit);
             
             if (!popularArticleIds.isEmpty()) {
+                log.info("从 Redis 获取到热门文章ID: {}", popularArticleIds);
                 // 根据 Redis 中的文章ID查询文章详情
                 List<ArticleExcerptDTO> result = new ArrayList<>();
                 for (String articleIdStr : popularArticleIds) {
@@ -144,6 +145,9 @@ public class ArticleServiceImpl implements ArticleService {
                         if (article != null && article.getStatus() == Article.ArticleStatus.published) {
                             ArticleExcerptDTO dto = convertToExcerptDTO(article);
                             result.add(dto);
+                            log.info("添加文章到结果: ID={}, 标题={}, 浏览量={}", articleId, article.getTitle(), article.getViewCount());
+                        } else {
+                            log.warn("文章状态不符合要求: ID={}, 状态={}", articleId, article != null ? article.getStatus() : "null");
                         }
                     } catch (NumberFormatException e) {
                         log.warn("无效的文章ID: {}", articleIdStr);
@@ -151,8 +155,10 @@ public class ArticleServiceImpl implements ArticleService {
                 }
                 
                 if (!result.isEmpty()) {
-                    log.debug("从 Redis 获取热门文章: limit={}, count={}", limit, result.size());
+                    log.info("从 Redis 获取热门文章成功: limit={}, count={}", limit, result.size());
                     return result;
+                } else {
+                    log.warn("Redis 中的文章都被过滤掉了，回退到数据库查询");
                 }
             }
             
