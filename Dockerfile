@@ -1,6 +1,7 @@
 # 使用一个轻量级的 Java 17 运行环境作为基础镜像
 FROM openjdk:17-jdk-slim
 
+
 # 设置时区
 ENV TZ=Asia/Shanghai
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
