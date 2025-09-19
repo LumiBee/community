@@ -82,9 +82,6 @@ public class SecurityConfig {
                                                    CustomOAuth2AuthenticationSuccessHandler customOAuth2SuccessHandler) throws Exception {
 
         http
-                .requiresChannel(channel -> 
-                    channel.requestMatchers(r -> r.getHeader("X-Forwarded-Proto") != null)
-                           .requiresSecure())
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
                         .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",

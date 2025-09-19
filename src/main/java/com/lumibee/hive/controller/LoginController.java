@@ -56,10 +56,12 @@ public class LoginController {
     @GetMapping("/login")
     @Operation(summary = "重定向到登录页面", description = "重定向到Vue SPA的登录页面")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "重定向成功")
+        @ApiResponse(responseCode = "302", description = "重定向到前端登录页面")
     })
-    public ResponseEntity<Void> redirectToLoginSPA() {
-        return ResponseEntity.ok().build();
+    public void redirectToLoginSPA(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        // 重定向到前端登录页面
+        String frontendUrl = "https://www.hivelumi.com/login";
+        response.sendRedirect(frontendUrl);
     }
 
     /**
