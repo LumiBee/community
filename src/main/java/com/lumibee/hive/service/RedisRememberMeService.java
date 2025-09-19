@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class RedisRememberMeService {
     
     private static final String REMEMBER_ME_PREFIX = "REMEMBER_ME:";
+    private static final String REMEMBER_ME_COOKIE_NAME = "remember-me";
     private static final Duration REMEMBER_ME_TTL = Duration.ofDays(14);
 
     @Autowired
@@ -46,7 +47,7 @@ public class RedisRememberMeService {
      * 设置remember-me cookie
      */
     public void setRememberMeCookie(HttpServletResponse response, String token) {
-        Cookie cookie = new Cookie(REMEMBER_ME_PREFIX, token);
+        Cookie cookie = new Cookie(REMEMBER_ME_COOKIE_NAME, token);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         cookie.setMaxAge((int) REMEMBER_ME_TTL.getSeconds());
@@ -60,7 +61,7 @@ public class RedisRememberMeService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (REMEMBER_ME_PREFIX.equals(cookie.getName())) {
+                if (REMEMBER_ME_COOKIE_NAME.equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }

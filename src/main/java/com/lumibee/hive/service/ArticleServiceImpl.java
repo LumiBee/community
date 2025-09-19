@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -676,7 +677,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 更新标签
         articleMapper.deleteArticleTagByArticleId(articleId);
-        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
+        if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
             Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
             for (Tag tag : tags) {
                 if (tag != null) {
