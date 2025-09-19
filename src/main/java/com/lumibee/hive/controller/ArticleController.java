@@ -98,11 +98,12 @@ public class ArticleController {
     public ResponseEntity<ArticleDetailsDTO> getArticleBySlugAPI(
             @Parameter(description = "文章slug") @PathVariable("slug") String slug,
             @AuthenticationPrincipal Principal principal) {
-        // 获取当前用户
+        // 获取当前用户（可能为null，表示匿名访问）
         User user = userService.getCurrentUserFromPrincipal(principal);
         
-        // 根据 slug 获取文章
-        ArticleDetailsDTO article = articleService.getArticleBySlug(slug, user.getId());
+        // 根据 slug 获取文章，传递用户ID（如果用户已登录）
+        Long userId = (user != null) ? user.getId() : null;
+        ArticleDetailsDTO article = articleService.getArticleBySlug(slug, userId);
 
         if (article == null) {
             return ResponseEntity.notFound().build();

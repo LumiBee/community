@@ -31,6 +31,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
+import org.springframework.security.web.session.InvalidSessionStrategy;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
@@ -106,12 +109,11 @@ public class SecurityConfig {
                                         "/v3/api-docs/**" // OpenAPI 3 文档
                                         ).permitAll() // 以上路径允许所有用户访问
                         .requestMatchers(HttpMethod.POST, "/portfolio").authenticated() // 创建作品集需要认证
-                        .requestMatchers("/user/current").authenticated() // 获取当前用户需要认证
                         .requestMatchers("/auth/refresh").permitAll() // Token刷新接口允许匿名访问
                         .requestMatchers("/publish", "/drafts", "/article/save-draft").authenticated()
                         .requestMatchers(HttpMethod.POST, "/article/*/comment").authenticated()
                         .requestMatchers("/ai/**").authenticated() // AI 相关 API 需要认证
-                        .anyRequest().authenticated() // 其他所有未明确指定的请求不允许匿名访问
+                        .anyRequest().permitAll() // 其他所有请求允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
@@ -126,7 +128,7 @@ public class SecurityConfig {
                                 .usernameParameter("account") // 前端表单中用于输入邮箱或用户名的字段的 name 属性
                                 .passwordParameter("password") // 前端表单中密码字段的 name 属性
                                 .successHandler(formLoginSuccessHandler)
-                                .failureUrl("/login?error=true")
+                                .failureHandler(customAuthenticationFailureHandler())
                                 .permitAll()
                 )
                 .oauth2Login(oauth2 ->
@@ -138,10 +140,10 @@ public class SecurityConfig {
                         session
                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                                 .maximumSessions(1)
-                                .expiredUrl("/login?expired")
+                                .expiredSessionStrategy(customSessionExpiredStrategy())
                                 .and()
                                 .sessionFixation().migrateSession()
-                                .invalidSessionUrl("/login?invalid")
+                                .invalidSessionStrategy(customInvalidSessionStrategy())
                 )
                 .logout(logout ->
                         logout
@@ -196,10 +198,72 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return (request, response, exception) -> {
+            String host = request.getServerName();
+            String redirectUrl;
+            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+                redirectUrl = "http://localhost:3000/login?error=true";
+            } else {
+                redirectUrl = "https://www.hivelumi.com/login?error=true";
+            }
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
+    @Bean
+    public SessionInformationExpiredStrategy customSessionExpiredStrategy() {
+        return (event) -> {
+            HttpServletRequest request = event.getRequest();
+            HttpServletResponse response = event.getResponse();
+            String host = request.getServerName();
+            String redirectUrl;
+            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+                redirectUrl = "http://localhost:3000/login?expired";
+            } else {
+                redirectUrl = "https://www.hivelumi.com/login?expired";
+            }
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
+    @Bean
+    public InvalidSessionStrategy customInvalidSessionStrategy() {
+        return (request, response) -> {
+            String host = request.getServerName();
+            String redirectUrl;
+            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+                redirectUrl = "http://localhost:3000/login?invalid";
+            } else {
+                redirectUrl = "https://www.hivelumi.com/login?invalid";
+            }
+            response.sendRedirect(redirectUrl);
+        };
+    }
+
+    @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint() {
         return (request, response, authException) -> {
-            // 对于 API 请求，重定向到 HTTPS 登录页面
-            String redirectUrl = "https://www.hivelumi.com/login";
+            String requestURI = request.getRequestURI();
+            
+            // 如果是 API 请求，返回 401 状态码和 JSON 响应
+            if (requestURI.startsWith("/api/")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"请先登录\"}");
+                return;
+            }
+            
+            // 对于页面请求，根据环境动态选择重定向地址
+            String host = request.getServerName();
+            String redirectUrl;
+            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
+                // 开发环境
+                redirectUrl = "http://localhost:3000/login";
+            } else {
+                // 生产环境
+                redirectUrl = "https://www.hivelumi.com/login";
+            }
             response.sendRedirect(redirectUrl);
         };
     }
