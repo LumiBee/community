@@ -29,6 +29,8 @@ import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.core.AuthenticationException;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
@@ -114,6 +116,9 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.and()) // 启用CORS支持
+                .exceptionHandling(exceptions -> 
+                    exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
+                )
                 .formLogin(formLogin ->
                         formLogin
                                 .loginPage("/login") // 登录页的 GET 路径
@@ -188,6 +193,15 @@ public class SecurityConfig {
 
 
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            // 对于 API 请求，重定向到 HTTPS 登录页面
+            String redirectUrl = "https://www.hivelumi.com/login";
+            response.sendRedirect(redirectUrl);
+        };
     }
 
     @Bean
