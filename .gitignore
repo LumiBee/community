@@ -40,9 +40,11 @@ build/
 .mvn
 
 uploads/
+jmeter/
 
 application-dev.yml
 application-prod.yml
+application-performance.yml
 
 logs/
 tmp/

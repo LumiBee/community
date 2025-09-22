@@ -223,7 +223,7 @@ public class RedisClearCacheService {
         log.info("所有缓存清除完成");
     }
 
-    private void clearCachesByPattern(String pattern) {
+    public void clearCachesByPattern(String pattern) {
         log.info("清除缓存数据, pattern={}", pattern);
         try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
 

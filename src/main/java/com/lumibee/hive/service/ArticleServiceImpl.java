@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,8 +59,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private CacheManager cacheManager;
     @Autowired private RedisClearCacheService redisClearCacheService;
     @Autowired private RedisCounterService redisCounterService;
-    @Autowired private RedisMonitoringService redisMonitoringService;
     @Autowired private RedisPopularArticleService redisPopularArticleService;
+    @Autowired private com.lumibee.hive.service.message.MessageProducerService messageProducerService;
 
 
     /**
@@ -132,34 +131,20 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(readOnly = true)
     public List<ArticleExcerptDTO> getPopularArticles(int limit) {
         try {
-            // 首先尝试从 Redis 获取热门文章ID
+            // 从 Redis Sorted Set 获取热门文章ID列表
             List<String> popularArticleIds = redisPopularArticleService.getPopularArticleIds(limit);
             
             if (!popularArticleIds.isEmpty()) {
                 log.info("从 Redis 获取到热门文章ID: {}", popularArticleIds);
-                // 根据 Redis 中的文章ID查询文章详情
-                List<ArticleExcerptDTO> result = new ArrayList<>();
-                for (String articleIdStr : popularArticleIds) {
-                    try {
-                        Integer articleId = Integer.parseInt(articleIdStr);
-                        Article article = articleMapper.selectById(articleId);
-                        if (article != null && article.getStatus() == Article.ArticleStatus.published) {
-                            ArticleExcerptDTO dto = convertToExcerptDTO(article);
-                            result.add(dto);
-                            log.info("添加文章到结果: ID={}, 标题={}, 浏览量={}", articleId, article.getTitle(), article.getViewCount());
-                        } else {
-                            log.warn("文章状态不符合要求: ID={}, 状态={}", articleId, article != null ? article.getStatus() : "null");
-                        }
-                    } catch (NumberFormatException e) {
-                        log.warn("无效的文章ID: {}", articleIdStr);
-                    }
-                }
                 
-                if (!result.isEmpty()) {
-                    log.info("从 Redis 获取热门文章成功: limit={}, count={}", limit, result.size());
-                    return result;
+                // 使用 HMGET 批量获取文章摘要信息
+                List<ArticleExcerptDTO> cachedArticles = redisPopularArticleService.getArticleExcerpts(popularArticleIds);
+                
+                if (!cachedArticles.isEmpty()) {
+                    log.info("从 Redis 缓存获取热门文章成功: limit={}, count={}", limit, cachedArticles.size());
+                    return cachedArticles;
                 } else {
-                    log.warn("Redis 中的文章都被过滤掉了，回退到数据库查询");
+                    log.warn("Redis 缓存中没有文章摘要数据，回退到数据库查询");
                 }
             }
             
@@ -179,10 +164,14 @@ public class ArticleServiceImpl implements ArticleService {
                     Article fullArticle = articleMapper.selectById(article.getArticleId());
                     java.time.LocalDateTime publishTime = fullArticle != null ? fullArticle.getGmtCreate() : null;
                     
-                    // 更新到 Redis（包含时间衰减）
+                    // 更新到 Redis Sorted Set（包含时间衰减）
                     redisPopularArticleService.updateArticlePopularity(
                         article.getArticleId(), viewCount, likeCount, commentCount, publishTime
                     );
+                    
+                    // 缓存文章摘要信息到 Redis Hash
+                    redisPopularArticleService.cacheArticleExcerpt(article);
+                    
                 } catch (Exception e) {
                     log.warn("同步文章到 Redis 失败: articleId={}", article.getArticleId(), e);
                 }
@@ -566,60 +555,17 @@ public class ArticleServiceImpl implements ArticleService {
             articleMapper.updateById(article);
         }
         
-        // 更新 Redis 用户文章计数
-        try {
-            redisCounterService.incrementUserArticle(userId);
-        } catch (Exception e) {
-            log.error("更新 Redis 用户文章计数时出错: {}", e.getMessage());
-        }
-
-        // 初始化文章热度分数到 Redis（包含发布时间）
-        try {
-            redisPopularArticleService.updateArticlePopularity(
-                article.getArticleId(), 0, 0, 0, article.getGmtCreate()
-            );
-        } catch (Exception e) {
-            log.error("初始化文章热度分数失败: articleId={}", article.getArticleId(), e);
-        }
-
-        Integer articleId = article.getArticleId();
-        List<String> tagsName = requestDTO.getTagsName();
-        if (tagsName != null && !tagsName.isEmpty()) {
-            Set<Tag> tags = tagService.selectOrCreateTags(tagsName);
-            for (Tag tag : tags) {
-                if (tag != null) {
-                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
-                    tagService.incrementArticleCount(tag.getTagId());
-                }
-            }
-            // 清除标签列表缓存
-            redisClearCacheService.clearAllTagListCaches();
-        }
-
-        // 将文章保存到 Elasticsearch
-        User user = userMapper.selectById(userId);
-        ArticleDocument articleDocument = new ArticleDocument();
-        articleDocument.setId(articleId);
-        articleDocument.setContent(requestDTO.getContent());
-        articleDocument.setExcerpt(requestDTO.getExcerpt());
-        articleDocument.setUserName(user.getName());
-        articleDocument.setTitle(requestDTO.getTitle());
-        articleDocument.setSlug(article.getSlug());
-        articleDocument.setLikes(article.getLikes());
-        articleDocument.setViewCount(article.getViewCount());
-        articleDocument.setAvatarUrl(user.getAvatarUrl());
-        articleDocument.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
-        articleDocument.setBackgroundUrl(article.getBackgroundUrl());
-        articleDocument.setUserId(article.getUserId());
+        // 生成业务唯一ID用于消息幂等性检查
+        String businessId = generateBusinessId(article.getArticleId(), "PUBLISH");
         
-        // 保存到Elasticsearch
-        articleRepository.save(articleDocument);
-
-        // 发布文章后，清除相关缓存
-        redisClearCacheService.clearArticleRelatedCaches(article);
-        
-        // 额外清除所有文章列表缓存，确保首页能显示新文章
-        redisClearCacheService.clearAllArticleListCaches();
+        // 发送异步消息处理后续操作
+        try {
+            sendArticlePublishMessages(article, requestDTO, userId, businessId, isNewArticle);
+            log.info("文章发布消息发送成功: articleId={}, businessId={}", article.getArticleId(), businessId);
+        } catch (Exception e) {
+            log.error("发送文章发布消息失败: articleId={}", article.getArticleId(), e);
+            // 消息发送失败不影响核心业务，继续执行
+        }
 
         return this.getArticleBySlug(article.getSlug());
     }
@@ -692,6 +638,15 @@ public class ArticleServiceImpl implements ArticleService {
         existingArticle.setStatus(Article.ArticleStatus.published);
         articleMapper.updateById(existingArticle);
 
+        // 同步热门文章摘要缓存（只缓存真正的热门文章）
+        try {
+            ArticleExcerptDTO articleExcerpt = convertToExcerptDTO(existingArticle);
+            redisPopularArticleService.syncPopularArticleCache(articleExcerpt);
+            log.debug("同步更新文章摘要缓存成功: articleId={}", articleId);
+        } catch (Exception e) {
+            log.error("同步更新文章摘要缓存失败: articleId={}", articleId, e);
+        }
+
         // 更新Elasticsearch中的文章数据
         User user = userMapper.selectById(userId);
         ArticleDocument articleDocument = new ArticleDocument();
@@ -737,6 +692,14 @@ public class ArticleServiceImpl implements ArticleService {
         // 验证用户权限：只有文章作者才能删除文章
         if (!article.getUserId().equals(userId)) {
             throw new RuntimeException("无权限删除此文章");
+        }
+
+        // 删除文章摘要缓存
+        try {
+            redisPopularArticleService.removeArticleExcerpt(articleId);
+            log.debug("删除文章摘要缓存成功: articleId={}", articleId);
+        } catch (Exception e) {
+            log.error("删除文章摘要缓存失败: articleId={}", articleId, e);
         }
 
         if (article.getSlug() != null) {
@@ -978,5 +941,116 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return potentialSlug;
+    }
+
+    /**
+     * 生成业务唯一ID
+     */
+    private String generateBusinessId(Integer articleId, String operation) {
+        return String.format("article_%d_%s_%s", articleId, operation, System.currentTimeMillis());
+    }
+
+    /**
+     * 发送文章发布相关的异步消息
+     */
+    private void sendArticlePublishMessages(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId, boolean isNewArticle) {
+        Integer articleId = article.getArticleId();
+        
+        // 1. 发送缓存更新消息
+        sendCacheUpdateMessages(article, requestDTO, userId, businessId, isNewArticle);
+        
+        // 2. 发送搜索同步消息
+        sendSearchSyncMessage(article, requestDTO, userId, businessId);
+        
+        // 3. 发送标签同步消息
+        if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
+            sendTagSyncMessage(articleId, requestDTO.getTagsName(), businessId);
+        }
+    }
+
+    /**
+     * 发送缓存更新消息
+     */
+    private void sendCacheUpdateMessages(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId, boolean isNewArticle) {
+        Integer articleId = article.getArticleId();
+        
+        // 更新用户文章计数
+        if (isNewArticle) {
+            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage counterMessage = 
+                com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdateCounterMessage(
+                    articleId, businessId + "_counter", 
+                    java.util.List.of(com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.CounterType.USER_ARTICLE_COUNT)
+                );
+            counterMessage.setUserId(userId);
+            messageProducerService.sendCacheUpdateMessage(counterMessage);
+        }
+        
+        // 更新作品集文章计数
+        if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
+            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage portfolioMessage = 
+                com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdateCounterMessage(
+                    articleId, businessId + "_portfolio", 
+                    java.util.List.of(com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.CounterType.PORTFOLIO_ARTICLE_COUNT)
+                );
+            portfolioMessage.setPortfolioId(article.getPortfolioId());
+            messageProducerService.sendCacheUpdateMessage(portfolioMessage);
+        }
+        
+        // 更新文章热度分数
+        com.lumibee.hive.dto.message.ArticleCacheUpdateMessage popularityMessage = 
+            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdatePopularityMessage(
+                articleId, businessId + "_popularity", 0, 0, 0, article.getGmtCreate()
+            );
+        messageProducerService.sendCacheUpdateMessage(popularityMessage);
+        
+        // 清除相关缓存
+        java.util.List<String> cacheKeys = java.util.List.of(
+            "articles::list::homepage::*",
+            "articles::list::all::*",
+            "articles::list::user::" + userId + "::*",
+            "articles::list::tag::*",
+            "articles::list::popular::*"
+        );
+        com.lumibee.hive.dto.message.ArticleCacheUpdateMessage clearCacheMessage = 
+            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createClearCacheMessage(
+                articleId, businessId + "_clear_cache", cacheKeys
+            );
+        messageProducerService.sendCacheUpdateMessage(clearCacheMessage);
+    }
+
+    /**
+     * 发送搜索同步消息
+     */
+    private void sendSearchSyncMessage(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId) {
+        User user = userMapper.selectById(userId);
+        
+        com.lumibee.hive.dto.message.ArticleSearchSyncMessage searchMessage = 
+            com.lumibee.hive.dto.message.ArticleSearchSyncMessage.createIndexMessage(
+                article.getArticleId(), businessId + "_search"
+            );
+        searchMessage.setUserId(userId);
+        searchMessage.setUserName(user.getName());
+        searchMessage.setTitle(requestDTO.getTitle());
+        searchMessage.setContent(requestDTO.getContent());
+        searchMessage.setExcerpt(requestDTO.getExcerpt());
+        searchMessage.setSlug(article.getSlug());
+        searchMessage.setLikes(article.getLikes());
+        searchMessage.setViewCount(article.getViewCount());
+        searchMessage.setAvatarUrl(user.getAvatarUrl());
+        searchMessage.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
+        searchMessage.setBackgroundUrl(article.getBackgroundUrl());
+        
+        messageProducerService.sendSearchSyncMessage(searchMessage);
+    }
+
+    /**
+     * 发送标签同步消息
+     */
+    private void sendTagSyncMessage(Integer articleId, java.util.List<String> tagNames, String businessId) {
+        com.lumibee.hive.dto.message.ArticleTagSyncMessage tagMessage = 
+            com.lumibee.hive.dto.message.ArticleTagSyncMessage.createTagProcessMessage(
+                articleId, businessId + "_tag", tagNames
+            );
+        messageProducerService.sendTagSyncMessage(tagMessage);
     }
 }

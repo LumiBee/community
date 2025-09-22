@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.security.web.session.InvalidSessionStrategy;
@@ -117,7 +116,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> cors.and()) // 启用CORS支持
+                .cors(cors -> {}) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
                 )
@@ -141,6 +140,7 @@ public class SecurityConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                                 .maximumSessions(1)
                                 .expiredSessionStrategy(customSessionExpiredStrategy())
+                                .maxSessionsPreventsLogin(false)
                                 .and()
                                 .sessionFixation().migrateSession()
                                 .invalidSessionStrategy(customInvalidSessionStrategy())
@@ -200,6 +200,17 @@ public class SecurityConfig {
     @Bean
     public AuthenticationFailureHandler customAuthenticationFailureHandler() {
         return (request, response, exception) -> {
+            String requestURI = request.getRequestURI();
+            
+            // 如果是 API 请求，返回 401 状态码和 JSON 响应
+            if (requestURI.startsWith("/api/")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Authentication Failed\",\"message\":\"认证失败，请检查用户名和密码\"}");
+                return;
+            }
+            
+            // 对于页面请求，根据环境动态选择重定向地址
             String host = request.getServerName();
             String redirectUrl;
             if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
@@ -216,6 +227,21 @@ public class SecurityConfig {
         return (event) -> {
             HttpServletRequest request = event.getRequest();
             HttpServletResponse response = event.getResponse();
+            String requestURI = request.getRequestURI();
+            
+            // 添加调试日志
+            System.out.println("会话过期处理 - URI: " + requestURI);
+            
+            // 如果是 API 请求，返回 401 状态码和 JSON 响应
+            if (requestURI.startsWith("/api/")) {
+                System.out.println("API 请求会话过期，返回 401 JSON 响应");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Session Expired\",\"message\":\"会话已过期，请重新登录\"}");
+                return;
+            }
+            
+            // 对于页面请求，根据环境动态选择重定向地址
             String host = request.getServerName();
             String redirectUrl;
             if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
@@ -223,6 +249,7 @@ public class SecurityConfig {
             } else {
                 redirectUrl = "https://www.hivelumi.com/login?expired";
             }
+            System.out.println("页面请求会话过期，重定向到: " + redirectUrl);
             response.sendRedirect(redirectUrl);
         };
     }
@@ -230,6 +257,17 @@ public class SecurityConfig {
     @Bean
     public InvalidSessionStrategy customInvalidSessionStrategy() {
         return (request, response) -> {
+            String requestURI = request.getRequestURI();
+            
+            // 如果是 API 请求，返回 401 状态码和 JSON 响应
+            if (requestURI.startsWith("/api/")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json;charset=UTF-8");
+                response.getWriter().write("{\"error\":\"Invalid Session\",\"message\":\"会话无效，请重新登录\"}");
+                return;
+            }
+            
+            // 对于页面请求，根据环境动态选择重定向地址
             String host = request.getServerName();
             String redirectUrl;
             if ("localhost".equals(host) || "127.0.0.1".equals(host)) {

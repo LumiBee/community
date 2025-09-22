@@ -1,12 +1,15 @@
 package com.lumibee.hive.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -33,6 +36,10 @@ public class RedisPopularArticleService {
     private static final String ARTICLE_VIEW_COUNT_KEY = "article:view:";
     private static final String ARTICLE_LIKE_COUNT_KEY = "article:like:";
     private static final String ARTICLE_COMMENT_COUNT_KEY = "article:comment:";
+    private static final String ARTICLE_POPULAR_KEY = "article:cache";
+    
+    @Autowired
+    private ObjectMapper objectMapper;
 
     /**
      * 更新文章热度分数
@@ -60,7 +67,6 @@ public class RedisPopularArticleService {
             log.error("更新文章热度分数失败: articleId={}", articleId, e);
         }
     }
-
 
     /**
      * 增加文章浏览量
@@ -161,6 +167,200 @@ public class RedisPopularArticleService {
     }
 
     /**
+     * 缓存文章摘要信息
+     * 
+     * @param articleExcerpt 文章摘要DTO
+     */
+    public void cacheArticleExcerpt(ArticleExcerptDTO articleExcerpt) {
+        try {
+            if (articleExcerpt == null || articleExcerpt.getArticleId() == null) {
+                log.warn("文章摘要信息为空，跳过缓存");
+                return;
+            }
+            
+            // 将ArticleExcerptDTO序列化为JSON字符串
+            String jsonString = objectMapper.writeValueAsString(articleExcerpt);
+            
+            // 存储到Redis Hash中
+            redisTemplate.opsForHash().put(ARTICLE_POPULAR_KEY, articleExcerpt.getArticleId().toString(), jsonString);
+            
+            // 设置过期时间（7天）
+            redisTemplate.expire(ARTICLE_POPULAR_KEY, 7, TimeUnit.DAYS);
+            
+            log.debug("缓存文章摘要成功: articleId={}, title={}", 
+                    articleExcerpt.getArticleId(), articleExcerpt.getTitle());
+            
+        } catch (JsonProcessingException e) {
+            log.error("序列化文章摘要失败: articleId={}", articleExcerpt != null ? articleExcerpt.getArticleId() : "null", e);
+        } catch (Exception e) {
+            log.error("缓存文章摘要失败: articleId={}", articleExcerpt != null ? articleExcerpt.getArticleId() : "null", e);
+        }
+    }
+
+    /**
+     * 批量获取文章摘要信息
+     * 
+     * @param articleIds 文章ID列表
+     * @return 文章摘要DTO列表
+     */
+    public List<ArticleExcerptDTO> getArticleExcerpts(List<String> articleIds) {
+        try {
+            if (articleIds == null || articleIds.isEmpty()) {
+                log.debug("文章ID列表为空");
+                return List.of();
+            }
+            
+            // 使用HMGET批量获取文章摘要JSON字符串
+            List<Object> jsonStrings = redisTemplate.opsForHash()
+                    .multiGet(ARTICLE_POPULAR_KEY, articleIds.stream().map(Object::toString).collect(java.util.stream.Collectors.toList()));
+            
+            List<ArticleExcerptDTO> result = new ArrayList<>();
+            
+            for (int i = 0; i < jsonStrings.size(); i++) {
+                Object jsonObj = jsonStrings.get(i);
+                if (jsonObj != null) {
+                    try {
+                        String jsonString = jsonObj.toString();
+                        ArticleExcerptDTO articleExcerpt = objectMapper.readValue(jsonString, ArticleExcerptDTO.class);
+                        result.add(articleExcerpt);
+                        log.debug("反序列化文章摘要成功: articleId={}", articleExcerpt.getArticleId());
+                    } catch (JsonProcessingException e) {
+                        log.warn("反序列化文章摘要失败: articleId={}, json={}", articleIds.get(i), jsonObj, e);
+                    }
+                } else {
+                    log.debug("文章摘要缓存未命中: articleId={}", articleIds.get(i));
+                }
+            }
+            
+            log.debug("批量获取文章摘要: 请求={}, 成功={}", articleIds.size(), result.size());
+            return result;
+            
+        } catch (Exception e) {
+            log.error("批量获取文章摘要失败: articleIds={}", articleIds, e);
+            return List.of();
+        }
+    }
+
+    /**
+     * 删除文章摘要缓存
+     * 
+     * @param articleId 文章ID
+     */
+    public void removeArticleExcerpt(Integer articleId) {
+        try {
+            if (articleId == null) {
+                log.warn("文章ID为空，跳过删除缓存");
+                return;
+            }
+            
+            redisTemplate.opsForHash().delete(ARTICLE_POPULAR_KEY, articleId.toString());
+            log.debug("删除文章摘要缓存成功: articleId={}", articleId);
+            
+        } catch (Exception e) {
+            log.error("删除文章摘要缓存失败: articleId={}", articleId, e);
+        }
+    }
+
+    /**
+     * 清除所有文章摘要缓存
+     */
+    public void clearAllArticleExcerpts() {
+        try {
+            redisTemplate.delete(ARTICLE_POPULAR_KEY);
+            log.info("清除所有文章摘要缓存成功");
+        } catch (Exception e) {
+            log.error("清除所有文章摘要缓存失败", e);
+        }
+    }
+
+    /**
+     * 检查文章是否为热门文章（在 Sorted Set 中存在）
+     * 
+     * @param articleId 文章ID
+     * @return 是否为热门文章
+     */
+    public boolean isPopularArticle(Integer articleId) {
+        try {
+            if (articleId == null) {
+                return false;
+            }
+            
+            Double score = redisTemplate.opsForZSet().score(POPULAR_ARTICLES_KEY, articleId.toString());
+            return score != null;
+        } catch (Exception e) {
+            log.error("检查文章是否为热门文章失败: articleId={}", articleId, e);
+            return false;
+        }
+    }
+
+    /**
+     * 同步热门文章摘要缓存
+     * 只缓存真正在热门文章列表中的文章摘要
+     * 
+     * @param articleExcerpt 文章摘要
+     */
+    public void syncPopularArticleCache(ArticleExcerptDTO articleExcerpt) {
+        try {
+            if (articleExcerpt == null || articleExcerpt.getArticleId() == null) {
+                log.warn("文章摘要信息为空，跳过同步");
+                return;
+            }
+            
+            // 检查文章是否为热门文章
+            if (isPopularArticle(articleExcerpt.getArticleId())) {
+                cacheArticleExcerpt(articleExcerpt);
+                log.debug("同步热门文章摘要缓存成功: articleId={}", articleExcerpt.getArticleId());
+            } else {
+                log.debug("文章不是热门文章，跳过缓存: articleId={}", articleExcerpt.getArticleId());
+            }
+            
+        } catch (Exception e) {
+            log.error("同步热门文章摘要缓存失败: articleId={}", articleExcerpt != null ? articleExcerpt.getArticleId() : "null", e);
+        }
+    }
+
+    /**
+     * 清理非热门文章的摘要缓存
+     * 定期清理不在热门文章列表中的文章摘要
+     */
+    public void cleanupNonPopularArticleCache() {
+        try {
+            // 获取所有热门文章ID
+            Set<Object> popularArticleIds = redisTemplate.opsForZSet().range(POPULAR_ARTICLES_KEY, 0, -1);
+            if (popularArticleIds == null || popularArticleIds.isEmpty()) {
+                log.debug("没有热门文章，跳过清理");
+                return;
+            }
+            
+            Set<String> popularIdSet = popularArticleIds.stream()
+                    .map(Object::toString)
+                    .collect(java.util.stream.Collectors.toSet());
+            
+            // 获取所有缓存的文章摘要
+            Set<Object> cachedArticleIds = redisTemplate.opsForHash().keys(ARTICLE_POPULAR_KEY);
+            if (cachedArticleIds == null || cachedArticleIds.isEmpty()) {
+                log.debug("没有缓存的文章摘要，跳过清理");
+                return;
+            }
+            
+            int removedCount = 0;
+            for (Object cachedId : cachedArticleIds) {
+                String articleIdStr = cachedId.toString();
+                if (!popularIdSet.contains(articleIdStr)) {
+                    redisTemplate.opsForHash().delete(ARTICLE_POPULAR_KEY, articleIdStr);
+                    removedCount++;
+                    log.debug("清理非热门文章摘要缓存: articleId={}", articleIdStr);
+                }
+            }
+            
+            log.info("清理非热门文章摘要缓存完成: 清理数量={}", removedCount);
+            
+        } catch (Exception e) {
+            log.error("清理非热门文章摘要缓存失败", e);
+        }
+    }
+
+    /**
      * 从 Redis 获取计数值
      * 
      * @param key Redis 键
@@ -226,6 +426,20 @@ public class RedisPopularArticleService {
         double minDecayFactor = 0.2; // 最小保持20%的分数
         
         return Math.max(decayFactor, minDecayFactor);
+    }
+
+    /**
+     * 定时清理非热门文章的摘要缓存
+     * 每6小时执行一次
+     */
+    @Scheduled(fixedRate = 6 * 60 * 60 * 1000) // 6小时
+    public void scheduledCleanupNonPopularArticleCache() {
+        try {
+            log.info("开始定时清理非热门文章摘要缓存...");
+            cleanupNonPopularArticleCache();
+        } catch (Exception e) {
+            log.error("定时清理非热门文章摘要缓存失败", e);
+        }
     }
 
     /**
