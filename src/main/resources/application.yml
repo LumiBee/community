@@ -98,10 +98,57 @@ spring:
       key-prefix: "hive::" # 缓存键前缀
       use-key-prefix: true # 使用键前缀
 
+  # RabbitMQ 配置
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+    virtual-host: /
+    connection-timeout: 30000
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 1
+        concurrency: 1
+        max-concurrency: 5
+
 # 应用配置
 app:
   session:
     timeout: 1800  # 30分钟，单位：秒
+
+# RabbitMQ 自定义配置
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: admin
+  password: admin
+  virtual-host: /
+  connection-timeout: 30000
+  requested-heartbeat: 60
+  publisher-confirm-timeout: 5000
+  publisher-returns-timeout: 5000
+  ack-mode: manual
+  prefetch-count: 1
+  max-retry-attempts: 3
+  retry-interval: 1000
+  dead-letter:
+    exchange: hive.dlx.exchange
+    queue: hive.dlx.queue
+    routing-key: hive.dlx
+  article:
+    exchange: hive.article.exchange
+    queue: hive.article.queue
+    routing-key: hive.article.publish
+    search-queue: hive.article.search.queue
+    search-routing-key: hive.article.search
+    cache-queue: hive.article.cache.queue
+    cache-routing-key: hive.article.cache
+    tag-queue: hive.article.tag.queue
+    tag-routing-key: hive.article.tag
 
 mybatis-plus:
   type-aliases-package: com.lumibee.hive.entity
