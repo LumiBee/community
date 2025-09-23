@@ -100,6 +100,7 @@ public class SecurityConfig {
                                         "/login", // API登录端点
                                         "/profile/**", // 个人资料 API
                                         "/login-process", // 登录处理URL
+                                        "/user/current", // 获取当前用户信息API
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
                                         "/api-docs/**", // OpenAPI 文档
@@ -176,6 +177,7 @@ public class SecurityConfig {
                                         "/portfolios", // 作品集 API
                                         "/portfolio/**", // 作品集详情 API
                                         "/user/**", // 用户相关 API（包括关注功能）
+                                        "/user/current", // 获取当前用户信息API
                                         "/signup", // 注册 API
                                         "/profile/**", // 个人资料 API
                                         "/ai/**", // AI 相关 API - 忽略CSRF但需要认证
