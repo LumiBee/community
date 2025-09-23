@@ -98,6 +98,27 @@ spring:
       key-prefix: "hive::" # 缓存键前缀
       use-key-prefix: true # 使用键前缀
 
+  # Redisson 配置
+  redis:
+    redisson:
+      config: |
+        singleServerConfig:
+          address: "redis://localhost:6379"
+          password: null
+          database: 0
+          connectionPoolSize: 64
+          connectionMinimumIdleSize: 10
+          idleConnectionTimeout: 10000
+          connectTimeout: 10000
+          timeout: 3000
+          retryAttempts: 3
+          retryInterval: 1500
+          keepAlive: true
+          tcpNoDelay: true
+        lockWatchdogTimeout: 30000
+        threads: 16
+        nettyThreads: 32
+
   # RabbitMQ 配置
   rabbitmq:
     host: localhost
@@ -216,6 +237,7 @@ management:
 logging:
   level:
     com.lumibee.hive: INFO
+    com.lumibee.hive.service.message: DEBUG
     org.springframework.security: WARN
     com.alibaba.druid: INFO
   pattern:

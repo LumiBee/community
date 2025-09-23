@@ -311,6 +311,13 @@
             <artifactId>spring-rabbit-test</artifactId>
             <scope>test</scope>
         </dependency>
+        
+        <!-- Redisson 分布式锁支持 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.24.3</version>
+        </dependency>
     </dependencies>
 
     <build>

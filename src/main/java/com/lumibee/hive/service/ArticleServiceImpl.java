@@ -61,6 +61,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private RedisCounterService redisCounterService;
     @Autowired private RedisPopularArticleService redisPopularArticleService;
     @Autowired private com.lumibee.hive.service.message.MessageProducerService messageProducerService;
+    @Autowired private CacheBreakdownProtectionService cacheBreakdownProtectionService;
 
 
     /**
@@ -70,9 +71,27 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = "articles::list::homepage", key = "'page:' + #pageNum + '::size:' + #pageSize")
     @Transactional(readOnly = true)
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
+        return getHomepageArticleWithBreakdownProtection(pageNum, pageSize);
+    }
+
+    /**
+     * 使用分布式锁防止缓存击穿的首页文章获取方法
+     */
+    private Page<ArticleExcerptDTO> getHomepageArticleWithBreakdownProtection(long pageNum, long pageSize) {
+        String cacheKey = "page:" + pageNum + "::size:" + pageSize;
+        return cacheBreakdownProtectionService.getWithBreakdownProtection(
+            "articles::list::homepage", 
+            cacheKey, 
+            () -> loadHomepageArticleFromDatabase(pageNum, pageSize)
+        );
+    }
+
+    /**
+     * 从数据库加载首页文章
+     */
+    private Page<ArticleExcerptDTO> loadHomepageArticleFromDatabase(long pageNum, long pageSize) {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
@@ -308,16 +327,32 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 文章详情
      */
     @Override
-    @Cacheable(value = "articles::detail", key = "#slug")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
-        return getArticleBySlug(slug, null);
+        return getArticleBySlugWithBreakdownProtection(slug, null);
     }
 
     @Override
-    @Cacheable(value = "articles::detail", key = "#slug")
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug, Long userId) {
+        return getArticleBySlugWithBreakdownProtection(slug, userId);
+    }
+
+    /**
+     * 使用分布式锁防止缓存击穿的文章获取方法
+     */
+    private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId) {
+        return cacheBreakdownProtectionService.getWithBreakdownProtection(
+            "articles::detail", 
+            slug, 
+            () -> loadArticleFromDatabase(slug, userId)
+        );
+    }
+
+    /**
+     * 从数据库加载文章详情（原有逻辑）
+     */
+    private ArticleDetailsDTO loadArticleFromDatabase(String slug, Long userId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
         wrapper.eq("slug", slug).eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
