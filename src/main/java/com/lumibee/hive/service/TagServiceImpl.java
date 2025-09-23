@@ -99,7 +99,7 @@ public class TagServiceImpl implements TagService {
      * @return 标签DTO列表
      */
     @Override
-    // @Cacheable(value = "tags::list::all", key = "''") // 临时禁用缓存以避免 DevTools 类加载器问题
+    @Cacheable(value = "tags::list::all", key = "''")
     @Transactional(readOnly = true)
     public List<TagDTO> selectAllTags() {
         try {

@@ -37,44 +37,13 @@ public class RedissonConfig {
     @Bean
     public RedissonClient redissonClient() {
         try {
-            // 使用 Spring Boot 自动配置的 Redisson 客户端
-            // 如果自动配置失败，这里可以手动创建
+            // 使用配置文件中的 Redisson 配置
+            Config config = Config.fromYAML(redissonConfig);
             log.info("Redisson 客户端配置完成");
-            return Redisson.create();
+            return Redisson.create(config);
         } catch (Exception e) {
             log.error("创建 Redisson 客户端失败", e);
             throw new RuntimeException("Redisson 客户端初始化失败", e);
         }
-    }
-
-    /**
-     * 手动创建 Redisson 配置（备用方案）
-     */
-    private Config createRedissonConfig() {
-        Config config = new Config();
-        
-        // 单节点配置
-        config.useSingleServer()
-                .setAddress("redis://localhost:6379")
-                .setPassword(null)
-                .setDatabase(0)
-                .setConnectionPoolSize(64)
-                .setConnectionMinimumIdleSize(10)
-                .setIdleConnectionTimeout(10000)
-                .setConnectTimeout(10000)
-                .setTimeout(3000)
-                .setRetryAttempts(3)
-                .setRetryInterval(1500)
-                .setKeepAlive(true)
-                .setTcpNoDelay(true);
-        
-        // 锁监控超时时间
-        config.setLockWatchdogTimeout(30000);
-        
-        // 线程池配置
-        config.setThreads(16);
-        config.setNettyThreads(32);
-        
-        return config;
     }
 }
