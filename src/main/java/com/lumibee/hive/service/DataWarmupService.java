@@ -15,9 +15,14 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.lumibee.hive.dto.ArticleDetailsDTO;
+import com.lumibee.hive.dto.ArticleExcerptDTO;
+import com.lumibee.hive.dto.PortfolioDetailsDTO;
+import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.mapper.ArticleMapper;
+import com.lumibee.hive.model.Article;
 import com.lumibee.hive.model.ArticleDocument;
 import com.lumibee.hive.model.User;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -170,8 +175,8 @@ public class DataWarmupService {
         log.info("预热标签文章列表...");
 
         try {
-            var tags = tagService.selectAllTags();
-            for (var tag : tags) {
+            List<TagDTO> tags = tagService.selectAllTags();
+            for (TagDTO tag : tags) {
                 try {
                     articleService.getArticlesByTagSlug(tag.getSlug());
                     log.info("预热标签文章列表 {} 成功", tag.getName());
@@ -190,8 +195,8 @@ public class DataWarmupService {
         log.info("预热作品集文章列表...");
 
         try {
-            var portfolios = portfolioService.selectAllPortfolios();
-            for (var portfolio : portfolios) {
+            List<PortfolioDetailsDTO> portfolios = portfolioService.selectAllPortfolios();
+            for (PortfolioDetailsDTO portfolio : portfolios) {
                 try {
                     articleService.getArticlesByPortfolioId(portfolio.getId());
                     log.info("预热作品集文章列表 {} 成功", portfolio.getName());
@@ -210,8 +215,8 @@ public class DataWarmupService {
         log.info("预热文章计数器...");
 
         try {
-            var articles = articleMapper.selectList(null);
-            for (var article : articles) {
+            List<Article> articles = articleMapper.selectList(null);
+            for (Article article : articles) {
                 if (article.getViewCount() != null) {
                     redisCounterService.setArticleViewCount(article.getArticleId(),
                             article.getViewCount());
@@ -313,29 +318,29 @@ public class DataWarmupService {
         try {
             // 检查首页文章缓存
             log.info("第一次调用首页文章接口...");
-            var homepageResult1 = articleService.getHomepageArticle(1, 10);
+            Page<ArticleExcerptDTO> homepageResult1 = articleService.getHomepageArticle(1, 10);
             log.info("第一次调用结果：获取到{}条记录", homepageResult1.getRecords().size());
             
             log.info("第二次调用首页文章接口（应该从缓存获取）...");
-            var homepageResult2 = articleService.getHomepageArticle(1, 10);
+            Page<ArticleExcerptDTO> homepageResult2 = articleService.getHomepageArticle(1, 10);
             log.info("第二次调用结果：获取到{}条记录", homepageResult2.getRecords().size());
             
             // 检查热门文章缓存
             log.info("第一次调用热门文章接口...");
-            var popularResult1 = articleService.getPopularArticles(10);
+            List<ArticleExcerptDTO> popularResult1 = articleService.getPopularArticles(10);
             log.info("第一次调用结果：获取到{}条记录", popularResult1.size());
             
             log.info("第二次调用热门文章接口（应该从缓存获取）...");
-            var popularResult2 = articleService.getPopularArticles(10);
+            List<ArticleExcerptDTO> popularResult2 = articleService.getPopularArticles(10);
             log.info("第二次调用结果：获取到{}条记录", popularResult2.size());
             
             // 检查标签缓存
             log.info("第一次调用标签接口...");
-            var tagResult1 = tagService.selectAllTags();
+            List<TagDTO> tagResult1 = tagService.selectAllTags();
             log.info("第一次调用结果：获取到{}个标签", tagResult1.size());
             
             log.info("第二次调用标签接口（应该从缓存获取）...");
-            var tagResult2 = tagService.selectAllTags();
+            List<TagDTO> tagResult2 = tagService.selectAllTags();
             log.info("第二次调用结果：获取到{}个标签", tagResult2.size());
             
         } catch (Exception e) {

@@ -60,7 +60,6 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired private RedisClearCacheService redisClearCacheService;
     @Autowired private RedisCounterService redisCounterService;
     @Autowired private RedisPopularArticleService redisPopularArticleService;
-    @Autowired private com.lumibee.hive.service.message.MessageProducerService messageProducerService;
     @Autowired private CacheBreakdownProtectionService cacheBreakdownProtectionService;
 
 
@@ -590,16 +589,13 @@ public class ArticleServiceImpl implements ArticleService {
             articleMapper.updateById(article);
         }
         
-        // 生成业务唯一ID用于消息幂等性检查
-        String businessId = generateBusinessId(article.getArticleId(), "PUBLISH");
-        
-        // 发送异步消息处理后续操作
+        // 同步处理后续操作
         try {
-            sendArticlePublishMessages(article, requestDTO, userId, businessId, isNewArticle);
-            log.info("文章发布消息发送成功: articleId={}, businessId={}", article.getArticleId(), businessId);
+            processArticlePublishOperations(article, requestDTO, userId, isNewArticle);
+            log.info("文章发布后续操作处理成功: articleId={}", article.getArticleId());
         } catch (Exception e) {
-            log.error("发送文章发布消息失败: articleId={}", article.getArticleId(), e);
-            // 消息发送失败不影响核心业务，继续执行
+            log.error("文章发布后续操作处理失败: articleId={}", article.getArticleId(), e);
+            // 后续操作失败不影响核心业务，继续执行
         }
 
         return this.getArticleBySlug(article.getSlug());
@@ -706,6 +702,15 @@ public class ArticleServiceImpl implements ArticleService {
         
         // 额外清除所有文章列表缓存，确保首页能显示更新后的文章
         redisClearCacheService.clearAllArticleListCaches();
+
+        // 同步处理后续操作
+        try {
+            processArticlePublishOperations(existingArticle, requestDTO, userId, false);
+            log.info("文章更新后续操作处理成功: articleId={}", articleId);
+        } catch (Exception e) {
+            log.error("文章更新后续操作处理失败: articleId={}", articleId, e);
+            // 后续操作失败不影响核心业务，继续执行
+        }
 
         return getArticleBySlug(existingArticle.getSlug());
     }
@@ -978,114 +983,114 @@ public class ArticleServiceImpl implements ArticleService {
         return potentialSlug;
     }
 
-    /**
-     * 生成业务唯一ID
-     */
-    private String generateBusinessId(Integer articleId, String operation) {
-        return String.format("article_%d_%s_%s", articleId, operation, System.currentTimeMillis());
-    }
 
     /**
-     * 发送文章发布相关的异步消息
+     * 处理文章发布相关的后续操作
      */
-    private void sendArticlePublishMessages(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId, boolean isNewArticle) {
+    private void processArticlePublishOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId, boolean isNewArticle) {
         Integer articleId = article.getArticleId();
         
-        // 1. 发送缓存更新消息
-        sendCacheUpdateMessages(article, requestDTO, userId, businessId, isNewArticle);
+        // 1. 处理缓存更新操作
+        processCacheUpdateOperations(article, requestDTO, userId, isNewArticle);
         
-        // 2. 发送搜索同步消息
-        sendSearchSyncMessage(article, requestDTO, userId, businessId);
+        // 2. 处理搜索同步操作
+        processSearchSyncOperations(article, requestDTO, userId);
         
-        // 3. 发送标签同步消息
+        // 3. 处理标签同步操作
         if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
-            sendTagSyncMessage(articleId, requestDTO.getTagsName(), businessId);
+            processTagSyncOperations(articleId, requestDTO.getTagsName());
         }
     }
 
     /**
-     * 发送缓存更新消息
+     * 处理缓存更新操作
      */
-    private void sendCacheUpdateMessages(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId, boolean isNewArticle) {
+    private void processCacheUpdateOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId, boolean isNewArticle) {
         Integer articleId = article.getArticleId();
         
         // 更新用户文章计数
         if (isNewArticle) {
-            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage counterMessage = 
-                com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdateCounterMessage(
-                    articleId, businessId + "_counter", 
-                    java.util.List.of(com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.CounterType.USER_ARTICLE_COUNT)
-                );
-            counterMessage.setUserId(userId);
-            messageProducerService.sendCacheUpdateMessage(counterMessage);
+            redisCounterService.incrementUserArticle(userId);
         }
         
         // 更新作品集文章计数
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
-            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage portfolioMessage = 
-                com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdateCounterMessage(
-                    articleId, businessId + "_portfolio", 
-                    java.util.List.of(com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.CounterType.PORTFOLIO_ARTICLE_COUNT)
-                );
-            portfolioMessage.setPortfolioId(article.getPortfolioId());
-            messageProducerService.sendCacheUpdateMessage(portfolioMessage);
+            redisCounterService.incrementPortfolioArticle(article.getPortfolioId());
         }
         
         // 更新文章热度分数
-        com.lumibee.hive.dto.message.ArticleCacheUpdateMessage popularityMessage = 
-            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createUpdatePopularityMessage(
-                articleId, businessId + "_popularity", 0, 0, 0, article.getGmtCreate()
-            );
-        messageProducerService.sendCacheUpdateMessage(popularityMessage);
+        redisPopularArticleService.updateArticlePopularity(articleId, 0, 0, 0, article.getGmtCreate());
         
         // 清除相关缓存
-        java.util.List<String> cacheKeys = java.util.List.of(
-            "articles::list::homepage::*",
-            "articles::list::all::*",
-            "articles::list::user::" + userId + "::*",
-            "articles::list::tag::*",
-            "articles::list::popular::*"
-        );
-        com.lumibee.hive.dto.message.ArticleCacheUpdateMessage clearCacheMessage = 
-            com.lumibee.hive.dto.message.ArticleCacheUpdateMessage.createClearCacheMessage(
-                articleId, businessId + "_clear_cache", cacheKeys
-            );
-        messageProducerService.sendCacheUpdateMessage(clearCacheMessage);
+        redisClearCacheService.clearHomepageArticleCaches();
+        redisClearCacheService.clearUserArticleCaches(userId);
+        redisClearCacheService.clearAllTagListCaches();
     }
 
     /**
-     * 发送搜索同步消息
+     * 处理搜索同步操作
      */
-    private void sendSearchSyncMessage(Article article, ArticlePublishRequestDTO requestDTO, Long userId, String businessId) {
-        User user = userMapper.selectById(userId);
-        
-        com.lumibee.hive.dto.message.ArticleSearchSyncMessage searchMessage = 
-            com.lumibee.hive.dto.message.ArticleSearchSyncMessage.createIndexMessage(
-                article.getArticleId(), businessId + "_search"
-            );
-        searchMessage.setUserId(userId);
-        searchMessage.setUserName(user.getName());
-        searchMessage.setTitle(requestDTO.getTitle());
-        searchMessage.setContent(requestDTO.getContent());
-        searchMessage.setExcerpt(requestDTO.getExcerpt());
-        searchMessage.setSlug(article.getSlug());
-        searchMessage.setLikes(article.getLikes());
-        searchMessage.setViewCount(article.getViewCount());
-        searchMessage.setAvatarUrl(user.getAvatarUrl());
-        searchMessage.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
-        searchMessage.setBackgroundUrl(article.getBackgroundUrl());
-        
-        messageProducerService.sendSearchSyncMessage(searchMessage);
+    private void processSearchSyncOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId) {
+        try {
+            // 获取用户信息
+            User user = userMapper.selectById(userId);
+            if (user == null) {
+                log.warn("用户不存在，跳过搜索同步: userId={}", userId);
+                return;
+            }
+            
+            // 创建搜索文档
+            ArticleDocument searchDoc = new ArticleDocument();
+            searchDoc.setId(article.getArticleId());
+            searchDoc.setTitle(requestDTO.getTitle());
+            searchDoc.setContent(requestDTO.getContent());
+            searchDoc.setExcerpt(requestDTO.getExcerpt());
+            searchDoc.setSlug(article.getSlug());
+            searchDoc.setLikes(article.getLikes());
+            searchDoc.setViewCount(article.getViewCount());
+            searchDoc.setUserId(userId);
+            searchDoc.setUserName(user.getName());
+            searchDoc.setAvatarUrl(user.getAvatarUrl());
+            searchDoc.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
+            searchDoc.setBackgroundUrl(article.getBackgroundUrl());
+            
+            // 保存到 Elasticsearch
+            articleRepository.save(searchDoc);
+            
+            log.info("搜索同步操作处理完成: articleId={}, title={}", article.getArticleId(), requestDTO.getTitle());
+        } catch (Exception e) {
+            log.error("搜索同步操作处理失败: articleId={}", article.getArticleId(), e);
+        }
     }
 
     /**
-     * 发送标签同步消息
+     * 处理标签同步操作
      */
-    private void sendTagSyncMessage(Integer articleId, java.util.List<String> tagNames, String businessId) {
-        com.lumibee.hive.dto.message.ArticleTagSyncMessage tagMessage = 
-            com.lumibee.hive.dto.message.ArticleTagSyncMessage.createTagProcessMessage(
-                articleId, businessId + "_tag", tagNames
-            );
-        messageProducerService.sendTagSyncMessage(tagMessage);
+    private void processTagSyncOperations(Integer articleId, java.util.List<String> tagNames) {
+        try {
+            if (tagNames == null || tagNames.isEmpty()) {
+                log.info("标签列表为空，跳过标签同步: articleId={}", articleId);
+                return;
+            }
+            
+            // 先删除文章的所有标签关系
+            articleMapper.deleteArticleTagByArticleId(articleId);
+            
+            // 使用 TagService 的批量处理方法
+            Set<Tag> tags = tagService.selectOrCreateTags(tagNames);
+            
+            // 为每个标签创建文章标签关系
+            for (Tag tag : tags) {
+                if (tag != null) {
+                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
+                    log.debug("文章标签关系创建成功: articleId={}, tagId={}, tagName={}", 
+                        articleId, tag.getTagId(), tag.getName());
+                }
+            }
+            
+            log.info("标签同步操作处理完成: articleId={}, tagNames={}", articleId, tagNames);
+        } catch (Exception e) {
+            log.error("标签同步操作处理失败: articleId={}, tagNames={}", articleId, tagNames, e);
+        }
     }
 }

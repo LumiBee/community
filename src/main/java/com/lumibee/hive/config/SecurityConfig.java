@@ -99,8 +99,6 @@ public class SecurityConfig {
                                         "/signup", // 注册API
                                         "/login", // API登录端点
                                         "/profile/**", // 个人资料 API
-                                        "/debug/**", // 调试API
-                                        "/user/debug/**", // 用户调试API
                                         "/login-process", // 登录处理URL
                                         "/swagger-ui/**", // Swagger UI 界面
                                         "/swagger-ui.html", // Swagger UI 主页
