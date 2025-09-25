@@ -138,8 +138,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/ai/**").authenticated() // AI 相关 API 需要认证
                         .anyRequest().permitAll() // 其他所有请求允许匿名访问
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
+                // 注释掉JWT过滤器，因为使用Session认证
+                // .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
