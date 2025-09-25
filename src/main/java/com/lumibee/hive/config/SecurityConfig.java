@@ -2,6 +2,7 @@ package com.lumibee.hive.config;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import javax.sql.DataSource;
 
@@ -33,6 +34,9 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 import org.springframework.security.web.session.InvalidSessionStrategy;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
@@ -78,6 +82,27 @@ public class SecurityConfig {
         return tokenRepository;
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+            "https://www.hivelumi.com",
+            "https://hivelumi.com", 
+            "https://api.hivelumi.com",
+            "http://localhost:3000",
+            "http://localhost:8080"
+        ));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
 
 
     @Bean
@@ -115,7 +140,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> {}) // 启用CORS支持
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
                 )
