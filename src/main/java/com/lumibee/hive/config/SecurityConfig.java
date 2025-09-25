@@ -161,7 +161,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session ->
                         session
-                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                                 .maximumSessions(1)
                                 .expiredSessionStrategy(customSessionExpiredStrategy())
                                 .maxSessionsPreventsLogin(false)
