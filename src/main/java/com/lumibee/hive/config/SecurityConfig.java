@@ -161,7 +161,7 @@ public class SecurityConfig {
                 )
                 .logout(logout ->
                         logout
-                                .logoutUrl("/logout") // 改为API登出端点
+                                .logoutUrl("/api/logout") // 改为API登出端点
                                 .logoutSuccessUrl("/") // 简化重定向URL
                                 .invalidateHttpSession(true)
                                 .deleteCookies("JSESSIONID", "remember-me")
@@ -176,37 +176,7 @@ public class SecurityConfig {
                                 .rememberMeParameter("remember-me")
                                 .key("lumiHiveRememberMeKey")
                 )
-                .csrf(csrf ->
-                        csrf
-                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                                .ignoringRequestMatchers(
-                                        "/api/login-process", // 登录处理URL
-                                        "/api/login", // API登录端点
-                                        "/api/logout", // API登出端点
-                                        "/api/auth/refresh", // Token刷新接口
-                                        "/api/search/**", // 搜索 API
-                                        "/api/home", // 首页 API
-                                        "/api/tags/**", // 标签 API
-                                        "/api/articles/**", // 文章 API
-                                        "/api/article/**", // 单篇文章 API
-                                        "/api/portfolios", // 作品集 API
-                                        "/api/portfolio/**", // 作品集详情 API
-                                        "/api/user/**", // 用户相关 API（包括关注功能）
-                                        "/api/user/current", // 获取当前用户信息API
-                                        "/api/signup", // 注册 API
-                                        "/api/profile/**", // 个人资料 API
-                                        "/api/ai/**", // AI 相关 API - 忽略CSRF但需要认证
-                                        "/api/article/save-draft", // 保存草稿 API
-                                        "/api/debug/**", // 调试API
-                                        "/api/user/debug/**", // 用户调试API
-                                        "/api/favorites/**", // 收藏相关 API
-                                        "/api/update-cover", // 更新封面图片API
-                                        "/api/swagger-ui/**", // Swagger UI 界面
-                                        "/api/swagger-ui.html", // Swagger UI 主页
-                                        "/api/api-docs/**", // OpenAPI 文档
-                                        "/api/v3/api-docs/**" // OpenAPI 3 文档
-                                ) // API路径忽略CSRF
-                );
+                .csrf(csrf -> csrf.disable()) // 完全禁用CSRF，因为这是纯API应用;
 
 
         return http.build();
