@@ -283,6 +283,22 @@ public class SecurityConfig {
     public InvalidSessionStrategy customInvalidSessionStrategy() {
         return (request, response) -> {
             String requestURI = request.getRequestURI();
+            String requestMethod = request.getMethod();
+            String userAgent = request.getHeader("User-Agent");
+            String origin = request.getHeader("Origin");
+            String referer = request.getHeader("Referer");
+            String sessionId = request.getSession(false) != null ? request.getSession(false).getId() : "null";
+            
+            // 添加详细的调试日志
+            System.out.println("=== InvalidSessionStrategy 被触发 ===");
+            System.out.println("请求URI: " + requestURI);
+            System.out.println("请求方法: " + requestMethod);
+            System.out.println("User-Agent: " + userAgent);
+            System.out.println("Origin: " + origin);
+            System.out.println("Referer: " + referer);
+            System.out.println("会话ID: " + sessionId);
+            System.out.println("请求时间: " + new java.util.Date());
+            System.out.println("================================");
             
             // 如果是 API 请求，返回 401 状态码和 JSON 响应
             if (requestURI.startsWith("/api/")) {
