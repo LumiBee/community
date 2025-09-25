@@ -159,16 +159,6 @@ public class SecurityConfig {
                                 .loginPage("/api/login")
                                 .successHandler(customOAuth2SuccessHandler)
                 )
-                .sessionManagement(session ->
-                        session
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                                .maximumSessions(1)
-                                .expiredSessionStrategy(customSessionExpiredStrategy())
-                                .maxSessionsPreventsLogin(false)
-                                .and()
-                                .sessionFixation().migrateSession()
-                                .invalidSessionStrategy(customInvalidSessionStrategy())
-                )
                 .logout(logout ->
                         logout
                                 .logoutUrl("/logout") // 改为API登出端点
@@ -242,79 +232,6 @@ public class SecurityConfig {
                 redirectUrl = "http://localhost:3000/login?error=true";
             } else {
                 redirectUrl = "https://www.hivelumi.com/login?error=true";
-            }
-            response.sendRedirect(redirectUrl);
-        };
-    }
-
-    @Bean
-    public SessionInformationExpiredStrategy customSessionExpiredStrategy() {
-        return (event) -> {
-            HttpServletRequest request = event.getRequest();
-            HttpServletResponse response = event.getResponse();
-            String requestURI = request.getRequestURI();
-            
-            // 添加调试日志
-            System.out.println("会话过期处理 - URI: " + requestURI);
-            
-            // 如果是 API 请求，返回 401 状态码和 JSON 响应
-            if (requestURI.startsWith("/api/")) {
-                System.out.println("API 请求会话过期，返回 401 JSON 响应");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"error\":\"Session Expired\",\"message\":\"会话已过期，请重新登录\"}");
-                return;
-            }
-            
-            // 对于页面请求，根据环境动态选择重定向地址
-            String host = request.getServerName();
-            String redirectUrl;
-            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
-                redirectUrl = "http://localhost:3000/login?expired";
-            } else {
-                redirectUrl = "https://www.hivelumi.com/login?expired";
-            }
-            System.out.println("页面请求会话过期，重定向到: " + redirectUrl);
-            response.sendRedirect(redirectUrl);
-        };
-    }
-
-    @Bean
-    public InvalidSessionStrategy customInvalidSessionStrategy() {
-        return (request, response) -> {
-            String requestURI = request.getRequestURI();
-            String requestMethod = request.getMethod();
-            String userAgent = request.getHeader("User-Agent");
-            String origin = request.getHeader("Origin");
-            String referer = request.getHeader("Referer");
-            String sessionId = request.getSession(false) != null ? request.getSession(false).getId() : "null";
-            
-            // 添加详细的调试日志
-            System.out.println("=== InvalidSessionStrategy 被触发 ===");
-            System.out.println("请求URI: " + requestURI);
-            System.out.println("请求方法: " + requestMethod);
-            System.out.println("User-Agent: " + userAgent);
-            System.out.println("Origin: " + origin);
-            System.out.println("Referer: " + referer);
-            System.out.println("会话ID: " + sessionId);
-            System.out.println("请求时间: " + new java.util.Date());
-            System.out.println("================================");
-            
-            // 如果是 API 请求，返回 401 状态码和 JSON 响应
-            if (requestURI.startsWith("/api/")) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"error\":\"Invalid Session\",\"message\":\"会话无效，请重新登录\"}");
-                return;
-            }
-            
-            // 对于页面请求，根据环境动态选择重定向地址
-            String host = request.getServerName();
-            String redirectUrl;
-            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
-                redirectUrl = "http://localhost:3000/login?invalid";
-            } else {
-                redirectUrl = "https://www.hivelumi.com/login?invalid";
             }
             response.sendRedirect(redirectUrl);
         };
