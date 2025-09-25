@@ -88,29 +88,29 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authz -> authz
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
-                        .requestMatchers("/", "/login", "/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
-                                        "/uploads/**", // 上传的文件（包括头像）
-                                        "/home", // 首页 API
-                                        "/tags/**", // 标签 API
-                                        "/articles/**", // 文章 API
-                                        "/article/**", // 单篇文章 API
-                                        "/portfolios", // 作品集 API (GET)
-                                        "/portfolio/**", // 作品集详情 API (GET)
-                                        "/signup", // 注册API
-                                        "/login", // API登录端点
-                                        "/profile/**", // 个人资料 API
-                                        "/login-process", // 登录处理URL
-                                        "/user/current", // 获取当前用户信息API
-                                        "/swagger-ui/**", // Swagger UI 界面
-                                        "/swagger-ui.html", // Swagger UI 主页
-                                        "/api-docs/**", // OpenAPI 文档
-                                        "/v3/api-docs/**" // OpenAPI 3 文档
+                        .requestMatchers("/", "/api/login", "/api/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
+                                        "/api/uploads/**", // 上传的文件（包括头像）
+                                        "/api/home", // 首页 API
+                                        "/api/tags/**", // 标签 API
+                                        "/api/articles/**", // 文章 API
+                                        "/api/article/**", // 单篇文章 API
+                                        "/api/portfolios", // 作品集 API (GET)
+                                        "/api/portfolio/**", // 作品集详情 API (GET)
+                                        "/api/signup", // 注册API
+                                        "/api/login", // API登录端点
+                                        "/api/profile/**", // 个人资料 API
+                                        "/api/login-process", // 登录处理URL
+                                        "/api/user/current", // 获取当前用户信息API
+                                        "/api/swagger-ui/**", // Swagger UI 界面
+                                        "/api/swagger-ui.html", // Swagger UI 主页
+                                        "/api/api-docs/**", // OpenAPI 文档
+                                        "/api/v3/api-docs/**" // OpenAPI 3 文档
                                         ).permitAll() // 以上路径允许所有用户访问
-                        .requestMatchers(HttpMethod.POST, "/portfolio").authenticated() // 创建作品集需要认证
-                        .requestMatchers("/auth/refresh").permitAll() // Token刷新接口允许匿名访问
-                        .requestMatchers("/publish", "/drafts", "/article/save-draft").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/article/*/comment").authenticated()
-                        .requestMatchers("/ai/**").authenticated() // AI 相关 API 需要认证
+                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集需要认证
+                        .requestMatchers("/api/auth/refresh").permitAll() // Token刷新接口允许匿名访问
+                        .requestMatchers("/api/publish", "/api/drafts", "/api/article/save-draft").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
+                        .requestMatchers("/api/ai/**").authenticated() // AI 相关 API 需要认证
                         .anyRequest().permitAll() // 其他所有请求允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -121,8 +121,8 @@ public class SecurityConfig {
                 )
                 .formLogin(formLogin ->
                         formLogin
-                                .loginPage("/login") // 登录页的 GET 路径
-                                .loginProcessingUrl("/login-process") // 登录表单 POST 提交到此路径
+                                .loginPage("/api/login") // 登录页的 GET 路径
+                                .loginProcessingUrl("/api/login-process") // 登录表单 POST 提交到此路径
                                 .usernameParameter("account") // 前端表单中用于输入邮箱或用户名的字段的 name 属性
                                 .passwordParameter("password") // 前端表单中密码字段的 name 属性
                                 .successHandler(formLoginSuccessHandler)
@@ -131,7 +131,7 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 ->
                         oauth2
-                                .loginPage("/login")
+                                .loginPage("/api/login")
                                 .successHandler(customOAuth2SuccessHandler)
                 )
                 .sessionManagement(session ->
@@ -165,31 +165,31 @@ public class SecurityConfig {
                         csrf
                                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                                 .ignoringRequestMatchers(
-                                        "/login-process", // 登录处理URL
-                                        "/login", // API登录端点
-                                        "/logout", // API登出端点
-                                        "/auth/refresh", // Token刷新接口
-                                        "/search/**", // 搜索 API
-                                        "/home", // 首页 API
-                                        "/tags/**", // 标签 API
-                                        "/articles/**", // 文章 API
-                                        "/article/**", // 单篇文章 API
-                                        "/portfolios", // 作品集 API
-                                        "/portfolio/**", // 作品集详情 API
-                                        "/user/**", // 用户相关 API（包括关注功能）
-                                        "/user/current", // 获取当前用户信息API
-                                        "/signup", // 注册 API
-                                        "/profile/**", // 个人资料 API
-                                        "/ai/**", // AI 相关 API - 忽略CSRF但需要认证
-                                        "/article/save-draft", // 保存草稿 API
-                                        "/debug/**", // 调试API
-                                        "/user/debug/**", // 用户调试API
-                                        "/favorites/**", // 收藏相关 API
-                                        "/update-cover", // 更新封面图片API
-                                        "/swagger-ui/**", // Swagger UI 界面
-                                        "/swagger-ui.html", // Swagger UI 主页
-                                        "/api-docs/**", // OpenAPI 文档
-                                        "/v3/api-docs/**" // OpenAPI 3 文档
+                                        "/api/login-process", // 登录处理URL
+                                        "/api/login", // API登录端点
+                                        "/api/logout", // API登出端点
+                                        "/api/auth/refresh", // Token刷新接口
+                                        "/api/search/**", // 搜索 API
+                                        "/api/home", // 首页 API
+                                        "/api/tags/**", // 标签 API
+                                        "/api/articles/**", // 文章 API
+                                        "/api/article/**", // 单篇文章 API
+                                        "/api/portfolios", // 作品集 API
+                                        "/api/portfolio/**", // 作品集详情 API
+                                        "/api/user/**", // 用户相关 API（包括关注功能）
+                                        "/api/user/current", // 获取当前用户信息API
+                                        "/api/signup", // 注册 API
+                                        "/api/profile/**", // 个人资料 API
+                                        "/api/ai/**", // AI 相关 API - 忽略CSRF但需要认证
+                                        "/api/article/save-draft", // 保存草稿 API
+                                        "/api/debug/**", // 调试API
+                                        "/api/user/debug/**", // 用户调试API
+                                        "/api/favorites/**", // 收藏相关 API
+                                        "/api/update-cover", // 更新封面图片API
+                                        "/api/swagger-ui/**", // Swagger UI 界面
+                                        "/api/swagger-ui.html", // Swagger UI 主页
+                                        "/api/api-docs/**", // OpenAPI 文档
+                                        "/api/v3/api-docs/**" // OpenAPI 3 文档
                                 ) // API路径忽略CSRF
                 );
 

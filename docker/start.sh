@@ -42,6 +42,10 @@ else
     exit 1
 fi
 
+# 检查Flyway迁移表
+echo "🔍 检查Flyway迁移状态..."
+docker exec mysql-db mysql -u root -p${DB_PASSWORD:-cgqlbh114514} -e "USE community; SELECT * FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;" 2>/dev/null
+
 # 启动应用
 echo "🚀 启动Spring Boot应用..."
 docker-compose up -d hive-app
