@@ -1,8 +1,12 @@
 package com.lumibee.hive.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 全局跨域配置
@@ -10,19 +14,20 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig implements WebMvcConfigurer {
 
+    @Value("${app.cors.allowed-origins:http://localhost:3000,https://www.hivelumi.com,https://hivelumi.com,https://api.hivelumi.com}")
+    private String allowedOrigins;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
+        // 从配置文件读取允许的域名
+        List<String> origins = Arrays.asList(allowedOrigins.split(","));
+        
         // 覆盖所有请求
         registry.addMapping("/**")
                 // 允许发送 Cookie
                 .allowCredentials(true)
                 // 放行哪些域名（必须用 patterns，否则 * 会和 allowCredentials 冲突）
-                .allowedOriginPatterns(
-                    "http://localhost:3000",  // 开发环境
-                    "https://www.hivelumi.com",  // 生产环境前端域名
-                    "https://hivelumi.com",  // 不带www的域名
-                    "https://api.hivelumi.com"  // API子域名
-                )
+                .allowedOriginPatterns(origins.toArray(new String[0]))
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
