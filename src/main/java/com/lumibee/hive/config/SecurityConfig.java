@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
-import com.lumibee.hive.filter.RedisSessionFilter;
+// import com.lumibee.hive.filter.RedisSessionFilter; // 注释掉Session过滤器
 import com.lumibee.hive.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -57,8 +57,8 @@ public class SecurityConfig {
     @Autowired
     private DataSource dataSource;
     
-    @Autowired
-    private RedisSessionFilter redisSessionFilter;
+    // @Autowired
+    // private RedisSessionFilter redisSessionFilter; // 注释掉Session过滤器
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -138,9 +138,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/ai/**").authenticated() // AI 相关 API 需要认证
                         .anyRequest().permitAll() // 其他所有请求允许匿名访问
                 )
-                .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
-                // 注释掉JWT过滤器，因为使用Session认证
-                // .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // 注释掉Session过滤器，使用纯JWT认证
+                // .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())

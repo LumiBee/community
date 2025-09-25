@@ -21,7 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.RedisRememberMeService;
-import com.lumibee.hive.service.RedisSessionService;
+// import com.lumibee.hive.service.RedisSessionService; // 注释掉Session服务
+import com.lumibee.hive.utils.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -45,8 +46,11 @@ public class LoginController {
     @Autowired
     private RedisRememberMeService rememberMeService;
     
+    // @Autowired
+    // private RedisSessionService redisSessionService; // 注释掉Session服务
+    
     @Autowired
-    private RedisSessionService redisSessionService;
+    private JwtUtil jwtUtil;
     
     @Value("${app.session.timeout:1800}") // 30分钟
     private int sessionTimeoutSeconds;
@@ -107,18 +111,22 @@ public class LoginController {
             // 获取用户信息
             User user = (User) authentication.getPrincipal();
             
+            // 注释掉Session相关代码，使用纯JWT认证
             // 生成会话ID
-            String sessionId = UUID.randomUUID().toString();
+            // String sessionId = UUID.randomUUID().toString();
             
             // 存储到Redis Session
-            redisSessionService.storeSession(sessionId, user);
+            // redisSessionService.storeSession(sessionId, user);
             
             // 设置会话Cookie
-            Cookie sessionCookie = new Cookie("session", sessionId);
-            sessionCookie.setHttpOnly(true);
-            sessionCookie.setPath("/");
-            sessionCookie.setMaxAge(sessionTimeoutSeconds);
-            response.addCookie(sessionCookie);
+            // Cookie sessionCookie = new Cookie("session", sessionId);
+            // sessionCookie.setHttpOnly(true);
+            // sessionCookie.setPath("/");
+            // sessionCookie.setMaxAge(sessionTimeoutSeconds);
+            // response.addCookie(sessionCookie);
+            
+            // 生成JWT Token
+            String jwtToken = jwtUtil.generateToken(user.getId(), user.getName());
             
             // 处理remember-me功能
             if ("on".equals(rememberMe)) {
@@ -131,7 +139,8 @@ public class LoginController {
             responseMap.put("success", true);
             responseMap.put("user", user);
             responseMap.put("message", "登录成功");
-            responseMap.put("sessionId", sessionId);
+            // responseMap.put("sessionId", sessionId); // 注释掉Session ID
+            responseMap.put("token", jwtToken); // 添加JWT Token
             
             return ResponseEntity.ok(responseMap);
             
