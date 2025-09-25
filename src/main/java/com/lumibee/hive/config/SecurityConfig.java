@@ -176,7 +176,7 @@ public class SecurityConfig {
                                 .rememberMeParameter("remember-me")
                                 .key("lumiHiveRememberMeKey")
                 )
-                .csrf(csrf -> csrf.disable()) // 完全禁用CSRF，因为这是纯API应用;
+                .csrf(csrf -> csrf.disable()); // 完全禁用CSRF，因为这是纯API应用;
 
 
         return http.build();
