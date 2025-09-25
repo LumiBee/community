@@ -1,4 +1,4 @@
-package com.lumibee.hive.util;
+package com.lumibee.hive.utils;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

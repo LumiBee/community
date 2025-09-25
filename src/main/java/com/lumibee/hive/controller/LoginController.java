@@ -3,8 +3,8 @@ package com.lumibee.hive.controller;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
+import com.lumibee.hive.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.RedisRememberMeService;
 // import com.lumibee.hive.service.RedisSessionService; // 注释掉Session服务
-import com.lumibee.hive.utils.JwtUtil;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -155,30 +154,6 @@ public class LoginController {
         }
     }
 
-
-    /**
-     * 关闭密码设置提示
-     */
-    @PostMapping("/user/dismiss-password-prompt")
-    public ResponseEntity<Map<String, String>> dismissPasswordPrompt(HttpServletRequest request) {
-        // 从Redis Session中获取用户信息
-        String sessionId = getSessionIdFromRequest(request);
-        if (sessionId != null) {
-            User user = redisSessionService.getSession(sessionId);
-            if (user != null) {
-                // 可以在这里处理密码提示的关闭逻辑
-                // 比如在用户表中添加标记字段
-                log.info("用户 {} 关闭了密码设置提示", user.getName());
-            }
-        }
-        
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Prompt dismissed");
-        response.put("status", "success");
-        
-        return ResponseEntity.ok(response);
-    }
-
     /**
      * API登出端点，用于处理前端AJAX登出请求
      */
@@ -190,12 +165,6 @@ public class LoginController {
         try {
             // 获取会话ID
             String sessionId = getSessionIdFromRequest(request);
-            
-            // 清除Redis Session
-            if (sessionId != null) {
-                redisSessionService.deleteSession(sessionId);
-                log.info("用户会话 {} 已清除", sessionId);
-            }
             
             // 清除安全上下文
             SecurityContextHolder.clearContext();
