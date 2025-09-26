@@ -63,8 +63,7 @@ public class ImgServiceImpl implements ImgService {
         deleteUserAvatar(user);
         
         // 存储新头像
-        String relativePath = fileStorageService.storeFile(avatarFile, AVATAR_DIRECTORY);
-        String avatarUrl = fileStorageService.getFileUrl(relativePath, null);
+        String avatarUrl = fileStorageService.storeFile(avatarFile, AVATAR_DIRECTORY);
         
         // 更新用户头像URL
         user.setAvatarUrl(avatarUrl);
@@ -127,8 +126,7 @@ public class ImgServiceImpl implements ImgService {
         deleteBackgroundImg(user);
 
         // 存储新背景
-        String relativePath = fileStorageService.storeFile(coverImageFile, BG_DIRECTORY);
-        String imgUrl = fileStorageService.getFileUrl(relativePath, null);
+        String imgUrl = fileStorageService.storeFile(coverImageFile, BG_DIRECTORY);
 
         // 更新背景URL
         user.setBackgroundImgUrl(imgUrl);
