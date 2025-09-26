@@ -55,9 +55,8 @@ public class AdaptiveFileStorageService implements FileStorageService {
     @Override
     public String getFileUrl(String fileName, String subDirectory) {
         if (isProductionEnvironment() && ossFileStorageService != null) {
-            // 生产环境返回OSS URL
-            String objectKey = subDirectory == null ? fileName : subDirectory + "/" + fileName;
-            return ossFileStorageService.domain + "/" + objectKey;
+            // 生产环境直接调用OSS服务获取URL
+            return ossFileStorageService.getFileUrl(fileName, subDirectory);
         } else {
             // 开发环境返回本地URL
             return localFileStorageService.getFileUrl(fileName, subDirectory);

@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
@@ -18,11 +19,13 @@ import java.util.Map;
 @Component
 public class JwtUtil {
     
-    // JWT密钥 - 使用64字符(512位)的密钥以满足HS512要求
-    private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken1234567890123456789012345678901234567890";
+    // JWT密钥
+    @Value("${jwt.secret}")
+    private String jwtSecret;
     
-    // Token过期时间（24小时）
-    private static final long JWT_EXPIRATION = 24 * 60 * 60 * 1000;
+    // Token过期时间
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
     
     /**
      * 生成JWT Token
@@ -42,7 +45,7 @@ public class JwtUtil {
      */
     private String createToken(Map<String, Object> claims, String subject) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+        Date expiryDate = new Date(now.getTime() + jwtExpiration);
         
         return Jwts.builder()
                 .setClaims(claims)
@@ -104,7 +107,7 @@ public class JwtUtil {
      * 获取签名密钥
      */
     private Key getSigningKey() {
-        byte[] keyBytes = JWT_SECRET.getBytes(StandardCharsets.UTF_8);
+        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
     

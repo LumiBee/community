@@ -66,6 +66,21 @@ public class OssFileStorageService {
     }
 
     /**
+     * 获取文件访问URL
+     * @param fileName 文件名
+     * @param subDirectory 子目录
+     * @return 文件访问URL
+     */
+    public String getFileUrl(String fileName, String subDirectory) {
+        if (!StringUtils.hasText(fileName)) {
+            return null;
+        }
+        
+        String objectKey = subDirectory == null ? fileName : subDirectory + "/" + fileName;
+        return domain + "/" + objectKey;
+    }
+
+    /**
      * 删除OSS中的文件
      * @param fileUrl 文件URL
      * @return 是否删除成功
