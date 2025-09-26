@@ -18,8 +18,8 @@ import java.util.Map;
 @Component
 public class JwtUtil {
     
-    // JWT密钥 - 实际应用中应该放在配置文件中
-    private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken12345";
+    // JWT密钥 - 使用64字符(512位)的密钥以满足HS512要求
+    private static final String JWT_SECRET = "lumiHiveSecretKeyForJwtAuthenticationToken1234567890123456789012345678901234567890";
     
     // Token过期时间（24小时）
     private static final long JWT_EXPIRATION = 24 * 60 * 60 * 1000;
