@@ -40,8 +40,8 @@ public class SwaggerConfig {
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
                 .servers(List.of(
-                        new Server().url("http://localhost:8090").description("本地开发环境"),
-                        new Server().url("https://api.hivelumi.com").description("生产环境")
+                        new Server().url("http://localhost:3000").description("本地开发环境"),
+                        new Server().url("https://www.hivelumi.com").description("生产环境")
                 ))
                 // 添加全局安全要求
                 .addSecurityItem(new SecurityRequirement().addList(SECURITY_SCHEME_NAME))

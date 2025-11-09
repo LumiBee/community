@@ -122,7 +122,7 @@ public class ProfileController {
             Integer fans = userService.countFansByUserId(user.getId());
             Integer followers = userService.countFollowingByUserId(user.getId());
             Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
-            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
+            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize, false);
 
 
             Map<String, Object> response = new HashMap<>();

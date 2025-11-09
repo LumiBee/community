@@ -49,5 +49,5 @@ application-performance.yml
 logs/
 tmp/
 
-# Docker Compose 配置文件（包含敏感信息）
+# Docker Compose 配置文件
 docker-compose.yml

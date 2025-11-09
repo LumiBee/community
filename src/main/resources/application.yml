@@ -37,12 +37,23 @@ server:
       etag: true
       # 启用Last-Modified
       last-modified: true
+    # 静态资源路径配置
+    resources:
+      static-locations: classpath:/static/,classpath:/public/,file:./uploads/
+      cache:
+        cachecontrol:
+          max-age: 31536000 # 1年
+          cache-public: true
+          immutable: true
 
 spring:
   profiles:
     active: dev  # 默认激活dev配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf8
+    username: root
+    password: cgqlbh114514
     # Druid 连接池配置优化
     druid:
       initial-size: 5              # 初始连接数

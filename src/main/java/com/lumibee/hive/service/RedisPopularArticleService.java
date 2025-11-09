@@ -58,8 +58,8 @@ public class RedisPopularArticleService {
             // 更新到 Redis Sorted Set
             redisTemplate.opsForZSet().add(POPULAR_ARTICLES_KEY, articleId.toString(), popularityScore);
             
-            // 设置过期时间（7天）
-            redisTemplate.expire(POPULAR_ARTICLES_KEY, 7, TimeUnit.DAYS);
+            // 设置过期时间（1天）
+            redisTemplate.expire(POPULAR_ARTICLES_KEY, 1, TimeUnit.DAYS);
             
             log.debug("更新文章热度分数: articleId={}, score={}, publishTime={}", articleId, popularityScore, publishTime);
             
@@ -78,7 +78,7 @@ public class RedisPopularArticleService {
             // 增加浏览量
             String viewKey = ARTICLE_VIEW_COUNT_KEY + articleId;
             redisTemplate.opsForValue().increment(viewKey);
-            redisTemplate.expire(viewKey, 7, TimeUnit.DAYS);
+            redisTemplate.expire(viewKey, 1, TimeUnit.DAYS);
             
         } catch (Exception e) {
             log.error("增加文章浏览量失败: articleId={}", articleId, e);
@@ -95,7 +95,7 @@ public class RedisPopularArticleService {
             // 增加点赞数
             String likeKey = ARTICLE_LIKE_COUNT_KEY + articleId;
             redisTemplate.opsForValue().increment(likeKey);
-            redisTemplate.expire(likeKey, 7, TimeUnit.DAYS);
+            redisTemplate.expire(likeKey, 1, TimeUnit.DAYS);
             
         } catch (Exception e) {
             log.error("增加文章点赞数失败: articleId={}", articleId, e);
@@ -112,7 +112,7 @@ public class RedisPopularArticleService {
             // 减少点赞数
             String likeKey = ARTICLE_LIKE_COUNT_KEY + articleId;
             redisTemplate.opsForValue().decrement(likeKey);
-            redisTemplate.expire(likeKey, 7, TimeUnit.DAYS);
+            redisTemplate.expire(likeKey, 1, TimeUnit.DAYS);
 
             
         } catch (Exception e) {
@@ -130,7 +130,7 @@ public class RedisPopularArticleService {
             // 增加评论数
             String commentKey = ARTICLE_COMMENT_COUNT_KEY + articleId;
             redisTemplate.opsForValue().increment(commentKey);
-            redisTemplate.expire(commentKey, 7, TimeUnit.DAYS);
+            redisTemplate.expire(commentKey, 1, TimeUnit.DAYS);
             
         } catch (Exception e) {
             log.error("增加文章评论数失败: articleId={}", articleId, e);
@@ -184,8 +184,8 @@ public class RedisPopularArticleService {
             // 存储到Redis Hash中
             redisTemplate.opsForHash().put(ARTICLE_POPULAR_KEY, articleExcerpt.getArticleId().toString(), jsonString);
             
-            // 设置过期时间（7天）
-            redisTemplate.expire(ARTICLE_POPULAR_KEY, 7, TimeUnit.DAYS);
+            // 设置过期时间（1天）
+            redisTemplate.expire(ARTICLE_POPULAR_KEY, 1, TimeUnit.DAYS);
             
             log.debug("缓存文章摘要成功: articleId={}, title={}", 
                     articleExcerpt.getArticleId(), articleExcerpt.getTitle());

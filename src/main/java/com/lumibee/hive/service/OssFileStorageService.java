@@ -1,23 +1,26 @@
 package com.lumibee.hive.service;
 
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.ObjectMetadata;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.model.ObjectMetadata;
 
 /**
  * 阿里云OSS文件存储服务
  * 仅在生产环境使用
  */
 @Service
+@Profile("prod")
 public class OssFileStorageService {
 
     @Autowired

@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +30,7 @@ import com.lumibee.hive.model.User;
  * 负责用户相关的业务逻辑处理，包括用户认证、资料管理、关注关系等
  */
 @Service
+@Log4j2
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired private UserMapper userMapper;
@@ -257,6 +261,55 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             throw new RuntimeException("更新用户资料失败");
         }
+    }
+
+    @Override
+    @Transactional
+    public int changePoints(Long userId, Integer changePoints, String reason) {
+        // 1. 参数验证
+        if (userId == null || changePoints == null) {
+            log.warn("积分变更失败：用户ID或积分变化值为空");
+            return 0;
+        }
+
+        if (changePoints == 0) {
+            log.warn("积分变更失败：积分变化值不能为0");
+            return 0;
+        }
+
+        // 2. 验证用户是否存在
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            log.warn("积分变更失败：用户不存在，用户ID: {}", userId);
+            return 0;
+        }
+
+        // 3. 检查积分变化后的合理性
+        int currentPoints = user.getPoints() != null ? user.getPoints() : 0;
+        int newPoints = currentPoints + changePoints;
+
+        if (newPoints < 0) {
+            log.warn("积分变更失败：积分不足，当前积分: {}, 需要扣除: {}", currentPoints, Math.abs(changePoints));
+            return 0;
+        }
+
+        // 4. 执行积分更新
+        int result = userMapper.changePoints(userId, changePoints);
+
+        if (result > 0) {
+            // 5. 清除相关缓存
+            try {
+                redisClearCacheService.clearUserRelatedCaches(userId, user.getName());
+            } catch (Exception e) {
+                log.error("清除用户积分缓存失败: {}", e.getMessage());
+            }
+
+            // 6. 记录积分变化日志
+            log.info("用户积分变更成功：用户ID={}, 变化={}, 新积分={}, 原因={}",
+                    userId, changePoints, newPoints, reason);
+        }
+
+        return result;
     }
 
     @Override

@@ -42,6 +42,7 @@ public class User implements UserDetails, Principal {
     private String qqOpenId;
     private String backgroundImgUrl;
     private UserRole role;
+    private Integer points;
 
     @TableLogic
     @TableField(fill = FieldFill.INSERT)

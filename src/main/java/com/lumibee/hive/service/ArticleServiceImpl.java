@@ -309,13 +309,20 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Cacheable(value = "articles::list::user", key = "#userId + '::' + #pageNum + '::' + #pageSize")
     @Transactional(readOnly = true)
-    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
+    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize, boolean isDraft) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
+        if (isDraft) {
+            queryWrapper.eq(Article::getStatus, Article.ArticleStatus.draft)
                     .eq(Article::getDeleted, 0)
                     .eq(Article::getUserId, userId)
                     .orderByDesc(Article::getGmtModified);
+        }else {
+            queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
+                    .eq(Article::getDeleted, 0)
+                    .eq(Article::getUserId, userId)
+                    .orderByDesc(Article::getGmtModified);
+        }
 
         return getArticleExcerptDTOPage(pageNum, pageSize, articleProfilePageRequest, queryWrapper);
     }
@@ -652,56 +659,8 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        // 更新标签
-        articleMapper.deleteArticleTagByArticleId(articleId);
-        if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
-            Set<Tag> tags = tagService.selectOrCreateTags(requestDTO.getTagsName());
-            for (Tag tag : tags) {
-                if (tag != null) {
-                    tagService.insertTagArticleRelation(articleId, tag.getTagId());
-                    tagService.incrementArticleCount(tag.getTagId());
-                }
-            }
-            // 清除标签列表缓存
-            redisClearCacheService.clearAllTagListCaches();
-        }
-
         existingArticle.setStatus(Article.ArticleStatus.published);
         articleMapper.updateById(existingArticle);
-
-        // 同步热门文章摘要缓存（只缓存真正的热门文章）
-        try {
-            ArticleExcerptDTO articleExcerpt = convertToExcerptDTO(existingArticle);
-            redisPopularArticleService.syncPopularArticleCache(articleExcerpt);
-            log.debug("同步更新文章摘要缓存成功: articleId={}", articleId);
-        } catch (Exception e) {
-            log.error("同步更新文章摘要缓存失败: articleId={}", articleId, e);
-        }
-
-        // 更新Elasticsearch中的文章数据
-        User user = userMapper.selectById(userId);
-        ArticleDocument articleDocument = new ArticleDocument();
-        articleDocument.setId(articleId);
-        articleDocument.setContent(requestDTO.getContent());
-        articleDocument.setExcerpt(requestDTO.getExcerpt());
-        articleDocument.setUserName(user.getName());
-        articleDocument.setTitle(requestDTO.getTitle());
-        articleDocument.setSlug(existingArticle.getSlug());
-        articleDocument.setLikes(existingArticle.getLikes());
-        articleDocument.setViewCount(existingArticle.getViewCount());
-        articleDocument.setAvatarUrl(user.getAvatarUrl());
-        articleDocument.setGmtModified(existingArticle.getGmtModified() != null ? existingArticle.getGmtModified().toString() : null);
-        articleDocument.setBackgroundUrl(existingArticle.getBackgroundUrl());
-        articleDocument.setUserId(existingArticle.getUserId());
-
-        // 保存/更新到Elasticsearch
-        articleRepository.save(articleDocument);
-
-        // 更新文章后，清除相关缓存
-        redisClearCacheService.clearArticleRelatedCaches(existingArticle);
-        
-        // 额外清除所有文章列表缓存，确保首页能显示更新后的文章
-        redisClearCacheService.clearAllArticleListCaches();
 
         // 同步处理后续操作
         try {
@@ -1000,6 +959,9 @@ public class ArticleServiceImpl implements ArticleService {
         if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
             processTagSyncOperations(articleId, requestDTO.getTagsName());
         }
+
+        // 4. 增加用户积分
+        userService.changePoints(userId, 5, "用户新发布了一篇文章");
     }
 
     /**
@@ -1020,11 +982,19 @@ public class ArticleServiceImpl implements ArticleService {
         
         // 更新文章热度分数
         redisPopularArticleService.updateArticlePopularity(articleId, 0, 0, 0, article.getGmtCreate());
+
+        // 同步热门文章摘要缓存（只缓存真正的热门文章）
+        try {
+            ArticleExcerptDTO articleExcerpt = convertToExcerptDTO(article);
+            redisPopularArticleService.syncPopularArticleCache(articleExcerpt);
+            log.debug("同步文章摘要缓存成功: articleId={}", articleId);
+        } catch (Exception e) {
+            log.error("同步文章摘要缓存失败: articleId={}", articleId, e);
+        }
         
         // 清除相关缓存
         redisClearCacheService.clearHomepageArticleCaches();
         redisClearCacheService.clearUserArticleCaches(userId);
-        redisClearCacheService.clearAllTagListCaches();
     }
 
     /**
@@ -1089,6 +1059,8 @@ public class ArticleServiceImpl implements ArticleService {
             }
             
             log.info("标签同步操作处理完成: articleId={}, tagNames={}", articleId, tagNames);
+            // 清除标签列表缓存
+            redisClearCacheService.clearAllTagListCaches();
         } catch (Exception e) {
             log.error("标签同步操作处理失败: articleId={}, tagNames={}", articleId, tagNames, e);
         }

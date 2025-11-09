@@ -72,7 +72,7 @@ public class CacheMonitoringConfig {
     }
 
     // Redis 健康检查
-    @Scheduled(fixedRate = 30000) // 每30秒检查一次
+    @Scheduled(fixedRate = 300000) // 每300秒检查一次
     public void checkRedisHealth() {
         try {
             redisTemplate.opsForValue().get("health_check");
@@ -85,7 +85,7 @@ public class CacheMonitoringConfig {
     }
 
     // 缓存容量监控
-    @Scheduled(fixedRate = 60000) // 1分钟检查一次
+    @Scheduled(fixedRate = 600000) // 10分钟检查一次
     public void monitorCacheCapacity() {
         try {
             RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();
@@ -110,7 +110,7 @@ public class CacheMonitoringConfig {
     }
     
     // 缓存性能监控
-    @Scheduled(fixedRate = 300000) // 5分钟检查一次
+    @Scheduled(fixedRate = 3000000) // 50分钟检查一次
     public void monitorCachePerformance() {
         try {
             RedisConnection connection = redisTemplate.getConnectionFactory().getConnection();

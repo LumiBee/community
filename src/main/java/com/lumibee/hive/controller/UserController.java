@@ -312,4 +312,21 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @PutMapping("/check-in")
+    @Operation(summary = "用户签到", description = "用户签到，更新其积分")
+    public ResponseEntity<Map<String, Object>> checkIn(@AuthenticationPrincipal Principal principal) {
+        Map<String, Object> response = new HashMap<>();
+
+        // 获取当前用户
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            response.put("success", false);
+            response.put("message", "用户未登录");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+        response.put("test", "test");
+
+        return ResponseEntity.ok().body(response);
+    }
 }

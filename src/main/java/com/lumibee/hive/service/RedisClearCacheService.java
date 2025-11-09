@@ -1,16 +1,12 @@
 package com.lumibee.hive.service;
 
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Service;
 
 import com.lumibee.hive.mapper.TagMapper;
@@ -218,26 +214,37 @@ public class RedisClearCacheService {
      */
     public void clearAllCaches() {
         log.info("开始清除所有缓存");
-        clearAllArticleListCaches();
-        clearAllTagListCaches();
-        log.info("所有缓存清除完成");
+        try {
+            // 方法1：清除所有hive::开头的缓存
+            Set<String> allHiveKeys = redisTemplate.keys("hive::*");
+            if (allHiveKeys != null && !allHiveKeys.isEmpty()) {
+                log.info("发现 {} 个hive缓存键", allHiveKeys.size());
+                redisTemplate.unlink(allHiveKeys);
+                log.info("已删除所有hive缓存");
+            } else {
+                log.info("没有发现hive缓存键");
+            }
+            
+            // 方法2：按类型清除（备用方案）
+            clearAllArticleListCaches();
+            clearAllTagListCaches();
+            
+            log.info("所有缓存清除完成");
+        } catch (Exception e) {
+            log.error("清除所有缓存时发生错误: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     public void clearCachesByPattern(String pattern) {
         log.info("清除缓存数据, pattern={}", pattern);
-        try (RedisConnection connection = redisTemplate.getConnectionFactory().getConnection()) {
-
-            ScanOptions scanOptions = ScanOptions.scanOptions().match(pattern).count(1000).build();
-
-            Cursor<byte[]> cursor = connection.scan(scanOptions);
-            Set<String> keysToDelete = new HashSet<>();
-            while (cursor.hasNext()) {
-                // 找到的 key 是 byte[] 数组，需要转换为 String
-                keysToDelete.add(new String(cursor.next()));
-            }
-
-            if (!keysToDelete.isEmpty()) {
+        try {
+            // 使用RedisTemplate的keys方法，它会自动处理序列化
+            Set<String> keysToDelete = redisTemplate.keys(pattern);
+            
+            if (keysToDelete != null && !keysToDelete.isEmpty()) {
                 log.info("发现了 {} 个缓存数据", keysToDelete.size());
+                // 使用unlink进行异步删除，性能更好
                 redisTemplate.unlink(keysToDelete);
                 log.info("已删除缓存数据");
             } else {

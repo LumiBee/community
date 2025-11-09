@@ -57,12 +57,12 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "avatarUrl", column = "avatar_url")
     })
     List<ArticleExcerptDTO> getPopularArticles(@Param("limit") Integer limit);
-    @Select("SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.gmt_modified, " +
+    @Select("SELECT a.article_id, a.user_id, a.title, a.slug, a.excerpt, a.view_count, a.likes, a.gmt_modified, " +
             "u.name AS user_name, u.avatar_url " +
             "from articles a " +
             "LEFT JOIN article_tags at ON a.article_id = at.article_id " +
             "LEFT JOIN user u ON a.user_id = u.id " +
-            "WHERE at.tag_id = #{tagId} " +
+            "WHERE at.tag_id = #{tagId} AND a.deleted = 0 AND a.status = 'published' " +
             "ORDER BY a.view_count DESC")
     @Results(id = "getArticlesByTagId", value ={
             @Result(property = "articleId", column = "article_id"),
@@ -72,6 +72,8 @@ public interface ArticleMapper extends BaseMapper<Article> {
             @Result(property = "slug", column = "slug"),
             @Result(property = "avatarUrl", column = "avatar_url"),
             @Result(property = "excerpt", column = "excerpt"),
+            @Result(property = "viewCount", column = "view_count"),
+            @Result(property = "likes", column = "likes"),
             @Result(property = "gmtModified", column = "gmt_modified")
     })
     List<ArticleExcerptDTO> getArticlesByTagId(@Param("tagId") Integer tagId);

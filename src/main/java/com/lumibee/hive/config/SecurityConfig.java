@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 import javax.sql.DataSource;
 
-// import com.lumibee.hive.filter.RedisSessionFilter; // 注释掉Session过滤器
-import com.lumibee.hive.service.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -22,25 +20,22 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.web.AuthenticationEntryPoint;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.session.SessionInformationExpiredStrategy;
-import org.springframework.security.web.session.InvalidSessionStrategy;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.lumibee.hive.filter.JwtAuthenticationFilter;
 import com.lumibee.hive.model.User;
 import com.lumibee.hive.service.UserService;
-import com.lumibee.hive.filter.JwtAuthenticationFilter;
+import com.lumibee.hive.service.UserServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -57,8 +52,6 @@ public class SecurityConfig {
     @Autowired
     private DataSource dataSource;
     
-    // @Autowired
-    // private RedisSessionFilter redisSessionFilter; // 注释掉Session过滤器
     
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -90,7 +83,7 @@ public class SecurityConfig {
             "https://hivelumi.com", 
             "https://api.hivelumi.com",
             "http://localhost:3000",
-            "http://localhost:8080"
+            "http://localhost:8090"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
@@ -139,8 +132,6 @@ public class SecurityConfig {
                         .anyRequest().permitAll() // 其他所有请求允许匿名访问
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                // 注释掉Session过滤器，使用纯JWT认证
-                // .addFilterBefore(redisSessionFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
@@ -177,7 +168,7 @@ public class SecurityConfig {
                                 .rememberMeParameter("remember-me")
                                 .key("lumiHiveRememberMeKey")
                 )
-                .csrf(csrf -> csrf.disable()); // 完全禁用CSRF，因为这是纯API应用;
+                .csrf(csrf -> csrf.disable()); // 完全禁用CSRF;
 
 
         return http.build();

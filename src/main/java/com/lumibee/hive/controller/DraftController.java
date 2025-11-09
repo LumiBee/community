@@ -52,7 +52,7 @@ public class DraftController {
             ArticleDetailsDTO updatedDraft = articleService.saveDraft(requestDTO.getArticleId(), requestDTO, user.getId());
             return ResponseEntity.ok(updatedDraft);
         }else {
-            if (requestDTO.getTitle() == null || requestDTO.getContent() == null) {
+            if (requestDTO.getTitle() == null && requestDTO.getContent() != null) {
                 requestDTO.setTitle("无标题草稿");
             }
 
@@ -76,7 +76,7 @@ public class DraftController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        Page<ArticleExcerptDTO> drafts = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
+        Page<ArticleExcerptDTO> drafts = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize, true);
         return ResponseEntity.ok(drafts);
     }
 
