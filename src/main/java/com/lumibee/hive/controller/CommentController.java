@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -67,5 +68,37 @@ public class CommentController {
         
         Comments newComment = commentService.addComment(articleId, content, currentUser.getId(), parentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newComment);
+    }
+
+    @DeleteMapping("/{commentId}")
+    @Operation(summary = "删除评论", description = "删除指定的评论（只能删除自己的评论）")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "删除成功"),
+        @ApiResponse(responseCode = "401", description = "用户未认证"),
+        @ApiResponse(responseCode = "403", description = "无权删除该评论"),
+        @ApiResponse(responseCode = "404", description = "评论不存在")
+    })
+    public ResponseEntity<Void> deleteComment(
+            @Parameter(description = "评论ID") @PathVariable Long commentId,
+            @AuthenticationPrincipal Principal principal) {
+        User currentUser = userService.getCurrentUserFromPrincipal(principal);
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        try {
+            boolean deleted = commentService.deleteComment(commentId, currentUser.getId());
+            if (deleted) {
+                return ResponseEntity.ok().build();
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }

@@ -77,7 +77,6 @@ public class RedisClearCacheService {
 
         // 清除所有标签列表缓存
         clearAllTagListCaches();
-
     }
 
     public void clearArticleRelatedCaches(Article article) {

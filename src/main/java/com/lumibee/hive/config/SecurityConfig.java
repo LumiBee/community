@@ -86,8 +86,17 @@ public class SecurityConfig {
             "http://localhost:8090"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setExposedHeaders(Arrays.asList("*"));
+        // 明确指定允许的请求头，而不是使用通配符
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization", "Content-Type", "X-Requested-With", 
+            "Accept", "Origin", "Access-Control-Request-Method", 
+            "Access-Control-Request-Headers", "X-CSRF-TOKEN"
+        ));
+        // 明确指定暴露的响应头
+        configuration.setExposedHeaders(Arrays.asList(
+            "Authorization", "Content-Type", "X-Total-Count", 
+            "Access-Control-Allow-Origin", "Access-Control-Allow-Credentials"
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
@@ -105,31 +114,65 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有OPTIONS请求通过
-                        .requestMatchers("/", "/api/login", "/api/signup", "/css/**", "/js/**", "/img/**", "/favicon.ico",
-                                        "/api/uploads/**", // 上传的文件（包括头像）
-                                        "/api/home", // 首页 API
-                                        "/api/tags/**", // 标签 API
-                                        "/api/articles/**", // 文章 API
-                                        "/api/article/**", // 单篇文章 API
-                                        "/api/portfolios", // 作品集 API (GET)
-                                        "/api/portfolio/**", // 作品集详情 API (GET)
-                                        "/api/signup", // 注册API
-                                        "/api/login", // API登录端点
-                                        "/api/profile/**", // 个人资料 API
-                                        "/api/login-process", // 登录处理URL
-                                        "/api/user/current", // 获取当前用户信息API
-                                        "/api/swagger-ui/**", // Swagger UI 界面
-                                        "/api/swagger-ui.html", // Swagger UI 主页
-                                        "/api/api-docs/**", // OpenAPI 文档
-                                        "/api/v3/api-docs/**" // OpenAPI 3 文档
-                                        ).permitAll() // 以上路径允许所有用户访问
-                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集需要认证
-                        .requestMatchers("/api/auth/refresh").permitAll() // Token刷新接口允许匿名访问
-                        .requestMatchers("/api/publish", "/api/drafts", "/api/article/save-draft").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/article/*/comment").authenticated()
-                        .requestMatchers("/api/ai/**").authenticated() // AI 相关 API 需要认证
-                        .anyRequest().permitAll() // 其他所有请求允许匿名访问
+                        // 1. 首先处理OPTIONS请求（CORS预检）
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        
+                        // 2. 静态资源和公开页面
+                        .requestMatchers("/", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
+                        .requestMatchers("/login", "/signup", "/home", "/articles", "/articles/**",
+                                        "/portfolios", "/portfolios/**", "/profile/**", "/about",
+                                        "/tags", "/tags/**").permitAll() // 前端页面路由
+
+                        // 3. 认证相关接口（登录、注册、登出）
+                        .requestMatchers("/api/login", "/api/signup", "/api/login-process", "/api/auth/refresh").permitAll()
+                        
+                        // 4. 公开的API接口（只读操作）
+                        .requestMatchers(HttpMethod.GET, "/api/home").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/article/**").permitAll() // 获取文章详情
+                        .requestMatchers(HttpMethod.GET, "/api/portfolios").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/portfolio/**").permitAll() // 获取作品集详情
+                        .requestMatchers(HttpMethod.GET, "/api/profile/**").permitAll() // 获取用户资料（查看）
+                        .requestMatchers(HttpMethod.GET, "/api/user/current").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll() // 获取评论
+                        .requestMatchers("/uploads/**").permitAll() // 上传的文件（包括头像）- 注意：这是静态资源路径，不是API路径
+                        .requestMatchers(HttpMethod.GET, "/api/uploads/**").permitAll() // API方式访问上传文件
+                        
+                        // 5. Swagger文档（开发环境可考虑限制）
+                        .requestMatchers("/api/swagger-ui/**", "/api/swagger-ui.html", 
+                                        "/api/api-docs/**", "/api/v3/api-docs/**").permitAll()
+                        
+                        // 6. 需要认证的写操作 - 文章相关
+                        .requestMatchers("/api/article/publish").authenticated() // 发布文章
+                        .requestMatchers(HttpMethod.PUT, "/api/article/*/edit").authenticated() // 编辑文章（使用*匹配单个路径段）
+                        .requestMatchers(HttpMethod.DELETE, "/api/article/delete/*").authenticated() // 删除文章（使用*匹配单个路径段）
+                        .requestMatchers("/api/article/save-draft").authenticated() // 保存草稿
+                        .requestMatchers("/api/article/drafts").authenticated() // 获取草稿列表
+                        .requestMatchers(HttpMethod.POST, "/api/article/*/like").authenticated() // 点赞文章（使用*匹配单个路径段）
+                        
+                        // 7. 需要认证的写操作 - 作品集相关
+                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集
+                        .requestMatchers(HttpMethod.PUT, "/api/portfolio/**").authenticated() // 更新作品集
+                        .requestMatchers(HttpMethod.DELETE, "/api/portfolio/**").authenticated() // 删除作品集
+                        
+                        // 8. 需要认证的写操作 - 用户资料相关
+                        .requestMatchers(HttpMethod.PUT, "/api/profile/**").authenticated() // 更新用户资料
+                        .requestMatchers(HttpMethod.POST, "/api/profile/**").authenticated() // 用户资料相关操作
+                        
+                        // 9. 需要认证的操作 - 收藏夹相关
+                        .requestMatchers("/api/favorites/**").authenticated()
+                        
+                        // 10. 需要认证的操作 - 评论相关（必须在GET规则之后，但更具体的DELETE规则优先）
+                        .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated() // 删除评论（使用*匹配单个路径段，如 /api/comments/4）
+                        .requestMatchers(HttpMethod.POST, "/api/comments/**").authenticated() // 添加评论
+                        .requestMatchers(HttpMethod.PUT, "/api/comments/**").authenticated() // 更新评论
+                        
+                        // 11. 需要认证的操作 - AI相关
+                        .requestMatchers("/api/ai/**").authenticated()
+                        
+                        // 12. 其他请求默认需要认证（更安全的做法）
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持

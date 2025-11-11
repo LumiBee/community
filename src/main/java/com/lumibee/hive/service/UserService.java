@@ -23,6 +23,4 @@ public interface UserService {
     boolean isFavoritedByCurrentUser(Long id, Integer articleId);
     User updateProfile(Long userId, String userName, String email, String bio);
     int changePoints(Long userId, Integer changePoints, String reason);
-
-
 }
