@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            logger.error("JWT认证过程中发生错误", ex);
+            SecurityContextHolder.clearContext();
         }
         
         // 继续过滤器链
