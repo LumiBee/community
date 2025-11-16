@@ -44,7 +44,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 @Configuration
-//@EnableWebSecurity
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
@@ -125,52 +125,52 @@ public class SecurityConfig {
                                         "/tags", "/tags/**").permitAll() // 前端页面路由
 
                         // 3. 认证相关接口（登录、注册、登出）
-                        .requestMatchers("/api/login", "/api/signup", "/api/login-process", "/api/auth/refresh").permitAll()
+                        .requestMatchers("/login", "/signup", "/login-process", "/auth/refresh").permitAll()
                         
                         // 4. 公开的API接口（只读操作）
-                        .requestMatchers(HttpMethod.GET, "/api/home").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tags/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/article/**").permitAll() // 获取文章详情
-                        .requestMatchers(HttpMethod.GET, "/api/portfolios").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/portfolio/**").permitAll() // 获取作品集详情
-                        .requestMatchers(HttpMethod.GET, "/api/profile/**").permitAll() // 获取用户资料（查看）
-                        .requestMatchers(HttpMethod.GET, "/api/user/current").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/comments/**").permitAll() // 获取评论
+                        .requestMatchers(HttpMethod.GET, "/home").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/articles/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/article/**").permitAll() // 获取文章详情
+                        .requestMatchers(HttpMethod.GET, "portfolios").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/portfolio/**").permitAll() // 获取作品集详情
+                        .requestMatchers(HttpMethod.GET, "/profile/**").permitAll() // 获取用户资料（查看）
+                        .requestMatchers(HttpMethod.GET, "/user/current").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/comments/**").permitAll() // 获取评论
                         .requestMatchers("/uploads/**").permitAll() // 上传的文件（包括头像）- 注意：这是静态资源路径，不是API路径
                         .requestMatchers(HttpMethod.GET, "/api/uploads/**").permitAll() // API方式访问上传文件
                         
                         // 5. Swagger文档（开发环境可考虑限制）
-                        .requestMatchers("/api/swagger-ui/**", "/api/swagger-ui.html", 
-                                        "/api/api-docs/**", "/api/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
+                                        "/api-docs/**", "/v3/api-docs/**").permitAll()
                         
                         // 6. 需要认证的写操作 - 文章相关
-                        .requestMatchers("/api/article/publish").authenticated() // 发布文章
-                        .requestMatchers(HttpMethod.PUT, "/api/article/*/edit").authenticated() // 编辑文章（使用*匹配单个路径段）
-                        .requestMatchers(HttpMethod.DELETE, "/api/article/delete/*").authenticated() // 删除文章（使用*匹配单个路径段）
-                        .requestMatchers("/api/article/save-draft").authenticated() // 保存草稿
-                        .requestMatchers("/api/article/drafts").authenticated() // 获取草稿列表
-                        .requestMatchers(HttpMethod.POST, "/api/article/*/like").authenticated() // 点赞文章（使用*匹配单个路径段）
+                        .requestMatchers("/article/publish").authenticated() // 发布文章
+                        .requestMatchers(HttpMethod.PUT, "/article/*/edit").authenticated() // 编辑文章（使用*匹配单个路径段）
+                        .requestMatchers(HttpMethod.DELETE, "/article/delete/*").authenticated() // 删除文章（使用*匹配单个路径段）
+                        .requestMatchers("/article/save-draft").authenticated() // 保存草稿
+                        .requestMatchers("/articles/drafts").authenticated() // 获取草稿列表
+                        .requestMatchers(HttpMethod.POST, "/article/*/like").authenticated() // 点赞文章（使用*匹配单个路径段）
                         
                         // 7. 需要认证的写操作 - 作品集相关
-                        .requestMatchers(HttpMethod.POST, "/api/portfolio").authenticated() // 创建作品集
-                        .requestMatchers(HttpMethod.PUT, "/api/portfolio/**").authenticated() // 更新作品集
-                        .requestMatchers(HttpMethod.DELETE, "/api/portfolio/**").authenticated() // 删除作品集
+                        .requestMatchers(HttpMethod.POST, "/portfolio").authenticated() // 创建作品集
+                        .requestMatchers(HttpMethod.PUT, "/portfolio/**").authenticated() // 更新作品集
+                        .requestMatchers(HttpMethod.DELETE, "/portfolio/**").authenticated() // 删除作品集
                         
                         // 8. 需要认证的写操作 - 用户资料相关
-                        .requestMatchers(HttpMethod.PUT, "/api/profile/**").authenticated() // 更新用户资料
-                        .requestMatchers(HttpMethod.POST, "/api/profile/**").authenticated() // 用户资料相关操作
+                        .requestMatchers(HttpMethod.PUT, "/profile/**").authenticated() // 更新用户资料
+                        .requestMatchers(HttpMethod.POST, "/profile/**").authenticated() // 用户资料相关操作
                         
                         // 9. 需要认证的操作 - 收藏夹相关
-                        .requestMatchers("/api/favorites/**").authenticated()
+                        .requestMatchers("/favorites/**").authenticated()
                         
                         // 10. 需要认证的操作 - 评论相关（必须在GET规则之后，但更具体的DELETE规则优先）
-                        .requestMatchers(HttpMethod.DELETE, "/api/comments/*").authenticated() // 删除评论（使用*匹配单个路径段，如 /api/comments/4）
-                        .requestMatchers(HttpMethod.POST, "/api/comments/**").authenticated() // 添加评论
-                        .requestMatchers(HttpMethod.PUT, "/api/comments/**").authenticated() // 更新评论
+                        .requestMatchers(HttpMethod.DELETE, "/comments/*").authenticated() // 删除评论（使用*匹配单个路径段，如 /comments/4）
+                        .requestMatchers(HttpMethod.POST, "/comments/**").authenticated() // 添加评论
+                        .requestMatchers(HttpMethod.PUT, "/comments/**").authenticated() // 更新评论
                         
                         // 11. 需要认证的操作 - AI相关
-                        .requestMatchers("/api/ai/**").authenticated()
+                        .requestMatchers("/ai/**").authenticated()
                         
                         // 12. 其他请求默认需要认证（更安全的做法）
                         .anyRequest().authenticated()
