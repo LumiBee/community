@@ -1,61 +1,52 @@
 package com.lumibee.hive.config;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import javax.sql.DataSource;
-
+ 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
-import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
-import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.UserService;
 import com.lumibee.hive.service.UserServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 @Configuration
 @EnableWebSecurity
+@Log4j2
 public class SecurityConfig {
 
     @Autowired
     private UserServiceImpl userServiceImpl;
 
     @Autowired
-    private DataSource dataSource;
-    
-    
-    @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    private OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+
+    @Autowired
+    private OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -65,15 +56,6 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
-    }
-
-    @Bean
-    public PersistentTokenRepository persistentTokenRepository() {
-        JdbcTokenRepositoryImpl tokenRepository = new JdbcTokenRepositoryImpl();
-        tokenRepository.setDataSource(dataSource);
-        //第一次运行需要设为true,之后注释掉即可
-        //tokenRepository.setCreateTableOnStartup(true);
-        return tokenRepository;
     }
 
     @Bean
@@ -87,7 +69,7 @@ public class SecurityConfig {
             "http://localhost:8090"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
-        // 明确指定允许的请求头，而不是使用通配符
+        // 明确指定允许的请求头
         configuration.setAllowedHeaders(Arrays.asList(
             "Authorization", "Content-Type", "X-Requested-With", 
             "Accept", "Origin", "Access-Control-Request-Method", 
@@ -109,12 +91,13 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   @Qualifier("formLoginAuthenticationSuccessHandler") AuthenticationSuccessHandler formLoginSuccessHandler,
-                                                   CustomOAuth2AuthenticationSuccessHandler customOAuth2SuccessHandler) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.info("=== 初始化 SecurityFilterChain ===");
 
         http
-                .authorizeHttpRequests(authz -> authz
+                .authorizeHttpRequests(authz -> {
+                    log.info("配置授权规则...");
+                    authz
                         // 1. 首先处理OPTIONS请求（CORS预检）
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         
@@ -125,8 +108,11 @@ public class SecurityConfig {
                                         "/tags", "/tags/**").permitAll() // 前端页面路由
 
                         // 3. 认证相关接口（登录、注册、登出）
-                        .requestMatchers("/login", "/signup", "/login-process", "/auth/refresh").permitAll()
-                        
+                        .requestMatchers("/login", "/login/oauth2", "/signup", "/auth/refresh").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .requestMatchers("/login/oauth2/**").permitAll() // OAuth2回调接口
+                        .requestMatchers("/error").permitAll() // 允许访问错误页面
+
                         // 4. 公开的API接口（只读操作）
                         .requestMatchers(HttpMethod.GET, "/home").permitAll()
                         .requestMatchers(HttpMethod.GET, "/tags/**").permitAll()
@@ -140,7 +126,7 @@ public class SecurityConfig {
                         .requestMatchers("/uploads/**").permitAll() // 上传的文件（包括头像）- 注意：这是静态资源路径，不是API路径
                         .requestMatchers(HttpMethod.GET, "/api/uploads/**").permitAll() // API方式访问上传文件
                         
-                        // 5. Swagger文档（开发环境可考虑限制）
+                        // 5. Swagger文档
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
                                         "/api-docs/**", "/v3/api-docs/**").permitAll()
                         
@@ -173,82 +159,40 @@ public class SecurityConfig {
                         .requestMatchers("/ai/**").authenticated()
                         
                         // 12. 其他请求默认需要认证（更安全的做法）
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated();
+                })
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用CORS支持
                 .exceptionHandling(exceptions -> 
                     exceptions.authenticationEntryPoint(customAuthenticationEntryPoint())
                 )
-                .formLogin(formLogin ->
-                        formLogin
-                                .loginPage("/api/login") // 登录页的 GET 路径
-                                .loginProcessingUrl("/api/login-process") // 登录表单 POST 提交到此路径
-                                .usernameParameter("account") // 前端表单中用于输入邮箱或用户名的字段的 name 属性
-                                .passwordParameter("password") // 前端表单中密码字段的 name 属性
-                                .successHandler(formLoginSuccessHandler)
-                                .failureHandler(customAuthenticationFailureHandler())
-                                .permitAll()
-                )
-                .oauth2Login(oauth2 ->
-                        oauth2
-                                .loginPage("/api/login")
-                                .successHandler(customOAuth2SuccessHandler)
-                )
-                .oauth2Client(Customizer.withDefaults())
-                .logout(logout ->
-                        logout
-                                .logoutUrl("/api/logout") // 改为API登出端点
-                                .logoutSuccessUrl("/") // 简化重定向URL
-                                .invalidateHttpSession(true)
-                                .deleteCookies("JSESSIONID", "remember-me")
-                                .clearAuthentication(true)
-                                .permitAll()
-                )
-                .rememberMe(rememberMe ->
-                        rememberMe
-                                .tokenRepository(persistentTokenRepository())
-                                .tokenValiditySeconds(1209600) // 2周 = 14 * 24 * 60 * 60
-                                .userDetailsService(userServiceImpl)
-                                .rememberMeParameter("remember-me")
-                                .key("lumiHiveRememberMeKey")
-                )
+                .oauth2Login(oauth2 -> {
+                    log.info("配置OAuth2登录(无状态)...");
+                    oauth2
+                        .authorizationEndpoint(config ->
+                                config.authorizationRequestRepository(new com.lumibee.hive.security.oauth.HttpCookieOAuth2AuthorizationRequestRepository())
+                        )
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler(oAuth2AuthenticationFailureHandler);
+                })
+                .logout(logout -> logout.permitAll())
                 .csrf(csrf -> csrf.disable()); // 完全禁用CSRF;
 
-
+        log.info("=== SecurityFilterChain 配置完成 ===");
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
-        return (request, response, exception) -> {
-            String requestURI = request.getRequestURI();
-            
-            // 如果是 API 请求，返回 401 状态码和 JSON 响应
-            if (requestURI.startsWith("/api/")) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                response.setContentType("application/json;charset=UTF-8");
-                response.getWriter().write("{\"error\":\"Authentication Failed\",\"message\":\"认证失败，请检查用户名和密码\"}");
-                return;
-            }
-            
-            // 对于页面请求，根据环境动态选择重定向地址
-            String host = request.getServerName();
-            String redirectUrl;
-            if ("localhost".equals(host) || "127.0.0.1".equals(host)) {
-                redirectUrl = "http://localhost:3000/login?error=true";
-            } else {
-                redirectUrl = "https://www.hivelumi.com/login?error=true";
-            }
-            response.sendRedirect(redirectUrl);
-        };
     }
 
     @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint() {
         return (request, response, authException) -> {
             String requestURI = request.getRequestURI();
-            
+            log.error("=== 认证失败 - AuthenticationEntryPoint 被调用 ===");
+            log.error("请求URI: {}", requestURI);
+            log.error("请求方法: {}", request.getMethod());
+            log.error("异常信息: {}", authException.getMessage());
+            log.error("异常类型: {}", authException.getClass().getName());
+
             // 如果是 API 请求，返回 401 状态码和 JSON 响应
             if (requestURI.startsWith("/api/")) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -269,112 +213,5 @@ public class SecurityConfig {
             }
             response.sendRedirect(redirectUrl);
         };
-    }
-
-    @Bean
-    public AuthenticationSuccessHandler formLoginAuthenticationSuccessHandler() {
-        return (request, response, authentication) -> {
-            HttpSession session = request.getSession();
-            Object principal = authentication.getPrincipal();
-            String userIdentifier = "";
-
-            if (principal instanceof UserDetails) {
-                userIdentifier = ((UserDetails) principal).getUsername();
-            } else if (principal instanceof String) {
-                userIdentifier = (String) principal;
-            }
-
-            if (!userIdentifier.isEmpty()) {
-                User user = null;
-                if (userIdentifier.contains("@")) {
-                    user = userServiceImpl.selectByEmail(userIdentifier);
-                } else {
-                    user = userServiceImpl.selectByName(userIdentifier);
-                }
-
-                if (user != null) {
-                    User sessionUser = new User();
-                    sessionUser.setId(user.getId());
-                    sessionUser.setName(user.getName());
-                    sessionUser.setGithubId(user.getGithubId());
-                    sessionUser.setQqOpenId(user.getQqOpenId());
-                    sessionUser.setAvatarUrl(user.getAvatarUrl());
-                    sessionUser.setEmail(user.getEmail());
-
-                    session.setAttribute("user", sessionUser); //将 User 对象以键名 "user" 存入 session
-                } else {
-                    System.err.println("Form Login Success, but could not reload user from DB with identifier: " + userIdentifier);
-                }
-            } else {
-                System.err.println("Form Login Success, but could not get user identifier from principal.");
-            }
-
-            // 使用HTTPS重定向
-            String redirectUrl = request.getScheme().equals("https") ? 
-                "https://" + request.getServerName() + "/" : 
-                "/";
-            response.sendRedirect(redirectUrl);
-        };
-    }
-
-    @Component
-    public static class CustomOAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-
-        private final UserService userService;
-
-        @Autowired
-        public CustomOAuth2AuthenticationSuccessHandler(UserService userService) {
-            this.userService = userService;
-        }
-
-        @Override
-        public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-            HttpSession session = request.getSession();
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-
-
-            String githubId = oauth2User.getName();
-            String name = oauth2User.getAttribute("name");
-            String email = oauth2User.getAttribute("email");
-            String avatarUrl = oauth2User.getAttribute("avatar_url");
-            String bio = oauth2User.getAttribute("bio");
-
-            User user = userService.selectByGithubId(githubId);
-            boolean needsPasswordPrompt = false;
-
-            if (user == null) {
-                user = new User();
-                user.setGithubId(githubId);
-                user.setName(name);
-                user.setEmail(email);
-                user.setAvatarUrl(avatarUrl);
-                user.setBio(bio);
-                user.setGmtCreate(LocalDateTime.now());
-                user.setGmtModified(user.getGmtCreate());
-                user.setPassword(null); // 新 OAuth 用户，本地密码为 null
-                userService.insert(user);
-                needsPasswordPrompt = true;
-            }  else {
-                if (user.getPassword() == null || user.getPassword().isBlank()) {
-                    needsPasswordPrompt = true;
-                }
-
-                user.setGmtModified(LocalDateTime.now());
-                userService.updateById(user);
-            }
-
-            session.setAttribute("user", user);
-
-            if (needsPasswordPrompt) {
-                session.setAttribute("showPasswordSetupPrompt", true);
-            } else {
-                session.removeAttribute("showPasswordSetupPrompt");
-            }
-            // 使用HTTPS重定向
-            String redirectUrl = request.getScheme().equals("https") ? 
-                "https://" + request.getServerName() + request.getContextPath() + "/" : 
-                request.getContextPath() + "/";
-            response.sendRedirect(redirectUrl);
-        }
     }
 }

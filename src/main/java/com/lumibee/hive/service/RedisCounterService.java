@@ -2,6 +2,7 @@ package com.lumibee.hive.service;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -16,11 +17,17 @@ public class RedisCounterService {
     
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
-    
+
+    private static final int VIEW_WINDOW = 10;
     private static final String COUNTER_PREFIX = "counter:";
     
     // ==================== 基础操作方法 ====================
-    
+
+    public Boolean recordView(Integer articleId, Long userId) {
+        String key = "article-user:view:" + articleId + ":" + userId;
+        return redisTemplate.opsForValue().setIfAbsent(key, "1", VIEW_WINDOW, TimeUnit.MINUTES);
+    }
+
     /**
      * 增加计数器
      */
@@ -102,9 +109,11 @@ public class RedisCounterService {
     /**
      * 设置文章阅读量
      */
-    public void setArticleViewCount(Integer articleId, int count) {
+    public void setArticleViewCount(Integer articleId, Long userId,int count) {
         String key = "article:view:" + articleId;
         setCount(key, count);
+        String keyUser = "article-user:view:" + articleId + ":" + userId;
+        redisTemplate.opsForValue().setIfAbsent(keyUser, "1", VIEW_WINDOW, TimeUnit.MINUTES);
     }
     
     /**

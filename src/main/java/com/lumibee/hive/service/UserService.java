@@ -1,5 +1,6 @@
 package com.lumibee.hive.service;
 
+import com.lumibee.hive.dto.UserDTO;
 import com.lumibee.hive.model.User;
 
 import java.security.Principal;
@@ -11,6 +12,7 @@ public interface UserService {
     User selectByGithubId(String githubId);
     boolean updatePassword(Long id, String newPassword);
     int insert(User user);
+    User findOrCreateUser(String githubId, String login, String email, String avatarUrl);
     int updateById(User user);
     User selectById(Long id);
     List<User> selectByIds(List<Long> ids);
@@ -23,4 +25,8 @@ public interface UserService {
     boolean isFavoritedByCurrentUser(Long id, Integer articleId);
     User updateProfile(Long userId, String userName, String email, String bio);
     int changePoints(Long userId, Integer changePoints, String reason);
+
+    List<UserDTO> findFans(Long userId);
+    List<UserDTO> findFollowing(Long userId);
+
 }

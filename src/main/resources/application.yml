@@ -95,7 +95,6 @@ spring:
         secure: false  # 开发环境设为false，生产环境应设为true
         max-age: 1800  # cookie最大存活时间30分钟
         same-site: lax
-
   ai:
     dashscope:
       api-key: "placeholder_dashscope_key"
@@ -237,4 +236,7 @@ springdoc:
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
 
-
+# JWT 配置（仅用于开发/默认值，生产请通过环境变量覆盖）
+jwt:
+  secret: "change_this_dev_secret_key_please_change_to_strong_random"
+  expiration: 86400000 # 24小时，单位: 毫秒

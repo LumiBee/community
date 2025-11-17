@@ -373,10 +373,14 @@ public class ArticleServiceImpl implements ArticleService {
             if (!redisCounterService.existsArticleViewCount(article.getArticleId())) {
                 // 如果 Redis 中不存在，从数据库加载并增加1
                 viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
-                redisCounterService.setArticleViewCount(article.getArticleId(), viewCount);
+                redisCounterService.setArticleViewCount(article.getArticleId(), article.getUserId(), viewCount);
             } else {
-                // 如果 Redis 中存在，直接增加1
-                viewCount = redisCounterService.incrementArticleView(article.getArticleId());
+                // 如果 Redis 中存在，直接增加1(10min内只会加一次)
+                if (redisCounterService.recordView(article.getArticleId(), article.getUserId())) {
+                    viewCount = redisCounterService.incrementArticleView(article.getArticleId());
+                }else {
+                    viewCount = redisCounterService.getArticleViewCount(article.getArticleId());
+                }
             }
             article.setViewCount(viewCount);
             

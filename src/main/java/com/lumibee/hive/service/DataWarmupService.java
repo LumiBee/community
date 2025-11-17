@@ -218,7 +218,7 @@ public class DataWarmupService {
             List<Article> articles = articleMapper.selectList(null);
             for (Article article : articles) {
                 if (article.getViewCount() != null) {
-                    redisCounterService.setArticleViewCount(article.getArticleId(),
+                    redisCounterService.setArticleViewCount(article.getArticleId(),null,
                             article.getViewCount());
                 }
                 if (article.getLikes() != null) {

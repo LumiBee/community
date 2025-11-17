@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lumibee.hive.model.User;
-import com.lumibee.hive.service.RedisRememberMeService;
 // import com.lumibee.hive.service.RedisSessionService; // 注释掉Session服务
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,17 +41,12 @@ public class LoginController {
     @Autowired
     private AuthenticationManager authenticationManager;
     
-    @Autowired
-    private RedisRememberMeService rememberMeService;
-    
-    // @Autowired
-    // private RedisSessionService redisSessionService; // 注释掉Session服务
+    // 仅使用JWT，不再使用RememberMe或服务端Session
     
     @Autowired
     private JwtUtil jwtUtil;
     
-    @Value("${app.session.timeout:1800}") // 30分钟
-    private int sessionTimeoutSeconds;
+    // 不再使用服务端Session
 
     /**
      * 重定向登录页面到Vue SPA
@@ -127,11 +121,15 @@ public class LoginController {
             // 生成JWT Token
             String jwtToken = jwtUtil.generateToken(user.getId(), user.getName());
             
-            // 处理remember-me功能
-            if ("on".equals(rememberMe)) {
-                String rememberMeToken = rememberMeService.createRememberMeToken(user);
-                rememberMeService.setRememberMeCookie(response, rememberMeToken);
-            }
+            // 将JWT写入HttpOnly Cookie，前端也可从响应体读取
+            Cookie jwtCookie = new Cookie("jwt_token", jwtToken);
+            jwtCookie.setHttpOnly(true);
+            jwtCookie.setPath("/");
+            // 将Cookie过期时间设置为token剩余有效期（秒）
+            long expiresInSec = Math.max(0L, (jwtUtil.getExpirationDateFromToken(jwtToken).getTime() - System.currentTimeMillis()) / 1000);
+            // 如果remember-me选中，可以按需让前端使用刷新逻辑；这里仍以token有效期为准
+            jwtCookie.setMaxAge((int) Math.min(Integer.MAX_VALUE, expiresInSec));
+            response.addCookie(jwtCookie);
             
             // 返回成功响应
             Map<String, Object> responseMap = new HashMap<>();
@@ -163,23 +161,14 @@ public class LoginController {
         Map<String, Object> responseMap = new HashMap<>();
         
         try {
-            // 获取会话ID
-            String sessionId = getSessionIdFromRequest(request);
-            
             // 清除安全上下文
             SecurityContextHolder.clearContext();
             
-            // 清除会话Cookie
-            Cookie sessionCookie = new Cookie("session", "");
-            sessionCookie.setPath("/");
-            sessionCookie.setMaxAge(0);
-            response.addCookie(sessionCookie);
-            
-            // 清除remember-me cookie
-            Cookie rememberMeCookie = new Cookie("remember-me", "");
-            rememberMeCookie.setPath("/");
-            rememberMeCookie.setMaxAge(0);
-            response.addCookie(rememberMeCookie);
+            // 清除JWT Cookie（客户端也可自行丢弃Token）
+            Cookie jwtCookie = new Cookie("jwt_token", "");
+            jwtCookie.setPath("/");
+            jwtCookie.setMaxAge(0);
+            response.addCookie(jwtCookie);
             
             responseMap.put("success", true);
             responseMap.put("message", "登出成功");
@@ -195,20 +184,6 @@ public class LoginController {
     }
     
     
-     /**
-     * 从请求中获取会话ID
-     */
-    private String getSessionIdFromRequest(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("session".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
     
     /**
      * 创建错误响应

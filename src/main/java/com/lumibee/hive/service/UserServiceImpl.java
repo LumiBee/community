@@ -4,9 +4,12 @@ import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.lumibee.hive.dto.UserDTO;
+import com.lumibee.hive.model.Follower;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
@@ -33,12 +36,23 @@ import com.lumibee.hive.model.User;
 @Log4j2
 public class UserServiceImpl implements UserService, UserDetailsService {
 
-    @Autowired private UserMapper userMapper;
-    @Autowired private UserFollowingMapper userFollowingMapper;
-    @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-    @Autowired private RedisMonitoringService redisMonitoringService;
-    @Autowired private RedisCounterService redisCounterService;
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private UserFollowingMapper userFollowingMapper;
+
+    @Autowired
+    private ArticleFavoritesMapper articleFavoritesMapper;
+
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
+
+    @Autowired
+    private RedisMonitoringService redisMonitoringService;
+
+    @Autowired
+    private RedisCounterService redisCounterService;
 
     /**
      * 根据用户名查找用户
@@ -314,6 +328,56 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<UserDTO> findFans(Long userId) {
+        // 查询所有该用户的粉丝
+        QueryWrapper<Follower> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId);
+        List<Follower> relationships = userFollowingMapper.selectList(wrapper);
+
+        // 如果没有粉丝关系，则直接返回一个空的
+        if (relationships == null || relationships.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 提取所有粉丝的ID，避免N+1问题
+        List<Long> fanIds = relationships.stream()
+                .map(Follower::getFollowerId)
+                .collect(Collectors.toList());
+
+        List<User> fans = userMapper.selectByIds(fanIds);
+
+        return fans.stream()
+                .map(fan -> new UserDTO(fan.getName(), fan.getAvatarUrl(), fan.getId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserDTO> findFollowing(Long userId) {
+        // 查询所有该用户的关注关系
+        QueryWrapper<Follower> wrapper = new QueryWrapper<>();
+        wrapper.eq("follower_id", userId);
+        List<Follower> relationships = userFollowingMapper.selectList(wrapper);
+
+        // 如果没有关注关系，则直接返回一个空的
+        if (relationships == null || relationships.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 提取所有关注的ID，避免N+1问题
+        List<Long> followingIds = relationships.stream()
+                .map(Follower::getFollowerId)
+                .collect(Collectors.toList());
+
+        List<User> following = userMapper.selectByIds(followingIds);
+
+        return following.stream()
+                .map(followingUser -> new UserDTO(followingUser.getName(), followingUser.getAvatarUrl(), followingUser.getId()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
         if (id == null || articleId == null) {
             // 如果用户ID或文章ID无效，直接返回false
@@ -341,6 +405,51 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         
         return result;
     }
+
+    @Override
+    @Transactional
+    public User findOrCreateUser(String githubId, String login, String email, String avatarUrl) {
+        // 1. 查找GitHub ID是否已存在
+        User existingUser = userMapper.selectByGithubId(githubId);
+        if (existingUser != null) {
+            log.info("GitHub ID已存在，直接返回用户信息：{}", existingUser);
+            return existingUser;
+        }
+
+        // 2. 查找邮箱是否已存在, 如果存在则进行链接并同步更新GitHub ID和头像（如果为空）
+        if (email != null && !email.isEmpty()) {
+            existingUser = userMapper.selectByEmail(email);
+            if (existingUser != null) {
+                log.info("找到邮箱匹配的用户，现链接用户信息：{}", existingUser);
+                existingUser.setGithubId(githubId);
+                if (StrUtil.isBlank(existingUser.getAvatarUrl())) {
+                    existingUser.setAvatarUrl(avatarUrl);
+                }
+                updateById(existingUser);
+
+                redisClearCacheService.clearUserRelatedCaches(existingUser.getId(), existingUser.getName());
+                return existingUser;
+            }
+        }
+
+        // 3. 如果GitHub ID和邮箱都不存在，则创建新用户
+        log.info("GitHub ID和邮箱都不存在，创建新用户: githubId={}, login={}, email={}, avatarUrl={}",
+                githubId, login, email, avatarUrl);
+        User newUser = new User();
+        newUser.setGithubId(githubId);
+        newUser.setName(login);
+        newUser.setEmail(email);
+        newUser.setAvatarUrl(avatarUrl);
+        newUser.setGmtCreate(LocalDateTime.now());
+        newUser.setGmtModified(LocalDateTime.now());
+        newUser.setRole(User.UserRole.regular);
+        newUser.setPoints(0);
+        insert(newUser);
+
+        redisClearCacheService.clearUserRelatedCaches(newUser.getId(), newUser.getName());
+        return newUser;
+    }
+
 
     @Override
     @Transactional
