@@ -122,7 +122,7 @@ public class ProfileController {
             // 获取用户统计数据
             Integer articleCount = articleService.countArticlesByUserId(user.getId());
             Integer fans = userService.countFansByUserId(user.getId());
-            Integer followers = userService.countFollowingByUserId(user.getId());
+            Integer followings = userService.countFollowingByUserId(user.getId());
             Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
             Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize, false);
 
@@ -131,7 +131,7 @@ public class ProfileController {
             response.put("user", user);
             response.put("articleCount", articleCount);
             response.put("followersCount", fans);
-            response.put("followingCount", followers);
+            response.put("followingsCount", followings);
             response.put("articles", articlePage);
             response.put("isOwner", isOwner);
             response.put("isFollowed", isFollowed);
@@ -155,10 +155,10 @@ public class ProfileController {
         @ApiResponse(responseCode = "404", description = "用户不存在"),
         @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
-    public ResponseEntity<Map<String, Object>> getUserFollowers(
+    public ResponseEntity<Map<String, Object>> getUserFans(
             @Parameter(description = "用户名") @PathVariable("name") String name,
             @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
-            @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "6") long pageSize,
+            @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "12") long pageSize,
             @AuthenticationPrincipal Principal principal) {
 
         try {
@@ -175,11 +175,14 @@ public class ProfileController {
                 isOwner = true;
             }
 
-            List<UserDTO> fans = userService.findFans(user.getId());
+            Page<UserDTO> fans = userService.findFans(user.getId(), pageNum, pageSize);
             HashMap<String, Object> response = new HashMap<>();
 
             response.put("user", user);
-            response.put("followers", fans);
+            response.put("followers", fans.getRecords());
+            response.put("total", fans.getTotal());
+            response.put("pages", fans.getPages());
+            response.put("current", fans.getCurrent());
             response.put("isOwner", isOwner);
 
             return ResponseEntity.ok(response);
@@ -193,4 +196,54 @@ public class ProfileController {
             return ResponseEntity.status(500).body(errorResponse);
         }
     }
+
+    @GetMapping("/profile/{name}/followings")
+    @Operation(summary = "获取用户的关注列表", description = "根据用户名获取用户的关注列表")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "用户不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器内部错误")
+    })
+    public ResponseEntity<Map<String, Object>> getUserFollowings(
+            @Parameter(description = "用户名") @PathVariable("name") String name,
+            @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
+            @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "12") long pageSize,
+            @AuthenticationPrincipal Principal principal) {
+
+        try {
+            // 根据路径中的name查找用户
+            User user = userService.selectByName(name);
+            if (user == null) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // 判断正在查看的页面是否属于当前登录的用户
+            boolean isOwner = false;
+            User currentUser = userService.getCurrentUserFromPrincipal(principal);
+            if (principal != null && currentUser != null && currentUser.getId().equals(user.getId())) {
+                isOwner = true;
+            }
+
+            Page<UserDTO> following = userService.findFollowing(user.getId(), pageNum, pageSize);
+            HashMap<String, Object> response = new HashMap<>();
+
+            response.put("user", user);
+            response.put("followings", following.getRecords());
+            response.put("total", following.getTotal());
+            response.put("pages", following.getPages());
+            response.put("current", following.getCurrent());
+            response.put("isOwner", isOwner);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.err.println("获取用户资料出错: " + e.getMessage());
+            e.printStackTrace();
+
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "获取用户资料失败");
+            errorResponse.put("message", e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+
 }

@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.dto.UserDTO;
 import com.lumibee.hive.model.Follower;
 import lombok.extern.log4j.Log4j2;
@@ -328,52 +329,65 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDTO> findFans(Long userId) {
+    public Page<UserDTO> findFans(Long userId, long pageNum, long pageSize) {
+        Page<Follower> fansPage = new Page<>(pageNum, pageSize);
+
         // 查询所有该用户的粉丝
         QueryWrapper<Follower> wrapper = new QueryWrapper<>();
         wrapper.eq("user_id", userId);
-        List<Follower> relationships = userFollowingMapper.selectList(wrapper);
+        Page<Follower> relationships = userFollowingMapper.selectPage(fansPage, wrapper);
 
         // 如果没有粉丝关系，则直接返回一个空的
-        if (relationships == null || relationships.isEmpty()) {
-            return new ArrayList<>();
+        if (relationships == null || relationships.getRecords().isEmpty()) {
+            return new Page<>();
         }
 
         // 提取所有粉丝的ID，避免N+1问题
-        List<Long> fanIds = relationships.stream()
+        List<Long> fanIds = relationships.getRecords().stream()
                 .map(Follower::getFollowerId)
                 .collect(Collectors.toList());
 
         List<User> fans = userMapper.selectByIds(fanIds);
 
-        return fans.stream()
-                .map(fan -> new UserDTO(fan.getName(), fan.getAvatarUrl(), fan.getId()))
+        List<UserDTO> userDTOList = fans.stream()
+                .map(fan -> new UserDTO(fan.getName(), fan.getAvatarUrl(), fan.getId(), fan.getBio(), fan.getRole()))
                 .collect(Collectors.toList());
+
+        // 创建一个新的Page对象来包装UserDTO列表
+        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(), relationships.getTotal());
+        result.setRecords(userDTOList);
+        return result;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<UserDTO> findFollowing(Long userId) {
+    public Page<UserDTO> findFollowing(Long userId, long pageNum, long pageSize) {
+        Page<Follower> followingPage = new Page<>(pageNum, pageSize);
         // 查询所有该用户的关注关系
         QueryWrapper<Follower> wrapper = new QueryWrapper<>();
         wrapper.eq("follower_id", userId);
-        List<Follower> relationships = userFollowingMapper.selectList(wrapper);
+        Page<Follower> relationships = userFollowingMapper.selectPage(followingPage, wrapper);
 
         // 如果没有关注关系，则直接返回一个空的
-        if (relationships == null || relationships.isEmpty()) {
-            return new ArrayList<>();
+        if (relationships == null || relationships.getRecords().isEmpty()) {
+            return new Page<>();
         }
 
         // 提取所有关注的ID，避免N+1问题
-        List<Long> followingIds = relationships.stream()
-                .map(Follower::getFollowerId)
+        List<Long> followingIds = relationships.getRecords().stream()
+                .map(Follower::getUserId)
                 .collect(Collectors.toList());
 
         List<User> following = userMapper.selectByIds(followingIds);
 
-        return following.stream()
-                .map(followingUser -> new UserDTO(followingUser.getName(), followingUser.getAvatarUrl(), followingUser.getId()))
+        List<UserDTO> userDTOList = following.stream()
+                .map(followingUser -> new UserDTO(followingUser.getName(), followingUser.getAvatarUrl(), followingUser.getId(), followingUser.getBio(), followingUser.getRole()))
                 .collect(Collectors.toList());
+
+        // 创建一个新的Page对象来包装UserDTO列表
+        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(), relationships.getTotal());
+        result.setRecords(userDTOList);
+        return result;
     }
 
     @Override

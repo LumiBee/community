@@ -1,5 +1,6 @@
 package com.lumibee.hive.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.dto.UserDTO;
 import com.lumibee.hive.model.User;
 
@@ -26,7 +27,7 @@ public interface UserService {
     User updateProfile(Long userId, String userName, String email, String bio);
     int changePoints(Long userId, Integer changePoints, String reason);
 
-    List<UserDTO> findFans(Long userId);
-    List<UserDTO> findFollowing(Long userId);
+    Page<UserDTO> findFans(Long userId, long pageNum, long pageSize);
+    Page<UserDTO> findFollowing(Long userId, long pageNum, long pageSize);
 
 }
