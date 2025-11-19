@@ -67,10 +67,15 @@ public class IndexController {
         return ResponseEntity.ok(response);
     }
 
+import org.springframework.cache.annotation.Cacheable;
+//... (other imports)
+
+// ... (inside IndexController class)
     /**
      * 获取首页数据API
      */
     @GetMapping("/home")
+    @Cacheable(value = "homeCache", key = "'page' + #pageNum + '_size' + #pageSize")
     @Operation(summary = "获取首页数据", description = "获取首页需要显示的文章、标签和精选文章数据")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "获取成功")
