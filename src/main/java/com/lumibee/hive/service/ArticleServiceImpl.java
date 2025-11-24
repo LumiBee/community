@@ -413,6 +413,8 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDetailsDTO.setUserId(user.getId());
                 articleDetailsDTO.setUserName(user.getName());
                 articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
+                articleDetailsDTO.setBackgroundUrl(user.getBackgroundImgUrl());
+                articleDetailsDTO.setUserBio(user.getBio());
                 
                 // 获取用户的统计数据
                 Integer userFollowersCount = userService.countFansByUserId(user.getId());
@@ -430,7 +432,6 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDetailsDTO.setUserArticleCount(userArticleCount);
                 articleDetailsDTO.setUserFollowersCount(userFollowersCount);
                 articleDetailsDTO.setUserFollowingCount(userFollowingCount);
-                articleDetailsDTO.setUserBio(user.getBio());
             }
             if (portfolio != null) {
                 articleDetailsDTO.setPortfolio(convertToPortfolioDTO(portfolio));
