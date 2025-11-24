@@ -41,23 +41,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        log.info("=== JwtAuthenticationFilter 处理请求 ===");
-        log.info("请求URI: {}", request.getRequestURI());
-        log.info("请求方法: {}", request.getMethod());
-        log.info("请求URL: {}", request.getRequestURL());
+//        log.info("=== JwtAuthenticationFilter 处理请求 ===");
+//        log.info("请求URI: {}", request.getRequestURI());
+//        log.info("请求方法: {}", request.getMethod());
+//        log.info("请求URL: {}", request.getRequestURL());
 
         try {
             // 从请求中获取JWT
             String jwt = getJwtFromRequest(request);
-            log.info("提取的JWT: {}", jwt != null ? jwt.substring(0, Math.min(20, jwt.length())) + "..." : "null");
+//            log.info("提取的JWT: {}", jwt != null ? jwt.substring(0, Math.min(20, jwt.length())) + "..." : "null");
 
             // 检查JWT是否存在
             if (StringUtils.hasText(jwt)) {
-                log.info("JWT存在，开始验证...");
+//                log.info("JWT存在，开始验证...");
                 try {
                     // 验证令牌
                     boolean isValid = jwtUtil.validateToken(jwt);
-                    log.info("JWT验证结果: {}", isValid);
+//                     log.info("JWT验证结果: {}", isValid);
 
                     // 如果令牌有效，则设置认证信息
                     if (isValid) {
@@ -77,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                             // 设置安全上下文
                             SecurityContextHolder.getContext().setAuthentication(authentication);
-                            log.info("用户认证成功，用户ID: {}, 用户名: {}", userId, user.getName());
+                            // log.info("用户认证成功，用户ID: {}, 用户名: {}", userId, user.getName());
                         } else {
                             // 即使JWT有效，但找不到用户
                             log.warn("JWT was valid, but no user found with ID: {}", userId);
@@ -91,17 +91,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     SecurityContextHolder.clearContext();
                 }
             } else {
-                log.info("请求中没有JWT，作为匿名用户继续");
+//                log.info("请求中没有JWT，作为匿名用户继续");
             }
         } catch (Exception ex) {
             log.error("Error in JwtAuthenticationFilter (outside JWT processing)", ex);
             SecurityContextHolder.clearContext();
         }
 
-        log.info("JwtAuthenticationFilter处理完成，继续过滤器链");
+//        log.info("JwtAuthenticationFilter处理完成，继续过滤器链");
         // 无论如何，都继续过滤器链
         filterChain.doFilter(request, response);
-        log.info("=== JwtAuthenticationFilter 请求处理结束 ===");
+//        log.info("=== JwtAuthenticationFilter 请求处理结束 ===");
     }
     
     /**

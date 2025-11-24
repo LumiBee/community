@@ -67,7 +67,7 @@ public class IndexController {
         return ResponseEntity.ok(response);
     }
     /**
-     * 获取首页数据API
+     * 获取首页数据APIÏ
      */
     @GetMapping("/home")
     @Operation(summary = "获取首页数据", description = "获取首页需要显示的文章、标签和精选文章数据")
