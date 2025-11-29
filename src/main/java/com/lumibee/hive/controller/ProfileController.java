@@ -3,7 +3,6 @@ package com.lumibee.hive.controller;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.lumibee.hive.dto.UserDTO;
@@ -124,7 +123,7 @@ public class ProfileController {
             Integer fans = userService.countFansByUserId(user.getId());
             Integer followings = userService.countFollowingByUserId(user.getId());
             Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
-            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize, false);
+            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
 
 
             Map<String, Object> response = new HashMap<>();

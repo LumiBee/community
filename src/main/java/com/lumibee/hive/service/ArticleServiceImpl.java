@@ -307,24 +307,32 @@ public class ArticleServiceImpl implements ArticleService {
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = "articles::list::user", key = "#userId + '::' + #pageNum + '::' + #pageSize")
+    @Cacheable(value = "articles::list::user::published", key = "#userId + '::' + #pageNum + '::' + #pageSize")
     @Transactional(readOnly = true)
-    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize, boolean isDraft) {
+    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
-        if (isDraft) {
-            queryWrapper.eq(Article::getStatus, Article.ArticleStatus.draft)
-                    .eq(Article::getDeleted, 0)
-                    .eq(Article::getUserId, userId)
-                    .orderByDesc(Article::getGmtModified);
-        }else {
-            queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
-                    .eq(Article::getDeleted, 0)
-                    .eq(Article::getUserId, userId)
-                    .orderByDesc(Article::getGmtModified);
-        }
+
+        queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
+                .eq(Article::getDeleted, 0)
+                .eq(Article::getUserId, userId)
+                .orderByDesc(Article::getGmtModified);
 
         return getArticleExcerptDTOPage(pageNum, pageSize, articleProfilePageRequest, queryWrapper);
+    }
+
+    @Override
+    @Cacheable(value = "articles::list::user::draft", key = "#userId + '::' + #pageNum + '::' + #pageSize")
+    @Transactional(readOnly = true)
+    public Page<ArticleExcerptDTO> getDraftPageArticle(long userId, long pageNum, long pageSize) {
+        Page<Article> articleDraftPageRequest = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Article::getStatus, Article.ArticleStatus.draft)
+                .eq(Article::getDeleted, 0)
+                .eq(Article::getUserId, userId)
+                .orderByDesc(Article::getGmtModified);
+
+        return getArticleExcerptDTOPage(pageNum, pageSize, articleDraftPageRequest, queryWrapper);
     }
 
     /**
@@ -811,6 +819,8 @@ public class ArticleServiceImpl implements ArticleService {
         } else {
             articleMapper.updateById(article);
         }
+
+        redisClearCacheService.clearUserDraftCaches(userId);
 
         return getArticleBySlug(article.getSlug());
     }

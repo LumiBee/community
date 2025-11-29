@@ -11,7 +11,8 @@ import com.lumibee.hive.model.User;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
-    Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize, boolean isDraft);
+    Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize);
+    Page<ArticleExcerptDTO> getDraftPageArticle(long userId, long pageNum, long pageSize);
     List<ArticleExcerptDTO> getPopularArticles(int limit);
     List<ArticleExcerptDTO> getFeaturedArticles();
     ArticleDetailsDTO getArticleBySlug(String slug);
