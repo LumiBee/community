@@ -90,6 +90,7 @@ public class PublishController {
         }
         
         Long userId = user.getId();
+
         ArticleDetailsDTO updatedArticle = articleService.updateArticle(articleId, requestDTO, userId);
 
         return ResponseEntity.ok(updatedArticle);
