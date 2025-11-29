@@ -3,16 +3,13 @@ package com.lumibee.hive.service;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.lumibee.hive.dto.ArticleDetailsDTO;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import com.lumibee.hive.dto.ArticlePublishRequestDTO;
-import com.lumibee.hive.dto.LikeResponse;
+import com.lumibee.hive.dto.*;
 import com.lumibee.hive.model.User;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
     Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize);
-    Page<ArticleExcerptDTO> getDraftPageArticle(long userId, long pageNum, long pageSize);
+    List<DraftDTO> getDraftPageArticle(long userId);
     List<ArticleExcerptDTO> getPopularArticles(int limit);
     List<ArticleExcerptDTO> getFeaturedArticles();
     ArticleDetailsDTO getArticleBySlug(String slug);

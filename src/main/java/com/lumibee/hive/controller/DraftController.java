@@ -1,7 +1,9 @@
 package com.lumibee.hive.controller;
 
 import java.security.Principal;
+import java.util.List;
 
+import com.lumibee.hive.dto.DraftDTO;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,16 +71,13 @@ public class DraftController {
         @ApiResponse(responseCode = "200", description = "获取成功"),
         @ApiResponse(responseCode = "401", description = "用户未认证")
     })
-    public ResponseEntity<Page<ArticleExcerptDTO>> getDrafts(
-            @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
-            @Parameter(description = "每页数量") @RequestParam(name = "size", defaultValue = "10") long pageSize,
-            @AuthenticationPrincipal Principal principal) {
+    public ResponseEntity<List<DraftDTO>> getDrafts(@AuthenticationPrincipal Principal principal) {
         User user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        Page<ArticleExcerptDTO> drafts = articleService.getDraftPageArticle(user.getId(), pageNum, pageSize);
+        List<DraftDTO> drafts = articleService.getDraftPageArticle(user.getId());
         return ResponseEntity.ok(drafts);
     }
 

@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.lumibee.hive.dto.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +21,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.lumibee.hive.config.SlugGenerator;
-import com.lumibee.hive.dto.ArticleDetailsDTO;
-import com.lumibee.hive.dto.ArticleExcerptDTO;
-import com.lumibee.hive.dto.ArticlePublishRequestDTO;
-import com.lumibee.hive.dto.LikeResponse;
-import com.lumibee.hive.dto.PortfolioDTO;
-import com.lumibee.hive.dto.TagDTO;
 import com.lumibee.hive.mapper.ArticleFavoritesMapper;
 import com.lumibee.hive.mapper.ArticleLikesMapper;
 import com.lumibee.hive.mapper.ArticleMapper;
@@ -322,17 +317,18 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Cacheable(value = "articles::list::user::draft", key = "#userId + '::' + #pageNum + '::' + #pageSize")
+    @Cacheable(value = "articles::list::user::draft", key = "#userId")
     @Transactional(readOnly = true)
-    public Page<ArticleExcerptDTO> getDraftPageArticle(long userId, long pageNum, long pageSize) {
-        Page<Article> articleDraftPageRequest = new Page<>(pageNum, pageSize);
+    public List<DraftDTO> getDraftPageArticle(long userId) {
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, Article.ArticleStatus.draft)
                 .eq(Article::getDeleted, 0)
                 .eq(Article::getUserId, userId)
                 .orderByDesc(Article::getGmtModified);
 
-        return getArticleExcerptDTOPage(pageNum, pageSize, articleDraftPageRequest, queryWrapper);
+        return articleMapper.selectList(queryWrapper).stream()
+                .map(this::convertToDraftDTO)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -937,8 +933,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     private TagDTO convertToTagDTO(Tag tag) {
         if (tag == null) return null;
-        TagDTO dto = new TagDTO(); // 假设您已创建 TagDTO 类
+        TagDTO dto = new TagDTO();
         BeanUtils.copyProperties(tag, dto);
+        return dto;
+    }
+
+    private DraftDTO convertToDraftDTO(Article article) {
+        DraftDTO dto = new DraftDTO();
+        BeanUtils.copyProperties(article, dto);
         return dto;
     }
 
