@@ -14,6 +14,7 @@ public interface ArticleService {
     List<ArticleExcerptDTO> getFeaturedArticles();
     ArticleDetailsDTO getArticleBySlug(String slug);
     ArticleDetailsDTO getArticleBySlug(String slug, Long userId);
+    ArticleDetailsDTO getArticleById(Integer articleId);
     List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug);
     List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id);
     LikeResponse toggleLike(long userId, int articleId);

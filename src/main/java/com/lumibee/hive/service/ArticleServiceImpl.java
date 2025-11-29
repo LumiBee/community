@@ -355,14 +355,14 @@ public class ArticleServiceImpl implements ArticleService {
         return cacheBreakdownProtectionService.getWithBreakdownProtection(
             "articles::detail", 
             slug, 
-            () -> loadArticleFromDatabase(slug, userId)
+            () -> loadArticleFromDatabaseWithSlug(slug, userId)
         );
     }
 
     /**
-     * 从数据库加载文章详情（原有逻辑）
+     * 从数据库加载文章详情(通过文章slug)
      */
-    private ArticleDetailsDTO loadArticleFromDatabase(String slug, Long userId) {
+    private ArticleDetailsDTO loadArticleFromDatabaseWithSlug(String slug, Long userId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<> ();
         wrapper.eq("slug", slug).eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
@@ -478,6 +478,38 @@ public class ArticleServiceImpl implements ArticleService {
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    /**
+     * 通过文章ID获取文章草稿信息
+     * @param articleId 文章ID
+     * @return 文章详情
+     */
+    @Override
+    @Transactional
+    public ArticleDetailsDTO getArticleById(Integer articleId) {
+        return getArticleByIdWithBreakdownProtection(articleId);
+    }
+
+    private ArticleDetailsDTO getArticleByIdWithBreakdownProtection(Integer articleId) {
+        return cacheBreakdownProtectionService.getWithBreakdownProtection(
+                "articles::detail",
+                articleId.toString(),
+                () -> loadArticleFromDatabaseWithId(articleId)
+        );
+    }
+
+    // 从数据库加载文章详情(通过文章ID)
+    private ArticleDetailsDTO loadArticleFromDatabaseWithId(Integer articleId) {
+        QueryWrapper<Article> wrapper = new QueryWrapper<>();
+        wrapper.eq("article_id", articleId).eq("deleted", 0);
+        Article article = articleMapper.selectOne(wrapper);
+
+        if (article == null) {
+            return null; // 如果没有找到文章，返回null
+        }
+        return convertToArticleDetailsDTO(article);
     }
 
     @Override

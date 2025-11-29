@@ -95,7 +95,7 @@ public class ArticleController {
         @ApiResponse(responseCode = "200", description = "获取成功"),
         @ApiResponse(responseCode = "404", description = "文章不存在")
     })
-    public ResponseEntity<ArticleDetailsDTO> getArticleBySlugAPI(
+    public ResponseEntity<ArticleDetailsDTO> getArticleBySlug(
             @Parameter(description = "文章slug") @PathVariable("slug") String slug,
             @AuthenticationPrincipal Principal principal) {
         // 获取当前用户（可能为null，表示匿名访问）
@@ -132,6 +132,24 @@ public class ArticleController {
             article.setFavorited(false);
         }
 
+        return ResponseEntity.ok(article);
+    }
+
+    /**
+     * 通过ID获取文章详情API
+     */
+    @GetMapping("/article/id/{articleId}")
+    @ResponseBody
+    @Operation(summary = "通过ID获取文章详情", description = "根据文章的ID获取完整的文章详情信息")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "获取成功"),
+        @ApiResponse(responseCode = "404", description = "文章不存在")
+    })
+    public ResponseEntity<ArticleDetailsDTO> getArticleById(
+            @Parameter(description = "文章ID") @PathVariable("articleId") Integer articleId) {
+
+        // 根据 ID 获取文章
+        ArticleDetailsDTO article = articleService.getArticleById(articleId);
         return ResponseEntity.ok(article);
     }
 
