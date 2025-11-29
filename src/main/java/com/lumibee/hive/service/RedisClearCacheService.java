@@ -157,7 +157,14 @@ public class RedisClearCacheService {
      * 清除特定用户的文章列表缓存
      */
     public void clearUserArticleCaches(Long userId) {
-        clearCachesByPattern(keyPrefix + "articles::list::user::" + userId + "::*");
+        clearCachesByPattern(keyPrefix + "articles::list::user::published::" + userId + "::*");
+    }
+
+    /**
+     * 清除特定用户的草稿文章列表缓存
+     */
+    public void clearUserDraftCaches(Long userId) {
+        clearCachesByPattern(keyPrefix + "articles::list::user::draft::" + userId + "::*");
     }
     
     /**

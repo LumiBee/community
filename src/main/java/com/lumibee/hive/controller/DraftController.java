@@ -2,6 +2,7 @@ package com.lumibee.hive.controller;
 
 import java.security.Principal;
 
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Log4j2
 @Tag(name = "草稿管理", description = "文章草稿相关的 API 接口")
 public class DraftController {
     @Autowired private ArticleService articleService;
@@ -76,7 +78,7 @@ public class DraftController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         
-        Page<ArticleExcerptDTO> drafts = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize, true);
+        Page<ArticleExcerptDTO> drafts = articleService.getDraftPageArticle(user.getId(), pageNum, pageSize);
         return ResponseEntity.ok(drafts);
     }
 

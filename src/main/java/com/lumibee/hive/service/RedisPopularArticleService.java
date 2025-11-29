@@ -32,11 +32,11 @@ public class RedisPopularArticleService {
     @Autowired
     private com.lumibee.hive.mapper.ArticleMapper articleMapper;
 
-    private static final String POPULAR_ARTICLES_KEY = "popular:articles";
-    private static final String ARTICLE_VIEW_COUNT_KEY = "article:view:";
-    private static final String ARTICLE_LIKE_COUNT_KEY = "article:like:";
-    private static final String ARTICLE_COMMENT_COUNT_KEY = "article:comment:";
-    private static final String ARTICLE_POPULAR_KEY = "article:cache";
+    private static final String POPULAR_ARTICLES_KEY = "hive::popular::articles";
+    private static final String ARTICLE_VIEW_COUNT_KEY = "hive::counter::article::view::";
+    private static final String ARTICLE_LIKE_COUNT_KEY = "hive::counter::article::like::";
+    private static final String ARTICLE_COMMENT_COUNT_KEY = "hive::counter::article::comment::";
+    private static final String ARTICLE_POPULAR_KEY = "hive::popular::cache";
     
     @Autowired
     private ObjectMapper objectMapper;
