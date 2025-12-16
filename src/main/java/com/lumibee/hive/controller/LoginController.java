@@ -27,7 +27,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.log4j.Log4j2;
@@ -36,16 +35,15 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Tag(name = "登录管理", description = "登录相关的 API 接口")
 public class LoginController {
-    
-    
+
     @Autowired
     private AuthenticationManager authenticationManager;
-    
+
     // 仅使用JWT，不再使用RememberMe或服务端Session
-    
+
     @Autowired
     private JwtUtil jwtUtil;
-    
+
     // 不再使用服务端Session
 
     /**
@@ -54,7 +52,7 @@ public class LoginController {
     @GetMapping("/login")
     @Operation(summary = "重定向到登录页面", description = "重定向到Vue SPA的登录页面")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "302", description = "重定向到前端登录页面")
+            @ApiResponse(responseCode = "302", description = "重定向到前端登录页面")
     })
     public void redirectToLoginSPA(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 重定向到前端登录页面
@@ -68,69 +66,69 @@ public class LoginController {
     @PostMapping("/login")
     @Operation(summary = "用户登录", description = "处理用户登录请求，支持记住我功能")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "登录成功"),
-        @ApiResponse(responseCode = "401", description = "登录失败，用户名或密码错误"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误")
+            @ApiResponse(responseCode = "200", description = "登录成功"),
+            @ApiResponse(responseCode = "401", description = "登录失败，用户名或密码错误"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误")
     })
     public ResponseEntity<?> apiLogin(
-            @Parameter(description = "登录请求参数") @RequestBody Map<String, String> loginRequest, 
-            HttpServletRequest request, 
+            @Parameter(description = "登录请求参数") @RequestBody Map<String, String> loginRequest,
+            HttpServletRequest request,
             HttpServletResponse response) {
-        
+
         // 输入验证
         String account = loginRequest.get("account");
         String password = loginRequest.get("password");
         String rememberMe = loginRequest.get("remember-me");
-        
+
         if (account == null || account.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(createErrorResponse("用户名不能为空"));
         }
-        
+
         if (password == null || password.trim().isEmpty()) {
             return ResponseEntity.badRequest().body(createErrorResponse("密码不能为空"));
         }
-        
+
         try {
             // 创建认证令牌
-            UsernamePasswordAuthenticationToken authToken = 
-                new UsernamePasswordAuthenticationToken(account.trim(), password);
-            
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(account.trim(),
+                    password);
+
             // 尝试认证
             Authentication authentication = authenticationManager.authenticate(authToken);
-            
+
             // 认证成功，设置安全上下文
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            
+
             // 获取用户信息
             User user = (User) authentication.getPrincipal();
-            
+
             // 注释掉Session相关代码，使用纯JWT认证
             // 生成会话ID
             // String sessionId = UUID.randomUUID().toString();
-            
+
             // 存储到Redis Session
             // redisSessionService.storeSession(sessionId, user);
-            
+
             // 设置会话Cookie
             // Cookie sessionCookie = new Cookie("session", sessionId);
             // sessionCookie.setHttpOnly(true);
             // sessionCookie.setPath("/");
             // sessionCookie.setMaxAge(sessionTimeoutSeconds);
             // response.addCookie(sessionCookie);
-            
+
             // 生成JWT Token
             String jwtToken = jwtUtil.generateToken(user.getId(), user.getName());
-            
-            // 将JWT写入HttpOnly Cookie，前端也可从响应体读取
-            Cookie jwtCookie = new Cookie("jwt_token", jwtToken);
-            jwtCookie.setHttpOnly(true);
-            jwtCookie.setPath("/");
-            // 将Cookie过期时间设置为token剩余有效期（秒）
-            long expiresInSec = Math.max(0L, (jwtUtil.getExpirationDateFromToken(jwtToken).getTime() - System.currentTimeMillis()) / 1000);
-            // 如果remember-me选中，可以按需让前端使用刷新逻辑；这里仍以token有效期为准
-            jwtCookie.setMaxAge((int) Math.min(Integer.MAX_VALUE, expiresInSec));
-            response.addCookie(jwtCookie);
-            
+
+            // 全 JWT 模式：不再设置 Cookie，仅返回 Token
+            // Cookie jwtCookie = new Cookie("jwt_token", jwtToken);
+            // jwtCookie.setHttpOnly(true);
+            // jwtCookie.setPath("/");
+            // long expiresInSec = Math.max(0L,
+            // (jwtUtil.getExpirationDateFromToken(jwtToken).getTime() -
+            // System.currentTimeMillis()) / 1000);
+            // jwtCookie.setMaxAge((int) Math.min(Integer.MAX_VALUE, expiresInSec));
+            // response.addCookie(jwtCookie);
+
             // 返回成功响应
             Map<String, Object> responseMap = new HashMap<>();
             responseMap.put("success", true);
@@ -138,17 +136,17 @@ public class LoginController {
             responseMap.put("message", "登录成功");
             // responseMap.put("sessionId", sessionId); // 注释掉Session ID
             responseMap.put("token", jwtToken); // 添加JWT Token
-            
+
             return ResponseEntity.ok(responseMap);
-            
+
         } catch (AuthenticationException e) {
             log.warn("登录失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(createErrorResponse("用户名或密码错误"));
+                    .body(createErrorResponse("用户名或密码错误"));
         } catch (Exception e) {
             log.error("登录过程中发生错误", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(createErrorResponse("登录过程中发生错误，请稍后重试"));
+                    .body(createErrorResponse("登录过程中发生错误，请稍后重试"));
         }
     }
 
@@ -159,22 +157,22 @@ public class LoginController {
     @Operation(summary = "登出状态", description = "切换为登出状态")
     public ResponseEntity<Map<String, Object>> apiLogout(HttpServletRequest request, HttpServletResponse response) {
         Map<String, Object> responseMap = new HashMap<>();
-        
+
         try {
             // 清除安全上下文
             SecurityContextHolder.clearContext();
-            
-            // 清除JWT Cookie（客户端也可自行丢弃Token）
-            Cookie jwtCookie = new Cookie("jwt_token", "");
-            jwtCookie.setPath("/");
-            jwtCookie.setMaxAge(0);
-            response.addCookie(jwtCookie);
-            
+
+            // 全 JWT 模式：前端自行清除 Token，后端无需清除 Cookie
+            // Cookie jwtCookie = new Cookie("jwt_token", "");
+            // jwtCookie.setPath("/");
+            // jwtCookie.setMaxAge(0);
+            // response.addCookie(jwtCookie);
+
             responseMap.put("success", true);
             responseMap.put("message", "登出成功");
-            
+
             return ResponseEntity.ok(responseMap);
-            
+
         } catch (Exception e) {
             log.error("登出过程中发生错误", e);
             responseMap.put("success", false);
@@ -182,9 +180,7 @@ public class LoginController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseMap);
         }
     }
-    
-    
-    
+
     /**
      * 创建错误响应
      */
