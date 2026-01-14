@@ -34,22 +34,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "用户管理", description = "用户，关注，更新资料相关的 API 接口")
 public class UserController {
 
-    @Autowired private UserService userService;
-    @Autowired private ImgService imgService;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ImgService imgService;
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
 
     @PostMapping("/{userId}/follow")
     @Operation(summary = "切换关注状态", description = "关注或取消关注指定用户")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "操作成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "操作成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> toggleFollow(
             @Parameter(description = "要关注的用户ID") @PathVariable("userId") Long userId,
             @AuthenticationPrincipal Principal principal) {
-
 
         // 获取当前用户
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
@@ -68,7 +69,7 @@ public class UserController {
         // 调用服务层方法切换关注状态
         // 注意：这里是当前用户(currentUser)关注作者(userId)
         // 所以参数顺序应该是 currentUser.getId(), userId
-        
+
         // 验证用户是否存在
         User targetUser = userService.selectById(userId);
         if (targetUser == null) {
@@ -77,14 +78,14 @@ public class UserController {
             response.put("message", "要关注的用户不存在");
             return ResponseEntity.badRequest().body(response);
         }
-        
+
         boolean isFollowing = userService.toggleFollow(currentUser.getId(), userId);
-        
+
         // 构建响应
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("isFollowing", isFollowing);
-        
+
         // 添加提示消息
         if (isFollowing) {
             response.put("message", "关注成功！将为您推送作者的最新内容");
@@ -95,21 +96,20 @@ public class UserController {
         return ResponseEntity.ok().body(response);
     }
 
-
     /**
      * 检查当前用户是否关注了指定用户
      */
     @GetMapping("/{userId}/is-following")
     @Operation(summary = "检查用户是否关注", description = "检查当前用户是否关注了指定用户")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "检查成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "检查成功"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> isFollowing(
             @Parameter(description = "要检查的用户ID") @PathVariable("userId") Long userId,
             @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
-        
+
         // 获取当前用户
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
@@ -117,13 +117,13 @@ public class UserController {
             response.put("error", "用户未登录");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
-        
+
         // 检查关注状态
         boolean isFollowing = userService.isFollowing(currentUser.getId(), userId);
-        
+
         response.put("success", true);
         response.put("isFollowing", isFollowing);
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -133,15 +133,15 @@ public class UserController {
     @PostMapping("/avatar")
     @Operation(summary = "上传头像", description = "上传用户头像")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "上传成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "上传成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> uploadAvatar(
             @Parameter(description = "头像文件") @RequestParam("avatar") MultipartFile avatarFile,
             @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             // 获取当前用户
             User currentUser = userService.getCurrentUserFromPrincipal(principal);
@@ -150,14 +150,14 @@ public class UserController {
                 response.put("message", "用户未登录");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
             }
-            
+
             // 验证文件
             if (avatarFile == null || avatarFile.isEmpty()) {
                 response.put("success", false);
                 response.put("message", "请选择头像文件");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             // 验证文件类型
             String contentType = avatarFile.getContentType();
             if (contentType == null || !contentType.startsWith("image/")) {
@@ -165,36 +165,24 @@ public class UserController {
                 response.put("message", "请选择图片文件");
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             // 验证文件大小 (2MB)
             if (avatarFile.getSize() > 2 * 1024 * 1024) {
                 response.put("success", false);
                 response.put("message", "文件大小不能超过2MB");
                 return ResponseEntity.badRequest().body(response);
             }
-            
-            // 上传头像
+
+            // 上传头像并更新
             String avatarUrl = imgService.uploadAvatar(currentUser.getId(), avatarFile);
-            
-            // 更新用户头像URL
-            currentUser.setAvatarUrl(avatarUrl);
-            userService.updateById(currentUser);
-            
-            // 自动清理相关缓存
-            try {
-                redisClearCacheService.clearUserArticleCaches(currentUser.getId());
-            } catch (Exception e) {
-                System.err.println("清理缓存失败: " + e.getMessage());
-                // 缓存清理失败不影响头像上传的成功
-            }
-            
+
             // 返回成功响应
             response.put("success", true);
             response.put("message", "头像上传成功");
             response.put("avatarUrl", avatarUrl);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (IOException e) {
             System.err.println("头像上传失败: " + e.getMessage());
             response.put("success", false);
@@ -218,16 +206,16 @@ public class UserController {
     @PutMapping("/profile")
     @Operation(summary = "更新用户资料", description = "更新当前用户的用户名、邮箱或个人简介")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "资料更新成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "资料更新成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> updateProfile(
             @Parameter(description = "新的用户名") @RequestParam("userName") String userName,
             @Parameter(description = "新的邮箱") @RequestParam("email") String email,
             @Parameter(description = "新的个人简介", required = false) @RequestParam(value = "bio", required = false) String bio,
             @AuthenticationPrincipal Principal principal) {
-        
+
         Map<String, Object> response = new HashMap<>();
 
         // 获取当前用户
@@ -275,14 +263,13 @@ public class UserController {
         try {
             // 检查用户名是否发生变化
             boolean userNameChanged = !userName.trim().equals(currentUser.getName());
-            
+
             User updatedUser = userService.updateProfile(
-                currentUser.getId(), 
-                userName.trim(), 
-                email.trim(), 
-                bio != null ? bio.trim() : null
-            );
-            
+                    currentUser.getId(),
+                    userName.trim(),
+                    email.trim(),
+                    bio != null ? bio.trim() : null);
+
             // 自动清理相关缓存
             try {
                 if (userNameChanged) {
@@ -296,7 +283,7 @@ public class UserController {
                 System.err.println("清理缓存失败: " + e.getMessage());
                 // 缓存清理失败不影响资料更新的成功
             }
-            
+
             response.put("success", true);
             response.put("message", "资料更新成功");
             response.put("user", updatedUser);

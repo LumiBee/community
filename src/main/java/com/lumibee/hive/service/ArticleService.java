@@ -8,24 +8,44 @@ import com.lumibee.hive.model.User;
 
 public interface ArticleService {
     Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize);
-    Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize);
+
+    Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize, String keyword);
+
     List<DraftDTO> getDraftPageArticle(long userId);
+
     List<ArticleExcerptDTO> getPopularArticles(int limit);
+
     List<ArticleExcerptDTO> getFeaturedArticles();
+
     ArticleDetailsDTO getArticleBySlug(String slug);
+
     ArticleDetailsDTO getArticleBySlug(String slug, Long userId);
+
     ArticleDetailsDTO getArticleById(Integer articleId);
+
     List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug);
+
     List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id);
+
     LikeResponse toggleLike(long userId, int articleId);
+
     boolean isUserLiked(long userId, int articleId);
+
     ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId);
+
     Integer countArticlesByUserId(Long id);
-    ArticleDetailsDTO saveDraft(Integer articleId,ArticlePublishRequestDTO requestDTO, Long userId);
+
+    ArticleDetailsDTO saveDraft(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
+
     ArticleDetailsDTO selectDraftById(Integer articleId);
+
     ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
+
     ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId);
+
     List<ArticleDetailsDTO> selectAll();
+
     int getFavoriteCount(Integer articleId);
+
     void setArticleFeatured(Integer articleId, boolean isFeatured, User.UserRole role);
 }

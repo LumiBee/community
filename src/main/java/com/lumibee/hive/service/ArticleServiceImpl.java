@@ -42,30 +42,45 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class ArticleServiceImpl implements ArticleService {
 
-    @Autowired private ArticleMapper articleMapper;
-    @Autowired private PortfolioMapper portfolioMapper;
-    @Autowired private com.lumibee.hive.service.UserService userService;
-    @Autowired private UserMapper userMapper;
-    @Autowired private TagService tagService;
-    @Autowired private PortfolioService portfolioService;
-    @Autowired private ArticleLikesMapper articleLikesMapper;
-    @Autowired private ArticleRepository articleRepository;
-    @Autowired private ArticleFavoritesMapper favoriteMapper;
-    @Autowired private CacheManager cacheManager;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-    @Autowired private RedisCounterService redisCounterService;
-    @Autowired private RedisPopularArticleService redisPopularArticleService;
-    @Autowired private CacheBreakdownProtectionService cacheBreakdownProtectionService;
-
+    @Autowired
+    private ArticleMapper articleMapper;
+    @Autowired
+    private PortfolioMapper portfolioMapper;
+    @Autowired
+    private com.lumibee.hive.service.UserService userService;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private TagService tagService;
+    @Autowired
+    private PortfolioService portfolioService;
+    @Autowired
+    private ArticleLikesMapper articleLikesMapper;
+    @Autowired
+    private ArticleRepository articleRepository;
+    @Autowired
+    private ArticleFavoritesMapper favoriteMapper;
+    @Autowired
+    private CacheManager cacheManager;
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
+    @Autowired
+    private RedisCounterService redisCounterService;
+    @Autowired
+    private RedisPopularArticleService redisPopularArticleService;
+    @Autowired
+    private CacheBreakdownProtectionService cacheBreakdownProtectionService;
 
     /**
      * 获取首页文章列表
-     * @param pageNum 页码
+     * 
+     * @param pageNum  页码
      * @param pageSize 每页大小
      * @return 分页的文章摘要列表
      */
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = "articles::list::homepage", key = "''")
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         return getHomepageArticleWithBreakdownProtection(pageNum, pageSize);
     }
@@ -76,10 +91,9 @@ public class ArticleServiceImpl implements ArticleService {
     private Page<ArticleExcerptDTO> getHomepageArticleWithBreakdownProtection(long pageNum, long pageSize) {
         String cacheKey = "page:" + pageNum + "::size:" + pageSize;
         return cacheBreakdownProtectionService.getWithBreakdownProtection(
-            "articles::list::homepage", 
-            cacheKey, 
-            () -> loadHomepageArticleFromDatabase(pageNum, pageSize)
-        );
+                "articles::list::homepage",
+                cacheKey,
+                () -> loadHomepageArticleFromDatabase(pageNum, pageSize));
     }
 
     /**
@@ -89,14 +103,15 @@ public class ArticleServiceImpl implements ArticleService {
         Page<Article> articlePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
-                    .eq(Article::getDeleted, 0)
-                    .orderByDesc(Article::getGmtModified);
+                .eq(Article::getDeleted, 0)
+                .orderByDesc(Article::getGmtModified);
 
         return getArticleExcerptDTOPage(pageNum, pageSize, articlePageRequest, queryWrapper);
     }
 
     /**
      * 获取所有已发布的文章详情
+     * 
      * @return 文章详情列表
      */
     @Override
@@ -105,23 +120,23 @@ public class ArticleServiceImpl implements ArticleService {
     public List<ArticleDetailsDTO> selectAll() {
         QueryWrapper<Article> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("deleted", 0)
-                    .eq("status", Article.ArticleStatus.published)
-                    .orderByDesc("gmt_modified");
+                .eq("status", Article.ArticleStatus.published)
+                .orderByDesc("gmt_modified");
         List<Article> articles = articleMapper.selectList(queryWrapper);
-        
+
         if (articles.isEmpty()) {
             return new ArrayList<>();
         }
-        
+
         // 批量查询用户信息，避免N+1查询问题
         List<Long> userIds = articles.stream()
                 .map(Article::getUserId)
                 .distinct()
                 .collect(Collectors.toList());
-        
+
         Map<Long, User> userMap = userMapper.selectByIds(userIds).stream()
                 .collect(Collectors.toMap(User::getId, user -> user));
-        
+
         List<ArticleDetailsDTO> articleDetailsDTOs = new ArrayList<>();
         for (Article article : articles) {
             ArticleDetailsDTO articleDetailsDTO = new ArticleDetailsDTO();
@@ -137,6 +152,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 获取热门文章列表
+     * 
      * @param limit 限制数量
      * @return 热门文章摘要列表
      */
@@ -146,13 +162,14 @@ public class ArticleServiceImpl implements ArticleService {
         try {
             // 从 Redis Sorted Set 获取热门文章ID列表
             List<String> popularArticleIds = redisPopularArticleService.getPopularArticleIds(limit);
-            
+
             if (!popularArticleIds.isEmpty()) {
                 log.info("从 Redis 获取到热门文章ID: {}", popularArticleIds);
-                
+
                 // 使用 HMGET 批量获取文章摘要信息
-                List<ArticleExcerptDTO> cachedArticles = redisPopularArticleService.getArticleExcerpts(popularArticleIds);
-                
+                List<ArticleExcerptDTO> cachedArticles = redisPopularArticleService
+                        .getArticleExcerpts(popularArticleIds);
+
                 if (!cachedArticles.isEmpty()) {
                     log.info("从 Redis 缓存获取热门文章成功: limit={}, count={}", limit, cachedArticles.size());
                     return cachedArticles;
@@ -160,11 +177,11 @@ public class ArticleServiceImpl implements ArticleService {
                     log.warn("Redis 缓存中没有文章摘要数据，回退到数据库查询");
                 }
             }
-            
+
             // 如果 Redis 中没有数据，回退到数据库查询
             log.debug("Redis 中没有热门文章数据，回退到数据库查询");
             List<ArticleExcerptDTO> dbResult = articleMapper.getPopularArticles(limit);
-            
+
             // 将数据库结果同步到 Redis
             for (ArticleExcerptDTO article : dbResult) {
                 try {
@@ -172,26 +189,25 @@ public class ArticleServiceImpl implements ArticleService {
                     Integer viewCount = article.getViewCount() != null ? article.getViewCount() : 0;
                     Integer likeCount = redisCounterService.getArticleLikeCount(article.getArticleId());
                     Integer commentCount = 0; // 这里可以添加评论数查询
-                    
+
                     // 获取文章发布时间
                     Article fullArticle = articleMapper.selectById(article.getArticleId());
                     java.time.LocalDateTime publishTime = fullArticle != null ? fullArticle.getGmtCreate() : null;
-                    
+
                     // 更新到 Redis Sorted Set（包含时间衰减）
                     redisPopularArticleService.updateArticlePopularity(
-                        article.getArticleId(), viewCount, likeCount, commentCount, publishTime
-                    );
-                    
+                            article.getArticleId(), viewCount, likeCount, commentCount, publishTime);
+
                     // 缓存文章摘要信息到 Redis Hash
                     redisPopularArticleService.cacheArticleExcerpt(article);
-                    
+
                 } catch (Exception e) {
                     log.warn("同步文章到 Redis 失败: articleId={}", article.getArticleId(), e);
                 }
             }
-            
+
             return dbResult;
-            
+
         } catch (Exception e) {
             log.error("获取热门文章失败: limit={}", limit, e);
             // 发生异常时回退到数据库查询
@@ -201,6 +217,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 获取精选文章列表
+     * 
      * @return 精选文章摘要列表
      */
     @Override
@@ -255,19 +272,20 @@ public class ArticleServiceImpl implements ArticleService {
     private ArticleExcerptDTO convertToExcerptDTO(Article article) {
         ArticleExcerptDTO dto = new ArticleExcerptDTO();
         BeanUtils.copyProperties(article, dto);
-        
+
         // 设置用户信息
         User user = userMapper.selectById(article.getUserId());
         if (user != null) {
             dto.setUserName(user.getName());
             dto.setAvatarUrl(user.getAvatarUrl());
         }
-        
+
         return dto;
     }
 
     /**
      * 根据标签slug获取文章列表
+     * 
      * @param tagSlug 标签slug
      * @return 该标签下的文章摘要列表
      */
@@ -284,6 +302,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 根据作品集ID获取文章列表
+     * 
      * @param id 作品集ID
      * @return 该作品集下的文章摘要列表
      */
@@ -296,22 +315,31 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 获取用户个人页面的文章列表
-     * @param userId 用户ID
-     * @param pageNum 页码
+     * 
+     * @param userId   用户ID
+     * @param pageNum  页码
      * @param pageSize 每页大小
+     * @param keyword  搜索关键词（可选）
      * @return 分页的文章摘要列表
      */
     @Override
-    @Cacheable(value = "articles::list::user::published", key = "#userId + '::' + #pageNum + '::' + #pageSize")
+    @Cacheable(value = "articles::list::user::published", key = "#userId + '::' + #pageNum + '::' + #pageSize + '::' + (#keyword != null ? #keyword : '')")
     @Transactional(readOnly = true)
-    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize) {
+    public Page<ArticleExcerptDTO> getProfilePageArticle(long userId, long pageNum, long pageSize, String keyword) {
         Page<Article> articleProfilePageRequest = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<Article> queryWrapper = new LambdaQueryWrapper<>();
 
         queryWrapper.eq(Article::getStatus, Article.ArticleStatus.published)
                 .eq(Article::getDeleted, 0)
-                .eq(Article::getUserId, userId)
-                .orderByDesc(Article::getGmtModified);
+                .eq(Article::getUserId, userId);
+
+        // 如果提供了关键词，添加搜索条件
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            queryWrapper.and(wrapper -> wrapper
+                    .like(Article::getTitle, keyword.trim()));
+        }
+
+        queryWrapper.orderByDesc(Article::getGmtModified);
 
         return getArticleExcerptDTOPage(pageNum, pageSize, articleProfilePageRequest, queryWrapper);
     }
@@ -333,6 +361,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 根据slug获取文章详情
+     * 
      * @param slug 文章slug
      * @return 文章详情
      */
@@ -353,17 +382,16 @@ public class ArticleServiceImpl implements ArticleService {
      */
     private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId) {
         return cacheBreakdownProtectionService.getWithBreakdownProtection(
-            "articles::detail", 
-            slug, 
-            () -> loadArticleFromDatabaseWithSlug(slug, userId)
-        );
+                "articles::detail",
+                slug,
+                () -> loadArticleFromDatabaseWithSlug(slug, userId));
     }
 
     /**
      * 从数据库加载文章详情(通过文章slug)
      */
     private ArticleDetailsDTO loadArticleFromDatabaseWithSlug(String slug, Long userId) {
-        QueryWrapper<Article> wrapper = new QueryWrapper<> ();
+        QueryWrapper<Article> wrapper = new QueryWrapper<>();
         wrapper.eq("slug", slug).eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
 
@@ -382,12 +410,12 @@ public class ArticleServiceImpl implements ArticleService {
                 // 如果 Redis 中存在，直接增加1(10min内只会加一次)
                 if (redisCounterService.recordView(article.getArticleId(), article.getUserId())) {
                     viewCount = redisCounterService.incrementArticleView(article.getArticleId());
-                }else {
+                } else {
                     viewCount = redisCounterService.getArticleViewCount(article.getArticleId());
                 }
             }
             article.setViewCount(viewCount);
-            
+
             // 从 Redis 获取点赞数，如果 Redis 中没有则从数据库加载
             int likeCount;
             if (!redisCounterService.existsArticleLikeCount(article.getArticleId())) {
@@ -399,14 +427,14 @@ public class ArticleServiceImpl implements ArticleService {
                 likeCount = redisCounterService.getArticleLikeCount(article.getArticleId());
             }
             article.setLikes(likeCount);
-            
+
             // 更新文章热度分数到 Redis
             try {
                 redisPopularArticleService.incrementArticleView(article.getArticleId());
             } catch (Exception e) {
                 log.warn("更新文章热度分数失败: articleId={}", article.getArticleId(), e);
             }
-            
+
             User user = userService.selectById(article.getUserId());
             Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
             List<Tag> tags = tagService.selectTagsByArticleId(article.getArticleId());
@@ -419,11 +447,11 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDetailsDTO.setAvatarUrl(user.getAvatarUrl());
                 articleDetailsDTO.setBackgroundUrl(user.getBackgroundImgUrl());
                 articleDetailsDTO.setUserBio(user.getBio());
-                
+
                 // 获取用户的统计数据
                 Integer userFollowersCount = userService.countFansByUserId(user.getId());
                 Integer userFollowingCount = userService.countFollowingByUserId(user.getId());
-                
+
                 // 从 Redis 获取用户文章数量
                 int userArticleCount = redisCounterService.getUserArticleCount(user.getId());
                 if (!redisCounterService.existsUserArticleCount(user.getId())) {
@@ -462,7 +490,8 @@ public class ArticleServiceImpl implements ArticleService {
                     articleDocument.setLikes(article.getLikes());
                     articleDocument.setViewCount(article.getViewCount());
                     articleDocument.setAvatarUrl(user != null ? user.getAvatarUrl() : "");
-                    articleDocument.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
+                    articleDocument.setGmtModified(
+                            article.getGmtModified() != null ? article.getGmtModified().toString() : null);
                     articleDocument.setBackgroundUrl(article.getBackgroundUrl());
                     articleDocument.setUserId(article.getUserId());
                     articleRepository.save(articleDocument);
@@ -480,9 +509,9 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-
     /**
      * 通过文章ID获取文章草稿信息
+     * 
      * @param articleId 文章ID
      * @return 文章详情
      */
@@ -496,8 +525,7 @@ public class ArticleServiceImpl implements ArticleService {
         return cacheBreakdownProtectionService.getWithBreakdownProtection(
                 "articles::detail",
                 articleId.toString(),
-                () -> loadArticleFromDatabaseWithId(articleId)
-        );
+                () -> loadArticleFromDatabaseWithId(articleId));
     }
 
     // 从数据库加载文章详情(通过文章ID)
@@ -515,28 +543,24 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public LikeResponse toggleLike(long userId, int articleId) {
-        //获取当前文章的点赞状态
+        // 获取当前文章的点赞状态
         boolean isCurrentlyLiked = articleLikesMapper.toggleLike(userId, articleId) == null;
-        //用来储存用户的点赞状态
+        // 用来储存用户的点赞状态
         boolean newLikedStatus;
 
         if (isCurrentlyLiked) {
-            //如果当前用户没有点赞，则插入点赞记录并更新文章的点赞状态
+            // 如果当前用户没有点赞，则插入点赞记录并更新文章的点赞状态
             articleLikesMapper.insertLike(userId, articleId);
             articleMapper.updateArticleLikes(articleId, 1);
             // Redis 计数器操作
             redisCounterService.incrementArticleLike(articleId);
-            // 更新文章热度分数
-            redisPopularArticleService.incrementArticleLike(articleId);
             newLikedStatus = true;
-        }else {
-            //如果当前用户已经点赞，则删除点赞记录并更新文章的点赞状态
+        } else {
+            // 如果当前用户已经点赞，则删除点赞记录并更新文章的点赞状态
             articleLikesMapper.deleteLike(userId, articleId);
             articleMapper.updateArticleLikes(articleId, -1);
             // Redis 计数器操作
             redisCounterService.decrementArticleLike(articleId);
-            // 更新文章热度分数
-            redisPopularArticleService.decrementArticleLike(articleId);
             newLikedStatus = false;
         }
 
@@ -546,7 +570,7 @@ public class ArticleServiceImpl implements ArticleService {
             redisClearCacheService.clearArticleRelatedCaches(article);
         }
 
-        //获取当前文章的点赞数量
+        // 获取当前文章的点赞数量
         int likesCount;
         if (!redisCounterService.existsArticleLikeCount(articleId)) {
             // 如果 Redis 中不存在，从数据库获取
@@ -555,6 +579,18 @@ public class ArticleServiceImpl implements ArticleService {
         } else {
             // 如果 Redis 中存在，直接获取
             likesCount = redisCounterService.getArticleLikeCount(articleId);
+        }
+
+        // 更新文章热度分数
+        if (article != null) {
+            try {
+                Integer viewCount = redisCounterService.getArticleViewCount(articleId);
+                Integer commentCount = 0; // TODO: 添加评论数统计
+                redisPopularArticleService.updateArticlePopularity(
+                        articleId, viewCount, likesCount, commentCount, article.getGmtCreate());
+            } catch (Exception e) {
+                log.warn("更新文章热度分数失败: articleId={}", articleId, e);
+            }
         }
 
         return new LikeResponse(true, newLikedStatus, likesCount);
@@ -568,8 +604,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 发布文章
+     * 
      * @param requestDTO 文章发布请求数据
-     * @param userId 用户ID
+     * @param userId     用户ID
      * @return 文章详情
      */
     @Override
@@ -582,12 +619,12 @@ public class ArticleServiceImpl implements ArticleService {
         // 检查是否存在相同标题的草稿
         QueryWrapper<Article> draftQuery = new QueryWrapper<>();
         draftQuery.eq("title", requestDTO.getTitle())
-                  .eq("user_id", userId) // 确保是当前用户的草稿，这样即使是相同标题也不会冲突
-                  .eq("status", Article.ArticleStatus.draft)
-                  .eq("deleted", 0)
-                  .orderByDesc("gmt_modified")
-                  .last("LIMIT 1");
-        
+                .eq("user_id", userId) // 确保是当前用户的草稿，这样即使是相同标题也不会冲突
+                .eq("status", Article.ArticleStatus.draft)
+                .eq("deleted", 0)
+                .orderByDesc("gmt_modified")
+                .last("LIMIT 1");
+
         Article existingArticle = articleMapper.selectOne(draftQuery);
 
         Article article;
@@ -618,10 +655,11 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
-            Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId).getId();
+            Integer portfolioId = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId)
+                    .getId();
             article.setPortfolioId(portfolioId);
             portfolioService.updatePortfolioGmt(portfolioId, userId);
-            
+
             // 更新 Redis 作品集文章计数
             try {
                 redisCounterService.incrementPortfolioArticle(portfolioId);
@@ -636,7 +674,7 @@ public class ArticleServiceImpl implements ArticleService {
         } else {
             articleMapper.updateById(article);
         }
-        
+
         // 同步处理后续操作
         try {
             processArticlePublishOperations(article, requestDTO, userId, isNewArticle);
@@ -651,9 +689,10 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 更新文章
-     * @param articleId 文章ID
+     * 
+     * @param articleId  文章ID
      * @param requestDTO 文章更新请求数据
-     * @param userId 用户ID
+     * @param userId     用户ID
      * @return 文章详情
      */
     @Override
@@ -661,7 +700,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
         Article existingArticle = articleMapper.selectById(articleId);
         if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
-            throw new  RuntimeException("文章不存在或不属于当前用户");
+            throw new RuntimeException("文章不存在或不属于当前用户");
         }
 
         existingArticle.setTitle(requestDTO.getTitle());
@@ -675,7 +714,7 @@ public class ArticleServiceImpl implements ArticleService {
             Portfolio portfolio = portfolioService.selectOrCreatePortfolio(requestDTO.getPortfolioName(), userId);
             existingArticle.setPortfolioId(portfolio.getId());
             portfolioService.updatePortfolioGmt(portfolio.getId(), userId);
-            
+
             // 更新 Redis 作品集文章计数
             try {
                 // 如果原来有作品集，先减少计数
@@ -689,7 +728,7 @@ public class ArticleServiceImpl implements ArticleService {
             }
         } else {
             existingArticle.setPortfolioId(null);
-            
+
             // 如果原来有作品集，减少计数
             if (oldPortfolioId != null) {
                 try {
@@ -717,8 +756,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     /**
      * 删除文章
+     * 
      * @param articleId 文章ID
-     * @param userId 用户ID
+     * @param userId    用户ID
      * @return 文章详情
      */
     @Override
@@ -798,11 +838,11 @@ public class ArticleServiceImpl implements ArticleService {
         if (article == null) {
             throw new RuntimeException("文章不存在");
         }
-        
+
         article.setFeatured(isFeatured);
         article.setGmtModified(LocalDateTime.now());
         articleMapper.updateById(article);
-        
+
         // 清除相关缓存
         if (article.getSlug() != null) {
             Objects.requireNonNull(cacheManager.getCache("articleDetails")).evict(article.getSlug());
@@ -814,7 +854,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDetailsDTO saveDraft(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
         Article article = null;
         boolean isNewArticle = false;
-        
+
         if (articleId == null) {
             // 创建新草稿
             article = new Article();
@@ -832,7 +872,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setExcerpt(requestDTO.getExcerpt());
         article.setUserId(userId);
         article.setGmtModified(LocalDateTime.now());
-        
+
         // 只有新文章才设置创建时间
         if (isNewArticle) {
             article.setGmtCreate(LocalDateTime.now());
@@ -858,7 +898,7 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDetailsDTO selectDraftById(Integer articleId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId)
-               .eq("deleted", 0);
+                .eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
 
         if (article == null) {
@@ -877,7 +917,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (articleId == null) {
             return 0; // 如果文章ID无效，返回0
         }
-        
+
         // 从 Redis 获取文章收藏数
         try {
             int favoriteCount = redisCounterService.getArticleFavoriteCount(articleId);
@@ -896,7 +936,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {
-        if (article == null) return null;
+        if (article == null)
+            return null;
         ArticleDetailsDTO dto = new ArticleDetailsDTO();
         BeanUtils.copyProperties(article, dto);
 
@@ -925,7 +966,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @NotNull
-    private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize, Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
+    private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize,
+            Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
         // 使用MyBatis-Plus的分页查询
         Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
 
@@ -957,14 +999,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
-        if (portfolio == null) return null;
+        if (portfolio == null)
+            return null;
         PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类
         BeanUtils.copyProperties(portfolio, dto);
         return dto;
     }
 
     private TagDTO convertToTagDTO(Tag tag) {
-        if (tag == null) return null;
+        if (tag == null)
+            return null;
         TagDTO dto = new TagDTO();
         BeanUtils.copyProperties(tag, dto);
         return dto;
@@ -991,19 +1035,19 @@ public class ArticleServiceImpl implements ArticleService {
         return potentialSlug;
     }
 
-
     /**
      * 处理文章发布相关的后续操作
      */
-    private void processArticlePublishOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId, boolean isNewArticle) {
+    private void processArticlePublishOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId,
+            boolean isNewArticle) {
         Integer articleId = article.getArticleId();
-        
+
         // 1. 处理缓存更新操作
         processCacheUpdateOperations(article, requestDTO, userId, isNewArticle);
-        
+
         // 2. 处理搜索同步操作
         processSearchSyncOperations(article, requestDTO, userId);
-        
+
         // 3. 处理标签同步操作
         if (requestDTO.getTagsName() != null && !requestDTO.getTagsName().isEmpty()) {
             processTagSyncOperations(articleId, requestDTO.getTagsName());
@@ -1016,19 +1060,20 @@ public class ArticleServiceImpl implements ArticleService {
     /**
      * 处理缓存更新操作
      */
-    private void processCacheUpdateOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId, boolean isNewArticle) {
+    private void processCacheUpdateOperations(Article article, ArticlePublishRequestDTO requestDTO, Long userId,
+            boolean isNewArticle) {
         Integer articleId = article.getArticleId();
-        
+
         // 更新用户文章计数
         if (isNewArticle) {
             redisCounterService.incrementUserArticle(userId);
         }
-        
+
         // 更新作品集文章计数
         if (requestDTO.getPortfolioName() != null && !requestDTO.getPortfolioName().isEmpty()) {
             redisCounterService.incrementPortfolioArticle(article.getPortfolioId());
         }
-        
+
         // 更新文章热度分数
         redisPopularArticleService.updateArticlePopularity(articleId, 0, 0, 0, article.getGmtCreate());
 
@@ -1040,7 +1085,7 @@ public class ArticleServiceImpl implements ArticleService {
         } catch (Exception e) {
             log.error("同步文章摘要缓存失败: articleId={}", articleId, e);
         }
-        
+
         // 清除相关缓存
         redisClearCacheService.clearHomepageArticleCaches();
         redisClearCacheService.clearUserArticleCaches(userId);
@@ -1057,7 +1102,7 @@ public class ArticleServiceImpl implements ArticleService {
                 log.warn("用户不存在，跳过搜索同步: userId={}", userId);
                 return;
             }
-            
+
             // 创建搜索文档
             ArticleDocument searchDoc = new ArticleDocument();
             searchDoc.setId(article.getArticleId());
@@ -1072,10 +1117,10 @@ public class ArticleServiceImpl implements ArticleService {
             searchDoc.setAvatarUrl(user.getAvatarUrl());
             searchDoc.setGmtModified(article.getGmtModified() != null ? article.getGmtModified().toString() : null);
             searchDoc.setBackgroundUrl(article.getBackgroundUrl());
-            
+
             // 保存到 Elasticsearch
             articleRepository.save(searchDoc);
-            
+
             log.info("搜索同步操作处理完成: articleId={}, title={}", article.getArticleId(), requestDTO.getTitle());
         } catch (Exception e) {
             log.error("搜索同步操作处理失败: articleId={}", article.getArticleId(), e);
@@ -1091,22 +1136,22 @@ public class ArticleServiceImpl implements ArticleService {
                 log.info("标签列表为空，跳过标签同步: articleId={}", articleId);
                 return;
             }
-            
+
             // 先删除文章的所有标签关系
             articleMapper.deleteArticleTagByArticleId(articleId);
-            
+
             // 使用 TagService 的批量处理方法
             Set<Tag> tags = tagService.selectOrCreateTags(tagNames);
-            
+
             // 为每个标签创建文章标签关系
             for (Tag tag : tags) {
                 if (tag != null) {
                     tagService.insertTagArticleRelation(articleId, tag.getTagId());
-                    log.debug("文章标签关系创建成功: articleId={}, tagId={}, tagName={}", 
-                        articleId, tag.getTagId(), tag.getName());
+                    log.debug("文章标签关系创建成功: articleId={}, tagId={}, tagName={}",
+                            articleId, tag.getTagId(), tag.getName());
                 }
             }
-            
+
             log.info("标签同步操作处理完成: articleId={}, tagNames={}", articleId, tagNames);
             // 清除标签列表缓存
             redisClearCacheService.clearAllTagListCaches();

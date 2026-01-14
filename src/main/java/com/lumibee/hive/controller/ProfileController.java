@@ -35,9 +35,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "个人中心管理", description = "个人中心相关的 API 接口")
 public class ProfileController {
 
-    @Autowired private UserService userService;
-    @Autowired private ImgService imgService;
-    @Autowired private ArticleService articleService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ImgService imgService;
+    @Autowired
+    private ArticleService articleService;
 
     /**
      * 更新用户封面图片API
@@ -45,16 +48,16 @@ public class ProfileController {
     @PostMapping("/update-cover")
     @Operation(summary = "更新用户封面图片", description = "上传并更新用户的背景封面图片")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "更新成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证"),
-        @ApiResponse(responseCode = "500", description = "服务器内部错误")
+            @ApiResponse(responseCode = "200", description = "更新成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
     public ResponseEntity<Map<String, Object>> updateUserCover(
             @Parameter(description = "封面图片文件") @RequestParam("coverImageFile") MultipartFile coverImageFile,
             @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
-        
+
         // 检查用户是否登录
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
@@ -72,13 +75,11 @@ public class ProfileController {
 
         try {
             String newImageUrl = imgService.uploadCover(currentUser.getId(), coverImageFile);
-            // 更新用户信息
-            currentUser.setBackgroundImgUrl(newImageUrl);
 
             response.put("success", true);
             response.put("message", "背景图片更新成功");
             response.put("newImageUrl", newImageUrl);
-            
+
             return ResponseEntity.ok(response);
         } catch (IOException e) {
             response.put("success", false);
@@ -93,23 +94,23 @@ public class ProfileController {
     @GetMapping("/profile/{name}")
     @Operation(summary = "获取用户资料数据", description = "根据用户名获取用户的详细资料信息")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "404", description = "用户不存在"),
-        @ApiResponse(responseCode = "500", description = "服务器内部错误")
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "用户不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
     public ResponseEntity<Map<String, Object>> getUserProfileData(
             @Parameter(description = "用户名") @PathVariable("name") String name,
             @Parameter(description = "页码") @RequestParam(name = "page", defaultValue = "1") long pageNum,
             @Parameter(description = "每页大小") @RequestParam(name = "size", defaultValue = "6") long pageSize,
+            @Parameter(description = "搜索关键词") @RequestParam(name = "keyword", required = false) String keyword,
             @AuthenticationPrincipal Principal principal) {
-        
+
         try {
             // 根据路径中的name查找用户
             User user = userService.selectByName(name);
             if (user == null) {
                 return ResponseEntity.notFound().build();
             }
-            
 
             // 判断正在查看的页面是否属于当前登录的用户
             boolean isOwner = false;
@@ -122,9 +123,10 @@ public class ProfileController {
             Integer articleCount = articleService.countArticlesByUserId(user.getId());
             Integer fans = userService.countFansByUserId(user.getId());
             Integer followings = userService.countFollowingByUserId(user.getId());
-            Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId()) : false;
-            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize);
-
+            Boolean isFollowed = currentUser != null ? userService.isFollowing(currentUser.getId(), user.getId())
+                    : false;
+            Page<ArticleExcerptDTO> articlePage = articleService.getProfilePageArticle(user.getId(), pageNum, pageSize,
+                    keyword);
 
             Map<String, Object> response = new HashMap<>();
             response.put("user", user);
@@ -139,7 +141,7 @@ public class ProfileController {
         } catch (Exception e) {
             System.err.println("获取用户资料出错: " + e.getMessage());
             e.printStackTrace();
-            
+
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "获取用户资料失败");
             errorResponse.put("message", e.getMessage());
@@ -150,9 +152,9 @@ public class ProfileController {
     @GetMapping("/profile/{name}/fans")
     @Operation(summary = "获取用户的粉丝列表", description = "根据用户名获取用户的粉丝列表")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "404", description = "用户不存在"),
-        @ApiResponse(responseCode = "500", description = "服务器内部错误")
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "用户不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
     public ResponseEntity<Map<String, Object>> getUserFans(
             @Parameter(description = "用户名") @PathVariable("name") String name,
