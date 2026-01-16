@@ -80,7 +80,7 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Transactional(readOnly = true)
-    @Cacheable(value = "articles::list::homepage", key = "''")
+    @Cacheable(value = "articles::list::homepage", key = "'page:' + #pageNum + '::size:' + #pageSize")
     public Page<ArticleExcerptDTO> getHomepageArticle(long pageNum, long pageSize) {
         return getHomepageArticleWithBreakdownProtection(pageNum, pageSize);
     }
@@ -381,10 +381,42 @@ public class ArticleServiceImpl implements ArticleService {
      * 使用分布式锁防止缓存击穿的文章获取方法
      */
     private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId) {
-        return cacheBreakdownProtectionService.getWithBreakdownProtection(
+        ArticleDetailsDTO article = cacheBreakdownProtectionService.getWithBreakdownProtection(
                 "articles::detail",
                 slug,
                 () -> loadArticleFromDatabaseWithSlug(slug, userId));
+
+        if (article != null) {
+            // 在缓存外部处理浏览量增加
+            int viewCount = incrementAndGetViewCount(article.getArticleId(), userId);
+            article.setViewCount(viewCount);
+        }
+        return article;
+    }
+
+    // 增加并获取浏览量
+    private int incrementAndGetViewCount(Integer articleId, Long userId) {
+        int viewCount;
+        if (!redisCounterService.existsArticleViewCount(articleId)) {
+            Article article = articleMapper.selectById(articleId);
+            viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
+            redisCounterService.setArticleViewCount(articleId, article.getUserId(), viewCount);
+        } else {
+            if (redisCounterService.recordView(articleId, userId)) {
+                viewCount = redisCounterService.incrementArticleView(articleId);
+            } else {
+                viewCount = redisCounterService.getArticleViewCount(articleId);
+            }
+        }
+
+        // 更新文章热度分数
+        try {
+            redisPopularArticleService.incrementArticleView(articleId);
+        } catch (Exception e) {
+            log.warn("更新文章热度分数失败: articleId={}", articleId, e);
+        }
+
+        return viewCount;
     }
 
     /**
@@ -400,22 +432,6 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         try {
-            // 使用 Redis 计数器记录阅读量
-            int viewCount;
-            if (!redisCounterService.existsArticleViewCount(article.getArticleId())) {
-                // 如果 Redis 中不存在，从数据库加载并增加1
-                viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
-                redisCounterService.setArticleViewCount(article.getArticleId(), article.getUserId(), viewCount);
-            } else {
-                // 如果 Redis 中存在，直接增加1(10min内只会加一次)
-                if (redisCounterService.recordView(article.getArticleId(), article.getUserId())) {
-                    viewCount = redisCounterService.incrementArticleView(article.getArticleId());
-                } else {
-                    viewCount = redisCounterService.getArticleViewCount(article.getArticleId());
-                }
-            }
-            article.setViewCount(viewCount);
-
             // 从 Redis 获取点赞数，如果 Redis 中没有则从数据库加载
             int likeCount;
             if (!redisCounterService.existsArticleLikeCount(article.getArticleId())) {
@@ -428,12 +444,14 @@ public class ArticleServiceImpl implements ArticleService {
             }
             article.setLikes(likeCount);
 
-            // 更新文章热度分数到 Redis
-            try {
-                redisPopularArticleService.incrementArticleView(article.getArticleId());
-            } catch (Exception e) {
-                log.warn("更新文章热度分数失败: articleId={}", article.getArticleId(), e);
+            // 从 Redis 获取当前浏览量（不增加）
+            int currentViewCount;
+            if (redisCounterService.existsArticleViewCount(article.getArticleId())) {
+                currentViewCount = redisCounterService.getArticleViewCount(article.getArticleId());
+            } else {
+                currentViewCount = article.getViewCount() != null ? article.getViewCount() : 0;
             }
+            article.setViewCount(currentViewCount);
 
             User user = userService.selectById(article.getUserId());
             Portfolio portfolio = portfolioMapper.selectById(article.getPortfolioId());
@@ -476,6 +494,7 @@ public class ArticleServiceImpl implements ArticleService {
                 articleDetailsDTO.setTags(tagDTOs);
             }
 
+            // TODO: 解耦Elasticsearch
             // 确保文章存在于Elasticsearch中
             try {
                 if (!articleRepository.existsById(article.getArticleId())) {

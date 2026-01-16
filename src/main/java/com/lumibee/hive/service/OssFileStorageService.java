@@ -36,7 +36,8 @@ public class OssFileStorageService {
 
     /**
      * 上传文件到OSS
-     * @param file 文件
+     * 
+     * @param file         文件
      * @param subDirectory 子目录
      * @return 文件访问URL
      * @throws IOException 上传异常
@@ -63,14 +64,16 @@ public class OssFileStorageService {
             // 上传文件到OSS
             ossClient.putObject(bucketName, objectKey, inputStream, metadata);
 
-            // 返回文件访问URL
-            return domain + "/" + objectKey;
+            // 返回相对路径而不是完整URL，避免SSL证书问题
+            // 前端会通过 avatar-helper.js 自动添加正确的前缀
+            return objectKey;
         }
     }
 
     /**
      * 获取文件访问URL
-     * @param fileName 文件名
+     * 
+     * @param fileName     文件名
      * @param subDirectory 子目录
      * @return 文件访问URL
      */
@@ -78,13 +81,15 @@ public class OssFileStorageService {
         if (!StringUtils.hasText(fileName)) {
             return null;
         }
-        
+
+        // 返回相对路径，与 uploadFile 保持一致
         String objectKey = subDirectory == null ? fileName : subDirectory + "/" + fileName;
-        return domain + "/" + objectKey;
+        return objectKey;
     }
 
     /**
      * 删除OSS中的文件
+     * 
      * @param fileUrl 文件URL
      * @return 是否删除成功
      */
@@ -111,6 +116,7 @@ public class OssFileStorageService {
 
     /**
      * 从URL中提取对象键
+     * 
      * @param fileUrl 文件URL
      * @return 对象键
      */
@@ -124,11 +130,17 @@ public class OssFileStorageService {
             return fileUrl.substring(domain.length() + 1); // +1 是为了移除开头的 "/"
         }
 
+        // 如果已经是相对路径，直接返回
+        if (!fileUrl.startsWith("http")) {
+            return fileUrl;
+        }
+
         return null;
     }
 
     /**
      * 提取文件扩展名
+     * 
      * @param filename 文件名
      * @return 扩展名
      */
