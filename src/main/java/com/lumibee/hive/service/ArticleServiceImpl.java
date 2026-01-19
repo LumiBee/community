@@ -1,11 +1,7 @@
 package com.lumibee.hive.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.lumibee.hive.dto.*;
@@ -14,6 +10,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,6 +67,8 @@ public class ArticleServiceImpl implements ArticleService {
     private RedisPopularArticleService redisPopularArticleService;
     @Autowired
     private CacheBreakdownProtectionService cacheBreakdownProtectionService;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 获取首页文章列表
@@ -368,19 +367,19 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
-        return getArticleBySlugWithBreakdownProtection(slug, null);
+        return getArticleBySlugWithBreakdownProtection(slug, null, null);
     }
 
     @Override
     @Transactional
-    public ArticleDetailsDTO getArticleBySlug(String slug, Long userId) {
-        return getArticleBySlugWithBreakdownProtection(slug, userId);
+    public ArticleDetailsDTO getArticleBySlug(String slug, Long userId, String ipAddress) {
+        return getArticleBySlugWithBreakdownProtection(slug, userId, ipAddress);
     }
 
     /**
      * 使用分布式锁防止缓存击穿的文章获取方法
      */
-    private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId) {
+    private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId, String ipAddress) {
         ArticleDetailsDTO article = cacheBreakdownProtectionService.getWithBreakdownProtection(
                 "articles::detail",
                 slug,
@@ -388,21 +387,21 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (article != null) {
             // 在缓存外部处理浏览量增加
-            int viewCount = incrementAndGetViewCount(article.getArticleId(), userId);
+            int viewCount = incrementAndGetViewCount(article.getArticleId(), userId, ipAddress);
             article.setViewCount(viewCount);
         }
         return article;
     }
 
     // 增加并获取浏览量
-    private int incrementAndGetViewCount(Integer articleId, Long userId) {
+    private int incrementAndGetViewCount(Integer articleId, Long userId, String ipAddress) {
         int viewCount;
         if (!redisCounterService.existsArticleViewCount(articleId)) {
             Article article = articleMapper.selectById(articleId);
             viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
             redisCounterService.setArticleViewCount(articleId, article.getUserId(), viewCount);
         } else {
-            if (redisCounterService.recordView(articleId, userId)) {
+            if (redisCounterService.recordView(articleId, userId, ipAddress)) {
                 viewCount = redisCounterService.incrementArticleView(articleId);
             } else {
                 viewCount = redisCounterService.getArticleViewCount(articleId);
@@ -984,17 +983,33 @@ public class ArticleServiceImpl implements ArticleService {
         return dto;
     }
 
+    // 通用的分页查询方法，返回 ArticleExcerptDTO 的分页结果
     @NotNull
     private Page<ArticleExcerptDTO> getArticleExcerptDTOPage(long pageNum, long pageSize,
             Page<Article> articlePageRequest, LambdaQueryWrapper<Article> queryWrapper) {
         // 使用MyBatis-Plus的分页查询
         Page<Article> articlePage = articleMapper.selectPage(articlePageRequest, queryWrapper);
+        List<Article> articles = articlePage.getRecords();
+
+        Map<Integer, Integer> viewCounts = batchGetViewCountsFromRedis(articles);
+        Map<Integer, Integer> likeCounts = batchGetLikeCountsFromRedis(articles);
 
         // 转换为DTO
-        List<ArticleExcerptDTO> articleDTOList = articlePage.getRecords().stream()
+        List<ArticleExcerptDTO> articleDTOList = articles.stream()
                 .map(article -> {
                     ArticleExcerptDTO dto = new ArticleExcerptDTO();
                     BeanUtils.copyProperties(article, dto);
+
+                    // 获取浏览量和点赞数
+                    Integer viewCount = viewCounts.get(article.getArticleId());
+                    if (viewCount != null) {
+                        dto.setViewCount(viewCount);
+                    }
+
+                    Integer likeCount = likeCounts.get(article.getArticleId());
+                    if (likeCount != null) {
+                        dto.setLikes(likeCount);
+                    }
 
                     // 获取用户信息
                     User user = userService.selectById(article.getUserId());
@@ -1017,14 +1032,66 @@ public class ArticleServiceImpl implements ArticleService {
         return articleDTOPage;
     }
 
+    // 批量获取文章阅读量
+    private Map<Integer, Integer> batchGetViewCountsFromRedis(List<Article> articles) {
+        Map<Integer, Integer> viewCounts = new HashMap<>();
+
+        List<String> keys = articles.stream()
+                .map(article -> "hive::counter::article::view::" + article.getArticleId())
+                .collect(Collectors.toList());
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        for (int i = 0; i < articles.size(); i++) {
+            Article article = articles.get(i);
+            Object value = values != null ? values.get(i) : null;
+
+            if (value != null) {
+                viewCounts.put(article.getArticleId(), Integer.parseInt(value.toString()));
+            } else {
+                viewCounts.put(article.getArticleId(),
+                        article.getViewCount() != null ? article.getViewCount() : 0);
+            }
+        }
+
+        return viewCounts;
+    }
+
+    // 批量获取文章点赞数
+    private Map<Integer, Integer> batchGetLikeCountsFromRedis(List<Article> articles) {
+        Map<Integer, Integer> likeCounts = new HashMap<>();
+
+        List<String> keys = articles.stream()
+                .map(article -> "hive::counter::article::like::" + article.getArticleId())
+                .collect(Collectors.toList());
+
+        List<Object> values = redisTemplate.opsForValue().multiGet(keys);
+
+        for (int i = 0; i < articles.size(); i++) {
+            Article article = articles.get(i);
+            Object value = values != null ? values.get(i) : null;
+
+            if (value != null) {
+                likeCounts.put(article.getArticleId(), Integer.parseInt(value.toString()));
+            } else {
+                likeCounts.put(article.getArticleId(),
+                        article.getLikes() != null ? article.getLikes() : 0);
+            }
+        }
+
+        return likeCounts;
+    }
+
+    // 转换 Portfolio 为 PortfolioDTO
     private PortfolioDTO convertToPortfolioDTO(Portfolio portfolio) {
         if (portfolio == null)
             return null;
-        PortfolioDTO dto = new PortfolioDTO(); // 假设您已创建 PortfolioDTO 类
+        PortfolioDTO dto = new PortfolioDTO();
         BeanUtils.copyProperties(portfolio, dto);
         return dto;
     }
 
+    // 转换 Tag 为 TagDTO
     private TagDTO convertToTagDTO(Tag tag) {
         if (tag == null)
             return null;
@@ -1033,12 +1100,14 @@ public class ArticleServiceImpl implements ArticleService {
         return dto;
     }
 
+    // 转换 Article 为 DraftDTO
     private DraftDTO convertToDraftDTO(Article article) {
         DraftDTO dto = new DraftDTO();
         BeanUtils.copyProperties(article, dto);
         return dto;
     }
 
+    // 创建唯一的文章slug
     public String createUniqueSlug(String title) {
         String baseSlug = SlugGenerator.generateSlug(title);
         if (baseSlug.isEmpty()) {

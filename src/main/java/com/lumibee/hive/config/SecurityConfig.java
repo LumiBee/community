@@ -92,7 +92,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.info("=== 初始化 SecurityFilterChain ===");
 
         http
                 .authorizeHttpRequests(authz -> {
@@ -105,7 +104,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/css/**", "/js/**", "/img/**", "/favicon.ico").permitAll()
                         .requestMatchers("/login", "/signup", "/home", "/articles", "/articles/**",
                                         "/portfolios", "/portfolios/**", "/profile/**", "/about",
-                                        "/tags", "/tags/**").permitAll() // 前端页面路由
+                                        "/tags", "/tags/**", "/actuator/**").permitAll() // 前端页面路由
 
                         // 3. 认证相关接口（登录、注册、登出）
                         .requestMatchers("/login", "/login/oauth2", "/signup", "/auth/refresh").permitAll()

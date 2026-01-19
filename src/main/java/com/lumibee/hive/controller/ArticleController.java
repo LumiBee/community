@@ -3,6 +3,8 @@ package com.lumibee.hive.controller;
 import java.security.Principal;
 import java.util.List;
 
+import com.lumibee.hive.utils.IpAddressUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -97,13 +99,16 @@ public class ArticleController {
     })
     public ResponseEntity<ArticleDetailsDTO> getArticleBySlug(
             @Parameter(description = "文章slug") @PathVariable("slug") String slug,
-            @AuthenticationPrincipal Principal principal) {
+            @AuthenticationPrincipal Principal principal,
+            HttpServletRequest request) {
         // 获取当前用户（可能为null，表示匿名访问）
         User user = userService.getCurrentUserFromPrincipal(principal);
-        
-        // 根据 slug 获取文章，传递用户ID（如果用户已登录）
+        // 获取请求的IP地址(如果用户名为null，则使用IP地址进行区分)
+        String ipAddress = IpAddressUtil.getClientIpAddress(request);
+
+        // 根据 slug 获取文章，传递用户ID（如果用户已登录）,否则传递null
         Long userId = (user != null) ? user.getId() : null;
-        ArticleDetailsDTO article = articleService.getArticleBySlug(slug, userId);
+        ArticleDetailsDTO article = articleService.getArticleBySlug(slug, userId, ipAddress);
 
         if (article == null) {
             return ResponseEntity.notFound().build();

@@ -19,7 +19,7 @@ public interface ArticleService {
 
     ArticleDetailsDTO getArticleBySlug(String slug);
 
-    ArticleDetailsDTO getArticleBySlug(String slug, Long userId);
+    ArticleDetailsDTO getArticleBySlug(String slug, Long userId, String ipAddress);
 
     ArticleDetailsDTO getArticleById(Integer articleId);
 

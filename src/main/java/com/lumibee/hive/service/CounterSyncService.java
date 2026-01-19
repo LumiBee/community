@@ -32,7 +32,7 @@ public class CounterSyncService {
     /**
      * 每5分钟同步一次计数器到数据库
      */
-    @Scheduled(fixedRate = 300000) // 5分钟
+    @Scheduled(fixedRate = 60000) // 1分钟
     public void syncCountersToDatabase() {
         log.info("开始同步Redis计数器到数据库...");
         

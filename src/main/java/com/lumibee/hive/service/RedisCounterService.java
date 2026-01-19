@@ -21,10 +21,9 @@ public class RedisCounterService {
     private static final int VIEW_WINDOW = 10;
     private static final String COUNTER_PREFIX = "hive::counter::";
 
-    // ==================== 基础操作方法 ====================
-
-    public Boolean recordView(Integer articleId, Long userId) {
-        String key = "hive::article-user::view::" + articleId + "::" + userId;
+    public Boolean recordView(Integer articleId, Long userId, String ipAddress) {
+        String userIdentifier = userId != null ? userId.toString() : "anonymous::" + ipAddress;
+        String key = "hive::article-user::view::" + articleId + "::" + userIdentifier;
         return redisTemplate.opsForValue().setIfAbsent(key, "1", VIEW_WINDOW, TimeUnit.MINUTES);
     }
 
@@ -112,7 +111,7 @@ public class RedisCounterService {
     public void setArticleViewCount(Integer articleId, Long userId, int count) {
         String key = "article::view::" + articleId;
         setCount(key, count);
-        String keyUser = "article-user::view::" + articleId + "::" + userId;
+        String keyUser = "hive::article-user::view::" + articleId + "::" + userId;
         redisTemplate.opsForValue().setIfAbsent(keyUser, "1", VIEW_WINDOW, TimeUnit.MINUTES);
     }
 
