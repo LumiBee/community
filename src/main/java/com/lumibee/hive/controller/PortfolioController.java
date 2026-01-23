@@ -79,7 +79,7 @@ public class PortfolioController {
     /**
      * 创建作品集API
      */
-    @PostMapping("/portfolio")
+    @PostMapping("/portfolio/create")
     @Operation(summary = "创建作品集", description = "创建新的作品集")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "创建成功"),

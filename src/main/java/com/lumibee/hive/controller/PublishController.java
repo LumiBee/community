@@ -1,5 +1,6 @@
 package com.lumibee.hive.controller;
 
+import java.io.IOException;
 import java.security.Principal;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +13,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.lumibee.hive.dto.ArticleDetailsDTO;
 import com.lumibee.hive.dto.ArticlePublishRequestDTO;
 import com.lumibee.hive.service.ArticleService;
 import com.lumibee.hive.service.UserService;
+import com.lumibee.hive.service.ImgService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,34 +36,38 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "文章发布", description = "文章发布、编辑、删除相关的 API 接口")
 public class PublishController {
 
-    @Autowired private UserService userService;
-    @Autowired private ArticleService articleService;
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private ArticleService articleService;
+
+    @Autowired
+    private ImgService imgService;
 
     @PostMapping("/publish")
     @Operation(summary = "发布文章", description = "发布新文章到平台")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "文章发布成功", 
-                    content = @Content(schema = @Schema(implementation = ArticleDetailsDTO.class))),
-        @ApiResponse(responseCode = "401", description = "用户未认证"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误")
+            @ApiResponse(responseCode = "201", description = "文章发布成功", content = @Content(schema = @Schema(implementation = ArticleDetailsDTO.class))),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误")
     })
     public ResponseEntity<ArticleDetailsDTO> publishArticle(
-        @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
-        @Parameter(description = "文章发布请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
+            @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
+            @Parameter(description = "文章发布请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
 
-        
         // 检查用户是否已认证
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         // 获取当前用户
         var user = userService.getCurrentUserFromPrincipal(principal);
-        
+
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         Long userId = user.getId();
         ArticleDetailsDTO newArticle = articleService.publishArticle(requestDTO, userId);
 
@@ -69,26 +77,26 @@ public class PublishController {
     @PutMapping("/{articleId}/edit")
     @Operation(summary = "编辑文章", description = "编辑已发布的文章")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "文章编辑成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证"),
-        @ApiResponse(responseCode = "404", description = "文章不存在")
+            @ApiResponse(responseCode = "200", description = "文章编辑成功"),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> editArticle(
-        @Parameter(description = "文章ID") @PathVariable Integer articleId,
-        @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
-        @Parameter(description = "文章编辑请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
-        
+            @Parameter(description = "文章ID") @PathVariable Integer articleId,
+            @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
+            @Parameter(description = "文章编辑请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
+
         // 检查用户是否已认证
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         // 获取当前用户
         var user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         Long userId = user.getId();
 
         ArticleDetailsDTO updatedArticle = articleService.updateArticle(articleId, requestDTO, userId);
@@ -99,25 +107,25 @@ public class PublishController {
     @DeleteMapping("/delete/{articleId}")
     @Operation(summary = "删除文章", description = "删除已发布的文章")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "文章删除成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证"),
-        @ApiResponse(responseCode = "404", description = "文章不存在")
+            @ApiResponse(responseCode = "200", description = "文章删除成功"),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> deleteArticle(
-        @Parameter(description = "文章ID") @PathVariable Integer articleId,
-        @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal) {
-        
+            @Parameter(description = "文章ID") @PathVariable Integer articleId,
+            @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal) {
+
         // 检查用户是否已认证
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         // 获取当前用户
         var user = userService.getCurrentUserFromPrincipal(principal);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
-        
+
         Long userId = user.getId();
         ArticleDetailsDTO deletedArticle = articleService.deleteArticleById(articleId, userId);
 
@@ -128,5 +136,32 @@ public class PublishController {
         }
     }
 
+    @PostMapping("/upload-img")
+    @Operation(summary = "上传文章图片", description = "上传文章图片")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "文章图片上传成功", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误")
+    })
+    public ResponseEntity<String> uploadImg(
+            @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
+            @Parameter(description = "文章图片") @RequestParam("imgFile") MultipartFile imgFile) throws IOException {
+
+        // 检查用户是否已认证
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // 获取当前用户
+        var user = userService.getCurrentUserFromPrincipal(principal);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Long userId = user.getId();
+        String imgUrl = imgService.uploadImg(userId, imgFile);
+
+        return ResponseEntity.ok(imgUrl);
+    }
 
 }

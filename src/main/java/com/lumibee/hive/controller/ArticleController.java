@@ -33,18 +33,20 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "文章管理", description = "文章相关的 API 接口")
 public class ArticleController {
 
-    @Autowired private ArticleService articleService;
-    @Autowired private UserService userService;
+    @Autowired
+    private ArticleService articleService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/article/{articleId}/like")
     @Operation(summary = "切换文章点赞状态", description = "用户点赞或取消点赞文章")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "操作成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "操作成功"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<LikeResponse> toggleLike(
-        @Parameter(description = "文章ID") @PathVariable("articleId") int articleId,
-        @AuthenticationPrincipal Principal principal) {
+            @Parameter(description = "文章ID") @PathVariable("articleId") int articleId,
+            @AuthenticationPrincipal Principal principal) {
 
         // 获取当前用户
         User user = userService.getCurrentUserFromPrincipal(principal);
@@ -54,7 +56,7 @@ public class ArticleController {
 
         // 调用服务层方法切换点赞状态（Service 层已处理 Redis 操作）
         LikeResponse response = articleService.toggleLike(user.getId(), articleId);
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -65,7 +67,7 @@ public class ArticleController {
     @ResponseBody
     @Operation(summary = "获取热门文章", description = "根据浏览量等指标获取热门文章列表")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
+            @ApiResponse(responseCode = "200", description = "获取成功")
     })
     public ResponseEntity<List<ArticleExcerptDTO>> getPopularArticles(
             @Parameter(description = "限制返回数量，默认6篇") @RequestParam(name = "limit", defaultValue = "6") int limit) {
@@ -80,7 +82,7 @@ public class ArticleController {
     @ResponseBody
     @Operation(summary = "获取精选文章", description = "获取系统精选的文章列表")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
+            @ApiResponse(responseCode = "200", description = "获取成功")
     })
     public ResponseEntity<List<ArticleExcerptDTO>> getFeaturedArticles() {
         List<ArticleExcerptDTO> featuredArticles = articleService.getFeaturedArticles();
@@ -94,8 +96,8 @@ public class ArticleController {
     @ResponseBody
     @Operation(summary = "通过slug获取文章详情", description = "根据文章的slug获取完整的文章详情信息")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "404", description = "文章不存在")
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> getArticleBySlug(
             @Parameter(description = "文章slug") @PathVariable("slug") String slug,
@@ -118,11 +120,14 @@ public class ArticleController {
         int favoriteCount = articleService.getFavoriteCount(article.getArticleId());
         article.setFavoriteCount(favoriteCount);
 
+        // 获取文章的编辑时间
+        article.setGmtModified(articleService.getArticleGmtModified(article.getArticleId()));
+
         if (user != null) {
             // 检查用户是否点赞
             boolean isLiked = articleService.isUserLiked(user.getId(), article.getArticleId());
             article.setLiked(isLiked);
-            
+
             // 判断当前用户是否关注了作者
             boolean followedByCurrentUser = userService.isFollowing(user.getId(), article.getUserId());
             article.setFollowed(followedByCurrentUser);
@@ -147,8 +152,8 @@ public class ArticleController {
     @ResponseBody
     @Operation(summary = "通过ID获取文章详情", description = "根据文章的ID获取完整的文章详情信息")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "404", description = "文章不存在")
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> getArticleById(
             @Parameter(description = "文章ID") @PathVariable("articleId") Integer articleId) {

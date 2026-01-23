@@ -1,5 +1,6 @@
 package com.lumibee.hive.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -48,4 +49,6 @@ public interface ArticleService {
     int getFavoriteCount(Integer articleId);
 
     void setArticleFeatured(Integer articleId, boolean isFeatured, User.UserRole role);
+
+    LocalDateTime getArticleGmtModified(Integer articleId);
 }

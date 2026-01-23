@@ -953,6 +953,12 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
+    @Override
+    public LocalDateTime getArticleGmtModified(Integer articleId) {
+        Article article = articleMapper.selectById(articleId);
+        return article.getGmtModified();
+    }
+
     private ArticleDetailsDTO convertToArticleDetailsDTO(Article article) {
         if (article == null)
             return null;

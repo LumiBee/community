@@ -51,7 +51,7 @@ spring:
     active: dev  # 默认激活dev配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf8
+    url: jdbc:mysql://localhost:3306/community?useUnicode=true&characterEncoding=utf8mb4&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: cgqlbh114514
     # Druid 连接池配置优化
@@ -153,7 +153,7 @@ file:
   upload:
     dir: ./uploads  # 文件上传目录 - 项目目录下
   base:
-    url: http://localhost:8090/uploads/  # 访问URL前缀 - 包含完整后端地址
+    url: /api/uploads/  # 访问URL前缀 - 确保通过 API 上下文路径访问
 
 # 头像配置
 avatar:

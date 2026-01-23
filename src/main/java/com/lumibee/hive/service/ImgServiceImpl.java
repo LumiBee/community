@@ -16,8 +16,9 @@ import com.lumibee.hive.model.User;
 @Service
 public class ImgServiceImpl implements ImgService {
 
-    private static final String AVATAR_DIRECTORY = "avatars";
-    private static final String BG_DIRECTORY = "backgrounds";
+    private static final String AVATAR_DIRECTORY = "avatars"; // 头像目录
+    private static final String BG_DIRECTORY = "backgrounds"; // 背景目录
+    private static final String IMG_DIRECTORY = "images"; // 文章内图片目录
     private static final String DEFAULT_AVATAR = "/img/default01.jpg";
 
     @Autowired
@@ -38,28 +39,9 @@ public class ImgServiceImpl implements ImgService {
     @Override
     @Transactional
     public String uploadAvatar(Long userId, MultipartFile avatarFile) throws IOException {
-        // 验证参数
-        if (userId == null || avatarFile == null || avatarFile.isEmpty()) {
-            throw new IllegalArgumentException("Invalid user ID or avatar file");
-        }
+        checkImg(userId, avatarFile);
 
-        // 检查用户是否存在
         User user = userService.selectById(userId);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found: " + userId);
-        }
-
-        // 检查文件大小
-        if (avatarFile.getSize() > maxAvatarSize) {
-            throw new IllegalArgumentException("Avatar file size exceeds maximum allowed size");
-        }
-
-        // 检查文件类型
-        String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(avatarFile.getOriginalFilename()));
-        String fileExtension = extractExtension(originalFilename);
-        if (!allowedExtensions.contains(fileExtension)) {
-            throw new IllegalArgumentException("Only " + allowedExtensions + " files are allowed for avatars");
-        }
 
         // 删除旧头像
         deleteUserAvatar(user);
@@ -99,28 +81,9 @@ public class ImgServiceImpl implements ImgService {
 
     @Override
     public String uploadCover(Long userId, MultipartFile coverImageFile) throws IOException {
-        // 验证参数
-        if (userId == null || coverImageFile == null || coverImageFile.isEmpty()) {
-            throw new IllegalArgumentException("Invalid user ID or cover image file");
-        }
+        checkImg(userId, coverImageFile);
 
-        // 检查用户是否存在
         User user = userService.selectById(userId);
-        if (user == null) {
-            throw new IllegalArgumentException("User not found: " + userId);
-        }
-
-        // 检查文件大小
-        if (coverImageFile.getSize() > maxAvatarSize * 2) {
-            throw new IllegalArgumentException("Cover image file size exceeds maximum allowed size");
-        }
-
-        // 检查文件类型
-        String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(coverImageFile.getOriginalFilename()));
-        String fileExtension = extractExtension(originalFilename);
-        if (!allowedExtensions.contains(fileExtension)) {
-            throw new IllegalArgumentException("Only " + allowedExtensions + " files are allowed for avatars");
-        }
 
         // 删除旧封面
         deleteBackgroundImg(user);
@@ -141,6 +104,47 @@ public class ImgServiceImpl implements ImgService {
             // 缓存清理失败不影响头像上传的成功
         }
         return imgUrl;
+    }
+
+    @Override
+    public String uploadImg(Long userId, MultipartFile imgFile) throws IOException {
+        checkImg(userId, imgFile);
+
+        User user = userService.selectById(userId);
+
+        // 存储图片，获取相对路径
+        String relativePath = fileStorageService.storeFile(imgFile, IMG_DIRECTORY);
+
+        // 转换为完整 URL
+        String baseUrl = fileStorageService.getBaseUrl();
+        String fullUrl = baseUrl + relativePath;
+
+        return fullUrl;
+    }
+
+    public void checkImg(Long userId, MultipartFile imgFile) throws IOException {
+        // 验证参数
+        if (userId == null || imgFile == null || imgFile.isEmpty()) {
+            throw new IllegalArgumentException("Invalid user ID or image file");
+        }
+
+        // 检查用户是否存在
+        User user = userService.selectById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found: " + userId);
+        }
+
+        // 检查文件大小
+        if (imgFile.getSize() > maxAvatarSize * 2) {
+            throw new IllegalArgumentException("Image file size exceeds maximum allowed size");
+        }
+
+        // 检查文件类型
+        String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(imgFile.getOriginalFilename()));
+        String fileExtension = extractExtension(originalFilename);
+        if (!allowedExtensions.contains(fileExtension)) {
+            throw new IllegalArgumentException("Only " + allowedExtensions + " files are allowed for avatars");
+        }
     }
 
     private void deleteUserAvatar(User user) {

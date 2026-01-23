@@ -8,6 +8,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface ImgService {
     String uploadAvatar(@Param("userId") Long userId, @Param("avatarFile") MultipartFile avatarFile) throws IOException;
+
     String getAvatarUrl(Long userId);
-    String uploadCover(@Param("userId") Long userId, @Param("coverImageFile") MultipartFile coverImageFile) throws IOException;
+
+    String uploadCover(@Param("userId") Long userId, @Param("coverImageFile") MultipartFile coverImageFile)
+            throws IOException;
+
+    String uploadImg(@Param("userId") Long userId, @Param("imgFile") MultipartFile imgFile) throws IOException;
 }
