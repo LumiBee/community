@@ -103,7 +103,7 @@ spring:
   cache:
     type: redis
     redis:
-      time-to-live: 3600000 # 默认1小时
+      time-to-live: PT1H # 默认1小时
       cache-null-values: true # 允许缓存null值
       key-prefix: "hive::" # 缓存键前缀
       use-key-prefix: true # 使用键前缀

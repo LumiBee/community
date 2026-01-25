@@ -519,6 +519,14 @@ public class ArticleServiceImpl implements ArticleService {
                 System.err.println("Elasticsearch索引文章失败: " + e.getMessage());
             }
 
+            // 设置用户是否关注作者
+            if (userId != null && user != null && !userId.equals(user.getId())) {
+                boolean isFollowed = userService.isFollowing(userId, user.getId());
+                articleDetailsDTO.setFollowed(isFollowed);
+            } else {
+                articleDetailsDTO.setFollowed(false);
+            }
+
             return articleDetailsDTO;
         } catch (Exception e) {
             System.err.println("获取文章详情失败: " + e.getMessage());

@@ -8,15 +8,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import com.lumibee.hive.mapper.ArticleMapper;
+import com.lumibee.hive.model.Article;
+import lombok.extern.log4j.Log4j2;
+
 /**
  * Redis 计数器服务
  * 提供各种计数器的 Redis 操作，包括文章阅读量、点赞数、用户关注数、粉丝数等
  */
 @Service
+@Log4j2
 public class RedisCounterService {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    private ArticleMapper articleMapper;
 
     private static final int VIEW_WINDOW = 10;
     private static final String COUNTER_PREFIX = "hive::counter::";
@@ -99,10 +107,31 @@ public class RedisCounterService {
 
     /**
      * 获取文章阅读量
+     * 如果Redis中不存在，则从数据库加载并回填到Redis
      */
     public int getArticleViewCount(Integer articleId) {
         String key = "article::view::" + articleId;
-        return getCount(key);
+        String redisKey = COUNTER_PREFIX + key;
+        Object value = redisTemplate.opsForValue().get(redisKey);
+
+        if (value != null) {
+            return Integer.parseInt(value.toString());
+        }
+
+        // Redis中不存在，从数据库加载
+        Article article = articleMapper.selectById(articleId);
+        int dbViewCount = (article != null && article.getViewCount() != null)
+                ? article.getViewCount()
+                : 0;
+
+        // 回填到Redis
+        if (dbViewCount > 0) {
+            redisTemplate.opsForValue().set(redisKey, dbViewCount);
+            log.debug("从数据库加载文章浏览量并回填Redis: articleId={}, viewCount={}",
+                    articleId, dbViewCount);
+        }
+
+        return dbViewCount;
     }
 
     /**
