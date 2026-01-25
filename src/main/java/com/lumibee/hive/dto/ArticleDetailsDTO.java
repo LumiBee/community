@@ -36,7 +36,7 @@ public class ArticleDetailsDTO {
 
     @JsonProperty("liked")
     private boolean isLiked;
-    @JsonProperty("followed")
+    @JsonProperty("isFollowed")
     private boolean isFollowed;
     @JsonProperty("favorited")
     private boolean isFavorited;
