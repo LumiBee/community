@@ -395,27 +395,32 @@ public class ArticleServiceImpl implements ArticleService {
 
     // 增加并获取浏览量
     private int incrementAndGetViewCount(Integer articleId, Long userId, String ipAddress) {
-        int viewCount;
-        if (!redisCounterService.existsArticleViewCount(articleId)) {
-            Article article = articleMapper.selectById(articleId);
-            viewCount = article.getViewCount() != null ? article.getViewCount().intValue() + 1 : 1;
-            redisCounterService.setArticleViewCount(articleId, article.getUserId(), viewCount);
-        } else {
-            if (redisCounterService.recordView(articleId, userId, ipAddress)) {
-                viewCount = redisCounterService.incrementArticleView(articleId);
-            } else {
-                viewCount = redisCounterService.getArticleViewCount(articleId);
+        // 1. 确保 Redis 中有当前文章的浏览量缓存
+        // 如果不存在，getArticleViewCount 会自动从数据库加载并回填 Redis
+        // 注意：这里我们不需要立即 +1，而是先确保基准值存在
+        Integer currentViewCount = redisCounterService.getArticleViewCount(articleId);
+
+        // 2. 尝试记录用户访问（去重）
+        // recordView 返回 true 表示这是一个新的有效访问（该用户/IP 在窗口期内首次访问）
+        boolean isNewView = redisCounterService.recordView(articleId, userId, ipAddress);
+
+        int finalViewCount;
+        if (isNewView) {
+            // 3. 如果是新访问，执行原子递增
+            finalViewCount = redisCounterService.incrementArticleView(articleId);
+
+            // 更新文章热度分数（仅在浏览量增加时更新）
+            try {
+                redisPopularArticleService.incrementArticleView(articleId);
+            } catch (Exception e) {
+                log.warn("更新文章热度分数失败: articleId={}", articleId, e);
             }
+        } else {
+            // 4. 如果是重复访问，直接返回当前值
+            finalViewCount = currentViewCount;
         }
 
-        // 更新文章热度分数
-        try {
-            redisPopularArticleService.incrementArticleView(articleId);
-        } catch (Exception e) {
-            log.warn("更新文章热度分数失败: articleId={}", articleId, e);
-        }
-
-        return viewCount;
+        return finalViewCount;
     }
 
     /**
@@ -733,6 +738,11 @@ public class ArticleServiceImpl implements ArticleService {
         existingArticle.setContent(requestDTO.getContent());
         existingArticle.setExcerpt(requestDTO.getExcerpt());
         existingArticle.setGmtModified(LocalDateTime.now());
+
+        // 防止更新文章内容时覆盖浏览量和点赞数等统计数据
+        // 这些数据由 Redis 计数器维护并异步同步
+        existingArticle.setViewCount(null);
+        existingArticle.setLikes(null);
 
         // 更新作品集
         Integer oldPortfolioId = existingArticle.getPortfolioId();

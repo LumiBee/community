@@ -64,11 +64,13 @@ public class RedisCounterService {
 
     /**
      * 获取计数器值
+     * 
+     * @return 计数器值，如果key不存在返回null
      */
-    public int getCount(String key) {
+    public Integer getCount(String key) {
         String redisKey = COUNTER_PREFIX + key;
         Object value = redisTemplate.opsForValue().get(redisKey);
-        return value != null ? Integer.parseInt(value.toString()) : 0;
+        return value != null ? Integer.parseInt(value.toString()) : null;
     }
 
     /**
@@ -109,7 +111,7 @@ public class RedisCounterService {
      * 获取文章阅读量
      * 如果Redis中不存在，则从数据库加载并回填到Redis
      */
-    public int getArticleViewCount(Integer articleId) {
+    public Integer getArticleViewCount(Integer articleId) {
         String key = "article::view::" + articleId;
         String redisKey = COUNTER_PREFIX + key;
         Object value = redisTemplate.opsForValue().get(redisKey);
@@ -125,11 +127,9 @@ public class RedisCounterService {
                 : 0;
 
         // 回填到Redis
-        if (dbViewCount > 0) {
-            redisTemplate.opsForValue().set(redisKey, dbViewCount);
-            log.debug("从数据库加载文章浏览量并回填Redis: articleId={}, viewCount={}",
-                    articleId, dbViewCount);
-        }
+        redisTemplate.opsForValue().set(redisKey, dbViewCount);
+        log.debug("从数据库加载文章浏览量并回填Redis: articleId={}, viewCount={}",
+                articleId, dbViewCount);
 
         return dbViewCount;
     }
@@ -181,7 +181,7 @@ public class RedisCounterService {
     /**
      * 获取文章点赞数
      */
-    public int getArticleLikeCount(Integer articleId) {
+    public Integer getArticleLikeCount(Integer articleId) {
         String key = "article::like::" + articleId;
         return getCount(key);
     }
