@@ -29,7 +29,7 @@ public class RedisCounterService {
     private static final int VIEW_WINDOW = 10;
     private static final String COUNTER_PREFIX = "hive::counter::";
 
-    public Boolean recordView(Integer articleId, Long userId, String ipAddress) {
+    public Boolean recordView(int articleId, Long userId, String ipAddress) {
         String userIdentifier = userId != null ? userId.toString() : "anonymous::" + ipAddress;
         String key = "hive::article-user::view::" + articleId + "::" + userIdentifier;
         return redisTemplate.opsForValue().setIfAbsent(key, "1", VIEW_WINDOW, TimeUnit.MINUTES);
@@ -67,10 +67,10 @@ public class RedisCounterService {
      * 
      * @return 计数器值，如果key不存在返回null
      */
-    public Integer getCount(String key) {
+    public int getCount(String key) {
         String redisKey = COUNTER_PREFIX + key;
         Object value = redisTemplate.opsForValue().get(redisKey);
-        return value != null ? Integer.parseInt(value.toString()) : null;
+        return value != null ? Integer.parseInt(value.toString()) : 0;
     }
 
     /**
@@ -102,7 +102,7 @@ public class RedisCounterService {
     /**
      * 文章阅读量计数增加
      */
-    public int incrementArticleView(Integer articleId) {
+    public int incrementArticleView(int articleId) {
         String key = "article::view::" + articleId;
         return increment(key);
     }
@@ -111,7 +111,7 @@ public class RedisCounterService {
      * 获取文章阅读量
      * 如果Redis中不存在，则从数据库加载并回填到Redis
      */
-    public Integer getArticleViewCount(Integer articleId) {
+    public int getArticleViewCount(int articleId) {
         String key = "article::view::" + articleId;
         String redisKey = COUNTER_PREFIX + key;
         Object value = redisTemplate.opsForValue().get(redisKey);
@@ -137,7 +137,7 @@ public class RedisCounterService {
     /**
      * 设置文章阅读量
      */
-    public void setArticleViewCount(Integer articleId, Long userId, int count) {
+    public void setArticleViewCount(int articleId, Long userId, int count) {
         String key = "article::view::" + articleId;
         setCount(key, count);
         String keyUser = "hive::article-user::view::" + articleId + "::" + userId;
@@ -147,7 +147,7 @@ public class RedisCounterService {
     /**
      * 检查文章阅读量是否存在
      */
-    public boolean existsArticleViewCount(Integer articleId) {
+    public boolean existsArticleViewCount(int articleId) {
         String key = "article::view::" + articleId;
         return exists(key);
     }
@@ -155,7 +155,7 @@ public class RedisCounterService {
     /**
      * 删除文章阅读量计数器
      */
-    public void deleteArticleViewCount(Integer articleId) {
+    public void deleteArticleViewCount(int articleId) {
         String key = "article::view::" + articleId;
         deleteCounter(key);
     }
@@ -165,7 +165,7 @@ public class RedisCounterService {
     /**
      * 文章点赞计数增加
      */
-    public int incrementArticleLike(Integer articleId) {
+    public int incrementArticleLike(int articleId) {
         String key = "article::like::" + articleId;
         return increment(key);
     }
@@ -173,7 +173,7 @@ public class RedisCounterService {
     /**
      * 文章点赞计数减少
      */
-    public int decrementArticleLike(Integer articleId) {
+    public int decrementArticleLike(int articleId) {
         String key = "article::like::" + articleId;
         return decrement(key);
     }
@@ -181,7 +181,7 @@ public class RedisCounterService {
     /**
      * 获取文章点赞数
      */
-    public Integer getArticleLikeCount(Integer articleId) {
+    public int getArticleLikeCount(int articleId) {
         String key = "article::like::" + articleId;
         return getCount(key);
     }
@@ -189,7 +189,7 @@ public class RedisCounterService {
     /**
      * 设置文章点赞数
      */
-    public void setArticleLikeCount(Integer articleId, int count) {
+    public void setArticleLikeCount(int articleId, int count) {
         String key = "article::like::" + articleId;
         setCount(key, count);
     }
@@ -197,7 +197,7 @@ public class RedisCounterService {
     /**
      * 检查文章点赞数是否存在
      */
-    public boolean existsArticleLikeCount(Integer articleId) {
+    public boolean existsArticleLikeCount(int articleId) {
         String key = "article::like::" + articleId;
         return exists(key);
     }
@@ -205,7 +205,7 @@ public class RedisCounterService {
     /**
      * 删除文章点赞数计数器
      */
-    public void deleteArticleLikeCount(Integer articleId) {
+    public void deleteArticleLikeCount(int articleId) {
         String key = "article::like::" + articleId;
         deleteCounter(key);
     }
@@ -402,7 +402,7 @@ public class RedisCounterService {
     /**
      * 文章被收藏次数增加
      */
-    public int incrementArticleFavorite(Integer articleId) {
+    public int incrementArticleFavorite(int articleId) {
         String key = "article::favorite::" + articleId;
         return increment(key);
     }
@@ -410,7 +410,7 @@ public class RedisCounterService {
     /**
      * 文章被收藏次数减少
      */
-    public int decrementArticleFavorite(Integer articleId) {
+    public int decrementArticleFavorite(int articleId) {
         String key = "article::favorite::" + articleId;
         return decrement(key);
     }
@@ -418,7 +418,7 @@ public class RedisCounterService {
     /**
      * 获取文章被收藏次数
      */
-    public int getArticleFavoriteCount(Integer articleId) {
+    public int getArticleFavoriteCount(int articleId) {
         String key = "article::favorite::" + articleId;
         return getCount(key);
     }
@@ -426,7 +426,7 @@ public class RedisCounterService {
     /**
      * 设置文章被收藏次数
      */
-    public void setArticleFavoriteCount(Integer articleId, int count) {
+    public void setArticleFavoriteCount(int articleId, int count) {
         String key = "article::favorite::" + articleId;
         setCount(key, count);
     }
@@ -434,7 +434,7 @@ public class RedisCounterService {
     /**
      * 检查文章被收藏次数是否存在
      */
-    public boolean existsArticleFavoriteCount(Integer articleId) {
+    public boolean existsArticleFavoriteCount(int articleId) {
         String key = "article::favorite::" + articleId;
         return exists(key);
     }
@@ -442,7 +442,7 @@ public class RedisCounterService {
     /**
      * 删除文章被收藏次数计数器
      */
-    public void deleteArticleFavoriteCount(Integer articleId) {
+    public void deleteArticleFavoriteCount(int articleId) {
         String key = "article::favorite::" + articleId;
         deleteCounter(key);
     }

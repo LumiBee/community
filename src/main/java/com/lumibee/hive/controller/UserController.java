@@ -49,7 +49,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> toggleFollow(
-            @Parameter(description = "要关注的用户ID") @PathVariable("userId") Long userId,
+            @Parameter(description = "要关注的用户ID") @PathVariable("userId") long userId,
             @AuthenticationPrincipal Principal principal) {
 
         // 获取当前用户
@@ -106,7 +106,7 @@ public class UserController {
             @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Map<String, Object>> isFollowing(
-            @Parameter(description = "要检查的用户ID") @PathVariable("userId") Long userId,
+            @Parameter(description = "要检查的用户ID") @PathVariable("userId") long userId,
             @AuthenticationPrincipal Principal principal) {
         Map<String, Object> response = new HashMap<>();
 

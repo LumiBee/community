@@ -1,5 +1,5 @@
 # 使用一个轻量级的 Java 17 运行环境作为基础镜像
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
 # 设置时区
 ENV TZ=Asia/Shanghai

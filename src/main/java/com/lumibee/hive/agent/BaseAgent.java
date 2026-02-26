@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-
 /**
  * 基础代理类，提供通用的代理执行逻辑
  * 子类需要实现具体的 step 方法来定义代理的行为
@@ -48,6 +47,7 @@ public abstract class BaseAgent {
 
     /**
      * 流式执行用户输入的提示
+     * 
      * @param userPrompt 用户输入的提示
      * @return SseEmitter 用于流式传输结果
      */
@@ -56,7 +56,10 @@ public abstract class BaseAgent {
         SseEmitter emitter = new SseEmitter(5 * 60 * 1000L); // 5 分钟
 
         // 使用线程异步处理，避免阻塞主线程
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         CompletableFuture.runAsync(() -> {
+            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
             try {
                 if (this.state != AgentState.IDLE) {
                     emitter.send("错误，无法从状态运行代理：" + this.state);
@@ -111,6 +114,8 @@ public abstract class BaseAgent {
 
             } catch (Exception e) {
                 emitter.completeWithError(e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
             }
         });
 
@@ -133,11 +138,10 @@ public abstract class BaseAgent {
 
     /**
      * 执行下一步
+     * 
      * @return 下一步的结果
      */
     public abstract String step();
-
-
 
     /**
      * 清理资源
@@ -159,6 +163,7 @@ public abstract class BaseAgent {
 
     /**
      * 检查代理是否卡住
+     * 
      * @return true 如果代理卡住了，false 否则
      */
     protected boolean isStuck() {

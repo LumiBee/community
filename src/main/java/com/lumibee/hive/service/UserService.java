@@ -9,25 +9,43 @@ import java.util.List;
 
 public interface UserService {
     User selectByName(String name);
-    User selectByEmail(String email);
-    User selectByGithubId(String githubId);
-    boolean updatePassword(Long id, String newPassword);
-    int insert(User user);
-    User findOrCreateUser(String githubId, String login, String email, String avatarUrl);
-    int updateById(User user);
-    User selectById(Long id);
-    List<User> selectByIds(List<Long> ids);
-    User getCurrentUserFromPrincipal(Principal principal);
-    boolean isFollowing(Long userId, Long followerId);
-    boolean toggleFollow(Long userId, Long followerId);
-    Integer countFansByUserId(Long id);
-    Integer countFollowingByUserId(Long id);
-    void refreshUserPrincipal(User user);
-    boolean isFavoritedByCurrentUser(Long id, Integer articleId);
-    User updateProfile(Long userId, String userName, String email, String bio);
-    int changePoints(Long userId, Integer changePoints, String reason);
 
-    Page<UserDTO> findFans(Long userId, long pageNum, long pageSize);
-    Page<UserDTO> findFollowing(Long userId, long pageNum, long pageSize);
+    User selectByEmail(String email);
+
+    User selectByGithubId(String githubId);
+
+    boolean updatePassword(long id, String newPassword);
+
+    int insert(User user);
+
+    User findOrCreateUser(String githubId, String login, String email, String avatarUrl);
+
+    int updateById(User user);
+
+    User selectById(long id);
+
+    List<User> selectByIds(List<Long> ids);
+
+    User getCurrentUserFromPrincipal(Principal principal);
+
+    boolean isFollowing(long userId, long followerId);
+
+    boolean toggleFollow(long userId, long followerId);
+
+    int countFansByUserId(long id);
+
+    int countFollowingByUserId(long id);
+
+    void refreshUserPrincipal(User user);
+
+    boolean isFavoritedByCurrentUser(long id, int articleId);
+
+    User updateProfile(long userId, String userName, String email, String bio);
+
+    int changePoints(long userId, int changePoints, String reason);
+
+    Page<UserDTO> findFans(long userId, long pageNum, long pageSize);
+
+    Page<UserDTO> findFollowing(long userId, long pageNum, long pageSize);
 
 }

@@ -8,10 +8,15 @@ import com.lumibee.hive.model.Tag;
 
 public interface TagService {
 
-    void incrementArticleCount(Integer tagId);
+    void incrementArticleCount(int tagId);
+
     Set<Tag> selectOrCreateTags(List<String> tagNames);
-    List<Tag> selectTagsByArticleId(Integer articleId);
+
+    List<Tag> selectTagsByArticleId(int articleId);
+
     List<TagDTO> selectAllTags();
-    void insertTagArticleRelation(Integer articleId, Integer tagId);
+
+    void insertTagArticleRelation(int articleId, int tagId);
+
     TagDTO selectTagBySlug(String slug);
 }

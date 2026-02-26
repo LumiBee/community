@@ -47,24 +47,26 @@ public class RedisClearCacheService {
         clearCachesByPattern(keyPrefix + "tags::list::all::*");
         clearCachesByPattern(keyPrefix + "tags::list::popular::*");
     }
-    
+
     /**
      * 清除文章标签列表缓存
+     * 
      * @param articleId 文章ID
      */
-    public void clearArticleTagsCaches(Integer articleId) {
+    public void clearArticleTagsCaches(int articleId) {
         clearCachesByPattern(keyPrefix + "tags::list::article::" + articleId);
     }
-    
+
     /**
      * 清除标签详情缓存
+     * 
      * @param tagSlug 标签slug
      */
     public void clearTagDetailCaches(String tagSlug) {
         clearCachesByPattern(keyPrefix + "tags::detail::" + tagSlug);
     }
 
-    public void clearUserRelatedCaches(Long userId, String userName) {
+    public void clearUserRelatedCaches(long userId, String userName) {
         // 清理用户文章列表缓存
         clearUserArticleCaches(userId);
 
@@ -142,31 +144,31 @@ public class RedisClearCacheService {
     /**
      * 清除制定用户粉丝/关注列表缓存
      */
-    public void clearUserStatusCaches(Long userId) {
+    public void clearUserStatusCaches(long userId) {
         clearCachesByPattern(keyPrefix + "users::count::*::" + userId);
     }
-    
+
     /**
      * 清除特定标签的文章列表缓存
      */
     public void clearTagArticleCaches(String tagSlug) {
         clearCachesByPattern(keyPrefix + "articles::list::tag::" + tagSlug);
     }
-    
+
     /**
      * 清除特定用户的文章列表缓存
      */
-    public void clearUserArticleCaches(Long userId) {
+    public void clearUserArticleCaches(long userId) {
         clearCachesByPattern(keyPrefix + "articles::list::user::published::" + userId + "::*");
     }
 
     /**
      * 清除特定用户的草稿文章列表缓存
      */
-    public void clearUserDraftCaches(Long userId) {
+    public void clearUserDraftCaches(long userId) {
         clearCachesByPattern(keyPrefix + "articles::list::user::draft::" + userId + "::*");
     }
-    
+
     /**
      * 清除首页文章缓存
      */
@@ -175,46 +177,49 @@ public class RedisClearCacheService {
         clearCachesByPattern(keyPrefix + "articles::list::homepage::*");
         log.info("首页文章缓存清除完成");
     }
-    
+
     /**
      * 清除文章详情缓存
      */
     public void clearArticleDetailCaches(String slug) {
         clearCachesByPattern(keyPrefix + "articles::detail::" + slug);
     }
-    
+
     /**
      * 清除作品集文章缓存
      */
-    public void clearPortfolioArticleCaches(Integer portfolioId) {
+    public void clearPortfolioArticleCaches(int portfolioId) {
         clearCachesByPattern(keyPrefix + "articles::list::portfolio::" + portfolioId);
     }
 
     /**
      * 清除用户关注关系缓存
-     * @param userId 被关注者ID
+     * 
+     * @param userId     被关注者ID
      * @param followerId 关注者ID
      */
-    public void clearUserFollowCaches(Long userId, Long followerId) {
+    public void clearUserFollowCaches(long userId, long followerId) {
         clearCachesByPattern(keyPrefix + "users::follow::" + userId + "::" + followerId);
     }
 
     /**
      * 清除用户收藏相关缓存
+     * 
      * @param userId 用户ID
      */
-    public void clearUserFavoritesCaches(Long userId) {
+    public void clearUserFavoritesCaches(long userId) {
         clearCachesByPattern(keyPrefix + "favorites::list::user::" + userId);
     }
 
     /**
      * 清除作品集详情缓存
+     * 
      * @param portfolioId 作品集ID
      */
-    public void clearPortfolioDetailCaches(Integer portfolioId) {
+    public void clearPortfolioDetailCaches(int portfolioId) {
         clearCachesByPattern(keyPrefix + "portfolios::detail::" + portfolioId);
     }
-    
+
     /**
      * 手动清除所有缓存（用于调试和紧急情况）
      */
@@ -230,11 +235,11 @@ public class RedisClearCacheService {
             } else {
                 log.info("没有发现hive缓存键");
             }
-            
+
             // 方法2：按类型清除（备用方案）
             clearAllArticleListCaches();
             clearAllTagListCaches();
-            
+
             log.info("所有缓存清除完成");
         } catch (Exception e) {
             log.error("清除所有缓存时发生错误: {}", e.getMessage(), e);
@@ -247,7 +252,7 @@ public class RedisClearCacheService {
         try {
             // 使用RedisTemplate的keys方法，它会自动处理序列化
             Set<String> keysToDelete = redisTemplate.keys(pattern);
-            
+
             if (keysToDelete != null && !keysToDelete.isEmpty()) {
                 log.info("发现了 {} 个缓存数据", keysToDelete.size());
                 // 使用unlink进行异步删除，性能更好

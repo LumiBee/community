@@ -41,10 +41,10 @@ public class CommentController {
     @GetMapping("/article/{articleId}")
     @Operation(summary = "获取文章评论", description = "根据文章ID获取该文章的所有评论")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
+            @ApiResponse(responseCode = "200", description = "获取成功")
     })
     public ResponseEntity<List<CommentDTO>> getCommentsByArticleId(
-            @Parameter(description = "文章ID") @PathVariable Integer articleId) {
+            @Parameter(description = "文章ID") @PathVariable int articleId) {
         List<CommentDTO> comments = commentService.getCommentsByArticleId(articleId);
         return ResponseEntity.ok(comments);
     }
@@ -52,12 +52,12 @@ public class CommentController {
     @PostMapping("/add")
     @Operation(summary = "添加评论", description = "为指定文章添加新评论")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "201", description = "评论添加成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "201", description = "评论添加成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Comments> addComment(
-            @Parameter(description = "文章ID") @RequestParam Integer articleId,
+            @Parameter(description = "文章ID") @RequestParam int articleId,
             @Parameter(description = "评论内容") @RequestParam String content,
             @Parameter(description = "父评论ID", required = false) @RequestParam(required = false) Long parentId,
             @AuthenticationPrincipal Principal principal) {
@@ -65,7 +65,7 @@ public class CommentController {
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         Comments newComment = commentService.addComment(articleId, content, currentUser.getId(), parentId);
         return ResponseEntity.status(HttpStatus.CREATED).body(newComment);
     }
@@ -73,19 +73,19 @@ public class CommentController {
     @DeleteMapping("/{commentId}")
     @Operation(summary = "删除评论", description = "删除指定的评论（只能删除自己的评论）")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "删除成功"),
-        @ApiResponse(responseCode = "401", description = "用户未认证"),
-        @ApiResponse(responseCode = "403", description = "无权删除该评论"),
-        @ApiResponse(responseCode = "404", description = "评论不存在")
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "401", description = "用户未认证"),
+            @ApiResponse(responseCode = "403", description = "无权删除该评论"),
+            @ApiResponse(responseCode = "404", description = "评论不存在")
     })
     public ResponseEntity<Void> deleteComment(
-            @Parameter(description = "评论ID") @PathVariable Long commentId,
+            @Parameter(description = "评论ID") @PathVariable long commentId,
             @AuthenticationPrincipal Principal principal) {
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
         if (currentUser == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         try {
             boolean deleted = commentService.deleteComment(commentId, currentUser.getId());
             if (deleted) {

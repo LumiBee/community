@@ -185,9 +185,9 @@ public class ArticleServiceImpl implements ArticleService {
             for (ArticleExcerptDTO article : dbResult) {
                 try {
                     // 获取文章的统计数据
-                    Integer viewCount = article.getViewCount() != null ? article.getViewCount() : 0;
-                    Integer likeCount = redisCounterService.getArticleLikeCount(article.getArticleId());
-                    Integer commentCount = 0; // 这里可以添加评论数查询
+                    int viewCount = article.getViewCount() != null ? article.getViewCount() : 0;
+                    int likeCount = redisCounterService.getArticleLikeCount(article.getArticleId());
+                    int commentCount = 0; // 这里可以添加评论数查询
 
                     // 获取文章发布时间
                     Article fullArticle = articleMapper.selectById(article.getArticleId());
@@ -308,7 +308,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Cacheable(value = "articles::list::portfolio", key = "#id")
     @Transactional(readOnly = true)
-    public List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id) {
+    public List<ArticleExcerptDTO> getArticlesByPortfolioId(int id) {
         return articleMapper.getArticlesByPortfolioId(id);
     }
 
@@ -548,19 +548,19 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Transactional
-    public ArticleDetailsDTO getArticleById(Integer articleId) {
+    public ArticleDetailsDTO getArticleById(int articleId) {
         return getArticleByIdWithBreakdownProtection(articleId);
     }
 
-    private ArticleDetailsDTO getArticleByIdWithBreakdownProtection(Integer articleId) {
+    private ArticleDetailsDTO getArticleByIdWithBreakdownProtection(int articleId) {
         return cacheBreakdownProtectionService.getWithBreakdownProtection(
                 "articles::detail",
-                articleId.toString(),
+                String.valueOf(articleId),
                 () -> loadArticleFromDatabaseWithId(articleId));
     }
 
     // 从数据库加载文章详情(通过文章ID)
-    private ArticleDetailsDTO loadArticleFromDatabaseWithId(Integer articleId) {
+    private ArticleDetailsDTO loadArticleFromDatabaseWithId(int articleId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId).eq("deleted", 0);
         Article article = articleMapper.selectOne(wrapper);
@@ -615,8 +615,8 @@ public class ArticleServiceImpl implements ArticleService {
         // 更新文章热度分数
         if (article != null) {
             try {
-                Integer viewCount = redisCounterService.getArticleViewCount(articleId);
-                Integer commentCount = 0; // TODO: 添加评论数统计
+                int viewCount = redisCounterService.getArticleViewCount(articleId);
+                int commentCount = 0; // TODO: 添加评论数统计
                 redisPopularArticleService.updateArticlePopularity(
                         articleId, viewCount, likesCount, commentCount, article.getGmtCreate());
             } catch (Exception e) {
@@ -642,7 +642,7 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Transactional
-    public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId) {
+    public ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, long userId) {
         if (requestDTO.getArticleId() != null) {
             return updateArticle(requestDTO.getArticleId(), requestDTO, userId);
         }
@@ -728,7 +728,7 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Transactional
-    public ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId) {
+    public ArticleDetailsDTO updateArticle(int articleId, ArticlePublishRequestDTO requestDTO, long userId) {
         Article existingArticle = articleMapper.selectById(articleId);
         if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
             throw new RuntimeException("文章不存在或不属于当前用户");
@@ -799,7 +799,7 @@ public class ArticleServiceImpl implements ArticleService {
      */
     @Override
     @Transactional
-    public ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId) {
+    public ArticleDetailsDTO deleteArticleById(int articleId, long userId) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在");
@@ -849,7 +849,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public Integer countArticlesByUserId(Long id) {
+    public int countArticlesByUserId(long id) {
         // 从 Redis 获取用户文章数量
         try {
             int articleCount = redisCounterService.getUserArticleCount(id);
@@ -869,7 +869,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     // TODO : 完善权限控制，确保只有管理员可以设置精选文章
     @Transactional
-    public void setArticleFeatured(Integer articleId, boolean isFeatured, User.UserRole role) {
+    public void setArticleFeatured(int articleId, boolean isFeatured, User.UserRole role) {
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new RuntimeException("文章不存在");
@@ -931,7 +931,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public ArticleDetailsDTO selectDraftById(Integer articleId) {
+    public ArticleDetailsDTO selectDraftById(int articleId) {
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId)
                 .eq("deleted", 0);
@@ -949,11 +949,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public int getFavoriteCount(Integer articleId) {
-        if (articleId == null) {
-            return 0; // 如果文章ID无效，返回0
-        }
-
+    public int getFavoriteCount(int articleId) {
         // 从 Redis 获取文章收藏数
         try {
             int favoriteCount = redisCounterService.getArticleFavoriteCount(articleId);
@@ -972,7 +968,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public LocalDateTime getArticleGmtModified(Integer articleId) {
+    public LocalDateTime getArticleGmtModified(int articleId) {
         Article article = articleMapper.selectById(articleId);
         return article.getGmtModified();
     }

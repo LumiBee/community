@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 根据用户名查找用户
+     * 
      * @param name 用户名
      * @return 用户信息
      */
@@ -69,6 +70,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 根据邮箱查找用户
+     * 
      * @param email 邮箱
      * @return 用户信息
      */
@@ -80,6 +82,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 根据GitHub ID查找用户
+     * 
      * @param githubId GitHub ID
      * @return 用户信息
      */
@@ -91,15 +94,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 检查用户是否关注了另一个用户
-     * @param userId 被关注的用户ID
+     * 
+     * @param userId     被关注的用户ID
      * @param followerId 关注者用户ID
      * @return 是否关注
      */
     @Override
     @Cacheable(value = "users::follow", key = "#userId + '::' + #followerId")
     @Transactional(readOnly = true)
-    public boolean isFollowing(Long userId, Long followerId) {
-        if (userId == null || followerId == null || userId.equals(followerId)) {
+    public boolean isFollowing(long userId, long followerId) {
+        if (userId == followerId) {
             return false;
         }
         Integer result = userFollowingMapper.isFollowing(followerId, userId);
@@ -108,13 +112,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 获取用户的粉丝数量
+     * 
      * @param id 用户ID
      * @return 粉丝数量
      */
     @Override
     @Cacheable(value = "users::count", key = "'fans::' + #id")
     @Transactional(readOnly = true)
-    public Integer countFansByUserId(Long id) {
+    public int countFansByUserId(long id) {
         if (!redisCounterService.existsUserFansCount(id)) {
             Integer count = userFollowingMapper.countFansByUserId(id);
             // 将数据库中的粉丝数写入Redis缓存
@@ -126,13 +131,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 获取用户的关注数量
+     * 
      * @param id 用户ID
      * @return 关注数量
      */
     @Override
     @Cacheable(value = "users::count", key = "'followers::' + #id")
     @Transactional(readOnly = true)
-    public Integer countFollowingByUserId(Long id) {
+    public int countFollowingByUserId(long id) {
         if (!redisCounterService.existsUserFollowCount(id)) {
             Integer count = userFollowingMapper.countFollowingByUserId(id);
             // 将数据库中的粉丝数写入Redis缓存
@@ -144,13 +150,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     /**
      * 更新用户密码
-     * @param id 用户ID
+     * 
+     * @param id          用户ID
      * @param newPassword 新密码
      * @return 是否更新成功
      */
     @Override
     @Transactional
-    public boolean updatePassword(Long id, String newPassword) {
+    public boolean updatePassword(long id, String newPassword) {
         User existingUser = userMapper.selectById(id);
         if (existingUser == null) {
             return false;
@@ -162,7 +169,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setGmtModified(LocalDateTime.now());
 
         int updatedRows = userMapper.updateById(user);
-        
+
         // 清除用户相关缓存
         if (updatedRows > 0) {
             try {
@@ -171,19 +178,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 System.err.println("清除用户相关缓存时出错: " + e.getMessage());
             }
         }
-        
+
         return updatedRows > 0;
     }
 
     @Override
     @Transactional
-    public boolean toggleFollow(Long followerId, Long userId) {
+    public boolean toggleFollow(long followerId, long userId) {
         // 这里followerId是当前用户（关注者），userId是要关注的作者（被关注者）
-        if (followerId == null || userId == null || followerId.equals(userId)) {
+        if (followerId == userId) {
             // 用户不能关注自己，或者参数无效
             return false;
         }
-
 
         // 检查当前用户是否已经关注了作者
         // 在following表中：user_id=被关注者，follower_id=关注者
@@ -230,7 +236,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public User updateProfile(Long userId, String userName, String email, String bio) {
+    public User updateProfile(long userId, String userName, String email, String bio) {
         // 先获取完整的用户信息
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
@@ -280,12 +286,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public int changePoints(Long userId, Integer changePoints, String reason) {
+    public int changePoints(long userId, int changePoints, String reason) {
         // 1. 参数验证
-        if (userId == null || changePoints == null) {
-            log.warn("积分变更失败：用户ID或积分变化值为空");
-            return 0;
-        }
 
         if (changePoints == 0) {
             log.warn("积分变更失败：积分变化值不能为0");
@@ -329,7 +331,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserDTO> findFans(Long userId, long pageNum, long pageSize) {
+    public Page<UserDTO> findFans(long userId, long pageNum, long pageSize) {
         Page<Follower> fansPage = new Page<>(pageNum, pageSize);
 
         // 查询所有该用户的粉丝
@@ -354,14 +356,15 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .collect(Collectors.toList());
 
         // 创建一个新的Page对象来包装UserDTO列表
-        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(), relationships.getTotal());
+        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(),
+                relationships.getTotal());
         result.setRecords(userDTOList);
         return result;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserDTO> findFollowing(Long userId, long pageNum, long pageSize) {
+    public Page<UserDTO> findFollowing(long userId, long pageNum, long pageSize) {
         Page<Follower> followingPage = new Page<>(pageNum, pageSize);
         // 查询所有该用户的关注关系
         QueryWrapper<Follower> wrapper = new QueryWrapper<>();
@@ -381,22 +384,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         List<User> following = userMapper.selectByIds(followingIds);
 
         List<UserDTO> userDTOList = following.stream()
-                .map(followingUser -> new UserDTO(followingUser.getName(), followingUser.getAvatarUrl(), followingUser.getId(), followingUser.getBio(), followingUser.getRole()))
+                .map(followingUser -> new UserDTO(followingUser.getName(), followingUser.getAvatarUrl(),
+                        followingUser.getId(), followingUser.getBio(), followingUser.getRole()))
                 .collect(Collectors.toList());
 
         // 创建一个新的Page对象来包装UserDTO列表
-        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(), relationships.getTotal());
+        Page<UserDTO> result = new Page<>(relationships.getCurrent(), relationships.getSize(),
+                relationships.getTotal());
         result.setRecords(userDTOList);
         return result;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public boolean isFavoritedByCurrentUser(Long id, Integer articleId) {
-        if (id == null || articleId == null) {
-            // 如果用户ID或文章ID无效，直接返回false
-            return false;
-        }
+    public boolean isFavoritedByCurrentUser(long id, int articleId) {
 
         Integer result = articleFavoritesMapper.selectIfFavoriteExists(id, articleId);
         boolean isFavorited = result != null && result > 0;
@@ -407,7 +408,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Transactional
     public int insert(User user) {
         int result = userMapper.insert(user);
-        
+
         // 清除相关缓存（新用户创建后需要清除所有用户列表缓存）
         if (result > 0) {
             try {
@@ -416,7 +417,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 System.err.println("清除用户相关缓存时出错: " + e.getMessage());
             }
         }
-        
+
         return result;
     }
 
@@ -464,12 +465,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return newUser;
     }
 
-
     @Override
     @Transactional
     public int updateById(User user) {
         int result = userMapper.updateById(user);
-        
+
         // 清除相关缓存（用户信息更新后需要清除相关缓存）
         if (result > 0) {
             try {
@@ -478,14 +478,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 System.err.println("清除用户相关缓存时出错: " + e.getMessage());
             }
         }
-        
+
         return result;
     }
 
     @Override
     @Cacheable(value = "users::profile", key = "'id::' + #id")
     @Transactional(readOnly = true)
-    public User selectById(Long id) {
+    public User selectById(long id) {
         User user = userMapper.selectById(id);
         if (user != null) {
         }
@@ -507,7 +507,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (principal == null) {
             return null;
         }
-
 
         User currentUser = null;
         String identifier = null;
@@ -559,7 +558,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         } else {
             // 尝试使用 principal.getName() 作为最后的手段，但它不一定总是用户名
             identifier = principal.getName(); // java.security.Principal 的 getName()
-            if(identifier != null){
+            if (identifier != null) {
                 // 直接从数据库加载用户，绕过缓存
                 currentUser = userMapper.selectByName(identifier);
             }
@@ -602,10 +601,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 user,
                 user.getPassword(),
-                user.getAuthorities()
-        );
+                user.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
-
 
 }

@@ -31,13 +31,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "作品集管理", description = "作品集相关的 API 接口")
 public class PortfolioController {
 
-    @Autowired private PortfolioMapper portfolioMapper;
+    @Autowired
+    private PortfolioMapper portfolioMapper;
 
-    @Autowired private PortfolioService portfolioService;
+    @Autowired
+    private PortfolioService portfolioService;
 
-    @Autowired private ArticleService articleService;
+    @Autowired
+    private ArticleService articleService;
 
-    @Autowired private UserService userService;
+    @Autowired
+    private UserService userService;
 
     /**
      * 获取单个作品集详情API
@@ -45,15 +49,12 @@ public class PortfolioController {
     @GetMapping("/portfolio/{id}")
     @Operation(summary = "获取作品集详情", description = "根据ID获取指定作品集的详细信息")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "404", description = "作品集不存在")
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "404", description = "作品集不存在")
     })
     public ResponseEntity<PortfolioDetailsDTO> getPortfolioById(
-            @Parameter(description = "作品集ID") @PathVariable("id") Integer id) {
-        if (id == null) {
-            return ResponseEntity.badRequest().build();
-        }
+            @Parameter(description = "作品集ID") @PathVariable("id") int id) {
 
         PortfolioDetailsDTO portfolioDetails = portfolioService.selectPortfolioById(id);
         if (portfolioDetails == null) {
@@ -69,7 +70,7 @@ public class PortfolioController {
     @GetMapping("/portfolios")
     @Operation(summary = "获取所有作品集", description = "获取系统中所有作品集的列表")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "获取成功")
+            @ApiResponse(responseCode = "200", description = "获取成功")
     })
     public ResponseEntity<List<PortfolioDetailsDTO>> getAllPortfolios() {
         List<PortfolioDetailsDTO> allPortfolios = portfolioService.selectAllPortfolios();
@@ -82,28 +83,29 @@ public class PortfolioController {
     @PostMapping("/portfolio/create")
     @Operation(summary = "创建作品集", description = "创建新的作品集")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "创建成功"),
-        @ApiResponse(responseCode = "400", description = "请求参数错误"),
-        @ApiResponse(responseCode = "401", description = "用户未认证")
+            @ApiResponse(responseCode = "200", description = "创建成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "401", description = "用户未认证")
     })
     public ResponseEntity<Portfolio> createPortfolio(
-            @Parameter(description = "作品集创建请求") @RequestBody PortfolioCreateRequest request, 
+            @Parameter(description = "作品集创建请求") @RequestBody PortfolioCreateRequest request,
             @AuthenticationPrincipal Principal principal) {
-        
+
         if (request == null || request.getTitle() == null || request.getTitle().trim().isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
 
         // 从当前登录用户获取用户ID
         User currentUser = userService.getCurrentUserFromPrincipal(principal);
-        
+
         if (currentUser == null || currentUser.getId() == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         try {
             String description = request.getDescription() != null ? request.getDescription().trim() : null;
-            Portfolio portfolio = portfolioService.selectOrCreatePortfolio(request.getTitle().trim(), currentUser.getId(), description);
+            Portfolio portfolio = portfolioService.selectOrCreatePortfolio(request.getTitle().trim(),
+                    currentUser.getId(), description);
             if (portfolio != null) {
                 return ResponseEntity.ok(portfolio);
             } else {

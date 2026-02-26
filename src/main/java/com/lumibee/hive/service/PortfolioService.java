@@ -6,9 +6,13 @@ import com.lumibee.hive.dto.PortfolioDetailsDTO;
 import com.lumibee.hive.model.Portfolio;
 
 public interface PortfolioService {
-    Portfolio selectOrCreatePortfolio(String portfolioName, Long userId);
-    Portfolio selectOrCreatePortfolio(String portfolioName, Long userId, String description);
+    Portfolio selectOrCreatePortfolio(String portfolioName, long userId);
+
+    Portfolio selectOrCreatePortfolio(String portfolioName, long userId, String description);
+
     List<PortfolioDetailsDTO> selectAllPortfolios();
-    PortfolioDetailsDTO selectPortfolioById(Integer id);
-    void updatePortfolioGmt(Integer id, Long userId);
+
+    PortfolioDetailsDTO selectPortfolioById(int id);
+
+    void updatePortfolioGmt(int id, long userId);
 }

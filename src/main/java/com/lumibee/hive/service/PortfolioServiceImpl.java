@@ -28,22 +28,28 @@ import com.lumibee.hive.model.User;
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
 
-    @Autowired private PortfolioMapper portfolioMapper;
-    @Autowired private UserMapper userMapper;
-    @Autowired private ArticleMapper articleMapper;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-    @Autowired private RedisMonitoringService redisMonitoringService;
-    @Autowired private RedisCounterService redisCounterService;
+    @Autowired
+    private PortfolioMapper portfolioMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private ArticleMapper articleMapper;
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
+    @Autowired
+    private RedisMonitoringService redisMonitoringService;
+    @Autowired
+    private RedisCounterService redisCounterService;
 
     @Override
     @Transactional
-    public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId) {
+    public Portfolio selectOrCreatePortfolio(String portfolioName, long userId) {
         return selectOrCreatePortfolio(portfolioName, userId, "Portfolio for " + portfolioName);
     }
 
     @Override
     @Transactional
-    public Portfolio selectOrCreatePortfolio(String portfolioName, Long userId, String description) {
+    public Portfolio selectOrCreatePortfolio(String portfolioName, long userId, String description) {
         if (portfolioName == null || portfolioName.isEmpty()) {
             return null; // 如果传入的portfolioName为空，直接返回null
         }
@@ -63,14 +69,14 @@ public class PortfolioServiceImpl implements PortfolioService {
             portfolio.setDescription(description != null ? description : "Portfolio for " + portfolioName);
             portfolio.setUserId(userId);
             portfolioMapper.insert(portfolio);
-            
+
             // 更新 Redis 计数器
             try {
                 redisCounterService.incrementUserPortfolio(userId);
             } catch (Exception e) {
                 System.err.println("更新 Redis 用户作品集计数时出错: " + e.getMessage());
             }
-            
+
             // 清除作品集相关缓存
             try {
                 redisClearCacheService.clearPortfolioDetailCaches(portfolio.getId());
@@ -88,7 +94,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("deleted", 0).orderByDesc("gmt_modified");
         List<Portfolio> portfolios = portfolioMapper.selectList(queryWrapper);
-        
+
         if (portfolios != null) {
             for (Portfolio p : portfolios) {
             }
@@ -112,7 +118,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         List<Integer> portfolioIds = portfolios.stream().map(Portfolio::getId).collect(Collectors.toList());
         Map<Integer, Integer> articleCountsMap = new HashMap<>();
-        if(!portfolioIds.isEmpty()){
+        if (!portfolioIds.isEmpty()) {
             // 从 Redis 获取作品集文章数量
             for (Integer portfolioId : portfolioIds) {
                 try {
@@ -158,11 +164,8 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     @Cacheable(value = "portfolios::detail", key = "#id")
     @Transactional(readOnly = true)
-    public PortfolioDetailsDTO selectPortfolioById(Integer id) {
-        if (id == null) {
-            throw new IllegalArgumentException("id不能为空");
-        }
-
+    public PortfolioDetailsDTO selectPortfolioById(int id) {
+        // 先从缓存中尝试获取
         QueryWrapper<Portfolio> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("id", id).eq("deleted", 0);
         Portfolio portfolio = portfolioMapper.selectOne(queryWrapper);
@@ -170,12 +173,12 @@ public class PortfolioServiceImpl implements PortfolioService {
         if (portfolio == null || portfolio.getId() == null) {
             return null; // 返回null，会被缓存防止穿透
         }
-        
+
         PortfolioDetailsDTO dto = new PortfolioDetailsDTO();
         BeanUtils.copyProperties(portfolio, dto);
 
         if (portfolio.getUserId() != null) {
-            User user = userMapper.selectById(portfolio.getUserId()); 
+            User user = userMapper.selectById(portfolio.getUserId());
             if (user != null) {
                 dto.setUserName(user.getName());
                 dto.setAvatarUrl(user.getAvatarUrl());
@@ -193,10 +196,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     @Transactional
-    public void updatePortfolioGmt(Integer id, Long userId) {
-        if (id == null || userId == null) {
-            throw new IllegalArgumentException("id和userId不能为空");
-        }
+    public void updatePortfolioGmt(int id, long userId) {
         Portfolio portfolio = portfolioMapper.selectById(id);
         if (portfolio == null || !portfolio.getUserId().equals(userId)) {
             throw new IllegalArgumentException("作品集不存在或不属于当前用户");

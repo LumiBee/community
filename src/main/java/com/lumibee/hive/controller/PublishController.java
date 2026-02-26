@@ -82,7 +82,7 @@ public class PublishController {
             @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> editArticle(
-            @Parameter(description = "文章ID") @PathVariable Integer articleId,
+            @Parameter(description = "文章ID") @PathVariable int articleId,
             @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal,
             @Parameter(description = "文章编辑请求数据") @RequestBody ArticlePublishRequestDTO requestDTO) {
 
@@ -112,7 +112,7 @@ public class PublishController {
             @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> deleteArticle(
-            @Parameter(description = "文章ID") @PathVariable Integer articleId,
+            @Parameter(description = "文章ID") @PathVariable int articleId,
             @Parameter(description = "当前用户") @AuthenticationPrincipal Principal principal) {
 
         // 检查用户是否已认证

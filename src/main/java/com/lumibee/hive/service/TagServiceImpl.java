@@ -26,28 +26,33 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 public class TagServiceImpl implements TagService {
 
-    @Autowired private TagMapper tagMapper;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-    @Autowired private RedisMonitoringService redisMonitoringService;
-    @Autowired private RedisCounterService redisCounterService;
+    @Autowired
+    private TagMapper tagMapper;
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
+    @Autowired
+    private RedisMonitoringService redisMonitoringService;
+    @Autowired
+    private RedisCounterService redisCounterService;
 
     /**
      * 增加标签的文章计数
+     * 
      * @param tagId 标签ID
      */
     @Override
     @Transactional
-    public void incrementArticleCount(Integer tagId) {
-        if (tagId != null) {
+    public void incrementArticleCount(int tagId) {
+        if (tagId > 0) {
             tagMapper.incrementArticleCount(tagId);
-            
+
             // 更新 Redis 计数器
             try {
                 redisCounterService.incrementTagArticle(tagId);
             } catch (Exception e) {
                 log.error("更新 Redis 标签文章计数时出错: {}", e.getMessage());
             }
-            
+
             // 清除标签相关缓存
             try {
                 redisClearCacheService.clearAllTagListCaches();
@@ -64,6 +69,7 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 选择或创建标签
+     * 
      * @param tagNames 标签名称列表
      * @return 标签集合
      */
@@ -84,18 +90,20 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 根据文章ID获取标签列表
+     * 
      * @param articleId 文章ID
      * @return 标签列表
      */
     @Override
     @Cacheable(value = "tags::list::article", key = "#articleId")
     @Transactional(readOnly = true)
-    public List<Tag> selectTagsByArticleId(Integer articleId) {
+    public List<Tag> selectTagsByArticleId(int articleId) {
         return tagMapper.selectTagsByArticleId(articleId);
     }
 
     /**
      * 获取所有标签列表
+     * 
      * @return 标签DTO列表
      */
     @Override
@@ -108,7 +116,7 @@ public class TagServiceImpl implements TagService {
                 log.warn("selectAllTags returned null");
                 return null;
             }
-            
+
             // 从 Redis 获取每个标签的文章数量
             for (TagDTO tag : result) {
                 try {
@@ -124,7 +132,7 @@ public class TagServiceImpl implements TagService {
                     // 如果 Redis 出错，使用数据库中的值
                 }
             }
-            
+
             return result;
         } catch (Exception e) {
             log.error("Error occurred while selecting all tags", e);
@@ -134,21 +142,22 @@ public class TagServiceImpl implements TagService {
 
     /**
      * 插入文章标签关系
+     * 
      * @param articleId 文章ID
-     * @param tagId 标签ID
+     * @param tagId     标签ID
      */
     @Override
     @Transactional
-    public void insertTagArticleRelation(Integer articleId, Integer tagId) {
+    public void insertTagArticleRelation(int articleId, int tagId) {
         tagMapper.insertTagArticleRelation(articleId, tagId);
-        
+
         // 更新 Redis 计数器
         try {
             redisCounterService.incrementTagArticle(tagId);
         } catch (Exception e) {
             log.error("更新 Redis 标签文章计数时出错: {}", e.getMessage());
         }
-        
+
         // 清除标签相关缓存
         try {
             redisClearCacheService.clearArticleTagsCaches(articleId);
@@ -179,7 +188,7 @@ public class TagServiceImpl implements TagService {
                 log.debug("No tag found for slug: {}", slug);
                 return null;
             }
-            
+
             // 从 Redis 获取标签的文章数量
             try {
                 int articleCount = redisCounterService.getTagArticleCount(result.getTagId());
@@ -193,7 +202,7 @@ public class TagServiceImpl implements TagService {
                 log.error("获取标签 {} 文章数量时出错: {}", result.getTagId(), e.getMessage());
                 // 如果 Redis 出错，使用数据库中的值
             }
-            
+
             return result;
         } catch (Exception e) {
             log.error("Error occurred while selecting tag by slug: {}", slug, e);

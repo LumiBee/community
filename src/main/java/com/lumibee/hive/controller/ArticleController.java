@@ -156,7 +156,7 @@ public class ArticleController {
             @ApiResponse(responseCode = "404", description = "文章不存在")
     })
     public ResponseEntity<ArticleDetailsDTO> getArticleById(
-            @Parameter(description = "文章ID") @PathVariable("articleId") Integer articleId) {
+            @Parameter(description = "文章ID") @PathVariable("articleId") int articleId) {
 
         // 根据 ID 获取文章
         ArticleDetailsDTO article = articleService.getArticleById(articleId);

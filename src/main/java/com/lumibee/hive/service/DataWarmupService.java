@@ -52,7 +52,7 @@ public class DataWarmupService {
     @EventListener(ApplicationReadyEvent.class)
     public void warmupCaches() {
         log.info("开始预热缓存...");
-        
+
         // 先清除所有缓存，确保从干净的状态开始
         log.info("清除所有缓存...");
         redisClearCacheService.clearAllCaches();
@@ -61,12 +61,17 @@ public class DataWarmupService {
         warmupCoreData();
 
         // 延迟预热其他数据
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         CompletableFuture.runAsync(() -> {
+            ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
             try {
                 Thread.sleep(10000); // 10秒后预热其他数据
                 warmupOtherData();
             } catch (Exception e) {
                 log.error("预热缓存失败: {}", e.getMessage(), e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
             }
         });
     }
@@ -75,32 +80,32 @@ public class DataWarmupService {
     @Scheduled(cron = "0 0 7 * * ?") // 每天7点预热所有数据
     public void warmupAllData() {
         log.info("开始预热所有数据...");
-        
+
         // 先清除所有缓存，确保从干净的状态开始
         log.info("清除所有缓存...");
         redisClearCacheService.clearAllCaches();
-        
+
         warmupCoreData();
         warmupOtherData();
     }
-    
+
     /**
      * 手动清除所有缓存并重新预热
      * 用于调试和紧急情况
      */
     public void clearAndWarmupAllCaches() {
         log.info("手动清除所有缓存并重新预热...");
-        
+
         // 清除所有缓存
         redisClearCacheService.clearAllCaches();
-        
+
         // 重新预热所有数据
         warmupCoreData();
         warmupOtherData();
-        
+
         log.info("缓存清除和预热完成");
     }
-    
+
     // 预热核心数据
     private void warmupCoreData() {
         log.info("预热核心数据...");
@@ -109,7 +114,7 @@ public class DataWarmupService {
         warmupFeaturedArticles();
         warmupTagList();
     }
-    
+
     // 预热其他数据
     private void warmupOtherData() {
         log.info("预热其他数据...");
@@ -218,7 +223,7 @@ public class DataWarmupService {
             List<Article> articles = articleMapper.selectList(null);
             for (Article article : articles) {
                 if (article.getViewCount() != null) {
-                    redisCounterService.setArticleViewCount(article.getArticleId(),null,
+                    redisCounterService.setArticleViewCount(article.getArticleId(), null,
                             article.getViewCount());
                 }
                 if (article.getLikes() != null) {
@@ -238,7 +243,7 @@ public class DataWarmupService {
 
         List<ArticleDetailsDTO> articles = articleService.selectAll();
         if (articles == null || articles.isEmpty()) {
-            return ;
+            return;
         }
 
         // 批量查询用户信息，避免在循环中逐个查询
@@ -285,7 +290,7 @@ public class DataWarmupService {
                     // ArticleDetailsDTO可能没有getBackgroundUrl方法，使用null
                     backgroundUrl = null;
                 }
-                
+
                 User user = userMap.get(userId);
 
                 ArticleDocument document = new ArticleDocument();
@@ -310,51 +315,51 @@ public class DataWarmupService {
         articleRepository.saveAll(documents);
 
     }
-    
+
     // 检查缓存状态
     private void checkCacheStatus() {
         log.info("检查缓存状态...");
-        
+
         try {
             // 检查首页文章缓存
             log.info("第一次调用首页文章接口...");
             Page<ArticleExcerptDTO> homepageResult1 = articleService.getHomepageArticle(1, 10);
             log.info("第一次调用结果：获取到{}条记录", homepageResult1.getRecords().size());
-            
+
             log.info("第二次调用首页文章接口（应该从缓存获取）...");
             Page<ArticleExcerptDTO> homepageResult2 = articleService.getHomepageArticle(1, 10);
             log.info("第二次调用结果：获取到{}条记录", homepageResult2.getRecords().size());
-            
+
             // 检查热门文章缓存
             log.info("第一次调用热门文章接口...");
             List<ArticleExcerptDTO> popularResult1 = articleService.getPopularArticles(10);
             log.info("第一次调用结果：获取到{}条记录", popularResult1.size());
-            
+
             log.info("第二次调用热门文章接口（应该从缓存获取）...");
             List<ArticleExcerptDTO> popularResult2 = articleService.getPopularArticles(10);
             log.info("第二次调用结果：获取到{}条记录", popularResult2.size());
-            
+
             // 检查标签缓存
             log.info("第一次调用标签接口...");
             List<TagDTO> tagResult1 = tagService.selectAllTags();
             log.info("第一次调用结果：获取到{}个标签", tagResult1.size());
-            
+
             log.info("第二次调用标签接口（应该从缓存获取）...");
             List<TagDTO> tagResult2 = tagService.selectAllTags();
             log.info("第二次调用结果：获取到{}个标签", tagResult2.size());
-            
+
         } catch (Exception e) {
             log.error("检查缓存状态失败: {}", e.getMessage(), e);
         }
-        
+
         // 直接检查 Redis 中的缓存数据
         checkRedisCacheData();
     }
-    
+
     // 直接检查 Redis 中的缓存数据
     private void checkRedisCacheData() {
         log.info("直接检查 Redis 中的缓存数据...");
-        
+
         try {
             // 测试 Redis 连接
             String testKey = "test:connection";
@@ -362,11 +367,11 @@ public class DataWarmupService {
             String testValue = (String) redisTemplate.opsForValue().get(testKey);
             log.info("Redis 连接测试: {}", "test_value".equals(testValue) ? "成功" : "失败");
             redisTemplate.delete(testKey);
-            
+
             // 检查所有以 hive:: 开头的键
             Set<String> keys = redisTemplate.keys("hive::*");
             log.info("Redis 中所有以 hive:: 开头的键数量: {}", keys != null ? keys.size() : 0);
-            
+
             if (keys != null && !keys.isEmpty()) {
                 log.info("Redis 中的键列表:");
                 for (String key : keys) {
@@ -375,7 +380,7 @@ public class DataWarmupService {
             } else {
                 log.warn("Redis 中没有找到任何以 hive:: 开头的键！");
             }
-            
+
             // 检查所有键（用于调试）
             Set<String> allKeys = redisTemplate.keys("*");
             log.info("Redis 中所有键的数量: {}", allKeys != null ? allKeys.size() : 0);
@@ -383,17 +388,18 @@ public class DataWarmupService {
                 log.info("Redis 中的所有键（前10个）:");
                 int count = 0;
                 for (String key : allKeys) {
-                    if (count >= 10) break;
+                    if (count >= 10)
+                        break;
                     log.info("  - {}", key);
                     count++;
                 }
             }
-            
+
             // 检查特定的缓存键
             String homepageKey = "hive::articles::list::homepage::page:1::size:10";
             Object homepageValue = redisTemplate.opsForValue().get(homepageKey);
             log.info("首页文章缓存键 {} 的值: {}", homepageKey, homepageValue != null ? "存在" : "不存在");
-            
+
         } catch (Exception e) {
             log.error("检查 Redis 缓存数据失败: {}", e.getMessage(), e);
         }

@@ -22,33 +22,33 @@ public interface ArticleService {
 
     ArticleDetailsDTO getArticleBySlug(String slug, Long userId, String ipAddress);
 
-    ArticleDetailsDTO getArticleById(Integer articleId);
+    ArticleDetailsDTO getArticleById(int articleId);
 
     List<ArticleExcerptDTO> getArticlesByTagSlug(String tagSlug);
 
-    List<ArticleExcerptDTO> getArticlesByPortfolioId(Integer id);
+    List<ArticleExcerptDTO> getArticlesByPortfolioId(int id);
 
     LikeResponse toggleLike(long userId, int articleId);
 
     boolean isUserLiked(long userId, int articleId);
 
-    ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, Long userId);
+    ArticleDetailsDTO publishArticle(ArticlePublishRequestDTO requestDTO, long userId);
 
-    Integer countArticlesByUserId(Long id);
+    int countArticlesByUserId(long id);
 
     ArticleDetailsDTO saveDraft(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
 
-    ArticleDetailsDTO selectDraftById(Integer articleId);
+    ArticleDetailsDTO selectDraftById(int articleId);
 
-    ArticleDetailsDTO updateArticle(Integer articleId, ArticlePublishRequestDTO requestDTO, Long userId);
+    ArticleDetailsDTO updateArticle(int articleId, ArticlePublishRequestDTO requestDTO, long userId);
 
-    ArticleDetailsDTO deleteArticleById(Integer articleId, Long userId);
+    ArticleDetailsDTO deleteArticleById(int articleId, long userId);
 
     List<ArticleDetailsDTO> selectAll();
 
-    int getFavoriteCount(Integer articleId);
+    int getFavoriteCount(int articleId);
 
-    void setArticleFeatured(Integer articleId, boolean isFeatured, User.UserRole role);
+    void setArticleFeatured(int articleId, boolean isFeatured, User.UserRole role);
 
-    LocalDateTime getArticleGmtModified(Integer articleId);
+    LocalDateTime getArticleGmtModified(int articleId);
 }

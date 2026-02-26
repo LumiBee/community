@@ -33,12 +33,18 @@ import com.lumibee.hive.model.User;
 @Service
 public class FavoriteServiceImpl implements FavoriteService {
 
-    @Autowired private FavoriteMapper favoriteMapper;
-    @Autowired private UserMapper userMapper;
-    @Autowired private ArticleFavoritesMapper articleFavoritesMapper;
-    @Autowired private RedisClearCacheService redisClearCacheService;
-    @Autowired private RedisMonitoringService redisMonitoringService;
-    @Autowired private RedisCounterService redisCounterService;
+    @Autowired
+    private FavoriteMapper favoriteMapper;
+    @Autowired
+    private UserMapper userMapper;
+    @Autowired
+    private ArticleFavoritesMapper articleFavoritesMapper;
+    @Autowired
+    private RedisClearCacheService redisClearCacheService;
+    @Autowired
+    private RedisMonitoringService redisMonitoringService;
+    @Autowired
+    private RedisCounterService redisCounterService;
 
     @Override
     @Transactional
@@ -135,8 +141,8 @@ public class FavoriteServiceImpl implements FavoriteService {
     public List<FavoriteDetailsDTO> getFavoritesByUserId(Long userId) {
         QueryWrapper<Favorites> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("user_id", userId)
-                    .eq("deleted", 0)
-                    .orderByDesc("gmt_create");
+                .eq("deleted", 0)
+                .orderByDesc("gmt_create");
         List<Favorites> favoritesList = favoriteMapper.selectList(queryWrapper);
 
         if (favoritesList == null || favoritesList.isEmpty()) {
@@ -145,7 +151,7 @@ public class FavoriteServiceImpl implements FavoriteService {
         return favoritesList.stream().map(favorite -> {
             FavoriteDetailsDTO favoriteDTO = new FavoriteDetailsDTO();
             BeanUtils.copyProperties(favorite, favoriteDTO);
-            
+
             // 从 Redis 获取收藏夹文章数量
             try {
                 int articlesCount = redisCounterService.getFavoriteArticleCount(favorite.getId());
@@ -160,7 +166,7 @@ public class FavoriteServiceImpl implements FavoriteService {
                 // 如果 Redis 出错，从数据库获取
                 favoriteDTO.setArticlesCount(articleFavoritesMapper.countArticlesInFavorite(favorite.getId()));
             }
-            
+
             favoriteDTO.setAvatarUrl(userMapper.selectById(favorite.getUserId()).getAvatarUrl());
             favoriteDTO.setUserName(userMapper.selectById(favorite.getUserId()).getUsername());
             return favoriteDTO;
@@ -176,9 +182,9 @@ public class FavoriteServiceImpl implements FavoriteService {
             return new FavoriteResponse(false, "收藏夹不存在或不属于当前用户", false, null);
         }
 
-        QueryWrapper<ArticleFavorites> queryWrapper = new QueryWrapper<> ();
+        QueryWrapper<ArticleFavorites> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("article_id", articleId)
-                    .eq("favorite_id", favoriteId);
+                .eq("favorite_id", favoriteId);
         ArticleFavorites existingArticleFavorite = articleFavoritesMapper.selectOne(queryWrapper);
         if (existingArticleFavorite != null) {
             return new FavoriteResponse(false, "文章已在收藏夹中", true, null);
@@ -253,7 +259,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             } catch (Exception e) {
                 System.err.println("更新 Redis 计数器时出错: " + e.getMessage());
             }
-            
+
             result.put("success", true);
             result.put("message", "已成功从收藏夹中移除所有文章");
         } else {
@@ -299,13 +305,13 @@ public class FavoriteServiceImpl implements FavoriteService {
     @Transactional
     public Map<String, Object> updateFavoriteFolder(Long userId, Integer favoriteId, String newName) {
         Map<String, Object> result = new HashMap<>();
-        
+
         if (newName == null || newName.trim().isEmpty()) {
             result.put("success", false);
             result.put("message", "收藏夹名称不能为空");
             return result;
         }
-        
+
         User user = userMapper.selectById(userId);
         if (user == null) {
             result.put("success", false);
@@ -351,7 +357,7 @@ public class FavoriteServiceImpl implements FavoriteService {
             } catch (Exception e) {
                 System.err.println("更新 Redis 计数器时出错: " + e.getMessage());
             }
-            
+
             result.put("success", true);
             result.put("message", "已成功从该收藏夹中移除文章");
         } else {
