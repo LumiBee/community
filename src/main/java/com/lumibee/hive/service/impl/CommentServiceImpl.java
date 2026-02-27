@@ -1,4 +1,6 @@
-package com.lumibee.hive.service;
+package com.lumibee.hive.service.impl;
+
+import com.lumibee.hive.service.*;
 
 import com.lumibee.hive.dto.CommentDTO;
 import com.lumibee.hive.mapper.ArticleMapper;
@@ -16,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 /**
  * 评论服务实现类
  * 负责评论相关的业务逻辑处理，包括评论的增删改查、评论树结构管理等
@@ -24,10 +25,14 @@ import java.util.stream.Collectors;
 @Service
 public class CommentServiceImpl implements CommentService {
 
-    @Autowired private CommentMapper commentMapper;
-    @Autowired private ArticleMapper articleMapper;
-    @Autowired private CacheManager cacheManager;
-    @Autowired private RedisMonitoringService redisMonitoringService;
+    @Autowired
+    private CommentMapper commentMapper;
+    @Autowired
+    private ArticleMapper articleMapper;
+    @Autowired
+    private CacheManager cacheManager;
+    @Autowired
+    private RedisMonitoringService redisMonitoringService;
 
     @Override
     @Cacheable(value = "comments::list::article", key = "#articleId")
@@ -58,7 +63,6 @@ public class CommentServiceImpl implements CommentService {
             repComment.setReplies(replies);
         });
 
-
         return topLevelComments;
     }
 
@@ -69,12 +73,13 @@ public class CommentServiceImpl implements CommentService {
         if (articleId == null || content == null || content.trim().isEmpty() || userId == null) {
             throw new IllegalArgumentException("文章ID、评论内容和用户ID不能为空");
         }
-        
+
         Comments comment = new Comments();
         comment.setArticleId(articleId);
         comment.setUserId(userId);
         comment.setContent(content.trim());
-        // 注意：gmtCreate 和 gmtModified 有 @TableField(fill = FieldFill.INSERT) 注解，会自动填充，不需要手动设置
+        // 注意：gmtCreate 和 gmtModified 有 @TableField(fill = FieldFill.INSERT)
+        // 注解，会自动填充，不需要手动设置
 
         if (parentId != null) {
             Comments parentComment = commentMapper.selectById(parentId);
@@ -83,7 +88,8 @@ public class CommentServiceImpl implements CommentService {
             }
             comment.setParentCommentId(parentId);
             // 设置根评论ID：如果父评论有根评论ID，使用父评论的根评论ID；否则使用父评论ID作为根评论ID
-            comment.setRootCommentId(parentComment.getRootCommentId() != null ? parentComment.getRootCommentId() : parentId);
+            comment.setRootCommentId(
+                    parentComment.getRootCommentId() != null ? parentComment.getRootCommentId() : parentId);
         }
 
         try {
@@ -114,25 +120,25 @@ public class CommentServiceImpl implements CommentService {
         if (commentId == null || userId == null) {
             throw new IllegalArgumentException("评论ID和用户ID不能为空");
         }
-        
+
         // 查询评论是否存在且属于当前用户
         Comments comment = commentMapper.selectById(commentId);
         if (comment == null) {
             throw new IllegalArgumentException("评论不存在: " + commentId);
         }
-        
+
         // 检查是否是评论作者
         if (!comment.getUserId().equals(userId)) {
             throw new SecurityException("无权删除他人的评论");
         }
-        
+
         // 使用MyBatis-Plus的逻辑删除（@TableLogic会自动处理）
         try {
             commentMapper.deleteById(commentId);
         } catch (Exception e) {
             throw new RuntimeException("删除评论失败: " + e.getMessage(), e);
         }
-        
+
         // 清除缓存
         try {
             evictArticleDetailsCache(comment.getArticleId());
@@ -144,7 +150,7 @@ public class CommentServiceImpl implements CommentService {
             // 缓存清除失败不影响删除操作的成功，只记录日志
             System.err.println("清除缓存失败: " + e.getMessage());
         }
-        
+
         return true;
     }
 

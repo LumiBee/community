@@ -1,4 +1,6 @@
-package com.lumibee.hive.service;
+package com.lumibee.hive.service.impl;
+
+import com.lumibee.hive.service.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,57 +18,57 @@ import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileStorageServiceImpl implements FileStorageService {
-    
+
     private final Path rootLocation;
     private final String baseUrl;
-    
+
     public FileStorageServiceImpl(
             @Value("${file.upload.dir:./uploads}") String uploadDir,
             @Value("${file.base.url:/uploads/}") String baseUrl) {
         this.rootLocation = Paths.get(uploadDir).toAbsolutePath().normalize();
         this.baseUrl = baseUrl;
-        
+
         try {
             Files.createDirectories(this.rootLocation);
         } catch (IOException e) {
             throw new RuntimeException("Could not initialize storage location", e);
         }
     }
-    
+
     @Override
     public String storeFile(MultipartFile file, String subDirectory) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("File cannot be empty");
         }
-        
+
         // 创建子目录
         Path targetLocation = this.rootLocation;
         if (StringUtils.hasText(subDirectory)) {
             targetLocation = targetLocation.resolve(subDirectory);
             Files.createDirectories(targetLocation);
         }
-        
+
         // 生成唯一文件名
         String originalFilename = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
         String fileExtension = extractExtension(originalFilename);
         String filename = UUID.randomUUID().toString() + "." + fileExtension;
-        
+
         // 保存文件
         try (InputStream inputStream = file.getInputStream()) {
             Path filePath = targetLocation.resolve(filename);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-            
+
             // 返回相对于存储根目录的路径
             return subDirectory == null ? filename : subDirectory + "/" + filename;
         }
     }
-    
+
     @Override
     public boolean deleteFile(String filePath) {
         if (!StringUtils.hasText(filePath)) {
             return false;
         }
-        
+
         try {
             Path path = this.rootLocation.resolve(filePath);
             return Files.deleteIfExists(path);
@@ -74,17 +76,17 @@ public class FileStorageServiceImpl implements FileStorageService {
             return false;
         }
     }
-    
+
     @Override
     public String getFileUrl(String fileName, String subDirectory) {
         if (!StringUtils.hasText(fileName)) {
             return null;
         }
-        
+
         String relativePath = subDirectory == null ? fileName : subDirectory + "/" + fileName;
         return baseUrl + relativePath;
     }
-    
+
     @Override
     public Path getStorageLocation() {
         return this.rootLocation;
@@ -101,4 +103,4 @@ public class FileStorageServiceImpl implements FileStorageService {
         }
         return filename.substring(filename.lastIndexOf(".") + 1);
     }
-} 
+}

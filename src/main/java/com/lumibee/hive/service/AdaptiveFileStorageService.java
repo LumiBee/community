@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.lumibee.hive.service.impl.FileStorageServiceImpl;
 
 import java.io.IOException;
 import java.nio.file.Path;

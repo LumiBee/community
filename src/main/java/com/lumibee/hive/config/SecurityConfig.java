@@ -24,7 +24,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
-import com.lumibee.hive.service.UserServiceImpl;
+import com.lumibee.hive.service.impl.UserServiceImpl;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

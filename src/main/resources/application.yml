@@ -98,6 +98,12 @@ spring:
   ai:
     dashscope:
       api-key: "placeholder_dashscope_key"
+    vectorstore:
+      elasticsearch:
+        index-name: "hivelumi_knowledge"
+        dimensions: 1536 # Dashscope default usually 1536
+  elasticsearch:
+    uris: "http://localhost:9200"
   
   # 缓存配置
   cache:

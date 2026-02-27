@@ -1,4 +1,6 @@
-package com.lumibee.hive.service;
+package com.lumibee.hive.service.impl;
+
+import com.lumibee.hive.service.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;

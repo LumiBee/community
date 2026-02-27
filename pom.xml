@@ -30,6 +30,8 @@
         <java.version>21</java.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
+        <!-- 解决Spring AI 1.0.0与Spring Boot 3.4由于ES Java Client版本升级导致的NoSuchMethodError -->
+        <elasticsearch-java.version>8.13.4</elasticsearch-java.version>
         <spring-boot.version>3.5.4</spring-boot.version>
     </properties>
     <dependencyManagement>
@@ -40,6 +42,13 @@
                 <version>${spring-ai-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            
+            <!-- 强制覆盖 Elasticsearch Client 版本以兼容 Spring AI 1.0.0 -->
+            <dependency>
+                <groupId>co.elastic.clients</groupId>
+                <artifactId>elasticsearch-java</artifactId>
+                <version>8.13.4</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -65,144 +74,165 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
+        <!-- Spring Boot Web Starter: 提供Web和MVC应用支持，内嵌Tomcat -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
+        <!-- Spring Boot DevTools: 提供热部署等开发期工具 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
         </dependency>
+        <!-- Lombok: 简化Java代码，通过注解自动生成getter/setter/builder等 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
+        <!-- Spring Boot Test: 提供测试支持 (JUnit, Mockito等) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
 
+        <!-- OkHttp: 高效的HTTP客户端，用于发起网络请求 -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>4.12.0</version>
         </dependency>
+        <!-- OkHttp Logging Interceptor: 提供OkHttp网络请求日志打印 -->
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>logging-interceptor</artifactId>
             <version>4.12.0</version>
         </dependency>
+        <!-- Fastjson2: 阿里巴巴的高性能JSON解析库 -->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
             <version>2.0.57</version>
         </dependency>
+        <!-- MyBatis Spring Boot Starter: 整合MyBatis数据持久层框架 -->
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>3.0.4</version>
         </dependency>
+        <!-- Druid: 阿里巴巴的数据库连接池，提供强大的监控和扩展功能 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>1.2.23</version>
         </dependency>
+        <!-- MyBatis-Plus: MyBatis的增强工具，简化CRUD操作 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
+        <!-- MyBatis-Plus JSqlParser: SQL解析工具，通常用于分页插件等 -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-jsqlparser</artifactId>
         </dependency>
+        <!-- MySQL Connector: MySQL数据库驱动 -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <version>8.3.0</version>
         </dependency>
+        <!-- Jakarta Validation API: Java的参数抽象校验规范 API -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
+        <!-- Spring Boot Security Starter: 提供安全和认证支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
+        <!-- Spring Boot OAuth2 Client Starter: 提供OAuth2客户端支持 (例如第三方登录) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
+        <!-- Spring Boot Validation Starter: 提供数据校验功能 (如 @Valid) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-        <!-- 移除tinypinyin依赖，使用其他拼音库替代 -->
-        <!-- <dependency>
-            <groupId>com.github.promeg</groupId>
-            <artifactId>tinypinyin</artifactId>
-            <version>2.0.3</version>
-        </dependency> -->
+        <!-- CommonMark: Java Markdown解析器，用于将Markdown转换为HTML -->
         <dependency>
             <groupId>org.lucee</groupId>
             <artifactId>commonmark</artifactId>
             <version>0.22.0</version>
         </dependency>
+        <!-- CommonMark Tables: 支持Markdown中的表格语法 -->
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark-ext-gfm-tables</artifactId>
             <version>0.22.0</version>
         </dependency>
+        <!-- CommonMark Strikethrough: 支持Markdown中的删除线语法 -->
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark-ext-gfm-strikethrough</artifactId>
             <version>0.22.0</version>
         </dependency>
+        <!-- Spring Boot Elasticsearch Starter: 整合Elasticsearch搜索引擎 (可能用于全文检索) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
         </dependency>
+        <!-- Spring Boot Actuator Starter: 提供应用的健康检查和监控端点 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+        <!-- Micrometer Prometheus Registry: 用于将Actuator监控数据暴露给Prometheus -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
+        <!-- Spring Boot WebFlux Starter: 提供响应式Web编程支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+        <!-- Spring Boot Cache Starter: 提供缓存抽象支持 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
+        <!-- Caffeine: 高性能本地缓存库 -->
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
         
-        <!-- Swagger/OpenAPI 3 支持 -->
+        <!-- Swagger/OpenAPI 3 支持: 用于生成API接口文档UI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.5.0</version>
         </dependency>
         
-        <!-- JWT 支持 -->
+        <!-- JWT 支持: 接口 (JSON Web Token相关) -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.11.5</version>
         </dependency>
+        <!-- JWT 支持: 实现 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+        <!-- JWT 支持: Jackson JSON处理器 -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
@@ -210,94 +240,122 @@
             <scope>runtime</scope>
         </dependency>
         
-        <!-- 阿里云OSS支持 -->
+        <!-- 阿里云OSS支持: 提供阿里云对象存储服务集成，用于文件上传 -->
         <dependency>
             <groupId>com.aliyun.oss</groupId>
             <artifactId>aliyun-sdk-oss</artifactId>
             <version>3.17.4</version>
         </dependency>
+        <!-- Spring Boot Redis Starter: 提供Spring Data Redis支持 (用于缓存/Session等) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
+        <!-- Jackson JSR310: 提供Jackson对Java 8时间API(LocalDateTime等)的序列化和反序列化支持 -->
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
+        <!-- 阿里云DashScope Java SDK: 用于对接通义千问等阿里云大模型 API -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dashscope-sdk-java</artifactId>
             <version>2.21.1</version>
         </dependency>
+        <!-- Spring AI Alibaba Starter: Spring AI对阿里云大模型的适配 -->
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
         </dependency>
+        <!-- Hutool AI: 国产扩展工具包，AI相关集成工具 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-ai</artifactId>
             <version>5.8.38</version>
         </dependency>
+        <!-- iText Core: 强大的PDF生成与操作库核心模块 -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>itext-core</artifactId>
             <version>9.1.0</version>
             <type>pom</type>
         </dependency>
+        <!-- iText Asian Fonts: iText中文字体支持包 (用于生成包含中文的PDF) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
             <artifactId>font-asian</artifactId>
             <version>9.1.0</version>
             <scope>test</scope>
         </dependency>
+        <!-- Core JSON: 基础JSON处理库 -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
             <version>20231013</version>
         </dependency>
+        <!-- Jsoup: 强大的HTML解析器，可用于处理或过滤提取富文本HTML -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.19.1</version>
         </dependency>
+        <!-- Spring AI Core: Spring AI框架核心模块 (规范和抽象) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-core</artifactId>
             <version>1.0.0-M6</version>
             <scope>compile</scope>
         </dependency>
+        <!-- Spring AI Elasticsearch Store Starter: 包含自动装配Bean，这很重要，否则不会自动生成VectorStore -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
+        <!-- Spring AI PDF Document Reader: 提供从PDF文件中提取文本和解析文档内容的功能，通常配合RAG使用 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-pdf-document-reader</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
+
+        <!-- Jackson Databind: Spring Boot核心JSON绑定库模块 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.17.1</version>
         </dependency>
+        <!-- Jackson YAML: Jackson的YAML支持，用于读写YAML配置文件或数据 -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.17.1</version>
         </dependency>
+        <!-- JSONSchema Generator: 用于通过Java类自动生成JSON Schema -->
         <dependency>
             <groupId>com.github.victools</groupId>
             <artifactId>jsonschema-generator</artifactId>
             <version>4.38.0</version>
         </dependency>
 
-        <!-- Redisson 分布式锁支持 -->
+        <!-- Redisson 分布式锁支持: Redis的高级Java客户端，提供分布式锁等功能 -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
             <version>3.24.3</version>
         </dependency>
         
-        <!-- Flyway 数据库迁移工具 -->
+        <!-- Flyway Core: 数据库版本控制迁移工具核心模块 -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
+        <!-- Flyway MySQL: Flyway对MySQL数据库的支持 -->
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-mysql</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>
