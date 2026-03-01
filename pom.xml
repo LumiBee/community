@@ -28,10 +28,9 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
-        <spring-ai-alibaba.version>1.0.0.2</spring-ai-alibaba.version>
-        <!-- 解决Spring AI 1.0.0与Spring Boot 3.4由于ES Java Client版本升级导致的NoSuchMethodError -->
-        <elasticsearch-java.version>8.13.4</elasticsearch-java.version>
+        <spring-ai.version>1.1.2</spring-ai.version>
+        <spring-ai-alibaba.version>1.1.2.0</spring-ai-alibaba.version>
+
         <spring-boot.version>3.5.4</spring-boot.version>
     </properties>
     <dependencyManagement>
@@ -43,13 +42,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- 强制覆盖 Elasticsearch Client 版本以兼容 Spring AI 1.0.0 -->
-            <dependency>
-                <groupId>co.elastic.clients</groupId>
-                <artifactId>elasticsearch-java</artifactId>
-                <version>8.13.4</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
@@ -266,6 +259,7 @@
         <dependency>
             <groupId>com.alibaba.cloud.ai</groupId>
             <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
         </dependency>
         <!-- Hutool AI: 国产扩展工具包，AI相关集成工具 -->
         <dependency>
@@ -293,44 +287,56 @@
             <artifactId>json</artifactId>
             <version>20231013</version>
         </dependency>
+
         <!-- Jsoup: 强大的HTML解析器，可用于处理或过滤提取富文本HTML -->
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>1.19.1</version>
         </dependency>
-        <!-- Spring AI Core: Spring AI框架核心模块 (规范和抽象) -->
+
+
+        <!-- Spring AI Dependencies -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-core</artifactId>
-            <version>1.0.0-M6</version>
-            <scope>compile</scope>
+            <artifactId>spring-ai-model</artifactId>
+            <version>${spring-ai.version}</version>
         </dependency>
-        <!-- Spring AI Elasticsearch Store Starter: 包含自动装配Bean，这很重要，否则不会自动生成VectorStore -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-client-chat</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-rag</artifactId>
+            <version>${spring-ai.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-starter-vector-store-elasticsearch</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
-        <!-- Spring AI PDF Document Reader: 提供从PDF文件中提取文本和解析文档内容的功能，通常配合RAG使用 -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-pdf-document-reader</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
 
-        <!-- Jackson Databind: Spring Boot核心JSON绑定库模块 -->
+        <!-- Jackson Databind: Jackson的核心数据绑定库 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.17.1</version>
         </dependency>
-        <!-- Jackson YAML: Jackson的YAML支持，用于读写YAML配置文件或数据 -->
+
+        <!-- Jackson YAML: Jackson用于处理YAML格式数据的库 -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>2.17.1</version>
         </dependency>
+
         <!-- JSONSchema Generator: 用于通过Java类自动生成JSON Schema -->
         <dependency>
             <groupId>com.github.victools</groupId>
@@ -416,6 +422,7 @@
     </profiles>
 
     <repositories>
+
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>

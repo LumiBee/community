@@ -23,11 +23,11 @@ public class CounterSyncService {
     @Autowired
     private ArticleMapper articleMapper;
 
-    private static final Pattern ARTICLE_VIEW_PATTERN = Pattern.compile("^article:view:(\\d+)$");
-    private static final Pattern ARTICLE_LIKE_PATTERN = Pattern.compile("^article:like:(\\d+)$");
-    private static final Pattern USER_LIKE_PATTERN = Pattern.compile("^user:like:(\\d+)$");
-    private static final Pattern USER_FOLLOW_PATTERN = Pattern.compile("^user:follow:(\\d+)$");
-    private static final Pattern USER_FANS_PATTERN = Pattern.compile("^user:fans:(\\d+)$");
+    private static final Pattern ARTICLE_VIEW_PATTERN = Pattern.compile("^article::view::(\\d+)$");
+    private static final Pattern ARTICLE_LIKE_PATTERN = Pattern.compile("^article::like::(\\d+)$");
+    private static final Pattern USER_LIKE_PATTERN = Pattern.compile("^user::like::(\\d+)$");
+    private static final Pattern USER_FOLLOW_PATTERN = Pattern.compile("^user::follow::(\\d+)$");
+    private static final Pattern USER_FANS_PATTERN = Pattern.compile("^user::fans::(\\d+)$");
 
     /**
      * 每5分钟同步一次计数器到数据库
@@ -50,7 +50,7 @@ public class CounterSyncService {
             int skippedCount = 0;
 
             for (String key : counterKeys) {
-                String cleanKey = key.replace("counter:", "");
+                String cleanKey = key.replace("hive::counter::", "");
                 Integer count = redisCounterService.getCount(cleanKey);
 
                 // 如果 count 为 null，说明在遍历 keys 和获取 value 之间该 key 已过期或被删除
@@ -85,7 +85,7 @@ public class CounterSyncService {
         try {
             // 文章阅读量
             if (ARTICLE_VIEW_PATTERN.matcher(key).matches()) {
-                int articleId = Integer.parseInt(key.split(":")[2]);
+                int articleId = Integer.parseInt(key.split("::")[2]);
 
                 // 检查文章是否存在
                 Article existingArticle = articleMapper.selectById(articleId);
@@ -110,7 +110,7 @@ public class CounterSyncService {
 
             // 文章点赞数
             if (ARTICLE_LIKE_PATTERN.matcher(key).matches()) {
-                int articleId = Integer.parseInt(key.split(":")[2]);
+                int articleId = Integer.parseInt(key.split("::")[2]);
 
                 // 检查文章是否存在
                 Article existingArticle = articleMapper.selectById(articleId);
@@ -163,7 +163,7 @@ public class CounterSyncService {
         int skippedCount = 0;
 
         for (String key : counterKeys) {
-            String cleanKey = key.replace("counter:", "");
+            String cleanKey = key.replace("hive::counter::", "");
             Integer count = redisCounterService.getCount(cleanKey);
 
             if (count == null) {
@@ -204,7 +204,7 @@ public class CounterSyncService {
         int skippedCount = 0;
 
         for (String key : counterKeys) {
-            String cleanKey = key.replace("counter:", "");
+            String cleanKey = key.replace("hive::counter::", "");
             Integer count = redisCounterService.getCount(cleanKey);
 
             if (count == null) {
@@ -253,7 +253,7 @@ public class CounterSyncService {
         int otherCount = 0;
 
         for (String key : counterKeys) {
-            String cleanKey = key.replace("counter:", "");
+            String cleanKey = key.replace("hive::counter::", "");
             if (ARTICLE_VIEW_PATTERN.matcher(cleanKey).matches()) {
                 articleViewCount++;
             } else if (ARTICLE_LIKE_PATTERN.matcher(cleanKey).matches()) {

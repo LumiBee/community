@@ -1,6 +1,8 @@
 package com.lumibee.hive.advisors;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.ai.chat.client.ChatClientRequest;
+import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.api.*;
 import org.springframework.ai.chat.model.MessageAggregator;
 import reactor.core.publisher.Flux;
@@ -13,7 +15,7 @@ import java.util.List;
  * 打印 info 级别日志、只输出单次用户提示词和 AI 回复的文本
  */
 @Log4j2
-public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
+public class MyLoggerAdvisor implements CallAdvisor, StreamAdvisor {
 
     @Override
     public String getName() {
@@ -25,33 +27,35 @@ public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
         return 0;
     }
 
-    private AdvisedRequest before(AdvisedRequest request) {
-        log.info("AI Request: {}", request.userText());
+    private ChatClientRequest before(ChatClientRequest request) {
+        log.info("AI Request: {}", request.prompt().getContents());
         return request;
     }
 
-    private void observeAfter(AdvisedResponse advisedResponse) {
-        log.info("AI Response: {}", advisedResponse.response().getResult().getOutput().getText());
+    private void observeAfter(ChatClientResponse advisedResponse) {
+        log.info("AI Response: {}", advisedResponse.chatResponse().getResult().getOutput().getText());
     }
 
-    public AdvisedResponse aroundCall(AdvisedRequest advisedRequest, CallAroundAdvisorChain chain) {
-        advisedRequest = this.before(advisedRequest);
-        AdvisedResponse advisedResponse = chain.nextAroundCall(advisedRequest);
-        this.observeAfter(advisedResponse);
-        return advisedResponse;
+    @Override
+    public ChatClientResponse adviseCall(ChatClientRequest request, CallAdvisorChain chain) {
+        request = this.before(request);
+        ChatClientResponse response = chain.nextCall(request);
+        this.observeAfter(response);
+        return response;
     }
 
-    public Flux<AdvisedResponse> aroundStream(AdvisedRequest advisedRequest, StreamAroundAdvisorChain chain) {
-        advisedRequest = this.before(advisedRequest);
-        Flux<AdvisedResponse> advisedResponses = chain.nextAroundStream(advisedRequest);
+    @Override
+    public Flux<ChatClientResponse> adviseStream(ChatClientRequest request, StreamAdvisorChain chain) {
+        request = this.before(request);
+        Flux<ChatClientResponse> responses = chain.nextStream(request);
 
-        Mono<List<AdvisedResponse>> collectedResponses = advisedResponses.collectList();
+        Mono<List<ChatClientResponse>> collectedResponses = responses.collectList();
 
-        Mono<List<AdvisedResponse>> loggedMono = collectedResponses.doOnSuccess(list -> {
+        Mono<List<ChatClientResponse>> loggedMono = collectedResponses.doOnSuccess(list -> {
             if (list == null || list.isEmpty()) {
                 return;
             }
-            AdvisedResponse finalResponse = list.get(list.size() - 1);
+            ChatClientResponse finalResponse = list.get(list.size() - 1);
             this.observeAfter(finalResponse);
         });
 

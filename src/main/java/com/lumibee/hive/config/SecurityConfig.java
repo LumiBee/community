@@ -26,6 +26,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.lumibee.hive.filter.JwtAuthenticationFilter;
 import com.lumibee.hive.service.impl.UserServiceImpl;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -91,6 +92,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authz -> {
                     log.info("配置授权规则...");
                     authz
+                            // 0. 允许所有异步请求，防止 SseEmitter 发出的内部 DispatcherType.ASYNC 被二次拦截导致 Context 丢失报错
+                            .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+
                             // 1. 首先处理OPTIONS请求（CORS预检）
                             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 

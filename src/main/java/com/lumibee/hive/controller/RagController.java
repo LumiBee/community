@@ -4,9 +4,13 @@ import com.lumibee.hive.service.KnowledgeBaseService;
 import com.lumibee.hive.service.RagChatService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import reactor.core.publisher.Flux;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 @RestController
 @RequestMapping("/ai/rag")
@@ -37,10 +41,24 @@ public class RagController {
      * 知识库流式问答接口 (SSE)
      */
     @GetMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<String> streamChat(
+    public SseEmitter streamChat(
             @RequestParam("question") String question,
             @RequestParam(value = "fileName", required = false) String fileName) {
 
-        return ragChatService.streamAskWithKnowledgeBase(question, fileName);
+        SseEmitter emitter = new SseEmitter(300000L); // 5 minutes timeout
+
+        ragChatService.streamAskWithKnowledgeBase(question, fileName)
+                .subscribe(
+                        content -> {
+                            try {
+                                emitter.send(content);
+                            } catch (Exception e) {
+                                emitter.completeWithError(e);
+                            }
+                        },
+                        emitter::completeWithError,
+                        emitter::complete);
+
+        return emitter;
     }
 }

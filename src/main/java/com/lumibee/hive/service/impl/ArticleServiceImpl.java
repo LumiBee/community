@@ -369,28 +369,35 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug) {
-        return getArticleBySlugWithBreakdownProtection(slug, null, null);
+        return getArticleBySlugWithBreakdownProtection(slug, null, null, false);
     }
 
     @Override
     @Transactional
     public ArticleDetailsDTO getArticleBySlug(String slug, Long userId, String ipAddress) {
-        return getArticleBySlugWithBreakdownProtection(slug, userId, ipAddress);
+        return getArticleBySlugWithBreakdownProtection(slug, userId, ipAddress, true);
     }
 
     /**
      * 使用分布式锁防止缓存击穿的文章获取方法
      */
-    private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId, String ipAddress) {
+    private ArticleDetailsDTO getArticleBySlugWithBreakdownProtection(String slug, Long userId, String ipAddress,
+            boolean incrementView) {
         ArticleDetailsDTO article = cacheBreakdownProtectionService.getWithBreakdownProtection(
                 "articles::detail",
                 slug,
                 () -> loadArticleFromDatabaseWithSlug(slug, userId));
 
         if (article != null) {
-            // 在缓存外部处理浏览量增加
-            int viewCount = incrementAndGetViewCount(article.getArticleId(), userId, ipAddress);
-            article.setViewCount(viewCount);
+            if (incrementView) {
+                // 在缓存外部处理浏览量增加
+                int viewCount = incrementAndGetViewCount(article.getArticleId(), userId, ipAddress);
+                article.setViewCount(viewCount);
+            } else {
+                // 不增加浏览量，仅获取当前值
+                int currentViewCount = redisCounterService.getArticleViewCount(article.getArticleId());
+                article.setViewCount(currentViewCount);
+            }
         }
         return article;
     }
