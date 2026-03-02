@@ -192,6 +192,17 @@ public class SecurityConfig {
 
             // 如果是 API 请求，返回 401 状态码和 JSON 响应
             if (requestURI.startsWith("/api/")) {
+                // 手动添加 CORS 头，因为此时可能由于认证失败绕过了常规 CORS 过滤器
+                String origin = request.getHeader("Origin");
+                if (origin != null && (origin.endsWith("hivelumi.com") || origin.contains("localhost"))) {
+                    response.setHeader("Access-Control-Allow-Origin", origin);
+                } else {
+                    response.setHeader("Access-Control-Allow-Origin", "https://www.hivelumi.com");
+                }
+                response.setHeader("Access-Control-Allow-Credentials", "true");
+                response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+                response.setHeader("Access-Control-Allow-Headers", "*");
+
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.setContentType("application/json;charset=UTF-8");
                 response.getWriter().write("{\"error\":\"Unauthorized\",\"message\":\"请先登录\"}");

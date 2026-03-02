@@ -83,13 +83,19 @@ public abstract class BaseAgent {
                         currentStep = stepNumber;
                         log.info("Executing step {}/{}", stepNumber, maxSteps);
 
+                        // 发送当前执行状态
+                        emitter.send("[系统信息] 正在执行第 " + stepNumber + " 步...");
+
                         // 单步执行
                         String stepResult = step();
-                        String result = "步骤 " + stepNumber + " 结果: " + stepResult;
+
                         if (isStuck()) {
+                            emitter.send("[Warn] 检测到逻辑陷入循环，正在尝试调整策略...");
                             handleStuckState();
                         }
-                        emitter.send(result);
+
+                        // 发送步骤执行的结果，用更美观的格式
+                        emitter.send("\n---\n**第 " + stepNumber + " 步结果：**\n" + stepResult + "\n\n");
                     }
 
                     // 检查是否超出步骤限制
