@@ -72,7 +72,7 @@ public class SecurityConfig {
         configuration.setAllowedHeaders(Arrays.asList(
                 "Authorization", "Content-Type", "X-Requested-With",
                 "Accept", "Origin", "Access-Control-Request-Method",
-                "Access-Control-Request-Headers", "X-CSRF-TOKEN"));
+                "Access-Control-Request-Headers", "X-CSRF-TOKEN", "Cache-Control"));
         // 明确指定暴露的响应头
         configuration.setExposedHeaders(Arrays.asList(
                 "Authorization", "Content-Type", "X-Total-Count",
