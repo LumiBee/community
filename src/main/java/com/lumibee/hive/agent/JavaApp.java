@@ -1,6 +1,5 @@
 package com.lumibee.hive.agent;
 
-import org.json.JSONObject;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.prompt.PromptTemplate;
@@ -12,16 +11,12 @@ import org.springframework.stereotype.Component;
 
 import com.lumibee.hive.advisors.MyLoggerAdvisor;
 import com.lumibee.hive.rag.QueryRewriter;
-import com.lumibee.hive.utils.TransApi;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import lombok.extern.log4j.Log4j2;
 import reactor.core.publisher.Flux;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Component
 @ConditionalOnProperty(name = "baidu.translate.app-id")
@@ -111,7 +106,6 @@ public class JavaApp {
         return chatClient.prompt(javaPromptTemplate.create())
                 .user(message)
                 .advisors(a -> a.param("conversationId", conversationId))
-                .toolCallbacks(allTools)
                 .stream()
                 .content();
     }
